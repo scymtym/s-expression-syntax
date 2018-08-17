@@ -1,8 +1,32 @@
 (defsystem "syntax"
   :version    (:read-file-form "version-string.sexp")
-  :depends-on ()
+  :depends-on ((:version "parser.packrat"                "0.1")
 
-  :components ()
+               (:version "architecture.builder-protocol" "0.10"))
+
+  :components ((:module     "src"
+                :serial     t
+                :components ((:file       "package")
+
+                             (:file       "conditions")
+                             (:file       "protocol")
+
+                             (:file       "grammar")
+
+                             (:file       "lambda-lists")
+
+                             (:file       "bindings")
+                             (:file       "declarations")
+                             (:file       "forms")
+                             (:file       "types")
+
+                             (:file       "semantics")
+
+                             (:file       "database")
+
+                             (:file       "macros")
+
+                             (:file       "special-operators"))))
 
   :in-order-to ((test-op (test-op "syntax/test"))))
 
