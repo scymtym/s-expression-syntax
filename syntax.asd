@@ -31,11 +31,26 @@
   :in-order-to ((test-op (test-op "syntax/test"))))
 
 (defsystem "syntax/test"
-  :depends-on ((:version "fiveam" "1.4")
+  :depends-on ("alexandria"
+
+               (:version "fiveam" "1.4")
 
                (:version "syntax" (:read-file-form "version-string.sexp")))
 
-  :components ()
+  :components ((:module     "test"
+                :serial     t
+                :components ((:file       "package")
+
+                             (:file       "grammar")
+
+                             (:file       "lambda-lists")
+
+                             ; (:file       "bindings")
+                             ; (:file       "declarations")
+                             (:file       "forms")
+                             ; (:file       "types")
+
+                             (:file       "special-operators"))))
 
   :perform    (test-op (operation component)
-                ))
+                (uiop:symbol-call '#:syntax.test '#:run-tests)))
