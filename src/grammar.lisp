@@ -9,7 +9,8 @@
 ;;; Grammar
 
 (parser:defgrammar special-operators
-  (:class parser.packrat.grammar.sexp:sexp-grammar))
+  (:class parser.packrat.grammar.sexp:sexp-grammar)
+  (:use lambda-lists)) ; TODO not sure this is good
 
 ;;; Basic rules TODO separate file
 
@@ -30,11 +31,11 @@
         (list 'setf (function-name/symbol))))
 
 (parser:defrule reference ()
-  (:guard symbolp)
+    (:guard symbolp)
   ; (bp:node* (:reference :name name))
   )
 
 (parser:defrule atom ()
-  (:guard atom)
+    (:guard atom)
   ; (bp:node* (:atom :value atom))
   )

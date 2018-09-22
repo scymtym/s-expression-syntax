@@ -20,7 +20,7 @@
 (defun constant? (name)
   (eq (sb-cltl2:variable-information name) :constant))
 
-(parser:defrule (variable-name) ()
+(parser:defrule (lambda-list-variable-name) ()
   (and (:guard symbolp)
        (not (:guard constant?))
        (not (:guard keywordp))
@@ -28,7 +28,7 @@
        :any))
 
 (parser:defrule (unique-variable-name) (seen)
-    (<- name (variable-name))
+    (<- name (lambda-list-variable-name))
   (cond ((not seen)
          name)
         ((not (gethash name seen))
@@ -122,7 +122,7 @@
 
 (parser:defrule destructuring-lambda-list (seen)
     (list* (? (:seq '&whole (<- whole (unique-variable-name seen))))
-           (? (:seq (* (<<- required (or (variable-name)
+           (? (:seq (* (<<- required (or (lambda-list-variable-name)
                                          (destructuring-lambda-list seen))))))
            (or '()
                (:compose (optional-rest-key-parameters seen)
