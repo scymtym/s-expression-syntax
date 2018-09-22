@@ -18,6 +18,14 @@
 (defmethod print-items:print-items append ((object named-mixin))
   `((:name ,(name object) "~A")))
 
+;;; `documentation-mixin'
+
+(defclass documentation-mixin ()
+  ((%documentation :initarg  :documentation
+                   :type     (or null string)
+                   :reader   %documentation
+                   :initform nil)))
+
 ;;; `parser-mixin'
 
 (defclass parser-mixin ()
@@ -55,6 +63,7 @@
 ;;; `special-operator'
 
 (defclass special-operator (named-mixin
+                            documentation-mixin
                             parser-mixin
                             print-items:print-items-mixin)
   ((%components :initarg :components

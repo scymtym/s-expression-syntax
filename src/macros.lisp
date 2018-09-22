@@ -6,8 +6,9 @@
 
 (cl:in-package #:syntax)
 
-(defmacro define-syntax (name syntax &rest components)
-  (let ((component-forms '())
+(defmacro define-syntax (name syntax components &rest options)
+  (let ((documentation   (second (find :documentation options :key #'first)))
+        (component-forms '())
         (value-forms     '()))
     (map nil (lambda (component)
                (destructuring-bind (name cardinality &key evaluation)
@@ -30,7 +31,9 @@
          (list ,@(nreverse value-forms)))
        (ensure-syntax ',name 'special-operator
                       :components (list ,@(nreverse component-forms))
-                      :rule       ',name))))
+                      :rule       ',name
+                      ,@(when documentation
+                          `(:documentation ,documentation))))))
 
 (defmacro define-special-operator (name syntax &rest components)
   (check-type  syntax (cons (member list list*)))
