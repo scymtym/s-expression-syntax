@@ -26,7 +26,11 @@
 
   ;; Syntax lookup protocol
   (:export
-   #:find-syntax)                       ; also `setf'
+   #:syntaxes
+   #:syntaxes/alist
+
+   #:find-syntax                    ; also `setf'
+   #:ensure-syntax)
 
   ;; Macros
   (:export

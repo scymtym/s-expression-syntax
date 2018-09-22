@@ -89,10 +89,16 @@
 
 ;;;
 
-(defvar *syntax* (make-hash-table :test #'eq))
+(defvar *syntaxes* (make-hash-table :test #'eq))
+
+(defun syntaxes ()
+  (hash-table-values *syntaxes*))
+
+(defun syntaxes/alist ()
+  (hash-table-alist *syntaxes*))
 
 (defun find-syntax (name &key (if-does-not-exist #'error))
-  (or (gethash name *syntax*)
+  (or (gethash name *syntaxes*)
       (typecase if-does-not-exist
         (function
          (funcall if-does-not-exist (make-condition 'syntax-not-found-error
@@ -101,7 +107,7 @@
          if-does-not-exist))))
 
 (defun (setf find-syntax) (new-value name)
-  (setf (gethash name *syntax*) new-value))
+  (setf (gethash name *syntaxes*) new-value))
 
 (defun ensure-syntax (name class &rest initargs)
   (let ((initargs (list* :name name initargs)))
