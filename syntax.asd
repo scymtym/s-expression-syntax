@@ -11,9 +11,9 @@
                              (:file       "conditions")
                              (:file       "protocol")
 
-                             (:file       "grammar")
-
                              (:file       "lambda-lists")
+
+                             (:file       "grammar")
 
                              (:file       "bindings")
                              (:file       "declarations")
