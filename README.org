@@ -7,3 +7,40 @@
 * TODO Introduction
 
 * TODO Tutorial
+
+  #+BEGIN_SRC lisp :results output :exports both
+    (let* ((syntax     (syntax:find-syntax 'let))
+           (form       '(let ((a 1) (b 2))
+                          (declare (type integer a))
+                          (declare (type integer b))
+                          (format t "~S" a)
+                          (list a b)))
+           (components (syntax:parse t syntax form)))
+      (loop :for (component-name form) :on components :by #'cddr
+            :for component = (syntax:find-component component-name syntax)
+            :do (format t "~16A -> ~16S~%~2@Tcardinality: ~S~%~2@Tevaluation:  ~S~2%"
+                        component-name form
+                        (syntax:cardinality component)
+                        (syntax:evaluation component))))
+  #+END_SRC
+
+  #+RESULTS:
+  #+begin_example
+  FORMS            -> ((FORMAT T "~S" A) (LIST A B))
+    cardinality: *
+    evaluation:  T
+
+  DECLARATIONS     -> ((TYPE INTEGER B) (TYPE INTEGER A))
+    cardinality: *
+    evaluation:  NIL
+
+  VALUES           -> (2 1)
+    cardinality: *
+    evaluation:  T
+
+  NAMES            -> (B A)
+    cardinality: *
+    evaluation:  (:BINDING :NAMESPACE VARIABLE :SCOPE :LEXICAL :ORDER :PARALLEL
+                  :VALUES VALUES)
+
+  #+end_example
