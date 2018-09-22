@@ -15,12 +15,12 @@
                   (push nil values))
                  (list (<<- names (variable-name))
                        (<<- values)))))
-  (list names values))
+  (list (nreverse names) (nreverse values)))
 
 (parser:defrule symbol-macro-bindings ()
     (list (* (list (<<- names  (variable-name))
                    (<<- values))))
-  (list names values))
+  (list (nreverse names) (nreverse values)))
 
 (parser:defrule local-function ()
     (list* name (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil)) ; TODO macro lambda-list for macrolet
@@ -30,4 +30,4 @@
 (parser:defrule function-bindings ()
     (list (* (:compose (local-function) (list (<<- names)
                                               (<<- functions)))))
-  (list names functions))
+  (list (nreverse names) (nreverse functions)))

@@ -19,8 +19,9 @@
                        component-forms)
                  (push `',name value-forms)
                  (push (case cardinality
-                         (* `(nreverse ,name))
-                         (t name))
+                         (*  `(nreverse ,name))
+                         (*> name)
+                         (t  name))
                        value-forms)))
          components)
     `(progn

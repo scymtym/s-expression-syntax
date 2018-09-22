@@ -295,13 +295,13 @@ may also be a lambda expression.")
 (define-special-operator symbol-macrolet
     (list* (:compose (symbol-macro-bindings) (list names values))
            (:compose (body) (list declarations forms)))
-  (names        * :evaluation (make-instance 'binding-semantics
-                                             :namespace :symbol-macro
-                                             :scope     :lexical
-                                             :values    'values))
-  (values       * :evaluation nil)
-  (declarations * :evaluation nil)
-  (forms        * :evaluation t))
+  (names        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace :symbol-macro
+                                              :scope     :lexical
+                                              :values    'values))
+  (values       *> :evaluation nil)
+  (declarations *> :evaluation nil)
+  (forms        *> :evaluation t))
 "SYMBOL-MACROLET ({(name expansion)}*) decl* form*
 Define the NAMES as symbol macros with the given EXPANSIONS. Within the
 body, references to a NAME will effectively be replaced with the EXPANSION."
@@ -309,15 +309,15 @@ body, references to a NAME will effectively be replaced with the EXPANSION."
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
     (list* (:compose (value-bindings) (list names values))
            (:compose (body) (list declarations forms)))
-  (names        * :evaluation (make-instance 'binding-semantics
-                                             :namespace 'variable
-                                             :scope     :lexical
-                                             :order     :parallel
-                                             :values    'values))
-  (values       * :evaluation t)
-  (declarations * :evaluation nil)
-  (forms        * :evaluation t))
-"LET ({(var [value]) | var}*) declaration* form*
+  (names        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :order     :parallel
+                                              :values    'values))
+  (values       *> :evaluation t)
+  (declarations *> :evaluation nil)
+  (forms        *> :evaluation t))
+  "LET ({(var [value]) | var}*) declaration* form*
 During evaluation of the FORMS, bind the VARS to the result of
 evaluating the VALUE forms. The variables are bound in parallel after
 all of the VALUES forms have been evaluated."
@@ -326,21 +326,21 @@ all of the VALUES forms have been evaluated."
 (define-special-operator let*
     (list* (:compose (value-bindings) (list names values))
            (:compose (body) (list declarations forms)))
-  (names        * :evaluation '(:binding :namespace :variable
-                                :scope     :lexical
-                                :order     :sequential
-                                :values    values))
-  (values       * :evaluation t)
-  (declarations * :evaluation nil)
-  (forms        * :evaluation t))
+  (names        *> :evaluation '(:binding :namespace :variable
+                                 :scope     :lexical
+                                 :order     :sequential
+                                 :values    values))
+  (values       *> :evaluation t)
+  (declarations *> :evaluation nil)
+  (forms        *> :evaluation t))
 "LET* ({(var [value]) | var}*) declaration* form*
 Similar to LET, but the variables are bound sequentially, allowing
 each VALUE form to reference any of the previous VARS."
 
 (define-special-operator locally
     (list* (:compose (body) (list declarations forms)))
-  (declarations * :evaluation t)
-  (forms        * :evaluation t)
+  (declarations *> :evaluation t)
+  (forms        *> :evaluation t)
   #+no (:documentation
    "LOCALLY declaration* form*
 Sequentially evaluate the FORMS in a lexical environment where the
@@ -352,9 +352,9 @@ FORMS are also processed as top level forms.")
     (list* symbols values (:compose (body) (list declarations forms)))
   (symbols      1 :evaluation '(:binding :namespace :variable
                                          :scope     :dynamic))
-  (values       1 :evaluation t)
-  (declarations 1 :evaluation nil)
-  (forms        t :evaluation t)
+   (values       1 :evaluation t)
+   (declarations 1 :evaluation nil)
+   (forms        t :evaluation t)
   (:documentation
    "PROGV symbols values form*
 Evaluate SYMBOLS producing a list of symbols and VALUES producing a
@@ -376,32 +376,29 @@ PROGV form."))
 (define-special-operator macrolet
     (list* (:compose (function-bindings) (list names functions))
            (:compose (body) (list declarations forms)))
-  (names        * :evaluation '(:binding :namespace :function
-                                :scope     :lexical))
-  (functions    * :evaluation nil)
-  (declarations * :evaluation nil)
-  (forms        * :evaluation t))
+  (names        *> :evaluation '(:binding :namespace :function
+                                 :scope     :lexical))
 
 (define-special-operator flet
     (list* (:compose (function-bindings) (list names functions))
            (:compose (body) (list declarations forms)))
-  (names        * :evaluation (make-instance 'binding-semantics
-                                             :namespace 'function
-                                             :scope     :lexical
-                                             :order     :parallel
-                                             :values    'functions))
-  (functions    * :evaluation nil)
-  (declarations * :evaluation nil)
-  (forms        * :evaluation t))
+  (names        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace 'function
+                                              :scope     :lexical
+                                              :order     :parallel
+                                              :values    'functions))
+  (functions    *> :evaluation nil)
+  (declarations *> :evaluation nil)
+  (forms        *> :evaluation t))
 
 (define-special-operator labels
     (list* (:compose (function-bindings) (list names functions))
            (:compose (body) (list declarations forms)))
-  (functions    * :evaluation '(:binding :namespace :function
+  (functions    *> :evaluation '(:binding :namespace :function
                                 :scope     :lexical
                                 :order     :recursive))
-  (declarations * :evaluation nil)
-  (forms        * :evaluation t))
+  (declarations *> :evaluation nil)
+  (forms        *> :evaluation t))
 
 ;;;; `the'
 
@@ -457,8 +454,8 @@ of the body and the thrown values will be returned."))
 
 (define-special-operator unwind-protect
     (list* protected (<- cleanup (forms)))
-  (protected 1 :evaluation t)
-  (cleanup   * :evaluation t)
+  (protected 1  :evaluation t)
+  (cleanup   *> :evaluation t)
   #+no (:documentation
    "UNWIND-PROTECT protected cleanup*
 Evaluate the form PROTECTED, returning its values. The CLEANUP forms
@@ -470,8 +467,8 @@ THROW)."))
 
 (define-special-operator multiple-value-call
     (list* function-form (<- args (forms)))
-  (function-form 1 :evaluation t)
-  (args          * :evaluation t) ; TODO arguments? make this consistent
+  (function-form 1  :evaluation t)
+  (args          *> :evaluation t) ; TODO arguments? make this consistent
   #+no (:documentation
    "MULTIPLE-VALUE-CALL function-form values-form*
 Call FUNCTION-FORM, passing all the values of each VALUES-FORM as
@@ -480,8 +477,8 @@ argument, etc."))
 
 (define-special-operator multiple-value-prog1
     (list* values-form (<- forms (forms)))
-  (values-form 1 :evaluation t)
-  (forms       * :evaluation t)
+  (values-form 1  :evaluation t)
+  (forms       *> :evaluation t)
   #+no (:documentation
    "MULTIPLE-VALUE-PROG1 values-form form*
 Evaluate VALUES-FORM and then the FORMS, but return all the values of
