@@ -1,3 +1,5 @@
+(cl:in-package #:syntax.concrete-syntax-tree.test)
+
 (parser:defgrammar lambda-lists
   (:class syntax.concrete-syntax-tree::cst-grammar #+normally parser.packrat.grammar.sexp:sexp-grammar))
 (parser:in-grammar lambda-lists)
