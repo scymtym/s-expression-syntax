@@ -36,7 +36,7 @@
                           `(:documentation ,documentation))))))
 
 (defmacro define-special-operator (name syntax &rest components)
-  (check-type  syntax (cons (member list list*)))
+  (check-type syntax (cons (member list list*)))
   `(define-syntax ,name
        (,(first syntax) ',name ,@(rest syntax))
      ,@components))
