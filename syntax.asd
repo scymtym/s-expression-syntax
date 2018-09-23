@@ -11,6 +11,18 @@
                              (:file       "conditions")
                              (:file       "protocol")
 
+                             (:file       "semantics")
+
+                             (:file       "database")
+
+                             (:file       "macros")))
+
+               (:module     "definitions"
+                :pathname   "src/definitions"
+                :depends-on ("src")
+                :serial     t
+                :components (; (:file       "package")
+
                              (:file       "lambda-lists")
 
                              (:file       "grammar")
@@ -20,12 +32,7 @@
                              (:file       "forms")
                              (:file       "types")
 
-                             (:file       "semantics")
-
-                             (:file       "database")
-
-                             (:file       "macros")
-
+                             ; (:file       "standard-macros")
                              (:file       "special-operators"))))
 
   :in-order-to ((test-op (test-op "syntax/test"))))
