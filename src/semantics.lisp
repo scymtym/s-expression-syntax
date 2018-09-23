@@ -8,7 +8,9 @@
 
 (defclass namespace-mixin ()
   ((namespace :initarg  :namespace
-              :reader   namespace)))
+              :reader   namespace))
+  (:default-initargs
+   :namespace (error "missing required initarg ~S" :namespace)))
 
 (defmethod print-items:print-items append ((object namespace-mixin))
   `((:namespace ,(namespace object) "~A")))
@@ -22,7 +24,10 @@
            :reader   order
            :initform :parallel)
    (values :initarg  :values
-           :reader   values*)))
+           :reader   values*))
+  (:default-initargs
+   :scope  (error "missing required initarg ~S" :scope)
+   :values (error "missing required initarg ~S" :values)))
 
 (defclass reference-semantics (namespace-mixin)
-  ((namespace :initarg :namespace)))
+  ())
