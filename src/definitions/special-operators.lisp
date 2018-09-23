@@ -358,7 +358,8 @@ may also be a lambda expression.")
     (list* symbols values (:compose (body) (list declarations forms)))
   ((symbols      1 :evaluation (make-instance 'binding-semantics
                                               :namespace :variable
-                                              :scope     :dynamic))
+                                              :scope     :dynamic
+                                              :values    'values))
    (values       1 :evaluation t)
    (declarations 1 :evaluation nil)
    (forms        t :evaluation t))
@@ -407,9 +408,12 @@ may also be a lambda expression.")
 (define-special-operator labels
     (list* (:compose (function-bindings) (list names functions))
            (:compose (body) (list declarations forms)))
-  ((functions    *> :evaluation '(:binding :namespace :function
-                                  :scope     :lexical
-                                  :order     :recursive))
+  ((names        *> :evaluation (make-instance 'binding-semantics
+                                               :namespace :function
+                                               :scope     :lexical
+                                               :order     :recursive
+                                               :values    'functions))
+   (functions    *> :evaluation nil)
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t)))
 
