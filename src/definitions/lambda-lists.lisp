@@ -122,8 +122,8 @@
 
 (parser:defrule destructuring-lambda-list (seen)
     (list* (? (:seq '&whole (<- whole (unique-variable-name seen))))
-           (? (:seq (* (<<- required (or (lambda-list-variable-name)
-                                         (destructuring-lambda-list seen))))))
+           (* (<<- required (or (lambda-list-variable-name)
+                                (destructuring-lambda-list seen))))
            (or '()
                (:compose (optional-rest-key-parameters seen)
                          (list optional rest key allow-other-keys?))
