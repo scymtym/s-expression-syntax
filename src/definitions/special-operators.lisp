@@ -9,8 +9,8 @@
 ;;;; Special operators for control
 
 (define-special-operator progn
-    (list* forms)
-  ((forms * :evaluation t))
+    (list* (<- forms (forms)))
+  ((forms *> :evaluation t))
   (:documentation
    "PROGN form*
 
