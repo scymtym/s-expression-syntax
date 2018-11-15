@@ -15,7 +15,9 @@
                    component
                  (push `(make-instance 'component
                                        :name        ',name
-                                       :cardinality ',cardinality
+                                       :cardinality ',(case cardinality
+                                                        (*> '*)
+                                                        (t  cardinality))
                                        :evaluation  ,evaluation)
                        component-forms)
                  (push `',name value-forms)
