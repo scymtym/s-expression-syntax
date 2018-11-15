@@ -42,3 +42,9 @@
   `(define-syntax ,name
        (,(first syntax) ',name ,@(rest syntax))
      ,@components))
+
+(defmacro define-macro (name syntax &rest components)
+  (check-type syntax (cons (member list list*)))
+  `(define-syntax ,name
+       (,(first syntax) ',name ,@(rest syntax))
+     ,@components))

@@ -32,8 +32,8 @@
                              (:file       "forms")
                              (:file       "types")
 
-                             ; (:file       "standard-macros")
-                             (:file       "special-operators"))))
+                             (:file       "special-operators")
+                             (:file       "standard-macros"))))
 
   :in-order-to ((test-op (test-op "syntax/test"))))
 
