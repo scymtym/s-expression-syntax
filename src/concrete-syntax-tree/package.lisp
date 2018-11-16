@@ -5,10 +5,11 @@
    #:let-plus)
 
   (:local-nicknames
-   (#:env #:parser.packrat.environment)
+   (#:env  #:parser.packrat.environment)
 
-   (#:exp #:parser.packrat.expression)
+   (#:exp  #:parser.packrat.expression)
 
-   (#:c   #:parser.packrat.compiler)
+   (#:c    #:parser.packrat.compiler)
 
-   (#:seq #:parser.packrat.grammar.sequence)))
+   (#:base #:parser.packrat.grammar.base)
+   (#:seq  #:parser.packrat.grammar.sequence)))

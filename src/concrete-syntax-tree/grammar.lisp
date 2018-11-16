@@ -20,9 +20,71 @@
   (tail)
   ())
 
-;;; compiler
+;;; Base expression compilation
 
-(defmethod c:compile-expression ((grammar      t) ; TODO how to specialize this properly?
+(declaim (inline listp* null* first* rest* maybe-unwrap))
+
+(defun listp* (maybe-cst)
+  (or (listp maybe-cst)
+      (typep maybe-cst 'cst:cons-cst)
+      (and (typep maybe-cst 'cst:atom-cst)
+           (cst:null maybe-cst))))
+
+(defun null* (maybe-cst)
+  (or (null maybe-cst)
+      (and (typep maybe-cst 'cst:cst)
+           (cst:null maybe-cst))))
+
+(defun first* (maybe-cst)
+  (typecase maybe-cst
+    (list    (first maybe-cst))
+    (cst:cst (cst:first maybe-cst))))
+
+(defun rest* (maybe-cst)
+  (typecase maybe-cst
+    (list    (rest maybe-cst))
+    (cst:cst (cst:rest maybe-cst))))
+
+(defun maybe-unwrap (maybe-cst)
+  (if (typep maybe-cst 'cst:cst)
+      (cst:raw maybe-cst)
+      maybe-cst))
+
+;;; Base expression compilation
+
+(defmethod c:compile-expression ((grammar      cst-grammar)
+                                 (environment  env:value-environment)
+                                 (expression   base:predicate-expression)
+                                 (success-cont function)
+                                 (failure-cont function))
+  (let+ (((&accessors-r/o (sub-expression exp:sub-expression) (predicate base:predicate)) expression)
+         ((predicate &rest arguments) (ensure-list predicate)))
+    (c:compile-expression
+     grammar environment sub-expression
+     (lambda (new-environment)
+       (let ((value (env:value new-environment)))
+         `(if (,predicate (maybe-unwrap ,value) ,@arguments)
+              ,(funcall success-cont new-environment)
+              ,(funcall failure-cont new-environment))))
+     failure-cont)))
+
+(defmethod c:compile-expression ((grammar      cst-grammar)
+                                 (environment  env:value-environment)
+                                 (expression   base:terminal-expression)
+                                 (success-cont function)
+                                 (failure-cont function))
+  (let* ((value     (env:value environment))
+         (expected  (exp:value expression))
+         (predicate (typecase expected
+                      (string 'equal)
+                      (t      'eql))))
+    `(if (,predicate (maybe-unwrap ,value) ',expected)
+         ,(funcall success-cont environment)
+         ,(funcall failure-cont environment))))
+
+;;; Sequence expression compilation
+
+(defmethod c:compile-expression ((grammar      cst-grammar)
                                  (environment  env:environment)
                                  (expression   parser.packrat.grammar.sexp::as-list-expression)
                                  (success-cont function)
@@ -37,14 +99,13 @@
                             environment (list :tail value)
                             :class 'cst-environment
                             :state '())))
-    `(if (typep ,value ',(ecase (parser.packrat.grammar.sexp::target-type expression)
-                           (list '(or cst:atom-cst cst:cons-cst))))
+    `(if ,(ecase (parser.packrat.grammar.sexp::target-type expression)
+            (list `(listp* ,value)))
          ,(c:compile-expression
            grammar list-environment (exp:sub-expression expression)
            (lambda (new-environment)
              (c:compile-expression
-              grammar new-environment (make-instance 'seq::bounds-test-expression
-                                                     :sub-expression (make-instance 'parser.packrat.grammar.base::ignored-expression))
+              grammar new-environment parser.packrat.grammar.sexp::*just-test-bounds*
               (curry #'call-with-value-environment failure-cont)
               (curry #'call-with-value-environment success-cont)))
            (curry #'call-with-value-environment failure-cont))
@@ -79,7 +140,7 @@
                                  (expression   seq::bounds-test-expression)
                                  (success-cont function)
                                  (failure-cont function))
-  `(if (cst:null ,(tail environment))
+  `(if (null* ,(tail environment))
        ,(funcall failure-cont environment)
        ,(c:compile-expression
          grammar environment (exp:sub-expression expression)
@@ -94,7 +155,10 @@
          (new-environment (env:environment-at environment (list :value element)
                                               :class 'env:value-environment
                                               :state '())))
-    `(let ((,element (cst:raw (cst:first ,(tail environment)))))
+    `(let* ((,element (first* ,(tail environment)))
+            (,element ,element #+no (if (and (cst:atom ,element) (not (cst:null ,element)))
+                          (cst:raw ,element)
+                          ,element)))
        ,(c:compile-expression
          grammar new-environment (exp:sub-expression expression)
          success-cont failure-cont))))
@@ -109,14 +173,14 @@
     (c:compile-expression
      grammar environment (exp:sub-expression expression)
      (lambda (element-environment)
-       (let* ((new-environment (parser.packrat.grammar.base::add-value
+       (let* ((new-environment (base::add-value
                                 (env:environment-at environment :fresh
                                                     :parent element-environment)
                                 (env:value element-environment)))
               (new-tail        (tail new-environment)))
          `(let ((,new-tail ,(or nil #+maybe-later to
                                     (ecase amount
-                                      (1 `(cst:rest ,tail))
+                                      (1 `(rest* ,tail))
                                       ; (2 `(cddr ,tail))
                                       ; (t `(nthcdr ,amount ,tail))
                                       ))))
