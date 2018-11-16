@@ -1,5 +1,5 @@
-(defsystem "syntax.concrete-syntax-tree"
-  :depends-on ("syntax"
+(asdf:defsystem "syntax.concrete-syntax-tree"
+  :depends-on ("parser.packrat"
 
                "concrete-syntax-tree")
 
