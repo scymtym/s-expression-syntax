@@ -1,4 +1,4 @@
-(defsystem "syntax"
+(asdf:defsystem "syntax"
   :version    (:read-file-form "version-string.sexp")
   :depends-on ((:version "parser.packrat"                "0.1")
 
@@ -37,7 +37,7 @@
 
   :in-order-to ((test-op (test-op "syntax/test"))))
 
-(defsystem "syntax/test"
+(asdf:defsystem "syntax/test"
   :depends-on ("alexandria"
 
                (:version "fiveam" "1.4")
