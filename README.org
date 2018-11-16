@@ -6,6 +6,19 @@
 
 * TODO Introduction
 
+  This system provides rules for parsing the various bits of Common
+  Lisp s-expression syntax:
+
+  + Special operators
+
+  + Lambda lists
+
+  + Declarations
+
+  + Type specifiers
+
+  + Standard macros
+
 * TODO Tutorial
 
   #+BEGIN_SRC lisp :results output :exports both
