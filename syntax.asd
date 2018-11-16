@@ -57,7 +57,8 @@
                              (:file       "forms")
                              ; (:file       "types")
 
-                             (:file       "special-operators"))))
+                             (:file       "special-operators")
+                             (:file       "standard-macros"))))
 
   :perform    (test-op (operation component)
                 (uiop:symbol-call '#:syntax.test '#:run-tests)))
