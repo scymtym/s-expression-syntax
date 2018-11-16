@@ -1,6 +1,7 @@
 (cl:in-package #:syntax.test)
 
-(in-suite :syntax)
+(in-suite* :syntax.special-operators
+  :in :syntax)
 
 ;;; Utilities
 
@@ -33,8 +34,12 @@
 (test progn
   "Test for `progn' special operator."
 
-  ;; TODO
-  )
+  (check-error-cases
+   'progn
+   '((progn . 1) foo))
+
+  (is (equal '(syntax::forms ())
+             (parse nil (find-syntax 'progn) '(progn)))))
 
 (test if
   "Test for `if' special operator."
@@ -152,7 +157,8 @@
                syntax::body ())
              (parse nil (find-syntax 'function) '(function (setf foo)))))
   (is (equal '(name nil
-               syntax::lambda-list ((a) nil b nil nil nil)
+               syntax::lambda-list ((a) nil b nil nil ; nil
+                                    )
                syntax::docstring nil
                syntax::declarations nil
                syntax::body ((foo)))
@@ -238,9 +244,10 @@
   "Test for `macrolet' special operator."
 
   (is (equal '(syntax::names (foo bar baz)
-               syntax::functions ((((b a) nil bla nil nil nil) nil nil ((list a b)))
-                                  ((nil nil nil nil nil nil) nil nil ("not-doc-string"))
-                                  ((nil nil nil nil nil nil) "doc-string" nil (1)))
+               syntax::functions
+               ((syntax::parsed-lambda ((b a) nil bla nil nil #+aux nil) nil nil ((list a b)))
+                (syntax::parsed-lambda (nil nil nil nil nil #+aux nil) nil nil ("not-doc-string"))
+                (syntax::parsed-lambda (nil nil nil nil nil #+aux nil) "doc-string" nil (1)))
                syntax::declarations nil
                syntax::forms ((foo 1 2)))
              (parse nil (find-syntax 'macrolet) '(macrolet ((foo (a b &rest bla) (list a b))

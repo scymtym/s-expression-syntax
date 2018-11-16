@@ -19,7 +19,7 @@
 
 ;;; Utilities
 
-(defun %rule-test-case (rule case)
+(defun %rule-test-case (rule case) ; TODO unused?
   (destructuring-bind
       (input expected-success? expected-position expected-value) case
     (declare (ignore expected-position))
