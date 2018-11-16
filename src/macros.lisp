@@ -21,10 +21,10 @@
                                        :evaluation  ,evaluation)
                        component-forms)
                  (push `',name value-forms)
-                 (push (case cardinality
-                         (*  `(nreverse ,name))
-                         (*> name)
-                         (t  name))
+                 (push (ecase cardinality
+                         (*     `(nreverse ,name))
+                         (*>    name)
+                         ((? 1) name))
                        value-forms)))
          components)
     `(progn
