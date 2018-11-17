@@ -4,17 +4,34 @@
   :in :syntax)
 
 (test defun
- (parse t (find-syntax 'defun) (cst:cstify '(defun foo (bar baz)
-                                             "bla"
-                                             (declare (type integer bar baz))
-                                             (+ 1 2)))))
+  "Test for the `defun' standard macro syntax."
+
+  (is (equal '(name foo
+               syntax::lambda-list ((baz bar) nil nil nil nil)
+               documentation "bla"
+               syntax::declarations ((type integer bar baz))
+               syntax::forms ((+ 1 2)))
+             (parse t (find-syntax 'defun)
+                    '(defun foo (bar baz)
+                      "bla"
+                      (declare (type integer bar baz))
+                      (+ 1 2))))))
 
 (test defclass
-  "Test for `declass' standard macro."
+  "Test for `declass' standard macro syntax."
 
   (is (equal '(name foo
                syntax::superclasses (bar baz)
-               syntax::slots ((foo))
+               syntax::slots ((name foo
+                               syntax::options (syntax::readers (bar)
+                                                syntax::writers ()
+                                                syntax::accessor ()
+                                                syntax::allocation nil
+                                                syntax::initform (+ 1)
+                                                type nil
+                                                documentation nil
+                                                syntax::option-names (:custom-option)
+                                                syntax::option-values (:foo))))
                syntax::default-initargs (:bar)
                syntax::default-initforms (1)
                syntax::metaclass foo
@@ -30,7 +47,7 @@
                       (:my-class-option 1))))))
 
 (test defgeneric
-  "Test for `defgeneric' standard macro."
+  "Test for `defgeneric' standard macro syntax."
 
   (is (equal '(name foo
                syntax::lambda-list ((b a) nil nil nil nil)
@@ -43,3 +60,24 @@
                     '(defgeneric foo (a b)
                       (:documentation "bla")
                       (:generic-function-class "bla"))))))
+
+(test defpackage
+  "Test for the `defpackage' standard macro syntax."
+
+  (is (equal '(syntax::nicknames ()
+               documentation "bla"
+               syntax::use (:bar "bar")
+               shadow ()
+               syntax::shadowing-import-from-packages (:foo2)
+               syntax::shadowing-import-from-names (("BAZ2" :bar2))
+               syntax::import-from-packages (:foo)
+               syntax::import-from-names ((#\c :bar))
+               export ()
+               intern ()
+               syntax::size 1)
+             (parse t (find-syntax 'defpackage) '(defpackage foo
+                                                  (:documentation "bla")
+                                                  (:use :bar "bar")
+                                                  (:size 1)
+                                                  (:import-from :foo #\c :bar)
+                                                  (:shadowing-import-from :foo2 "BAZ2" :bar2))))))

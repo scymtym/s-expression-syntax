@@ -12,7 +12,7 @@
    (lambda-list   1)
    (documentation ?)
    (declarations  *>)
-   (forms         *>)))
+   (forms         *> :evaluation t)))
 
 ;;; `defclass' including slots
 
@@ -34,7 +34,7 @@
    (writers       *)
    (accessor      *)
    (allocation    ?)
-   (initform      ?)
+   (initform      ? :evaluation t)
    (type          ?)
    (documentation ?)
    ;; Non-standard options
@@ -67,7 +67,7 @@
    (slots             *)
    ;; Standard options
    (default-initargs  *)
-   (default-initforms *)
+   (default-initforms * :evaluation t)
    (metaclass         ?)
    (documentation     ?)
    ;; Non-standard options
@@ -93,3 +93,46 @@
    ;; Other options
    (option-names              *)
    (option-values             *)))
+
+;;; `defpackage'
+
+(parser:defrule string-designator ()
+  (:guard (typep '(or character string symbol))))
+
+(parser:defrule package-designator ()
+  (or (string-designator) (:guard packagep)))
+
+(define-macro defpackage
+    (list (<- name (string-designator))
+          (* (or (list :nicknames (* (<<- nicknames (string-designator))))
+                 (list :documentation (:guard documentation stringp))
+                 (list :use (* (<<- use (package-designator))))
+                 (list :shadow (* (<<- shadow (:guard symbolp))))
+                 (list :shadowing-import-from
+                       (<<- shadowing-import-from-packages (package-designator))
+                       (<<- shadowing-import-from-names    (:transform
+                                                            (* (<<- temp (string-designator)))
+                                                            (prog1
+                                                                (nreverse temp)
+                                                              (setf temp '())))))
+                 (list :import-from
+                       (<<- import-from-packages (package-designator))
+                       (<<- import-from-names    (:transform
+                                                  (* (<<- temp (string-designator)))
+                                                  (prog1
+                                                      (nreverse temp)
+                                                    (setf temp '())))))
+                 (list :export (* (<<- export (string-designator))))
+                 (list :intern (* (<<- intern (string-designator))))
+                 (list :size (:guard size (typep '(integer 0)))))))
+  ((nicknames                      *)
+   (documentation                  ?)
+   (use                            *)
+   (shadow                         *)
+   (shadowing-import-from-packages *)
+   (shadowing-import-from-names    *)
+   (import-from-packages           *)
+   (import-from-names              *)
+   (export                         *)
+   (intern                         *)
+   (size                           ?)))
