@@ -362,7 +362,7 @@ may also be a lambda expression.")
                                               :values    'values))
    (values       1 :evaluation t)
    (declarations 1 :evaluation nil)
-   (forms        t :evaluation t))
+   (forms        * :evaluation t))
   (:documentation
    "PROGV symbols values form*
 
