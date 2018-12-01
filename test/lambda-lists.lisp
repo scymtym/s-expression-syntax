@@ -1,6 +1,6 @@
 (cl:in-package #:syntax.test)
 
-(in-suite :syntax)
+(def-suite* :syntax.lambda-lists)
 
 ;;; Ordinary lambda-list
 
@@ -26,8 +26,11 @@
   "Smoke test for the `specialized-lambda-list' rule."
 
   (is-true (parser.packrat:parse `(syntax::specialized-lambda-list ,(make-hash-table :test #'eq))
-                                 '((foo bar) (baz fez) &rest foo)
-                                 :grammar 'syntax::lambda-lists)))
+                                 '((foo bar) (baz fez) &rest whoop)
+                                 :grammar 'syntax::lambda-lists))
+  (is-false (parser.packrat:parse `(syntax::specialized-lambda-list ,(make-hash-table :test #'eq))
+                                  '((foo bar) (baz fez) &rest foo)
+                                  :grammar 'syntax::lambda-lists)))
 
 ;;; Destructuring Lambda-list
 

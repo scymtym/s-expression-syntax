@@ -45,22 +45,23 @@
   "Test for `if' special operator."
 
   (check-error-cases 'if
-                     '((if) sb-kernel::arg-count-error)
-                     '((if foo) sb-kernel::arg-count-error)
+                     '((if)                 sb-kernel::arg-count-error)
+                     '((if foo)             sb-kernel::arg-count-error)
                      '((if foo bar baz fez) sb-kernel::arg-count-error))
   (check-roundtrip-cases 'if
                          '(if foo bar)
                          '(if foo bar baz)))
 
-;;; BLOCK and TAGBODY
+;;; BLOCK, RETURN-FROM and TAGBODY
 
 (test block
   "Test for `block' special operator."
 
   (is (equal '(syntax::name foo syntax::forms (1))
              (parse nil (find-syntax 'block) '(block foo 1))))
-  #+TODO (parse-block-special-operator #'unparse-block-special-operator '(block foo a b)))
-
+  (check-roundtrip-cases 'block
+                         '(block)
+                         '(block foo a b)))
 
 (test return-from
   "Test for `return-from' special operator."
@@ -132,7 +133,8 @@
 (test quote
   "Test for `quote' special operator."
 
-  (is (equal '(syntax::material 1) (parse nil (find-syntax 'quote) '(quote 1))))
+  (is (equal '(syntax::material 1)
+             (parse nil (find-syntax 'quote) '(quote 1))))
   #+no (check-error-cases 'quote
                      '((quote) sb-kernel::arg-count-error)
                      '((quote x y) sb-kernel::arg-count-error))
