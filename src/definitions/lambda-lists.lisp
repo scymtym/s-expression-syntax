@@ -7,7 +7,7 @@
 (cl:in-package #:syntax)
 
 (parser:defgrammar lambda-lists
-  (:class parser.packrat.grammar.sexp:sexp-grammar))
+  (:class syntax.expression-grammar::expression-grammar))
 
 (parser:in-grammar lambda-lists)
 

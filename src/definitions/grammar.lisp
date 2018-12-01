@@ -9,7 +9,7 @@
 ;;; Grammar
 
 (parser:defgrammar special-operators
-  (:class parser.packrat.grammar.sexp:sexp-grammar)
+  (:class syntax.expression-grammar::expression-grammar)
   (:use lambda-lists)) ; TODO not sure this is good
 
 ;;; Basic rules TODO separate file
