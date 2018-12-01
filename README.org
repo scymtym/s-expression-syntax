@@ -2,12 +2,18 @@
 #+AUTHOR:   Jan Moringen
 #+EMAIL:    jmoringe@techfak.uni-bielefeld.de
 #+LANGUAGE: en
+
+#+OPTIONS: toc:t num:nil
 #+SEQ_TODO: TODO STARTED | DONE
 
-* TODO Introduction
+#+BEGIN_SRC lisp :exports both :results silent
+  (ql:quicklaod :syntax)
+#+END_SRC
 
-  This system provides rules for parsing the various bits of Common
-  Lisp s-expression syntax:
+* STARTED Introduction
+
+  The ~syntax~ library provides declarative rules for parsing the
+  various bits of Common Lisp's s-expression syntax:
 
   + Special operators
 
@@ -19,9 +25,9 @@
 
   + Standard macros
 
-* TODO Tutorial
+* STARTED Tutorial
 
-  #+BEGIN_SRC lisp :results output :exports both
+  #+BEGIN_SRC lisp :exports both :results output
     (let* ((syntax     (syntax:find-syntax 'let))
            (form       '(let ((a 1) (b 2))
                           (declare (type integer a))
@@ -57,3 +63,5 @@
                   :VALUES VALUES)
 
   #+end_example
+
+* TODO Dictionary
