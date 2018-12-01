@@ -1,39 +1,47 @@
 (asdf:defsystem "syntax"
-  :version    (:read-file-form "version-string.sexp")
-  :depends-on ((:version "parser.packrat"                "0.1")
+  :description "A declarative description of Common Lisp's s-expression syntax."
+  :license     "MIT"
 
-               (:version "architecture.builder-protocol" "0.10"))
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :components ((:module     "src"
-                :serial     t
-                :components ((:file       "package")
+  :version     (:read-file-form "version-string.sexp")
+  :depends-on  ((:version "parser.packrat"                "0.1")
 
-                             (:file       "conditions")
-                             (:file       "protocol")
+                (:version "architecture.builder-protocol" "0.10")
 
-                             (:file       "semantics")
+                (:version "syntax.expression-grammar"     (:read-file-form "version-string.sexp")))
 
-                             (:file       "database")
+  :components  ((:module     "src"
+                 :serial     t
+                 :components ((:file       "package")
 
-                             (:file       "macros")))
+                              (:file       "conditions")
+                              (:file       "protocol")
 
-               (:module     "definitions"
-                :pathname   "src/definitions"
-                :depends-on ("src")
-                :serial     t
-                :components (; (:file       "package")
+                              (:file       "semantics")
 
-                             (:file       "lambda-lists")
+                              (:file       "database")
 
-                             (:file       "grammar")
+                              (:file       "macros")))
 
-                             (:file       "bindings")
-                             (:file       "declarations")
-                             (:file       "forms")
-                             (:file       "types")
+                (:module     "definitions"
+                 :pathname   "src/definitions"
+                 :depends-on ("src")
+                 :serial     t
+                 :components (; (:file       "package")
 
-                             (:file       "special-operators")
-                             (:file       "standard-macros"))))
+                              (:file       "lambda-lists")
+
+                              (:file       "grammar")
+
+                              (:file       "bindings")
+                              (:file       "declarations")
+                              (:file       "forms")
+                              (:file       "types")
+
+                              (:file       "special-operators")
+                              (:file       "standard-macros"))))
 
   :in-order-to ((test-op (test-op "syntax/test"))))
 
