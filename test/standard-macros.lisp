@@ -64,7 +64,8 @@
 (test defpackage
   "Test for the `defpackage' standard macro syntax."
 
-  (is (equal '(syntax::nicknames ()
+  (is (equal '(name foo
+               syntax::nicknames ()
                documentation "bla"
                syntax::use (:bar "bar")
                shadow ()
