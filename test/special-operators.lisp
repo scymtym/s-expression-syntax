@@ -21,8 +21,7 @@
   (let ((syntax (find-syntax special-operator))
          ; (parser (sb-c::special-operator-info-parser info))
         )
-    (is-false (parse nil syntax form))
-    #+later (signals expected-error
+    (signals invalid-syntax-error
       (parse nil syntax form))))
 
 (defun check-error-cases (special-operator &rest specs)

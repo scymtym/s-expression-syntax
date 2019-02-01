@@ -57,8 +57,10 @@
 
 (defmethod parse ((client t) (syntax parser-mixin) (form t))
   (multiple-value-bind (success? components) (funcall (%parser syntax) form)
-    (when success?
-      components)))
+    (if success?
+        components
+        (error 'invalid-syntax-error :syntax syntax
+                                     :value  components))))
 
 ;;; `special-operator'
 
