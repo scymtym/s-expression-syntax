@@ -51,15 +51,20 @@
 
   (is (equal '(name foo
                syntax::lambda-list ((b a) nil nil nil nil)
-               syntax::generic-function-class nil
+               syntax::generic-function-class clazz
                syntax::argument-precedence-order nil
-               documentation "bla"
-               syntax::option-names (:generic-function-class)
-               syntax::option-values (("bla")))
+               documentation "foo"
+               syntax::option-names ()
+               syntax::option-values ())
              (parse t (find-syntax 'defgeneric)
                     '(defgeneric foo (a b)
-                      (:documentation "bla")
-                      (:generic-function-class "bla"))))))
+                      (:documentation "foo")
+                      (:generic-function-class clazz)))))
+
+  (signals invalid-syntax-error
+    (parse t (find-syntax 'defgeneric)
+           '(defgeneric foo ()
+             (:generic-function-class "foo")))))
 
 (test defpackage
   "Test for the `defpackage' standard macro syntax."

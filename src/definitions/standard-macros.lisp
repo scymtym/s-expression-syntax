@@ -77,12 +77,14 @@
 ;;; `defgeneric'
 
 (define-macro defgeneric
-    (list name
+    (list (<- name (function-name))
           (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
-          (* (or (list :generic-function-class    (:guard generic-function-class symbolp))
+          (* (or ;; Standard options
+                 (list :generic-function-class    (:guard generic-function-class symbolp))
                  (list :argument-precedence-order (<- argument-precedence-order (or :most-specific-first
                                                                                     :most-specific-last)))
                  (list :documentation             (:guard documentation stringp))
+                 ;; Non-standard options are basically free-form
                  (list* (<<- option-names (:guard keywordp)) (<<- option-values)))))
   ((name                      1)
    (lambda-list               1)
