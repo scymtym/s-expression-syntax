@@ -61,14 +61,16 @@
                 :pathname   "test/definitions"
                 :depends-on ("test")
                 :serial     t
-                :components ((:file       "grammar")
+                :components ((:file       "lambda-lists")
 
-                             (:file       "lambda-lists")
+                             (:file       "grammar")
 
-                                        ; (:file       "bindings")
-                                        ; (:file       "declarations")
+                             (:file       "names")
+
+                             ; (:file       "bindings")
+                             ; (:file       "declarations")
                              (:file       "forms")
-                                        ; (:file       "types")
+                             ; (:file       "types")
 
                              (:file       "special-operators")
                              (:file       "standard-macros"))))

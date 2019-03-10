@@ -1,21 +1,7 @@
 (cl:in-package #:syntax.test)
 
-(in-suite* :syntax.grammar
+(def-suite* :syntax.grammar
   :in :syntax)
-
-;;; Basic rules
-
-(test variable-name
-  "Smoke test for the `variable-name' rule."
-
-  (is-false (parser.packrat:parse '(syntax::variable-name) :foo)))
-
-(test function-name
-  "Smoke test for the `function-name' rule."
-
-  (is-false (parser.packrat:parse '(syntax::function-name) 1))
-  (is-true (parser.packrat:parse '(syntax::function-name) 'foo))
-  (is-true (parser.packrat:parse '(syntax::function-name) '(setf foo))))
 
 ;;; Bindings
 
