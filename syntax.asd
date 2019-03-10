@@ -34,6 +34,8 @@
 
                               (:file       "grammar")
 
+                              (:file       "names")
+
                               (:file       "bindings")
                               (:file       "declarations")
                               (:file       "forms")

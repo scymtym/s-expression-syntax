@@ -16,9 +16,6 @@
 
 ;;; `defclass' including slots
 
-(parser:defrule class-name ()
-  (and (:guard symbolp) (not (:guard null))))
-
 (parser:defrule slot-name ()
   (:guard symbolp))
 
