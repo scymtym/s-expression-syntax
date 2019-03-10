@@ -55,16 +55,20 @@
 
   :components ((:module     "test"
                 :serial     t
-                :components ((:file       "package")
+                :components ((:file       "package")))
 
-                             (:file       "grammar")
+               (:module     "definitions"
+                :pathname   "test/definitions"
+                :depends-on ("test")
+                :serial     t
+                :components ((:file       "grammar")
 
                              (:file       "lambda-lists")
 
-                             ; (:file       "bindings")
-                             ; (:file       "declarations")
+                                        ; (:file       "bindings")
+                                        ; (:file       "declarations")
                              (:file       "forms")
-                             ; (:file       "types")
+                                        ; (:file       "types")
 
                              (:file       "special-operators")
                              (:file       "standard-macros"))))
