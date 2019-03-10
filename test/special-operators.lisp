@@ -58,9 +58,9 @@
 
   (is (equal '(syntax::name foo syntax::forms (1))
              (parse nil (find-syntax 'block) '(block foo 1))))
-  (check-roundtrip-cases 'block
-                         '(block)
-                         '(block foo a b)))
+  (check-error-cases 'block
+                     '(block))
+  (check-roundtrip-cases '(block foo a b)))
 
 (test return-from
   "Test for `return-from' special operator."
