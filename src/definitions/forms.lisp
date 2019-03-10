@@ -1,6 +1,6 @@
 ;;;; forms.lisp --- Rules for parsing forms and bodies.
 ;;;;
-;;;; Copyright (C) 2018 Jan Moringen
+;;;; Copyright (C) 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,8 +8,12 @@
 
 (parser:in-grammar special-operators)
 
+(parser:defrule form ()
+  ;; (cl:declare …) must not appear where a form is required.
+  (and (not (list* 'declare :any)) :any))
+
 (parser:defrule forms ()
-    (list (* (<<- forms)))
+    (list (* (<<- forms (form))))
   (nreverse forms))
 
 (parser:defrule body ()
