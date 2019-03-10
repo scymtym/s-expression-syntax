@@ -77,6 +77,18 @@
    (option-names      *)
    (option-values     *)))
 
+;;; `deftype'
+
+(define-macro deftype
+    (list* (<- name (class-name))
+           (<- lambda-list ((deftype-lambda-list lambda-lists) 'nil))
+           (:compose (docstring-body) (list documentation declarations forms)))
+  ((name          1)
+   (lambda-list   1)
+   (documentation ?)
+   (declarations  *>)
+   (forms         *> :evaluation t)))
+
 ;;; `defgeneric'
 
 (define-macro defgeneric

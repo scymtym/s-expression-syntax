@@ -46,6 +46,22 @@
                        :bar 1)
                       (:my-class-option 1))))))
 
+(test deftype
+  "Test for `deftype' standard macro syntax."
+
+  (is (equal '(name foo
+               syntax::lambda-list (nil (a) () () ((:b b nil nil)) () ())
+               documentation "bla bli"
+               syntax::declarations ((ignore a) (ignore b))
+               syntax::forms ((list a b)))
+
+             (parse nil (find-syntax 'deftype)
+                    '(deftype foo (a &key b)
+                      "bla bli"
+                      (declare (ignore a))
+                      (declare (ignore b))
+                      (list a b))))))
+
 (test defgeneric
   "Test for `defgeneric' standard macro syntax."
 
