@@ -1,6 +1,6 @@
 (cl:in-package #:syntax.test)
 
-(in-suite* :syntax.standard-macros
+(def-suite* :syntax.standard-macros
   :in :syntax)
 
 (test defun

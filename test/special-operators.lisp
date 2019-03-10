@@ -1,6 +1,6 @@
 (cl:in-package #:syntax.test)
 
-(in-suite* :syntax.special-operators
+(def-suite* :syntax.special-operators
   :in :syntax)
 
 ;;; Utilities

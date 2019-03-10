@@ -1,6 +1,7 @@
 (cl:in-package #:syntax.test)
 
-(def-suite* :syntax.lambda-lists)
+(def-suite* :syntax.lambda-lists
+  :in :syntax)
 
 ;;; Ordinary lambda-list
 
