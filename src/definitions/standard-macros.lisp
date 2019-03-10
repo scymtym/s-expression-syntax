@@ -5,7 +5,7 @@
 ;;; `defun'
 
 (define-macro defun
-    (list* (:guard name symbolp)
+    (list* (<- name (function-name))
            (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
            (:compose (docstring-body) (list documentation declarations forms)))
   ((name          1)
