@@ -1,7 +1,6 @@
 (asdf:defsystem "syntax"
   :description "A declarative description of Common Lisp's s-expression syntax."
   :license     "MIT"
-
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 

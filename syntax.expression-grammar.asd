@@ -1,7 +1,6 @@
 (asdf:defsystem "syntax.expression-grammar"
-  :description "This system enables the syntax system to process non-s-expr representations."
+  :description "Enables the syntax system to process non-s-expr representations."
   :license     "MIT"
-
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 

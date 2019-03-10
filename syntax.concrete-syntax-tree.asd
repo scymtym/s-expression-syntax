@@ -1,7 +1,6 @@
 (asdf:defsystem "syntax.concrete-syntax-tree"
-  :description "This system enables the syntax system to process concrete syntax trees."
+  :description "Enables the syntax system to process concrete syntax trees."
   :license     "MIT"
-
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
