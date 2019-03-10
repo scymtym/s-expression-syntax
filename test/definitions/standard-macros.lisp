@@ -52,6 +52,20 @@
                       (declare (type integer bar baz))
                       (+ 1 2))))))
 
+(test defmacro
+  "Test for the `defmacro' standard macro syntax."
+
+  (is (equal '(name foo
+               syntax::lambda-list (() (a b) () () () () ())
+               documentation "bla"
+               syntax::declarations ((ignore a))
+               syntax::forms ((list 'cons b b)))
+             (parse t (find-syntax 'defmacro)
+                    '(defmacro foo (a b)
+                      "bla"
+                      (declare (ignore a))
+                      (list 'cons b b))))))
+
 (test defclass
   "Test for `defclass' standard macro syntax."
 

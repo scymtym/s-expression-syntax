@@ -40,6 +40,18 @@
    (declarations  *>)
    (forms         *> :evaluation t)))
 
+;;; `defmacro'
+
+(define-macro defmacro
+    (list* (<- name (function-name/symbol))
+           (<- lambda-list ((destructuring-lambda-list lambda-lists) 'nil)) ; TODO macro lambda list
+           (:compose (docstring-body) (list documentation declarations forms)))
+  ((name          1)
+   (lambda-list   1)
+   (documentation ?)
+   (declarations  *>)
+   (forms         *> :evaluation t)))
+
 ;;; `defclass' including slots
 
 (parser:defrule slot-name ()
