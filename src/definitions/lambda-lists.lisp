@@ -129,3 +129,13 @@
                          (list optional rest key allow-other-keys?))
                (<- cdr (destructuring-lambda-list seen))))
   (list whole required optional rest key allow-other-keys? cdr))
+
+;;; 3.4.8 Deftype Lambda Lists
+;;;
+;;; A deftype lambda list differs from a macro lambda list only in
+;;; that if no init-form is supplied for an optional parameter or
+;;; keyword parameter in the lambda-list, the default value for that
+;;; parameter is the symbol * (rather than nil).
+
+(parser:defrule deftype-lambda-list (seen)
+    (destructuring-lambda-list seen))
