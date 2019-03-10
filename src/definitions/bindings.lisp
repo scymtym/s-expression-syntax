@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Rules for binding constructs.
 ;;;;
-;;;; Copyright (C) 2018 Jan Moringen
+;;;; Copyright (C) 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,12 +18,13 @@
   (list (nreverse names) (nreverse values)))
 
 (parser:defrule symbol-macro-bindings ()
-    (list (* (list (<<- names  (variable-name))
+    (list (* (list (<<- names (variable-name))
                    (<<- values))))
   (list (nreverse names) (nreverse values)))
 
 (parser:defrule local-function ()
-    (list* name (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil)) ; TODO macro lambda-list for macrolet
+    (list* (<- name (function-name))
+           (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil)) ; TODO macro lambda-list for macrolet
            (:compose (docstring-body) (list docstring declarations forms)))
   (list name (list 'parsed-lambda lambda-list docstring declarations forms)))
 
