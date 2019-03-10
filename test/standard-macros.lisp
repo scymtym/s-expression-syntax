@@ -3,6 +3,41 @@
 (def-suite* :syntax.standard-macros
   :in :syntax)
 
+;;; `defconstant', `defvar' and `defparameter'
+
+(test defconstant
+  "Test for the `defconstant' standard macro syntax."
+
+  (is (equal '(name foo
+               syntax::initial-value (bar 1)
+               documentation "bla")
+             (parse t (find-syntax 'defconstant)
+                    '(defconstant foo
+                      (bar 1)
+                      "bla")))))
+
+(test defvar
+  "Test for the `defvar' standard macro syntax."
+
+  (is (equal '(name foo
+               syntax::initial-value (bar 1)
+               documentation "bla")
+             (parse t (find-syntax 'defvar)
+                    '(defvar foo
+                      (bar 1)
+                      "bla")))))
+
+(test defparameter
+  "Test for the `defparameter' standard macro syntax."
+
+  (is (equal '(name foo
+               syntax::initial-value (bar 1)
+               documentation "bla")
+             (parse t (find-syntax 'defparameter)
+                    '(defparameter foo
+                      (bar 1)
+                      "bla")))))
+
 (test defun
   "Test for the `defun' standard macro syntax."
 

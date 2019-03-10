@@ -2,6 +2,32 @@
 
 (parser:in-grammar special-operators)
 
+;;; `defconstant', `defvar' and `defparameter'
+
+(define-macro defconstant
+    (list (<- name (variable-name))
+          (<- initial-value (form))
+          (? (:guard documentation stringp)))
+  ((name          1)
+   (initial-value 1 :evaluation t)
+   (documentation ?)))
+
+(define-macro defvar
+    (list (<- name (variable-name))
+          (? (:seq (<- initial-value (form))
+                   (? (:guard documentation stringp)))) )
+  ((name          1)
+   (initial-value ? :evaluation t)
+   (documentation ?)))
+
+(define-macro defparameter
+    (list (<- name (variable-name))
+          (<- initial-value (form))
+          (? (:guard documentation stringp)))
+  ((name          1)
+   (initial-value 1 :evaluation t)
+   (documentation ?)))
+
 ;;; `defun'
 
 (define-macro defun
