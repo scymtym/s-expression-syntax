@@ -246,7 +246,7 @@
 
   (is (equal '(syntax::names (foo bar baz)
                syntax::functions
-               ((syntax::parsed-lambda ((b a) nil bla nil nil #+aux nil) nil nil ((list a b)))
+               ((syntax::parsed-lambda ((a b) nil bla nil nil #+aux nil) nil nil ((list a b)))
                 (syntax::parsed-lambda (nil nil nil nil nil #+aux nil) nil nil ("not-doc-string"))
                 (syntax::parsed-lambda (nil nil nil nil nil #+aux nil) "doc-string" nil (1)))
                syntax::declarations nil

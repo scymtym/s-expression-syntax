@@ -1,6 +1,6 @@
 ;;;; lambda-lists.lisp --- Rules for parsing different kinds of lambda lists.
 ;;;;
-;;;; Copyright (C) 2018 Jan Moringen
+;;;; Copyright (C) 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -71,7 +71,7 @@
            (<- rest (optional-rest-key-parameters seen))
            ; (parser.packrat.bootstrap::next-rule)
            )
-  (list* required rest))
+  (list* (nreverse required) rest))
 
 ;; TODO there should be sharing between the following two
 (parser:defrule optional-rest-key-aux-parameters (seen)
@@ -128,7 +128,7 @@
                (:compose (optional-rest-key-parameters seen)
                          (list optional rest key allow-other-keys?))
                (<- cdr (destructuring-lambda-list seen))))
-  (list whole required optional rest key allow-other-keys? cdr))
+  (list whole (nreverse required) optional rest key allow-other-keys? cdr))
 
 ;;; 3.4.8 Deftype Lambda Lists
 ;;;

@@ -42,7 +42,7 @@
   "Test for the `defun' standard macro syntax."
 
   (is (equal '(name foo
-               syntax::lambda-list ((baz bar) nil nil nil nil)
+               syntax::lambda-list ((bar baz) nil nil nil nil)
                documentation "bla"
                syntax::declarations ((type integer bar baz))
                syntax::forms ((+ 1 2)))
@@ -101,7 +101,7 @@
   "Test for `defgeneric' standard macro syntax."
 
   (is (equal '(name foo
-               syntax::lambda-list ((b a) nil nil nil nil)
+               syntax::lambda-list ((a b) nil nil nil nil)
                syntax::generic-function-class clazz
                syntax::argument-precedence-order nil
                documentation "foo"
