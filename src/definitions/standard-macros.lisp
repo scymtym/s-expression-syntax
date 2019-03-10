@@ -16,6 +16,9 @@
 
 ;;; `defclass' including slots
 
+(parser:defrule class-name ()
+  (and (:guard symbolp) (not (:guard null))))
+
 (parser:defrule slot-name ()
   (:guard symbolp))
 
@@ -48,15 +51,15 @@
    (options 1)))
 
 (define-macro defclass
-    (list (:guard name symbolp)
-          (list (* (<<- superclasses (:guard symbolp))))
+    (list (<- name (class-name))
+          (list (* (<<- superclasses (class-name))))
           (list (* (<<- slots (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
                  (list :default-initargs
                        (* (:seq (<<- default-initargs  (:guard symbolp))
                                 (<<- default-initforms :any))))
                  (list :metaclass
-                       (:guard metaclass symbolp))
+                       (<- metaclass (class-name)))
                  (list :documentation
                        (:guard documentation stringp))
                  ;; Non-standard options are basically free-form

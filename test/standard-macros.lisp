@@ -18,7 +18,7 @@
                       (+ 1 2))))))
 
 (test defclass
-  "Test for `declass' standard macro syntax."
+  "Test for `defclass' standard macro syntax."
 
   (is (equal '(name foo
                syntax::superclasses (bar baz)
