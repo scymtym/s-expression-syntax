@@ -128,13 +128,23 @@
                syntax::shadowing-import-from-packages (:foo2)
                syntax::shadowing-import-from-names (("BAZ2" :bar2))
                syntax::import-from-packages (:foo)
-               syntax::import-from-names ((#\c :bar))
+               syntax::import-from-names ((:bar :baz))
                export ()
                intern ()
                syntax::size 1)
-             (parse t (find-syntax 'defpackage) '(defpackage foo
-                                                  (:documentation "bla")
-                                                  (:use :bar "bar")
-                                                  (:size 1)
-                                                  (:import-from :foo #\c :bar)
-                                                  (:shadowing-import-from :foo2 "BAZ2" :bar2))))))
+             (parse t (find-syntax 'defpackage)
+                    '(defpackage foo
+                      (:documentation "bla")
+                      (:use :bar "bar")
+                      (:size 1)
+                      (:import-from :foo :bar :baz)
+                      (:shadowing-import-from :foo2 "BAZ2" :bar2)))))
+
+  (signals invalid-syntax-error
+    (parse t (find-syntax 'defpackage)
+           '(defpackage foo
+             (:documentation "bla")
+             (:use :bar "bar")
+             (:size 1)
+             (:import-from :foo #\c :bar)
+             (:shadowing-import-from :foo2 "BAZ2" :bar2)))))
