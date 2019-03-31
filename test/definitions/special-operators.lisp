@@ -367,6 +367,8 @@
 (test multiple-value-call
   "Test for `multiple-value-call' special operator."
 
+  (is (equal '(syntax::function-form foo syntax::arguments (1 2))
+             (parse nil (find-syntax 'multiple-value-call) '(multiple-value-call foo 1 2))))
   #+no (check-error-cases 'multiple-value-call
                      '((multiple-value-call) sb-kernel::arg-count-error))
   (check-roundtrip-cases 'multiple-value-call

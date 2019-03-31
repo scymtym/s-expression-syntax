@@ -488,9 +488,9 @@ may also be a lambda expression.")
 ;;;; Multiple value stuff
 
 (define-special-operator multiple-value-call
-    (list* function-form (<- args (forms)))
+    (list* function-form (<- arguments (forms)))
   ((function-form 1  :evaluation t)
-   (args          *> :evaluation t)) ; TODO arguments? make this consistent
+   (arguments     *> :evaluation t))
   (:documentation
    "MULTIPLE-VALUE-CALL function-form values-form*
 
