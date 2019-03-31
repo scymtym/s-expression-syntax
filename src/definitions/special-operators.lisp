@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Standard special operators supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018 Jan Moringen
+;;;; Copyright (C) 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -81,10 +81,6 @@ NIL."))
          name)
         (t
          nil)))
-
-;; TODO for parser.packrat tests
-#+test (parser:defrule test ()
-    (list (:seq (* (<<- tags 'foo)) (new-tag tags))))
 
 #+test (parser:parse '(test) '(foo foo foz))
 
@@ -197,7 +193,7 @@ NIL."))
     If READ-ONLY-P is non-NIL, then the resultant object is guaranteed
     to never be modified, so it can be put in read-only storage."))
 
-(define-special-operator quote ; TODO doesn't work because bootstrap-parse interprets quote
+(define-special-operator quote
     (list material)
   ((material 1 :evaluation nil))
   (:documentation
