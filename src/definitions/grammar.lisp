@@ -1,4 +1,4 @@
-;;;; grammar.lisp --- TODO.
+;;;; grammar.lisp --- Grammar for special operator and standard macros.
 ;;;;
 ;;;; Copyright (C) 2018, 2019 Jan Moringen
 ;;;;
