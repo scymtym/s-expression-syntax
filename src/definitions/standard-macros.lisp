@@ -58,7 +58,7 @@
   (:guard symbolp))
 
 (define-syntax slot-options
-    (list (* (or (:seq :reader        (<<- readers    (:must (function-name/symbol)))) ; TODO fail for something like :reader 1
+    (list (* (or (:seq :reader        (<<- readers    (function-name/symbol))) ; TODO fail for something like :reader 1
                  (:seq :writer        (<<- writers    (function-name)))
                  (:seq :accessor      (<<- accessor   (function-name/symbol)))
                  (:seq :allocation    (<-  allocation allocation-type))
