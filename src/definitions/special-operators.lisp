@@ -29,7 +29,7 @@ If TEST evaluates to true, evaluate THEN and return its values,
 otherwise evaluate ELSE and return its values. ELSE defaults to
 NIL."))
 
-;;;; `block', `return-from' and `tagbody'
+;;;; `block', `return-from', `return' and `tagbody'
 
 (parser:defrule block-name ()
     (or (:guard name symbolp)
