@@ -39,11 +39,11 @@ NIL."))
 
 (define-special-operator block
     (list* (<- name (block-name)) (<- forms (forms)))
-  ((name  1 :evaluation (make-instance 'binding-semantics
-                                       :namespace 'block
-                                       :scope     :lexical
-                                       :values    nil))
-   (forms * :evaluation t))
+  ((name  1  :evaluation (make-instance 'binding-semantics
+                                        :namespace 'block
+                                        :scope     :lexical
+                                        :values    nil))
+   (forms *> :evaluation t))
   (:documentation
    "BLOCK name form*
 
