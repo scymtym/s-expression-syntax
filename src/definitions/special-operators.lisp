@@ -62,6 +62,10 @@ NIL."))
     enclosing block BLOCK-NAME. This is constrained to be used only
     within the dynamic extent of the block."))
 
+(define-special-operator return
+    (list (? value))
+  ((value 1 :evaluation t)))
+
 (parser:defrule tag ()
     (:guard name (typep '(or symbol integer))))
 
