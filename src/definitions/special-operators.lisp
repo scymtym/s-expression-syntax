@@ -427,7 +427,7 @@ may also be a lambda expression.")
 ;;; SETQ
 
 (define-special-operator setq
-    (list (* (:seq (<<- names       (:guard symbolp)) ; TODO (variable-name)
+    (list (* (:seq (<<- names       (variable-name))
                    (<<- value-forms))))
   ((names       * :evaluation nil       ; :type symbol :access :write
                 )

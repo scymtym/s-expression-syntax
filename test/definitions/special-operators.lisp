@@ -312,8 +312,9 @@
   "Test for `setq' special operator."
 
   (check-error-cases 'setq
-                     '((setq a) program-error)
-                     '((setq a 1 b) program-error)
+                     '((setq a)        program-error)
+                     '((setq a 1 b)    program-error)
+                     '((setq 1 1)      program-error)
                      '((setq (1+ a) 1) program-error))
   (check-roundtrip-cases 'setq
                          '(setq)
