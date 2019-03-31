@@ -162,3 +162,14 @@
              (:size 1)
              (:import-from :foo #\c :bar)
              (:shadowing-import-from :foo2 "BAZ2" :bar2)))))
+
+(test in-package
+  "test for the `in-package' standard macro syntax."
+
+  (is (equal '(name foo)
+             (parse t (find-syntax 'in-package) '(in-package foo))))
+  (is (equal '(name "FOO")
+             (parse t (find-syntax 'in-package) '(in-package "FOO"))))
+
+  (signals invalid-syntax-error
+    (parse t (find-syntax 'in-package) '(in-package 1))))

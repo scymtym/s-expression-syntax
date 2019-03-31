@@ -146,7 +146,7 @@
    (option-names              *)
    (option-values             *)))
 
-;;; `defpackage'
+;;; `defpackage' and `in-package'
 
 (parser:defrule string-designator ()
   (:guard (typep '(or character string symbol))))
@@ -189,3 +189,7 @@
    (export                         *)
    (intern                         *)
    (size                           ?)))
+
+(define-macro in-package
+    (list (<- name (string-designator)))
+  ((name 1)))
