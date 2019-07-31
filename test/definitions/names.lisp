@@ -9,6 +9,8 @@
 (def-suite* :syntax.names
   :in :syntax)
 
+;;; Names
+
 (test variable-name
   "Smoke test for the `variable-name' rule."
 
@@ -22,3 +24,14 @@
 
   (is-true (parser.packrat:parse '(syntax::function-name) '(setf foo)))
   (is-false (parser.packrat:parse '(syntax::function-name) '(setf 1))))
+
+;;; References
+
+(test function-reference
+  "Smoke test for `function-reference' rule."
+
+  (is-false (parser.packrat.parse '(syntax::function-reference) '(function 1)))
+  (is-true (parser.packrat.parse '(syntax::function-reference) '(function foo)))
+
+  (is-false (parser.packrat.parse '(syntax::function-reference) '(function (setf 1))))
+  (is-true (parser.packrat.parse '(syntax::function-reference) '(function (setf foo)))))

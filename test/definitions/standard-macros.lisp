@@ -50,7 +50,15 @@
                     '(defun foo (bar baz)
                       "bla"
                       (declare (type integer bar baz))
-                      (+ 1 2))))))
+                      (+ 1 2)))))
+
+      (signals invalid-syntax-error
+        (parse t (find-syntax 'defun)
+               '(defun (setf 1) ())))
+      (signals invalid-syntax-error
+        (parse t (find-syntax 'defun)
+               '(defun foo ()
+                  (declare 1)))))
 
 (test defmacro
   "Test for the `defmacro' standard macro syntax."
