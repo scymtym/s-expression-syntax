@@ -42,7 +42,8 @@
                               (:file       "grammar")
                               (:file       "bindings")
                               (:file       "special-operators")
-                              (:file       "standard-macros"))))
+                              (:file       "standard-macros")
+                              (:file       "loop"))))
 
   :in-order-to ((test-op (test-op "s-expression-syntax/test"))))
 
@@ -72,7 +73,8 @@
 
                              (:file       "bindings")
                              (:file       "special-operators")
-                             (:file       "standard-macros"))))
+                             (:file       "standard-macros")
+                             (:file       "loop"))))
 
   :perform    (test-op (operation component)
                 (uiop:symbol-call '#:s-expression-syntax.test '#:run-tests)))
