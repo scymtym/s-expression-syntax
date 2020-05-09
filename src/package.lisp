@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,8 +9,14 @@
    #:cl
    #:alexandria)
 
-  (:import-from #:parser.packrat.bootstrap
-   #:? #:<- #:<<-)
+  (:import-from #:parser.packrat
+   #:defrule)
+
+  (:import-from #:parser.packrat.grammar.base
+   #:<- #:<<- #:guard)
+
+  (:import-from #:parser.packrat.grammar.sequence
+   #:seq #:?)
 
   ;; Conditions
   (:export
