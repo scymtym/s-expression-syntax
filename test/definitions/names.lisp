@@ -1,6 +1,6 @@
 ;;;; names.lisp --- Tests for name-related rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,24 +14,31 @@
 (test variable-name
   "Smoke test for the `variable-name' rule."
 
-  (is-false (parser.packrat:parse '(syntax::variable-name) :foo)))
+  (rule-test-cases (syntax::variable-name)
+    '(:foo nil :foo nil)
+    '(nil  nil nil nil)
+    '(a    t   a   a)))
 
 (test function-name
   "Smoke test for the `function-name' rule."
 
-  (is-false (parser.packrat:parse '(syntax::function-name) 1))
-  (is-true (parser.packrat:parse '(syntax::function-name) 'foo))
+  (rule-test-cases (syntax::function-name)
+    '(1           nil    1          nil)
+    '(nil         nil    nil        nil)
+    '(foo         t      foo        foo)
 
-  (is-true (parser.packrat:parse '(syntax::function-name) '(setf foo)))
-  (is-false (parser.packrat:parse '(syntax::function-name) '(setf 1))))
+    '((setf 1)    :fatal nil        "second element of SETF function name must be a symbol")
+    '((setf foo)  t      (setf foo) (setf foo))))
 
 ;;; References
 
 (test function-reference
   "Smoke test for `function-reference' rule."
 
-  (is-false (parser.packrat.parse '(syntax::function-reference) '(function 1)))
-  (is-true (parser.packrat.parse '(syntax::function-reference) '(function foo)))
+  (rule-test-cases (syntax::function-reference)
+    '((function 1)           :fatal nil                   "must be a function name")
+    '((function nil)         :fatal nil                   "must be a function name")
+    '((function foo)         t      (function foo)        (function foo))
 
-  (is-false (parser.packrat.parse '(syntax::function-reference) '(function (setf 1))))
-  (is-true (parser.packrat.parse '(syntax::function-reference) '(function (setf foo)))))
+    '((function (setf 1))    :fatal nil                   "second element of SETF function name must be a symbol")
+    '((function (setf foo))  t      (function (setf foo)) (function (setf foo)))))
