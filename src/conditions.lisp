@@ -6,6 +6,8 @@
 
 (cl:in-package #:syntax)
 
+;;;
+
 (define-condition syntax-not-found-error (error)
   ((%name :initarg :name
           :reader  name))
@@ -13,13 +15,29 @@
    (lambda (condition stream)
      (format stream "~@<No syntax named ~S.~@:>" (name condition)))))
 
-(define-condition invalid-syntax-error (error)
+(define-condition component-not-found-error (error)
   ((%syntax :initarg :syntax
             :reader  syntax)
-   (%value  :initarg :value
-            :reader  value))
+   (%name   :initarg :name
+            :reader  name))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Invalid ~A syntax at ~S.~@:>"
+     (format stream "~@<No component named ~S in syntax ~A.~@:>"
+             (name condition) (syntax condition)))))
+
+;;;
+
+(define-condition invalid-syntax-error (error)
+  ((%syntax  :initarg  :syntax
+             :reader   syntax)
+   (%value   :initarg  :value
+             :reader   value)
+   (%message :initarg  :message
+             :reader   message
+             :initform nil))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Invalid ~A syntax at ~S~@[: ~A~].~@:>"
              (name (syntax condition))
-             (value condition)))))
+             (value condition)
+             (message condition)))))

@@ -23,6 +23,10 @@
    #:syntax-not-found-error
    #:name
 
+   #:component-not-found
+   #:syntax
+   #:name
+
    #:invalid-syntax-error
    #:syntax
    #:value)

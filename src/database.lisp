@@ -1,6 +1,6 @@
 ;;;; database.lisp --- TODO.
 ;;;;
-;;;; Copyright (C) 2018 Jan Moringen
+;;;; Copyright (C) 2018, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -56,11 +56,12 @@
         (funcall rule context form)))))
 
 (defmethod parse ((client t) (syntax parser-mixin) (form t))
-  (multiple-value-bind (success? components) (funcall (%parser syntax) form)
-    (if success?
+  (multiple-value-bind (success? components value) (funcall (%parser syntax) form)
+    (if (eq success? t)
         components
-        (error 'invalid-syntax-error :syntax syntax
-                                     :value  components))))
+        (error 'invalid-syntax-error :syntax  syntax
+                                     :value   components
+                                     :message (or (if (stringp value) value "invalid expression"))))))
 
 ;;; `special-operator'
 
@@ -71,7 +72,9 @@
   ((%components :initarg :components
                 :reader  components)))
 
-(defmethod find-component ((name t) (container special-operator))
+(defmethod find-component ((name t) (container special-operator)
+                           &key if-does-not-exist)
+  (declare (ignore if-does-not-exist))
   (find name (components container) :key #'name :test #'eq))
 
 ;;; `component'
@@ -99,19 +102,15 @@
 (defun syntaxes/alist ()
   (hash-table-alist *syntaxes*))
 
-(defun find-syntax (name &key (if-does-not-exist #'error))
-  (or (gethash name *syntaxes*)
-      (typecase if-does-not-exist
-        (function
-         (funcall if-does-not-exist (make-condition 'syntax-not-found-error
-                                                    :name name)))
-        (t
-         if-does-not-exist))))
+(defmethod find-syntax ((name t) &key if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+  (gethash name *syntaxes*))
 
-(defun (setf find-syntax) (new-value name)
+(defmethod (setf find-syntax) ((new-value t) (name t) &key if-does-not-exist)
+  (declare (ignore if-does-not-exist))
   (setf (gethash name *syntaxes*) new-value))
 
-(defun ensure-syntax (name class &rest initargs)
+(defmethod ensure-syntax ((name t) (class t) &rest initargs)
   (let ((initargs (list* :name name initargs)))
     (if-let ((existing (find-syntax name :if-does-not-exist nil)))
       (apply #'reinitialize-instance existing initargs)
