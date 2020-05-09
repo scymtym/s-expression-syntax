@@ -48,7 +48,7 @@
          (expression (make-instance 'parser.packrat.grammar.base:rule-invocation-expression
                                     :rule rule))
          (rule       (compile nil (parser.packrat.compiler:compile-rule
-                                   grammar '() expression))))
+                                   grammar rule '() expression))))
     (declare (type function rule))
     (lambda (form)
       (let ((context (parser.packrat.grammar::make-context
