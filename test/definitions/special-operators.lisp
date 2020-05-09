@@ -220,7 +220,7 @@
 (test locally
   "Test for `locally' special operator."
 
-  (is (equal '(syntax::declarations ((type integer x) (type double-float x)) syntax::forms (x))
+  (is (equal '(syntax::declarations ((type (integer x)) (type (double-float x))) syntax::forms (x))
              (parse nil (find-syntax 'locally) '(locally (declare (type integer x) (type double-float x)) x))))
 
   (check-roundtrip-cases 'locally

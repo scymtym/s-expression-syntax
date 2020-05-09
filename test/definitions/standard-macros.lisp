@@ -44,7 +44,7 @@
   (is (equal '(name foo
                syntax::lambda-list ((bar baz) nil nil nil nil)
                documentation "bla"
-               syntax::declarations ((type integer bar baz))
+               syntax::declarations ((type (integer bar baz)))
                syntax::forms ((+ 1 2)))
              (parse t (find-syntax 'defun)
                     '(defun foo (bar baz)
@@ -66,7 +66,7 @@
   (is (equal '(name foo
                syntax::lambda-list (() (a b) () () () () ())
                documentation "bla"
-               syntax::declarations ((ignore a))
+               syntax::declarations ((ignore (a)))
                syntax::forms ((list 'cons b b)))
              (parse t (find-syntax 'defmacro)
                     '(defmacro foo (a b)
@@ -109,7 +109,7 @@
   (is (equal '(name foo
                syntax::lambda-list (nil (a) () () ((:b b nil nil)) () ())
                documentation "bla bli"
-               syntax::declarations ((ignore a) (ignore b))
+               syntax::declarations ((ignore (a)) (ignore (b)))
                syntax::forms ((list a b)))
 
              (parse nil (find-syntax 'deftype)
