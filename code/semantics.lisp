@@ -29,5 +29,6 @@
    :scope  (a:required-argument :scope)
    :values (a:required-argument :values)))
 
-(defclass reference-semantics (namespace-mixin)
+(defclass reference-semantics (namespace-mixin
+                               print-items:print-items-mixin)
   ())
