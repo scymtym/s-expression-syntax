@@ -7,13 +7,15 @@
 
 ;;; environment
 
-(defclass expression-environment (env:environment
-                           seq:sequential-environment-mixin)
-  ((tail :initarg :tail
-         :reader  tail)))
+(defclass expression-environment (; env:environment
+                                  seq::list-environment ; TODO hack
+                                  ; seq:sequential-environment-mixin
+                                  )
+  ((seq::tail :initarg :tail
+              :reader  tail)))
 
 (env:define-state-methods expression-environment
-  (tail)
+  (seq::tail)
   ())
 
 
