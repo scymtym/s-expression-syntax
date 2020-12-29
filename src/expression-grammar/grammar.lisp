@@ -1,9 +1,18 @@
+;;;; grammar.lisp --- Grammar class, compilation rules for the expression-grammar module.
+;;;;
+;;;; Copyright (C) 2020 Jan Moringen
+;;;;
+;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
 (cl:in-package #:syntax.expression-grammar)
 
 ;;; grammar
 
-(defclass expression-grammar (parser.packrat.grammar.sexp::sexp-grammar)
-  ())
+(defclass expression-grammar (sexp::sexp-grammar)
+  ()
+  (:default-initargs
+   :meta-grammar    'meta-grammar
+   :meta-start-rule 'base::expression))
 
 ;;; environment
 
@@ -21,43 +30,58 @@
 
 ;;; Base expression compilation
 
-(defmethod c:compile-expression ((grammar      expression-grammar)
-                                 (environment  env:value-environment)
-                                 (expression   base:predicate-expression)
-                                 (success-cont function)
-                                 (failure-cont function))
-  (let+ (((&accessors-r/o (sub-expression exp:sub-expression) (predicate base:predicate)) expression)
-         ((predicate &rest arguments) (ensure-list predicate)))
-    (c:compile-expression
-     grammar environment sub-expression
-     (lambda (new-environment)
-       (let ((value (env:value new-environment)))
-         `(if (if (%natural? ,value)
-                  (,predicate ,value ,@arguments)
-                  (,predicate (naturalize *client* ,value) ,@arguments))
-              ,(funcall success-cont new-environment)
-              ,(funcall failure-cont new-environment))))
-     failure-cont)))
+(defmethod base::compile-test ((grammar      expression-grammar)
+                               (environment  t)
+                               (expression   t)
+                               (predicate    t)
+                               (value        t)
+                               (arguments    t)
+                               (success-cont function)
+                               (failure-cont function))
+  ;; If VALUE is natural, call PREDICATE on it, otherwise naturalize
+  ;; VALUE and call PREDICATE on the result.
+  `(if (,predicate (if (%natural? ,value)
+                       ,value
+                       (naturalize *client* ,value))
+                   ,@arguments)
+       ,(funcall success-cont environment)
+       ,(funcall failure-cont environment)))
 
-(defmethod c:compile-expression ((grammar      expression-grammar)
-                                 (environment  env:value-environment)
-                                 (expression   base:terminal-expression)
-                                 (success-cont function)
-                                 (failure-cont function))
-  (let* ((value     (env:value environment))
-         (expected  (exp:value expression))
-         (predicate (typecase expected
-                      (string '%equal)
-                      (t      '%eql))))
-    `(if (,predicate ,value ',expected)
-         ,(funcall success-cont environment)
-         ,(funcall failure-cont environment))))
+;;; Compile tests in which the predicate is `equal' or `eql' by
+;;; emitting a call to `%equal' or `%eql' respectively. Those replacements
+(macrolet ((define-method (predicate replacement)
+             `(defmethod base::compile-test ((grammar      expression-grammar)
+                                             (environment  t)
+                                             (expression   t)
+                                             (predicate    (eql ',predicate))
+                                             (value        t)
+                                             (arguments    t)
+                                             (success-cont function)
+                                             (failure-cont function))
+                `(if (,',replacement ,value ,@arguments)
+                     ,(funcall success-cont environment)
+                     ,(funcall failure-cont environment)))))
+  (define-method equal %equal)
+  (define-method eql   %eql))
 
 ;;; Sequence expression compilation
 
 (defmethod c:compile-expression ((grammar      expression-grammar)
                                  (environment  env:environment)
-                                 (expression   parser.packrat.grammar.sexp::as-list-expression)
+                                 (expression   sexp::as-vector-expression)
+                                 (success-cont function)
+                                 (failure-cont function))
+  (let+ ((value (env:value environment))
+         ((&with-gensyms vector-function vector-value)))
+    `(flet ((,vector-function (,vector-value)
+              ,(call-next-method)))
+       (if (%natural? ,value)
+           (,vector-function ,value)
+           (,vector-function (naturalize *client* ,value))))))
+
+(defmethod c:compile-expression ((grammar      expression-grammar)
+                                 (environment  env:environment)
+                                 (expression   sexp::as-list-expression)
                                  (success-cont function)
                                  (failure-cont function))
   (let+ ((value (env:value environment))
@@ -70,21 +94,21 @@
                             environment (list :tail value)
                             :class 'expression-environment
                             :state '())))
-    `(if ,(ecase (parser.packrat.grammar.sexp::target-type expression)
+    `(if ,(ecase (sexp::target-type expression)
             (list `(%listp ,value)))
          ,(c:compile-expression
            grammar list-environment (exp:sub-expression expression)
            (lambda (new-environment)
              (c:compile-expression
-              grammar new-environment parser.packrat.grammar.sexp::*just-test-bounds*
+              grammar new-environment sexp::*just-test-bounds*
               (curry #'call-with-value-environment failure-cont)
               (curry #'call-with-value-environment success-cont)))
            (curry #'call-with-value-environment failure-cont))
          ,(funcall failure-cont environment))))
 
-(defmethod c:compile-expression ((grammar      t)
+(defmethod c:compile-expression ((grammar      expression-grammar)
                                  (environment  expression-environment)
-                                 (expression   parser.packrat.grammar.sexp::rest-expression)
+                                 (expression   sexp::rest-expression)
                                  (success-cont function)
                                  (failure-cont function))
   (let+ (((&with-gensyms tail-var end-var))
@@ -111,11 +135,12 @@
                                  (expression   seq::bounds-test-expression)
                                  (success-cont function)
                                  (failure-cont function))
-  `(if (%null ,(tail environment))
-       ,(funcall failure-cont environment)
+  `(if (and (%listp ,(tail environment)) ; TODO consp?
+            (not (%null ,(tail environment))))
        ,(c:compile-expression
          grammar environment (exp:sub-expression expression)
-         success-cont failure-cont)))
+         success-cont failure-cont)
+       ,(funcall failure-cont environment)))
 
 (defmethod c:compile-expression ((grammar      t)
                                  (environment  expression-environment)
@@ -146,11 +171,34 @@
                                                     :parent element-environment)
                                 (env:value element-environment)))
               (new-tail        (tail new-environment)))
-         `(let ((,new-tail ,(or nil #+maybe-later to
-                                    (ecase amount
-                                      (1 `(%rest ,tail))
-                                      ; (2 `(cddr ,tail))
-                                      ; (t `(nthcdr ,amount ,tail))
-                                      ))))
+         `(let ((,new-tail ,(ecase amount
+                              (1 `(%rest ,tail)))))
             ,(funcall success-cont new-environment))))
      failure-cont)))
+
+;;;; Structure expression compilation
+
+;;; TODO compile symbol-name call as (if (%natural ) (cl:symbol-name ) (our-own:name ))
+;;;      might require adding a c:compile-function-call
+
+(defmethod c:compile-expression ((grammar      expression-grammar)
+                                 (environment  env:environment)
+                                 (expression   sexp::structure-expression)
+                                 (success-cont function)
+                                 (failure-cont function))
+  (let+ ((value (env:value environment))
+         ((&with-gensyms structure-function structure-value))
+         (new-environment (env:environment-at
+                           environment (list :value structure-value))))
+    `(flet ((,structure-function (,structure-value)
+              ,(call-next-method
+                grammar new-environment expression
+                (lambda (environment)
+                  (funcall success-cont (env:environment-at
+                                         environment (list :value value))))
+                (lambda (environment)
+                  (funcall failure-cont (env:environment-at
+                                         environment (list :value value)))))))
+       (if (%natural? ,value)
+           (,structure-function ,value)
+           (,structure-function (naturalize *client* ,value))))))

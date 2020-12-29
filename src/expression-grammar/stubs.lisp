@@ -1,3 +1,9 @@
+;;;; stubs.lisp --- Inlinable functions for common operations.
+;;;;
+;;;; Copyright (C) 2020 Jan Moringen
+;;;;
+;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
 (cl:in-package #:syntax.expression-grammar)
 
 (declaim (inline %%natural? %natural? %listp %null %first %rest %equal %eql))
@@ -8,6 +14,8 @@
 (defun %natural? (thing)
   (or (%%natural? thing)
       (natural? *client* thing)))
+
+;;; List operations
 
 (defun %listp (maybe-list)
   (cond ((listp maybe-list)      t)
@@ -29,6 +37,8 @@
   (if (listp maybe-list)
       (rest maybe-list)
       (rest* *client* maybe-list)))
+
+;;; Comparison
 
 (defun %equal (left right)
   (if (%natural? left)

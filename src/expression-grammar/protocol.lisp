@@ -1,3 +1,9 @@
+;;;; protocol.lisp --- Protocol provided by the expression-grammar module.
+;;;;
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;;
+;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
 (cl:in-package #:syntax.expression-grammar)
 
 ;;; TODO have the client return a bunch of functions at the beginning
@@ -20,3 +26,17 @@
 (defgeneric equal* (client left right))
 
 (defgeneric eql* (client left right))
+
+;;; verbatim client
+
+(defclass verbatim-client ()
+  ())
+
+(defmethod natural? ((client verbatim-client) (thing t))
+  t)
+
+(defmethod listp* ((client verbatim-client) (maybe-list t))
+  nil)
+
+(defmethod null* ((client verbatim-client) (maybe-list t))
+  nil)

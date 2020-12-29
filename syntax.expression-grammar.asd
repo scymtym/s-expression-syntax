@@ -14,4 +14,5 @@
 
                              (:file       "protocol")
                              (:file       "stubs")
+                             (:file       "meta-grammar")
                              (:file       "grammar")))))
