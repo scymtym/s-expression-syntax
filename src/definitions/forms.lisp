@@ -6,10 +6,14 @@
 
 (cl:in-package #:syntax)
 
-(parser:in-grammar special-operators)
+(parser:defgrammar forms
+  (:class syntax.expression-grammar::expression-grammar)
+  (:use declarations))
+
+(parser:in-grammar forms)
 
 #+later (parser:defrule declaration ()
-    (list 'declare (* (<<- declarations #+maybe (declaration))))
+    (list 'declare (* (<<- declarations #+maybe ((declaration declarations)))))
   (nreverse declarations))
 
 (parser:defrule form ()
@@ -34,7 +38,8 @@
 ;; TODO do we need forms! ?
 
 (parser:defrule body ()
-  (list* (* (and (<<- declarations-raw) (list 'declare (* (<<- declarations (declaration!))))))
+    (list* (* (and (<<- declarations-raw)
+                   (list 'declare (* (<<- declarations ((declaration! declarations)))))))
          (and (<- forms (forms)) forms-raw))
   (list (nreverse declarations) #+later declarations-raw forms #+later forms-raw))
 

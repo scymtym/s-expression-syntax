@@ -6,7 +6,10 @@
 
 (cl:in-package #:syntax)
 
-(parser:in-grammar special-operators)
+(parser:defgrammar type-specifiers
+  (:class syntax.expression-grammar::expression-grammar))
+
+(parser:in-grammar type-specifiers)
 
 ;;; General type specifier syntax
 

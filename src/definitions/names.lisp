@@ -1,16 +1,17 @@
 ;;;; names.lisp --- Rules for different kinds of names.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:syntax)
 
-(parser:in-grammar special-operators)
+(parser:defgrammar names
+  (:class syntax.expression-grammar::expression-grammar))
 
-;;; Names
+(parser:in-grammar names)
 
-(parser:defrule variable-name () ; TODO could be used in lambda list grammar
+(parser:defrule variable-name ()
   (:guard (typep '(and symbol
                        (not keyword)
                        (not (member t nil))))) ; TODO constants?

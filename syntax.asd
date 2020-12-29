@@ -30,17 +30,16 @@
                  :serial     t
                  :components (; (:file       "package")
 
+                              (:file       "names")
+
+                              (:file       "types")
+                              (:file       "declarations")
+                              (:file       "forms")
+
                               (:file       "lambda-lists")
 
                               (:file       "grammar")
-
-                              (:file       "names")
-
                               (:file       "bindings")
-                              (:file       "declarations")
-                              (:file       "forms")
-                              (:file       "types")
-
                               (:file       "special-operators")
                               (:file       "standard-macros"))))
 

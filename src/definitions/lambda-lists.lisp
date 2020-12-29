@@ -1,13 +1,14 @@
 ;;;; lambda-lists.lisp --- Rules for parsing different kinds of lambda lists.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:syntax)
 
 (parser:defgrammar lambda-lists
-  (:class syntax.expression-grammar::expression-grammar))
+  (:class syntax.expression-grammar::expression-grammar)
+  (:use names))
 
 (parser:in-grammar lambda-lists)
 
@@ -112,10 +113,12 @@
 
 ;;; 3.4.5 Destructuring Lambda Lists
 
-#+later (defgrammar destructuring-lambda-list
-  (:use
-   ordinary-lambda-list))
-#+later (in-grammar destructuring-lambda-list)
+(parser:defgrammar destructuring-lambda-list
+  (:class syntax.expression-grammar::expression-grammar)
+  (:use lambda-lists))
+
+(parser:in-grammar destructuring-lambda-list)
+
 #+later (defrule required-parameter (seen)
   (or (next-rule seen)
       (destructuring-lambda-list seen)))
@@ -137,5 +140,11 @@
 ;;; keyword parameter in the lambda-list, the default value for that
 ;;; parameter is the symbol * (rather than nil).
 
+(parser:defgrammar deftype-lambda-list
+  (:class syntax.expression-grammar::expression-grammar)
+  (:use destructuring-lambda-list))
+
+(parser:in-grammar deftype-lambda-list)
+
 (parser:defrule deftype-lambda-list (seen)
-    (destructuring-lambda-list seen))
+  ((destructuring-lambda-list destructuring-lambda-list) seen))

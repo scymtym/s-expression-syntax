@@ -1,15 +1,17 @@
 ;;;; special-operators.lisp --- Standard special operators supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:syntax)
 
+(parser:in-grammar special-operators)
+
 ;;;; Special operators for control
 
 (define-special-operator progn
-    (list* (<- forms (forms)))
+    (list* (<- forms ((forms forms))))
   ((forms *> :evaluation t))
   (:documentation
    "PROGN form*
@@ -38,7 +40,7 @@ NIL."))
   name)
 
 (define-special-operator block
-    (list* (<- name (block-name)) (<- forms (forms)))
+    (list* (<- name (block-name)) (<- forms ((forms forms))))
   ((name  1  :evaluation (make-instance 'binding-semantics
                                         :namespace 'block
                                         :scope     :lexical
@@ -183,7 +185,7 @@ NIL."))
     COMPILE, LOAD, or EVAL)."))
 
 (define-special-operator load-time-value
-    (list form (? (:guard read-only-p (typep 'boolean))))
+    (list (<- form ((form forms))) (? (:guard read-only-p (typep 'boolean))))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil))
   (:documentation
@@ -256,9 +258,9 @@ may also be a lambda expression.")
                    :name :lambda-list))))))
 
 (define-special-operator function
-    (list (or (<- name (function-name))
+    (list (or (<- name ((function-name names)))
               (list* 'lambda (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
-                     (:compose (docstring-body) (list docstring declarations body)))))
+                     (:compose ((docstring-body forms)) (list docstring declarations body)))))
   ((name         1 :evaluation nil)
    (lambda-list  1 :evaluation nil)     ; TODO binding
    (docstring    1 :evaluation nil)
@@ -293,7 +295,7 @@ may also be a lambda expression.")
 
 (define-special-operator symbol-macrolet
     (list* (:compose (symbol-macro-bindings) (list names values))
-           (:compose (body) (list declarations forms)))
+           (:compose ((body forms)) (list declarations forms)))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace :symbol-macro
                                                :scope     :lexical
@@ -310,7 +312,7 @@ may also be a lambda expression.")
 
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
     (list* (:compose (value-bindings) (list names values))
-           (:compose (body) (list declarations forms)))
+           (:compose ((body forms)) (list declarations forms)))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace 'variable
                                                :scope     :lexical
@@ -329,7 +331,7 @@ may also be a lambda expression.")
 
 (define-special-operator let*
     (list* (:compose (value-bindings) (list names values))
-           (:compose (body) (list declarations forms)))
+           (:compose ((body forms)) (list declarations forms)))
   ((names        *> :evaluation '(:binding :namespace :variable
                                   :scope     :lexical
                                   :order     :sequential
@@ -344,7 +346,7 @@ may also be a lambda expression.")
     each VALUE form to reference any of the previous VARS."))
 
 (define-special-operator locally
-    (list* (:compose (body) (list declarations forms)))
+    (list* (:compose ((body forms)) (list declarations forms)))
   ((declarations *> :evaluation t)
    (forms        *> :evaluation t))
   (:documentation
@@ -355,7 +357,7 @@ may also be a lambda expression.")
     FORMS are also processed as top level forms."))
 
 (define-special-operator progv
-    (list* symbols values (:compose (body) (list declarations forms)))
+    (list* symbols values (:compose ((body forms)) (list declarations forms)))
   ((symbols      1 :evaluation (make-instance 'binding-semantics
                                               :namespace :variable
                                               :scope     :dynamic
@@ -384,7 +386,7 @@ may also be a lambda expression.")
 
 (define-special-operator macrolet
     (list* (:compose (function-bindings) (list names functions))
-           (:compose (body) (list declarations forms)))
+           (:compose ((body forms)) (list declarations forms)))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace :function
                                                :scope     :lexical
@@ -395,7 +397,7 @@ may also be a lambda expression.")
 
 (define-special-operator flet
     (list* (:compose (function-bindings) (list names functions))
-           (:compose (body) (list declarations forms)))
+           (:compose ((body forms)) (list declarations forms)))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
                                                :scope     :lexical
@@ -407,7 +409,7 @@ may also be a lambda expression.")
 
 (define-special-operator labels
     (list* (:compose (function-bindings) (list names functions))
-           (:compose (body) (list declarations forms)))
+           (:compose ((body forms)) (list declarations forms)))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace :function
                                                :scope     :lexical
@@ -420,15 +422,15 @@ may also be a lambda expression.")
 ;;;; `the'
 
 (define-special-operator the
-    (list (<- type (type-specifier)) form)
+    (list (<- type ((type-specifier! type-specifiers))) form)
   ((type 1 :evaluation nil)
    (form 1 :evaluation t)))
 
 ;;; SETQ
 
 (define-special-operator setq
-    (list (* (:seq (<<- names       (variable-name))
-                   (<<- value-forms))))
+    (list (* (:seq (<<- names       ((variable-name! names)))
+                   (<<- value-forms ((form! forms))))))
   ((names       * :evaluation nil       ; :type symbol :access :write
                 )
    (value-forms *))
@@ -448,7 +450,7 @@ may also be a lambda expression.")
 ;;;; `throw', `catch' and `unwind-protect'
 
 (define-special-operator throw
-    (list tag-form result-form)
+    (list tag-form (<- result-form ((form! forms))))
   ((tag-form    1 :evaluation t)
    (result-form 1 :evaluation t))
   (:documentation
@@ -458,7 +460,7 @@ may also be a lambda expression.")
     CATCH whose tag is EQ to TAG."))
 
 (define-special-operator catch
-    (list* tag-form (<- forms (forms)))
+    (list* tag-form (<- forms ((forms forms))))
   ((tag-form  1 :evaluation (make-instance 'binding-semantics
                                            :namespace 'tag
                                            :scope     'lexical
@@ -474,7 +476,7 @@ may also be a lambda expression.")
     returned."))
 
 (define-special-operator unwind-protect
-    (list* protected (<- cleanup (forms)))
+    (list* protected (<- cleanup ((forms forms))))
   ((protected 1  :evaluation t)
    (cleanup   *> :evaluation t))
   (:documentation
@@ -488,7 +490,7 @@ may also be a lambda expression.")
 ;;;; Multiple value stuff
 
 (define-special-operator multiple-value-call
-    (list* function-form (<- arguments (forms)))
+    (list* function-form (<- arguments ((forms forms))))
   ((function-form 1  :evaluation t)
    (arguments     *> :evaluation t))
   (:documentation
@@ -499,7 +501,7 @@ may also be a lambda expression.")
     argument, etc."))
 
 (define-special-operator multiple-value-prog1
-    (list* values-form (<- forms (forms)))
+    (list* values-form (<- forms ((forms forms))))
   ((values-form 1  :evaluation t)
    (forms       *> :evaluation t))
   (:documentation

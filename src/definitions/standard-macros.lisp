@@ -44,7 +44,7 @@
 
 (define-macro defmacro
     (list* (<- name (function-name/symbol))
-           (<- lambda-list ((destructuring-lambda-list lambda-lists) 'nil)) ; TODO macro lambda list
+           (<- lambda-list ((destructuring-lambda-list destructuring-lambda-list) 'nil)) ; TODO macro lambda list
            (:compose (docstring-body) (list documentation declarations forms)))
   ((name          1)
    (lambda-list   1)
@@ -116,7 +116,7 @@
 
 (define-macro deftype
     (list* (<- name (class-name))
-           (<- lambda-list ((deftype-lambda-list lambda-lists) 'nil))
+           (<- lambda-list ((deftype-lambda-list deftype-lambda-list) 'nil))
            (:compose (docstring-body) (list documentation declarations forms)))
   ((name          1)
    (lambda-list   1)

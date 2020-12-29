@@ -1,6 +1,6 @@
 ;;;; grammar.lisp --- Grammar for special operator and standard macros.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,12 @@
 
 (parser:defgrammar special-operators
   (:class syntax.expression-grammar::expression-grammar)
-  (:use lambda-lists)) ; TODO not sure this is good
+  (:use names
+        lambda-lists
+        destructuring-lambda-list
+        deftype-lambda-list
+        type-specifiers
+        forms))
 
 ;;; Basic rules TODO separate file
 

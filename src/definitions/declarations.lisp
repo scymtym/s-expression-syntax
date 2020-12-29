@@ -6,7 +6,12 @@
 
 (cl:in-package #:syntax)
 
-(parser:in-grammar special-operators)
+(parser:defgrammar declarations
+  (:class syntax.expression-grammar::expression-grammar)
+  (:use names
+        type-specifiers))
+
+(parser:in-grammar declarations)
 
 ;;; `declaration'
 
