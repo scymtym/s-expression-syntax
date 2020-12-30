@@ -1,3 +1,9 @@
+;;;; special-operators.lisp --- Tests for special operator rules.
+;;;;
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;;
+;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
 (cl:in-package #:syntax.test)
 
 (def-suite* :syntax.special-operators

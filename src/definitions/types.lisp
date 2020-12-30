@@ -20,8 +20,8 @@
 
 (parser:defrule type-specifier ()
     (and (:must (not (list* 'values :any)) "VALUES type is invalid in this context")
-     (or (guard symbolp) ; TODO control whether * is allowed
-         (list (guard symbolp) (* :any)))))
+         (or (guard symbolp) ; TODO control whether * is allowed
+             (list (guard symbolp) (* :any)))))
 
 (parser:defrule type-specifier! ()
     (:must (type-specifier) "must be a type specifier"))

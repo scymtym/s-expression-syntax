@@ -31,10 +31,7 @@
               (* (<<- arguments (variable-name!))))
 
         (list (<- kind 'optimize)
-              (* (<<- arguments (:must (or (optimization-quality)
-                                           (list (optimization-quality!)
-                                                 (optimization-level!)))
-                                       "must be a quality name or a list (QUALITY {0,1,2,3})"))))
+              (* (<<- arguments (optimization-specification!))))
 
         (list* (:must (guard kind symbolp) "declaration kind must be a symbol")
                (<- arguments (declaration-arguments))))
@@ -50,6 +47,15 @@
 (parser:defrule bound-declaration-reference! ()
   (:must (or (variable-name) (function-reference))
          "must be a variable name or function name"))
+
+(defrule optimization-specification ()
+  (or (optimization-quality)
+      (list (optimization-quality!)
+            (optimization-level!))))
+
+(defrule optimization-specification! ()
+  (:must (optimization-specification)
+         "must be a quality name or a list (QUALITY {0,1,2,3})"))
 
 (defrule optimization-quality ()
   (or 'speed 'debug 'safety 'space 'compilation-speed (guard symbolp)))
