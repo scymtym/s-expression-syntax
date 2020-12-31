@@ -11,15 +11,25 @@
 
 (parser:in-grammar names)
 
-(parser:defrule variable-name ()
-  (:guard (typep '(and symbol
-                       (not keyword)
-                       (not (member t nil))))) ; TODO constants?
-  ;; (bp:node* (:variable-name :name name))
+(defun constant? (name)
+  (eq (sb-cltl2:variable-information name) :constant))
+
+(parser:defrule variable-name/unchecked ()
+    :any
+    ;; (bp:node* (:variable-name :name name))
   )
 
+(parser:defrule variable-name ()
+    (and (guard symbolp)
+         (not (guard keywordp))
+         (not (guard constant?))
+         (variable-name/unchecked)))
+
 (parser:defrule variable-name! ()
-    (:must (variable-name) "must be a variable name"))
+    (and (:must (guard symbolp) "variable name must be a symbol")
+         (:must (not (guard keywordp)) "variable name must not be a keyword")
+         (:must (not (guard constant?)) "variable name must not designate a constant")
+         (variable-name/unchecked)))
 
 (parser:defrule function-name/symbol ()
     (:guard (typep '(and symbol (not (member t nil))))))

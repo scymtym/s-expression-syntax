@@ -15,9 +15,23 @@
   "Smoke test for the `variable-name' rule."
 
   (rule-test-cases ((syntax::variable-name syntax::names))
+    '(1    nil 1    nil)
     '(:foo nil :foo nil)
-    '(nil  nil nil nil)
-    '(a    t   a   a)))
+    '(nil  nil nil  nil)
+    '(t    nil t    nil)
+    '(pi   nil pi   nil)
+    '(a    t   a    a)))
+
+(test variable-name!
+  "Smoke test for the `variable-name!' rule."
+
+  (rule-test-cases ((syntax::variable-name! syntax::names))
+    '(1    :fatal 1    "variable name must be a symbol")
+    '(:foo :fatal :foo "variable name must not be a keyword")
+    '(nil  :fatal nil  "variable name must not designate a constant")
+    '(t    :fatal t    "variable name must not designate a constant")
+    '(pi   :fatal pi   "variable name must not designate a constant")
+    '(a    t      a    a)))
 
 (test function-name
   "Smoke test for the `function-name' rule."

@@ -14,7 +14,7 @@
 
   (rule-test-cases ((syntax::value-bindings syntax::special-operators))
     '((1)       nil    nil nil)
-    '(((1))     :fatal 1   "must be a variable name")
+    '(((1))     :fatal 1   "variable name must be a symbol")
     '(((a 1 2)) nil    nil nil)
 
     '(()        t      nil (()  ()))
@@ -26,7 +26,7 @@
 
   (rule-test-cases ((syntax::symbol-macro-bindings syntax::special-operators))
     '((1)       nil    nil nil)
-    '(((1))     :fatal 1   "must be a variable name")
+    '(((1))     :fatal 1   "variable name must be a symbol")
     '(((a))     nil    nil nil)
     '(((a 1 2)) nil    nil nil)
 

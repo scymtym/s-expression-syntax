@@ -18,15 +18,9 @@
 (defun lambda-list-keyword? (symbol)
   (member symbol '(&optional &rest &key &aux &allow-other-keys) :test #'eq))
 
-(defun constant? (name)
-  (eq (sb-cltl2:variable-information name) :constant))
-
 (parser:defrule (lambda-list-variable-name) ()
-  (and (:guard symbolp)
-       (not (:guard constant?))
-       (not (:guard keywordp))
-       (not (:guard lambda-list-keyword?))
-       :any))
+  (and (not (guard lambda-list-keyword?))
+       ((variable-name names))))
 
 (parser:defrule (unique-variable-name) (seen)
     (<- name (lambda-list-variable-name))
