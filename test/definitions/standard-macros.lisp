@@ -84,7 +84,9 @@
         "bla"
         (declare (ignore a))
         (list 'cons b b))
-      (name foo syntax::lambda-list (() (a b) () () () () ())
+      (name foo
+       syntax::lambda-list (:destructuring-lambda-list
+                            nil nil (a b) () nil () nil ())
        documentation "bla"
        syntax::declarations ((ignore (a)))
        syntax::forms ((list 'cons b b))))))
@@ -134,7 +136,9 @@
         (declare (ignore a))
         (declare (ignore b))
         (list a b))
-      (name foo syntax::lambda-list (nil (a) () () ((:b b nil nil)) () ())
+      (name foo
+       syntax::lambda-list (:destructuring-lambda-list
+                            nil nil (a) () nil (((keyword b) b nil nil)) nil ())
        documentation "bla bli"
        syntax::declarations ((ignore (a)) (ignore (b)))
        syntax::forms ((list a b))))))

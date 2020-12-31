@@ -48,7 +48,7 @@
     (and (guard symbolp) (not (guard null))))
 
 (parser:defrule class-name! ()
-    (:must (class-name) "must be a class-name"))
+    (:must (class-name) "must be a class name"))
 
 (parser:defrule slot-name ()
     (variable-name))
