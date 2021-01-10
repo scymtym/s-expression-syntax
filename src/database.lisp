@@ -87,8 +87,8 @@
                 :reader   evaluation)))
 
 (defmethod print-items:print-items append ((object component))
-  (let ((semantics (when-let ((semantics (evaluation object)))
-                    (print-items:print-items semantics))))
+  (let ((semantics (a:when-let ((semantics (evaluation object)))
+                     (print-items:print-items semantics))))
     `((:name      ,(name object) "~A")
       (:sematnics ,semantics     " ~/print-items:format-print-items/" ((:after :name))))))
 
@@ -97,10 +97,10 @@
 (defvar *syntaxes* (make-hash-table :test #'eq))
 
 (defun syntaxes ()
-  (hash-table-values *syntaxes*))
+  (a:hash-table-values *syntaxes*))
 
 (defun syntaxes/alist ()
-  (hash-table-alist *syntaxes*))
+  (a:hash-table-alist *syntaxes*))
 
 (defmethod find-syntax ((name t) &key if-does-not-exist)
   (declare (ignore if-does-not-exist))
@@ -112,7 +112,7 @@
 
 (defmethod ensure-syntax ((name t) (class t) &rest initargs)
   (let ((initargs (list* :name name initargs)))
-    (if-let ((existing (find-syntax name :if-does-not-exist nil)))
+    (a:if-let ((existing (find-syntax name :if-does-not-exist nil)))
       (apply #'reinitialize-instance existing initargs)
       (setf (find-syntax name) (apply #'make-instance class
                                       initargs)))))

@@ -14,11 +14,11 @@
 
 ;;; Documentation strings
 
-(parser:defrule documentation-string ()
+(defrule documentation-string ()
     (guard stringp))
 
-(parser:defrule documentation-string! ()
-    (:must (documentation-string) "must be a documentation string"))
+(defrule documentation-string! ()
+    (must (documentation-string) "must be a documentation string"))
 
 ;;; Forms
 
@@ -26,33 +26,33 @@
     (list 'declare (* (<<- declarations #+maybe ((declaration declarations)))))
   (nreverse declarations))
 
-(parser:defrule form ()
+(defrule form ()
     ;; (cl:declare …) must not appear where a form is required.
     ;; CL:DECLAIM warns in SBCL
-    (and (:must (not (list* 'declare :any)) "declare is not allowed here")
+    (and (must (not (list* 'declare :any)) "declare is not allowed here")
          :any))
 
-(parser:defrule form! () ; TODO use this where appropriate
-    (:must (form) "must be a form"))
+(defrule form! () ; TODO use this where appropriate
+    (must (form) "must be a form"))
 
-(parser:defrule compound-form ()
+(defrule compound-form ()
     (and (list* :any :any) (form)))
 
-(parser:defrule compound-form! ()
-    (:must (compound-form) "must be a compound form"))
+(defrule compound-form! ()
+    (must (compound-form) "must be a compound form"))
 
-(parser:defrule forms ()
+(defrule forms ()
     (list (* (<<- forms (form))))
   (nreverse forms))
 
 ;; TODO do we need forms! ?
 
-(parser:defrule body ()
+(defrule body ()
     (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))
          (<- forms (forms)))
   (list (nreverse declarations) forms))
 
-(parser:defrule docstring-body ()
+(defrule docstring-body ()
     ;; 3.4.11 Syntactic Interaction of Documentation Strings and Declarations
     ;; If the first form in the body is a string, it is a
     ;; documentation string. Exception: if the body consists of only

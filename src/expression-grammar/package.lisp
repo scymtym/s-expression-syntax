@@ -7,10 +7,11 @@
 (cl:defpackage #:syntax.expression-grammar
   (:use
    #:cl
-   #:alexandria
    #:let-plus)
 
   (:local-nicknames
+   (#:a    #:alexandria)
+
    (#:env  #:parser.packrat.environment)
 
    (#:exp  #:parser.packrat.expression)
@@ -22,7 +23,7 @@
    (#:sexp #:parser.packrat.grammar.sexp))
 
   (:import-from #:parser.packrat.grammar.base
-   #:<-)
+   #:<- #:guard #:must)
 
   (:export
    #:*client*

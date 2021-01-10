@@ -15,11 +15,11 @@
 
 ;;; `declaration'
 
-(parser:defrule declaration-arguments () ; TODO
+(defrule declaration-arguments () ; TODO
     (list (* (<<- arguments)))
   arguments #+later (bp:node* (:declaration-arguments :arguments arguments)))
 
-(parser:defrule declaration ()
+(defrule declaration ()
     (or (list (<- kind (or 'ignore 'ignorable 'dynamic-extent))
               (* (<<- arguments (bound-declaration-reference!))))
 
@@ -27,25 +27,25 @@
               (* (<<- arguments (variable-name!))))
 
         (list (<- kind (or 'type 'ftype))
-              (:must (<<- arguments (type-specifier!)) "must be a type specifier")
+              (must (<<- arguments (type-specifier!)) "must be a type specifier")
               (* (<<- arguments (variable-name!))))
 
         (list (<- kind 'optimize)
               (* (<<- arguments (optimization-specification!))))
 
-        (list* (:must (guard kind symbolp) "declaration kind must be a symbol")
+        (list* (must (guard kind symbolp) "declaration kind must be a symbol")
                (<- arguments (declaration-arguments))))
   (list kind (nreverse arguments))
   #+later (bp:node* (:declaration :kind kind)
     (1 :arguments arguments)))
 
-(parser:defrule declaration! ()
-    (:must (declaration) "must be a declaration"))
+(defrule declaration! ()
+    (must (declaration) "must be a declaration"))
 
 ;;; Standard declarations
 
-(parser:defrule bound-declaration-reference! ()
-  (:must (or (variable-name) (function-reference))
+(defrule bound-declaration-reference! ()
+  (must (or (variable-name) (function-reference))
          "must be a variable name or function name"))
 
 (defrule optimization-specification ()
@@ -54,17 +54,17 @@
             (optimization-level!))))
 
 (defrule optimization-specification! ()
-  (:must (optimization-specification)
+  (must (optimization-specification)
          "must be a quality name or a list (QUALITY {0,1,2,3})"))
 
 (defrule optimization-quality ()
   (or 'speed 'debug 'safety 'space 'compilation-speed (guard symbolp)))
 
 (defrule optimization-quality! ()
-  (:must (optimization-quality) "must be an optimization quality name"))
+  (must (optimization-quality) "must be an optimization quality name"))
 
 (defrule optimization-level ()
   (or 0 1 2 3))
 
 (defrule optimization-level! ()
-  (:must (optimization-level) "must be an optimization level, i.e. 0, 1, 2 or 3"))
+  (must (optimization-level) "must be an optimization level, i.e. 0, 1, 2 or 3"))

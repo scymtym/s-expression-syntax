@@ -16,11 +16,11 @@
 (parser.packrat:defrule once (context)  ; TODO define-macro-rule
     (:compose (:transform (list 'once variable expression)
                 (print (let ((temp (gensym)))
-                   `(<- ,variable (:guard (:must (:transform
-                                                  (<- ,temp ,expression)
-                                                  (if ,variable (:fail) ,temp))
-                                                 "option must not be repeated")
-                                          identity)))))
+                   `(<- ,variable (guard (must (:transform
+                                                (<- ,temp ,expression)
+                                                (if ,variable (:fail) ,temp))
+                                               "option must not be repeated")
+                                         identity)))))
               (base::expression context)))
 
 (parser.packrat:defrule base::expression (context)

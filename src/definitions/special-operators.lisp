@@ -35,12 +35,12 @@ NIL."))
 
 ;;;; `block', `return-from', `return' and `tagbody'
 
-(parser:defrule block-name ()
-    (:guard name symbolp)
+(defrule block-name ()
+    (guard name symbolp)
   name)
 
-(parser:defrule block-name! ()
-    (:must (block-name) "block name must be a symbol"))
+(defrule block-name! ()
+    (must (block-name) "block name must be a symbol"))
 
 (define-special-operator block
     (list* (<- name (block-name!)) (<- forms ((forms forms))))
@@ -73,10 +73,10 @@ NIL."))
 
 ;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
 ;;; valid tag will be treated as a form.
-(parser:defrule tag ()
-  (:guard name (typep '(or symbol integer))))
+(defrule tag ()
+  (guard name (typep '(or symbol integer))))
 
-(parser:defrule new-tag (seen)
+(defrule new-tag (seen)
     (<- name (tag))
   (if (position name seen :test #'eq)
       (:fail)
@@ -89,27 +89,27 @@ NIL."))
         (t
          nil)))
 
-(parser:defrule new-tag! (seen)
-  (:must (new-tag seen) "must be a unique tag name"))
+(defrule new-tag! (seen)
+  (must (new-tag seen) "must be a unique tag name"))
 
 #+test (parser:parse '(test) '(foo foo foz))
 
 ;;; TODO make a rule for parsing segments
 (define-special-operator tagbody
-    (list (* (:seq (* (<<- forms (and (not (tag)) ((form! forms)))))
-                   (* (<<- tags 'foo)) ; HACK to bind tags
-                   (or (<<- segments
-                            (:transform
-                               (<<- tags (new-tag! tags))
-                             (prog1
-                                 forms
-                               (print forms *trace-output*)
-                               (setf forms '()))))
-                       (:transform
-                          (:seq)
-                        (unless forms (:fail))
-                        (push forms segments)
-                        (setf forms '()))))))
+    (list (* (seq (* (<<- forms (and (not (tag)) ((form! forms)))))
+                  (* (<<- tags 'foo)) ; HACK to bind tags
+                  (or (<<- segments
+                           (:transform
+                              (<<- tags (new-tag! tags))
+                            (prog1
+                                forms
+                              (print forms *trace-output*)
+                              (setf forms '()))))
+                      (:transform
+                         (seq)
+                       (unless forms (:fail))
+                       (push forms segments)
+                       (setf forms '()))))))
   ((tags     * :evaluation nil) #+later (make-instance 'binding-semantics
                                                :namespace 'tag
                                                :scope     :lexical
@@ -166,7 +166,7 @@ NIL."))
 
 ;;;; `eval-when', `load-time-value', `quote' and `function'
 
-(define-constant +eval-when-situations+
+(a:define-constant +eval-when-situations+
     '(:compile-toplevel compile
       :load-toplevel    load
       :execute          eval)
@@ -187,7 +187,7 @@ NIL."))
           (intersection '(:execute eval) situations)))
 
 (define-special-operator eval-when
-    (list* (list (* (<<- situations (:guard (typep 'eval-when-situation)))))
+    (list* (list (* (<<- situations (guard (typep 'eval-when-situation)))))
            forms)
   ((situations 1 :evaluation nil)
    (forms      * :evaluation t))
@@ -199,7 +199,7 @@ NIL."))
     COMPILE, LOAD, or EVAL)."))
 
 (define-special-operator load-time-value
-    (list (<- form ((form! forms))) (? (:guard read-only-p (typep 'boolean))))
+    (list (<- form ((form! forms))) (? (guard read-only-p (typep 'boolean))))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil))
   (:documentation
@@ -450,9 +450,9 @@ may also be a lambda expression.")
 
 (define-special-operator setq
     (list (* (and :any
-                  (:must (seq (<<- names       (variable-name))
-                              (<<- value-forms ((form! forms))))
-                         "must be a variable name followed by an expression"))))
+                  (must (seq (<<- names       (variable-name))
+                             (<<- value-forms ((form! forms))))
+                        "must be a variable name followed by an expression"))))
   ((names       * :evaluation nil       ; :type symbol :access :write
                 )
    (value-forms *))
@@ -512,8 +512,8 @@ may also be a lambda expression.")
 ;;;; Multiple value stuff
 
 (define-special-operator multiple-value-bind
-    (list* (:must (list (* (<<- names ((variable-name! names)))))
-                  "must be a list of variable names") ; TODO unique variable name
+    (list* (must (list (* (<<- names ((variable-name! names)))))
+                 "must be a list of variable names") ; TODO unique variable name
            (<- values-form ((form! forms)))
            (<- (declarations forms) ((body forms))))
   ((names        *) ; TODO binding semantics
@@ -544,7 +544,7 @@ may also be a lambda expression.")
 
 ;;; Application
 
-(parser:defrule lambda ()
+(defrule lambda ()
     (list* 'lambda '() (<- body ((docstring-body forms))))
   (bp:node* ('lambda :documentation-string (first body))
     (* :declaration (second body))

@@ -6,17 +6,19 @@
 
 (cl:defpackage #:syntax
   (:use
-   #:cl
-   #:alexandria)
+   #:cl)
+
+  (:local-nicknames
+   (#:a #:alexandria))
 
   (:import-from #:parser.packrat
    #:defrule)
 
   (:import-from #:parser.packrat.grammar.base
-   #:<- #:<<- #:guard)
+   #:<- #:<<- #:guard #:must)
 
   (:import-from #:parser.packrat.grammar.sequence
-   #:seq #:?)
+   #:seq #:? #:bounds) ; bounds is for format
 
   ;; Conditions
   (:export

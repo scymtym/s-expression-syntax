@@ -18,17 +18,17 @@
                (bp:node* (:compound-type-specifier :head )
                  (* :argument )))
 
-(parser:defrule type-specifier ()
-    (and (:must (not (list* 'values :any)) "VALUES type is invalid in this context")
+(defrule type-specifier ()
+    (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
          (or (guard symbolp) ; TODO control whether * is allowed
              (list (guard symbolp) (* :any)))))
 
-(parser:defrule type-specifier! ()
-    (:must (type-specifier) "must be a type specifier"))
+(defrule type-specifier! ()
+    (must (type-specifier) "must be a type specifier"))
 
 ;;; `values' type specifier
 
-(parser:defrule values-type-specifier ()
+(defrule values-type-specifier ()
     (list 'values
           (* (<<- required (type-specifier)))
           (? (seq '&optional (<<- optional (type-specifier))))

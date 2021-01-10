@@ -19,7 +19,7 @@
 (defun lambda-list-keyword? (symbol)
   (member symbol '(&whole &optional &rest &key &aux &allow-other-keys) :test #'eq))
 
-(parser:defrule (lambda-list-variable-name) ()
+(defrule (lambda-list-variable-name) ()
   (and (not (guard lambda-list-keyword?))
        ((variable-name names))))
 
@@ -34,7 +34,7 @@
          (:fail))))
 
 (defrule unique-variable-name! (seen)
-    (:must (unique-variable-name seen) "must be a lambda list variable name"))
+    (must (unique-variable-name seen) "must be a lambda list variable name"))
 
 (defrule required-parameter (seen)
     (unique-variable-name seen))
@@ -54,7 +54,7 @@
     (unique-variable-name! seen))
 
 (defrule keyword-parameter (seen)
-    (or (list (or (list (<- keyword (:must (guard keywordp) "must be a keyword"))
+    (or (list (or (list (<- keyword (must (guard keywordp) "must be a keyword"))
                         (<- name (unique-variable-name! seen)))
                   (<- name (unique-variable-name! seen)))
               (? (seq (<- default ((form! forms)))
@@ -69,7 +69,7 @@
   (list name value))
 
 (defrule aux-parameter! (seen)
-    (:must (aux-parameter seen) "must be an aux parameter"))
+    (must (aux-parameter seen) "must be an aux parameter"))
 
 ;;; Reusable sections of lambda lists
 
@@ -118,7 +118,7 @@
 ;;; 3.4.3 Specialized Lambda Lists
 
 (defrule specializer ()
-    (or (list* 'eql (:must (list :any) "must be a single object"))
+    (or (list* 'eql (must (list :any) "must be a single object"))
         ((class-name! names))))
 
 (defrule specialized-parameter (seen)

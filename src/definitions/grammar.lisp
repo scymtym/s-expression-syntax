@@ -21,12 +21,12 @@
 
 (parser:in-grammar special-operators)
 
-(parser:defrule reference ()
-    (:guard symbolp)
+(defrule reference ()
+    (guard symbolp)
   ; (bp:node* (:reference :name name))
   )
 
-(parser:defrule atom ()
-    (:guard atom)
+(defrule atom ()
+    (guard atom)
   ; (bp:node* (:atom :value atom))
   )

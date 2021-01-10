@@ -101,9 +101,9 @@
            (lambda (new-environment)
              (c:compile-expression
               grammar new-environment sexp::*just-test-bounds*
-              (curry #'call-with-value-environment failure-cont)
-              (curry #'call-with-value-environment success-cont)))
-           (curry #'call-with-value-environment failure-cont))
+              (a:curry #'call-with-value-environment failure-cont)
+              (a:curry #'call-with-value-environment success-cont)))
+           (a:curry #'call-with-value-environment failure-cont))
          ,(funcall failure-cont environment))))
 
 (defmethod c:compile-expression ((grammar      expression-grammar)
