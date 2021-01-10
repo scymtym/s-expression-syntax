@@ -1,6 +1,6 @@
 ;;;; lambda-lists.lisp --- Tests for lambda list related rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,6 +32,9 @@
     '((&aux (foo (declare)))
       :fatal (declare) "declare is not allowed here")
 
+    '((&aux a)
+      t nil (() () nil () nil ((a nil))))
+
     '((foo bar &optional (hash-table-rehash-size default)
        &rest x
        &key ((:x-kw y) 1 supplied?) b &allow-other-keys &aux (a 1))
@@ -55,11 +58,14 @@
     '(((foo (eql 1 2)))
       :fatal (1 2) "must be a single object")
 
-    '(((baz fez) (foo bar) &rest whoop)
-      t nil (((baz fez) (foo bar)) () whoop () nil))
-
     '(((baz fez) (foo bar) &rest foo)
-      :fatal foo "must be a lambda list variable name")))
+      :fatal foo "must be a lambda list variable name")
+
+    '(((baz fez) (foo bar) &rest whoop)
+      t nil (((baz fez) (foo bar)) () whoop () nil ()))
+
+    '((&aux a)
+      t nil (() () nil () nil ((a nil))))))
 
 ;;; Destructuring lambda list
 
@@ -71,40 +77,39 @@
     '(((foo bar))
       t nil (:destructuring-lambda-list
              nil nil
-             ((:destructuring-lambda-list nil nil (foo bar) () nil () nil ()))
+             ((:pattern nil (foo bar) () nil () nil () nil))
              ()
              nil
              ()
              nil
-             ()))
+             ()
+             nil))
 
     '((&whole whole (foo &key a) . (&rest fez))
       t nil (:destructuring-lambda-list
              whole nil
-             ((:destructuring-lambda-list
-               nil nil (foo) () nil (((keyword a) a nil nil)) nil ()))
+             ((:pattern nil (foo) () nil (((keyword a) a nil nil)) nil () nil))
              ()
              fez
              ()
              nil
-             ()))
+             ()
+             nil))
 
     '((&optional ((bar baz) (5 6) bar-baz-p))
       t nil (:destructuring-lambda-list
              nil nil ()
-             (((:destructuring-lambda-list nil nil (bar baz) () nil () nil ())
+             (((:pattern nil (bar baz) () nil () nil () nil)
                (5 6) bar-baz-p))
-             nil () nil ()))
+             nil () nil () nil))
 
     '((&aux a (b 1))
       t nil (:destructuring-lambda-list
-             nil nil
-             ()
-             ()
-             nil
-             ()
-             nil
-             ((a nil) (b 1))))))
+             nil nil () () nil () nil ((a nil) (b 1)) nil))
+
+    '((a . rest)
+      t nil (:destructuring-lambda-list
+             nil nil (a) () nil () nil () rest))))
 
 ;;; Deftype lambda list
 
@@ -114,4 +119,5 @@
   (rule-test-cases ((syntax::deftype-lambda-list syntax::deftype-lambda-list)
                     (make-hash-table :test #'eq))
     '((foo bar)
-      t nil (nil (foo bar) () nil () nil ()))))
+      t nil (:destructuring-lambda-list
+             nil nil (foo bar) () nil () nil () nil))))

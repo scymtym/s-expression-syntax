@@ -1,6 +1,6 @@
 ;;;; lambda-lists.lisp --- Rules for parsing different kinds of lambda lists.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -71,43 +71,49 @@
 (defrule aux-parameter! (seen)
     (:must (aux-parameter seen) "must be an aux parameter"))
 
-;;; Reusable parts of lambda lists
+;;; Reusable sections of lambda lists
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrule (aux-parameters :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (required-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+      (+ (<<- parameters (required-parameter! seen)))
+    (nreverse parameters))
+
+  (defrule (optional-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+      (seq '&optional (* (<<- parameters (optional-parameter seen))))
+    (nreverse parameters))
+
+  (defrule (rest-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+      (seq '&rest (<- parameter (rest-parameter seen)))
+    parameter)
+
+  (defrule (keyword-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+      (seq '&key
+           (* (<<- keyword-parameters (keyword-parameter seen)))
+           (? (<- allow-other-keys? '&allow-other-keys)))
+    (list (nreverse keyword-parameters) allow-other-keys?))
+
+  (defrule (aux-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
       (seq '&aux (* (<<- parameters (aux-parameter! seen))))
     (nreverse parameters)))
 
 ;;; 3.4.1 Ordinary Lambda Lists
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrule (optional-rest-key-parameters :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
-      (seq (? (seq '&optional (* (<<- optional (optional-parameter seen)))))
-           (? (seq '&rest (<- rest (rest-parameter seen))))
-           (? (seq '&key
-                   (* (<<- keyword (keyword-parameter seen)))
-                   (? (<- allow-other-keys? '&allow-other-keys)))))
-    (list (nreverse optional) rest (nreverse keyword) allow-other-keys?))
-
-  (defrule (optional-rest-key-aux-parameters :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
-      (seq (<- optional-rest-key (optional-rest-key-parameters seen))
-           (? (<- aux (aux-parameters seen))))
-    (if aux
-        (nconc optional-rest-key (list aux))
-        optional-rest-key)))
-
-
 (defrule ordinary-lambda-list (seen)
-    (list (* (<<- required (required-parameter! seen)))
-          (<- rest (optional-rest-key-aux-parameters seen)))
-  (list* (nreverse required) rest))
+    (list (? (<- required (required-section seen)))
+          (? (<- optional (optional-section seen)))
+          (? (<- rest (rest-section seen)))
+          (? (<- (keyword allow-other-keys?) (keyword-section seen)))
+          (? (<- aux (aux-section seen))))
+  (list required optional rest keyword allow-other-keys? aux))
 
 ;;; 3.4.2 Generic Function Lambda Lists
 
 (defrule generic-function-lambda-list (seen)
-    (list (* (<<- required (required-parameter! seen)))
-          (<- rest (optional-rest-key-parameters seen)))
-  (list* (nreverse required) rest))
+    (list (? (<- required (required-section seen)))
+          (? (<- optional (optional-section seen))) ; TODO disallow defaults
+          (? (<- rest (rest-section seen)))
+          (? (<- (keyword allow-other-keys?) (keyword-section seen)))) ; TODO disallow defaults
+  (list required optional rest keyword allow-other-keys?))
 
 ;;; 3.4.3 Specialized Lambda Lists
 
@@ -123,8 +129,11 @@
 
 (defrule specialized-lambda-list (seen)
     (list (* (<<- required (specialized-parameter seen)))
-          (<- rest (optional-rest-key-parameters seen)))
-  (list* (nreverse required) rest))
+          (? (<- optional (optional-section seen)))
+          (? (<- rest (rest-section seen)))
+          (? (<- (keyword allow-other-keys?) (keyword-section seen)))
+          (? (<- aux (aux-section seen))))
+  (list (nreverse required) optional rest keyword allow-other-keys? aux))
 
 ;;; 3.4.4 Macro Lambda Lists
 
@@ -136,37 +145,39 @@
 
 (parser:in-grammar destructuring-lambda-list)
 
-(defrule unique-variable-name! (seen) ; TODO maybe not all unique-variable-names?
-  #+no (unique-variable-name seen)
-  #+no (:must (:guard symbolp) "must be a symbol")
-  (parser.packrat.grammar.base::next-rule seen))
-
 (defrule unique-variable-name (seen) ; TODO maybe not all unique-variable-names?
     (or '()
-        (destructuring-lambda-list seen)
-        (parser.packrat.grammar.base::next-rule seen)))
+        (and (guard consp) (pattern seen))
+        ((unique-variable-name lambda-lists) seen)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrule (whole-parameter :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (whole-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
       (seq '&whole (<- name (unique-variable-name! seen)))
     name)
 
-  (defrule (environment-parameter :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (environment-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
       (seq '&environment (<- name (unique-variable-name! seen)))
     name))
 
+(defrule pattern (seen)
+    (list* (? (<- whole    (whole-section seen)))
+           (? (<- required (required-section seen)))
+           (? (<- optional (optional-section seen)))
+           (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
+               (list (? (<- rest                    (rest-section seen)))
+                     (? (<- (key allow-other-keys?) (keyword-section seen)))
+                     (? (<- aux                     (aux-section seen))))))
+  (list :pattern whole required optional rest key allow-other-keys? aux cdr))
+
 (defrule destructuring-lambda-list (seen)
-    (list (? (<- whole (whole-parameter seen)))
-          (* (<<- required (required-parameter! seen) #+no (or (lambda-list-variable-name)
-                                                                               (destructuring-lambda-list seen))))
-          (or '()
-              (<- (optional rest key allow-other-keys?)
-                  (optional-rest-key-parameters seen))
-                                        ; (<- cdr (destructuring-lambda-list seen))
-              )
-          (? (<- environment (environment-parameter seen)))
-          (? (<- aux (aux-parameters seen))))
-  (list :destructuring-lambda-list whole environment (nreverse required) optional rest key allow-other-keys? aux #+later cdr))
+    (list* (? (<- whole    (whole-section seen)))    (? (<- env (environment-section seen)))
+           (? (<- required (required-section seen))) (? (<- env (environment-section seen)))
+           (? (<- optional (optional-section seen))) (? (<- env (environment-section seen)))
+           (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
+               (list (? (<- rest                    (rest-section seen)))    (? (<- env (environment-section seen)))
+                     (? (<- (key allow-other-keys?) (keyword-section seen))) (? (<- env (environment-section seen)))
+                     (? (<- aux                     (aux-section seen)))     (? (<- env (environment-section seen))))))
+  (list :destructuring-lambda-list whole env required optional rest key allow-other-keys? aux cdr))
 
 ;;; 3.4.8 Deftype Lambda Lists
 ;;;

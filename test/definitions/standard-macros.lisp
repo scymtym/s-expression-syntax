@@ -1,6 +1,6 @@
 ;;;; standard-macros.lisp --- Tests for standard macro rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -67,7 +67,7 @@
         "bla"
         (declare (type integer bar baz))
         (+ 1 2))
-      (name foo syntax::lambda-list ((bar baz) nil nil nil nil)
+      (name foo syntax::lambda-list ((bar baz) () nil () nil ())
        documentation "bla"
        syntax::declarations ((type (integer bar baz)))
        syntax::forms ((+ 1 2))))))
@@ -86,7 +86,7 @@
         (list 'cons b b))
       (name foo
        syntax::lambda-list (:destructuring-lambda-list
-                            nil nil (a b) () nil () nil ())
+                            nil nil (a b) () nil () nil () nil)
        documentation "bla"
        syntax::declarations ((ignore (a)))
        syntax::forms ((list 'cons b b))))))
@@ -138,7 +138,7 @@
         (list a b))
       (name foo
        syntax::lambda-list (:destructuring-lambda-list
-                            nil nil (a) () nil (((keyword b) b nil nil)) nil ())
+                            nil nil (a) () nil (((keyword b) b nil nil)) nil () nil)
        documentation "bla bli"
        syntax::declarations ((ignore (a)) (ignore (b)))
        syntax::forms ((list a b))))))
@@ -154,7 +154,7 @@
     '((defgeneric foo (a b)
         (:documentation "foo")
         (:generic-function-class clazz))
-      (name foo syntax::lambda-list ((a b) nil nil nil nil)
+      (name foo syntax::lambda-list ((a b) () nil () nil)
        syntax::generic-function-class clazz
        syntax::argument-precedence-order nil
        documentation "foo"

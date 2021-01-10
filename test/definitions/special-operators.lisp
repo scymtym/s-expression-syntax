@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Tests for special operator rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -164,8 +164,7 @@
                syntax::body ())
              (parse nil (find-syntax 'function) '(function (setf foo)))))
   (is (equal '(name nil
-               syntax::lambda-list ((a) nil b nil nil ; nil
-                                    )
+               syntax::lambda-list ((a) () b () nil ())
                syntax::docstring nil
                syntax::declarations nil
                syntax::body ((foo)))
@@ -252,9 +251,9 @@
 
   (is (equal '(syntax::names (foo bar baz)
                syntax::functions
-               ((syntax::parsed-lambda ((a b) nil bla nil nil #+aux nil) nil nil ((list a b)))
-                (syntax::parsed-lambda (nil nil nil nil nil #+aux nil) nil nil ("not-doc-string"))
-                (syntax::parsed-lambda (nil nil nil nil nil #+aux nil) "doc-string" nil (1)))
+               ((syntax::parsed-lambda ((a b) () bla () nil ()) nil nil ((list a b)))
+                (syntax::parsed-lambda (() () nil () nil ()) nil nil ("not-doc-string"))
+                (syntax::parsed-lambda (() () nil () nil ()) "doc-string" nil (1)))
                syntax::declarations nil
                syntax::forms ((foo 1 2)))
              (parse nil (find-syntax 'macrolet) '(macrolet ((foo (a b &rest bla) (list a b))

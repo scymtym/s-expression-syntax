@@ -128,7 +128,7 @@
 
 (define-macro defgeneric
     (list (<- name (function-name))
-          (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
+          (<- lambda-list ((generic-function-lambda-list lambda-lists) 'nil))
           (* (or ;; Standard options
                  (list :generic-function-class    (:must (:guard generic-function-class symbolp) "must be a class name"))
                  (list :argument-precedence-order (<- argument-precedence-order (or :most-specific-first

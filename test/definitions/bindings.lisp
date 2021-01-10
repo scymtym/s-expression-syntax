@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Tests for binding rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -43,6 +43,6 @@
     '(((a 1))       nil    nil nil)
 
     '(()            t      nil (()  ()))
-    '(((a ()))      t      nil ((a) ((syntax::parsed-lambda (() () nil () nil) () () ()))))
-    '(((a () 1))    t      nil ((a) ((syntax::parsed-lambda (() () nil () nil) () () (1)))))
-    '(((a () "" 1)) t      nil ((a) ((syntax::parsed-lambda (() () nil () nil) "" () (1)))))))
+    '(((a ()))      t      nil ((a) ((syntax::parsed-lambda (() () nil () nil ()) () () ()))))
+    '(((a () 1))    t      nil ((a) ((syntax::parsed-lambda (() () nil () nil ()) () () (1)))))
+    '(((a () "" 1)) t      nil ((a) ((syntax::parsed-lambda (() () nil () nil ()) "" () (1)))))))
