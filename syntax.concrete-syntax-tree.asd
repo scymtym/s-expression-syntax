@@ -13,8 +13,7 @@
                  :pathname   "src/concrete-syntax-tree"
                  :serial     t
                  :components ((:file       "package")
-
-                              (:file       "grammar"))))
+                              (:file       "client"))))
 
   :in-order-to ((test-op (test-op "syntax.concrete-syntax-tree/test"))))
 
@@ -27,7 +26,7 @@
                  :pathname   "test/concrete-syntax-tree"
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "grammar"))))
+                              (:file       "client"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:syntax.concrete-syntax-tree.test '#:run-tests)))
