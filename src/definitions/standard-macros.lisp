@@ -13,7 +13,7 @@
 (define-macro defconstant
     (list (<- name ((variable-name! names)))
           (<- initial-value ((form! forms)))
-          (? (guard documentation stringp))) ; TODO must
+          (? (<- documentation ((documentation-string! forms)))))
   ((name          1)
    (initial-value 1 :evaluation t)
    (documentation ?)))
@@ -21,7 +21,7 @@
 (define-macro defvar
     (list (<- name ((variable-name! names)))
           (? (seq (<- initial-value ((form! forms)))
-                  (? (guard documentation stringp)))))
+                  (? (<- documentation ((documentation-string! forms)))))))
   ((name          1)
    (initial-value ? :evaluation t)
    (documentation ?)))
@@ -29,7 +29,7 @@
 (define-macro defparameter
     (list (<- name ((variable-name! names)))
           (<- initial-value ((form! forms)))
-          (? (:guard documentation stringp)))
+          (? (<- documentation ((documentation-string! forms)))))
   ((name          1)
    (initial-value 1 :evaluation t)
    (documentation ?)))
@@ -128,7 +128,7 @@
 
 (define-macro defstruct
     (list (<- (name constructor) (structure-name))
-          (? (guard documentation stringp))
+          (? (<- documentation ((documentation-string forms))))
           (* (<<- slots (slot-description))))
   ((name          1)
    (constructor   ?)
@@ -175,7 +175,7 @@
                      (seq :initarg       (<<- initargs      (:must (guard symbolp)       "initarg must be a symbol")))
                      (seq :initform      (<-  initform      :any)) ; TODO rule for form?
                      (seq :type          (<-  type          ((type-specifier! type-specifiers))))
-                     (seq :documentation (<-  documentation (:must (guard stringp)       "documentation must be a string")) ; TODO rule for documentation
+                     (seq :documentation (<-  documentation ((documentation-string! forms)))
                            )
                      (seq (<<- option-names  (guard symbolp))
                           (<<- option-values))))))
@@ -196,8 +196,8 @@
 
 (define-macro defclass
     (list (<- name ((class-name! names)))
-          (and superclass-list (list (* (and :any (:must (<<- superclasses ((class-name names)))
-                                                         "superclass must be a class name")))))
+          (list (* (and :any (:must (<<- superclasses ((class-name names)))
+                                    "superclass must be a class name"))))
           (list (* (<<- slots (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
                  (list :default-initargs
@@ -207,22 +207,18 @@
                                       "default initarg must a symbol followed by an expression"))))
                  (list :metaclass
                        (:must (<- metaclass ((class-name names))) "metaclass must be a class name"))
-                 (and (list :documentation
-                            (:must (guard documentation stringp) "documentation must be a string"))
-                      documentation-raw)
+                 (list :documentation (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-names (:must (guard symbolp)))
                         (<<- option-values)))))
   ((name              1)
-   (superclasses      * ; :form superclass-list
-                      )
+   (superclasses      *)
    (slots             *)
    ;; Standard options
    (default-initargs  *)
    (default-initforms * :evaluation t)
    (metaclass         ?)
-   (documentation     ? ; :form documentation-raw
-                      )
+   (documentation     ?)
    ;; Non-standard options
    (option-names      *)
    (option-values     *)))
@@ -249,7 +245,7 @@
                  (list :argument-precedence-order (<- argument-precedence-order (guard (:must (or :most-specific-first ; TODO how to force this :must to work on the value context?
                                                                                                   :most-specific-last))
                                                                                         symbolp)))
-                 (list :documentation             (:must (guard documentation stringp) "a documentation string"))
+                 (list :documentation             (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-names (guard keywordp))
                         (<<- option-values)))))
@@ -268,18 +264,14 @@
 (define-macro defmethod
     (list* (<- name ((function-name! names)))
            (* (<<- qualifiers (guard (not 'nil) symbolp)))
-           (and (:must (<- lambda-list ((specialized-lambda-list lambda-lists) 'nil)) "expected lambda list")
-                lambda-list-raw)
-           (<- (documentation declarations #+later declarations-raw forms #+later forms-raw) ((docstring-body forms))))
+           (:must (<- lambda-list ((specialized-lambda-list lambda-lists) 'nil)) "expected lambda list")
+           (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (qualifiers    *)
-   (lambda-list   1                ; :form lambda-list-raw
-                  )
+   (lambda-list   1)
    (documentation ?)
-   (declarations  *>               ; :form declarations-raw
-                  )
-   (forms         *> :evaluation t ; :form forms-raw
-                  )))
+   (declarations  *>)
+   (forms         *> :evaluation t)))
 
 ;;; `defpackage' and `in-package'
 
@@ -304,7 +296,7 @@
     (list (:must (<- name (string-designator!)) "name is required")
           ;; TODO (* (and :any (:must (or …) "unknown options"))
           (* (or (list :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
-                 (list :documentation (<- documentation (guard stringp)))
+                 (list :documentation (<- documentation ((documentation-string! forms))))
                  (list :use           (* (<<- use (and :any (package-designator!)))))
                  (list :shadow        (* (<<- shadow (guard symbolp))))
                  (list :shadowing-import-from

@@ -12,6 +12,16 @@
 
 (parser:in-grammar forms)
 
+;;; Documentation strings
+
+(parser:defrule documentation-string ()
+    (guard stringp))
+
+(parser:defrule documentation-string! ()
+    (:must (documentation-string) "must be a documentation string"))
+
+;;; Forms
+
 #+later (parser:defrule declaration ()
     (list 'declare (* (<<- declarations #+maybe ((declaration declarations)))))
   (nreverse declarations))
@@ -38,18 +48,17 @@
 ;; TODO do we need forms! ?
 
 (parser:defrule body ()
-    (list* (* (and (<<- declarations-raw)
-                   (list 'declare (* (<<- declarations ((declaration! declarations)))))))
-         (and (<- forms (forms)) forms-raw))
-  (list (nreverse declarations) #+later declarations-raw forms #+later forms-raw))
+    (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))
+         (<- forms (forms)))
+  (list (nreverse declarations) forms))
 
 (parser:defrule docstring-body ()
     ;; 3.4.11 Syntactic Interaction of Documentation Strings and Declarations
     ;; If the first form in the body is a string, it is a
     ;; documentation string. Exception: if the body consists of only
     ;; one form, the form is not a documentation string.
-    (or (list (<- body (:transform (:guard form stringp)
-                         (list nil #+later nil (list form) #+later form))))
-        (list* (:guard docstring stringp) (<- body (body)))
+    (or (list (<- body (:transform (guard form stringp)
+                         (list () (list form)))))
+        (list* (<- docstring (documentation-string)) (<- body (body)))
         (<- body (body)))
   (list* docstring body))

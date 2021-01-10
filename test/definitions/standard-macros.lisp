@@ -95,9 +95,11 @@
   "Test for `defclass' standard macro syntax."
 
   (syntax-test-cases (defclass)
-    '((defclass)       invalid-syntax-error)
-    '((defclass 1)     invalid-syntax-error)
-    '((defclass foo 1) invalid-syntax-error)
+    '((defclass)                               invalid-syntax-error)
+    '((defclass 1)                             invalid-syntax-error)
+    '((defclass foo 1)                         invalid-syntax-error)
+    '((defclass foo () () (:documentation 1))  invalid-syntax-error)
+    '((defclass foo () ((a :documentation 1))) invalid-syntax-error)
 
     '((defclass foo (bar baz)
         ((foo :initform (+ 1) :custom-option :foo :reader bar))
@@ -165,6 +167,9 @@
   "Test for the `defpackage' standard macro syntax."
 
   (syntax-test-cases (defpackage)
+    '((defpackage 1)                      invalid-syntax-error)
+    '((defpackage foo 2)                  invalid-syntax-error)
+    '((defpackage foo (:documentation 1)) invalid-syntax-error)
     '((defpackage foo
         (:documentation "bla")
         (:use :bar "bar")
