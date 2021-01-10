@@ -95,12 +95,15 @@
   "Test for `defclass' standard macro syntax."
 
   (syntax-test-cases (defclass)
-    '((defclass)                               invalid-syntax-error)
-    '((defclass 1)                             invalid-syntax-error)
-    '((defclass foo 1)                         invalid-syntax-error)
-    '((defclass foo () () (:documentation 1))  invalid-syntax-error)
-    '((defclass foo () ((a :documentation 1))) invalid-syntax-error)
-
+    '((defclass)                                                   invalid-syntax-error)
+    '((defclass 1)                                                 invalid-syntax-error)
+    '((defclass foo 1)                                             invalid-syntax-error)
+    '((defclass foo () () (:documentation 1))                      invalid-syntax-error)
+    '((defclass foo () ((a :documentation 1)))                     invalid-syntax-error)
+    ;; Repeated options
+    '((defclass foo () () (:metaclass bar) (:metaclass bar))       invalid-syntax-error)
+    '((defclass foo () () (:documentation "") (:documentation "")) invalid-syntax-error)
+    ;; Valid syntax
     '((defclass foo (bar baz)
         ((foo :initform (+ 1) :custom-option :foo :reader bar))
         (:metaclass foo)
@@ -153,7 +156,20 @@
     '((defgeneric foo ()
         (:generic-function-class "foo"))
       invalid-syntax-error)
-
+    ;; Repeated options
+    '((defgeneric foo ()
+        (:generic-function-class bar)
+        (:generic-function-class bar))
+      invalid-syntax-error)
+    '((defgeneric foo ()
+        (:argument-precedence-order :most-specific-first)
+        (:argument-precedence-order :most-specific-first))
+      invalid-syntax-error)
+    '((defgeneric foo ()
+        (:documentation "foo")
+        (:documentation "foo"))
+      invalid-syntax-error)
+    ;; Valid syntax
     '((defgeneric foo (a b)
         (:documentation "foo")
         (:generic-function-class clazz))
@@ -167,9 +183,14 @@
   "Test for the `defpackage' standard macro syntax."
 
   (syntax-test-cases (defpackage)
-    '((defpackage 1)                      invalid-syntax-error)
-    '((defpackage foo 2)                  invalid-syntax-error)
-    '((defpackage foo (:documentation 1)) invalid-syntax-error)
+    '((defpackage 1)                                           invalid-syntax-error)
+    '((defpackage foo 2)                                       invalid-syntax-error)
+    '((defpackage foo (:documentation 1))                      invalid-syntax-error)
+    '((defpackage foo (:size "a"))                             invalid-syntax-error)
+    ;; Repeated options
+    '((defpackage foo (:documentation "") (:documentation "")) invalid-syntax-error)
+    '((defpackage foo (:size 1) (:size 2))                     invalid-syntax-error)
+    ;; Valid syntax
     '((defpackage foo
         (:documentation "bla")
         (:use :bar "bar")

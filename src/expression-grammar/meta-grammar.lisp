@@ -1,6 +1,6 @@
 ;;;; meta-grammar.lisp --- Meta grammar used by the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2020 Jan Moringen
+;;;; Copyright (C) 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,12 +15,12 @@
 
 (parser.packrat:defrule once (context)  ; TODO define-macro-rule
     (:compose (:transform (list 'once variable expression)
-                (print (let ((temp (gensym)))
-                   `(<- ,variable (guard (must (:transform
-                                                (<- ,temp ,expression)
-                                                (if ,variable (:fail) ,temp))
-                                               "option must not be repeated")
-                                         identity)))))
+                (let ((temp (gensym)))
+                  `(<- ,variable (guard (must (:transform
+                                                 (<- ,temp ,expression)
+                                               (if ,variable (:fail) ,temp))
+                                              "option must not be repeated")
+                                        identity))))
               (base::expression context)))
 
 (parser.packrat:defrule base::expression (context)

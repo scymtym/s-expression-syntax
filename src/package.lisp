@@ -20,6 +20,9 @@
   (:import-from #:parser.packrat.grammar.sequence
    #:seq #:? #:bounds) ; bounds is for format
 
+  (:import-from #:syntax.expression-grammar
+   #:once)
+
   ;; Conditions
   (:export
    #:syntax-not-found-error
