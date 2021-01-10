@@ -80,6 +80,16 @@
                  (lambda (&rest args) (print args))
                  '(return-from foo bla))))
 
+(test return
+  "Test for the `return' special operator"
+
+  (syntax-test-cases (return)
+    '((return (declare)) invalid-syntax-error)
+    '((return 1 2)       invalid-syntax-error)
+
+    '((return)           (value nil))
+    '((return 1)         (value 1))))
+
 (test tagbody
   "Test for `tagbody' special operator."
 
@@ -153,21 +163,21 @@
 
   (is (equal '(name foo
                syntax::lambda-list ()
-               syntax::docstring nil
+               documentation nil
                syntax::declarations ()
-               syntax::body ())
+               syntax::forms ())
              (parse nil (find-syntax 'function) '(function foo))))
   (is (equal '(name (setf foo)
                syntax::lambda-list ()
-               syntax::docstring nil
+               documentation nil
                syntax::declarations ()
-               syntax::body ())
+               syntax::forms ())
              (parse nil (find-syntax 'function) '(function (setf foo)))))
   (is (equal '(name nil
                syntax::lambda-list ((a) () b () nil ())
-               syntax::docstring nil
+               documentation nil
                syntax::declarations nil
-               syntax::body ((foo)))
+               syntax::forms ((foo)))
              (parse nil (find-syntax 'function) '(function (lambda (a &rest b) (foo))))))
 
   #+no (check-error-cases 'function

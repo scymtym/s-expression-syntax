@@ -20,7 +20,9 @@
     form. With no forms, returns NIL."))
 
 (define-special-operator if
-    (list test then (? else))
+    (list (<- test ((form! forms)))
+          (<- then ((form! forms)))
+          (? (<- else ((form! forms)))))
   ((test 1 :evaluation t)
    (then 1 :evaluation t)
    (else ? :evaluation t))
@@ -34,13 +36,14 @@ NIL."))
 ;;;; `block', `return-from', `return' and `tagbody'
 
 (parser:defrule block-name ()
-    (or (:guard name symbolp)
-        (:transform thing (error "~@<Block name must be a symbol, not ~S~@:>"
-                                 thing)))
+    (:guard name symbolp)
   name)
 
+(parser:defrule block-name! ()
+    (:must (block-name) "block name must be a symbol"))
+
 (define-special-operator block
-    (list* (<- name (block-name)) (<- forms ((forms forms))))
+    (list* (<- name (block-name!)) (<- forms ((forms forms))))
   ((name  1  :evaluation (make-instance 'binding-semantics
                                         :namespace 'block
                                         :scope     :lexical
@@ -53,10 +56,10 @@ NIL."))
     body, RETURN-FROM can be used to exit the form."))
 
 (define-special-operator return-from
-    (list (<- name (block-name)) (? value))
+    (list (<- name (block-name!)) (? (<- value ((form! forms)))))
   ((name  1 :evaluation (make-instance 'reference-semantics
                                        :namespace 'block))
-   (value 1 #+later ? :evaluation t))
+   (value 1 #+later ? :evaluation t)) ; TODO value-form?
   (:documentation
    "RETURN-FROM block-name value-form
 
@@ -65,11 +68,13 @@ NIL."))
     within the dynamic extent of the block."))
 
 (define-special-operator return
-    (list (? value))
+    (list (? (<- value ((form! forms)))))
   ((value 1 :evaluation t)))
 
+;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
+;;; valid tag will be treated as a form.
 (parser:defrule tag ()
-    (:guard name (typep '(or symbol integer))))
+  (:guard name (typep '(or symbol integer))))
 
 (parser:defrule new-tag (seen)
     (<- name (tag))
@@ -84,23 +89,32 @@ NIL."))
         (t
          nil)))
 
+(parser:defrule new-tag! (seen)
+  (:must (new-tag seen) "must be a unique tag name"))
+
 #+test (parser:parse '(test) '(foo foo foz))
 
+;;; TODO make a rule for parsing segments
 (define-special-operator tagbody
-    (list (* (:seq (* (<<- forms (and (not (tag)) :any)))
+    (list (* (:seq (* (<<- forms (and (not (tag)) ((form! forms)))))
                    (* (<<- tags 'foo)) ; HACK to bind tags
                    (or (<<- segments
-                             (:transform
-                              (<<- tags (new-tag tags))
-                              (prog1
-                                  forms
-                                (setf forms '()))))
+                            (:transform
+                               (<<- tags (new-tag! tags))
+                             (prog1
+                                 forms
+                               (print forms *trace-output*)
+                               (setf forms '()))))
                        (:transform
-                        (:seq)
+                          (:seq)
                         (unless forms (:fail))
                         (push forms segments)
                         (setf forms '()))))))
-  ((tags     * :evaluation nil)
+  ((tags     * :evaluation nil) #+later (make-instance 'binding-semantics
+                                               :namespace 'tag
+                                               :scope     :lexical
+                                               :order     :parallel
+                                               :values    nil)
    (segments * :evaluation t))
   (:documentation
    "TAGBODY {tag | statement}*
@@ -185,7 +199,7 @@ NIL."))
     COMPILE, LOAD, or EVAL)."))
 
 (define-special-operator load-time-value
-    (list (<- form ((form forms))) (? (:guard read-only-p (typep 'boolean))))
+    (list (<- form ((form! forms))) (? (:guard read-only-p (typep 'boolean))))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil))
   (:documentation
@@ -260,12 +274,12 @@ may also be a lambda expression.")
 (define-special-operator function
     (list (or (<- name ((function-name names)))
               (list* 'lambda (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
-                     (:compose ((docstring-body forms)) (list docstring declarations body)))))
-  ((name         1 :evaluation nil)
-   (lambda-list  1 :evaluation nil)     ; TODO binding
-   (docstring    1 :evaluation nil)
-   (declarations * :evaluation nil)
-   (body         * :evaluation nil)))
+                     (<- (documentation declarations forms) ((docstring-body forms))))))
+  ((name          ?  :evaluation nil)
+   (lambda-list   ?  :evaluation nil)     ; TODO binding
+   (documentation ?  :evaluation nil)
+   (declarations  *> :evaluation nil)
+   (forms         *> :evaluation t)))
 
 ;;;; SYMBOL-MACROLET, LET[*], LOCALLY and PROGV
 
@@ -294,8 +308,8 @@ may also be a lambda expression.")
       name))
 
 (define-special-operator symbol-macrolet
-    (list* (:compose (symbol-macro-bindings) (list names values))
-           (:compose ((body forms)) (list declarations forms)))
+    (list* (<- (names values) (symbol-macro-bindings))
+           (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace :symbol-macro
                                                :scope     :lexical
@@ -311,8 +325,8 @@ may also be a lambda expression.")
     be replaced with the EXPANSION."))
 
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
-    (list* (:compose (value-bindings) (list names values))
-           (:compose ((body forms)) (list declarations forms)))
+    (list* (<- (names values) (value-bindings!))
+           (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace 'variable
                                                :scope     :lexical
@@ -328,14 +342,14 @@ may also be a lambda expression.")
     evaluating the VALUE forms. The variables are bound in parallel
     after all of the VALUES forms have been evaluated."))
 
-
 (define-special-operator let*
-    (list* (:compose (value-bindings) (list names values))
-           (:compose ((body forms)) (list declarations forms)))
-  ((names        *> :evaluation '(:binding :namespace :variable
-                                  :scope     :lexical
-                                  :order     :sequential
-                                  :values    values))
+    (list* (<- (names values) (value-bindings!))
+           (<- (declarations forms) ((body forms))))
+  ((names        *> :evaluation (make-instance 'binding-semantics
+                                               :namespace 'variable
+                                               :scope     :lexical
+                                               :order     :sequential
+                                               :values    'values))
    (values       *> :evaluation t)
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t))
@@ -346,7 +360,7 @@ may also be a lambda expression.")
     each VALUE form to reference any of the previous VARS."))
 
 (define-special-operator locally
-    (list* (:compose ((body forms)) (list declarations forms)))
+    (list* (<- (declarations forms) ((body forms))))
   ((declarations *> :evaluation t)
    (forms        *> :evaluation t))
   (:documentation
@@ -357,9 +371,10 @@ may also be a lambda expression.")
     FORMS are also processed as top level forms."))
 
 (define-special-operator progv
-    (list* symbols values (:compose ((body forms)) (list declarations forms)))
+    (list* (<- symbols ((form! forms))) (<- values ((form! forms)))
+           (<- (declarations forms) ((body forms))))
   ((symbols      1 :evaluation (make-instance 'binding-semantics
-                                              :namespace :variable
+                                              :namespace 'variable
                                               :scope     :dynamic
                                               :values    'values))
    (values       1 :evaluation t)
@@ -385,10 +400,10 @@ may also be a lambda expression.")
    (body                 * :evaluation t)))
 
 (define-special-operator macrolet
-    (list* (:compose (function-bindings) (list names functions))
-           (:compose ((body forms)) (list declarations forms)))
+    (list* (<- (names functions) (function-bindings))
+           (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace :function
+                                               :namespace 'function
                                                :scope     :lexical
                                                :values    'functions))
    (functions    *> :evaluation nil)
@@ -396,8 +411,8 @@ may also be a lambda expression.")
    (forms        *> :evaluation t)))
 
 (define-special-operator flet
-    (list* (:compose (function-bindings) (list names functions))
-           (:compose ((body forms)) (list declarations forms)))
+    (list* (<- (names functions) (function-bindings))
+           (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
                                                :scope     :lexical
@@ -408,10 +423,10 @@ may also be a lambda expression.")
    (forms        *> :evaluation t)))
 
 (define-special-operator labels
-    (list* (:compose (function-bindings) (list names functions))
-           (:compose ((body forms)) (list declarations forms)))
+    (list* (<- (names functions) (function-bindings))
+           (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace :function
+                                               :namespace 'function
                                                :scope     :lexical
                                                :order     :recursive
                                                :values    'functions))
@@ -419,18 +434,25 @@ may also be a lambda expression.")
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t)))
 
-;;;; `the'
+;;;; `declaim' and `the'
+
+(define-special-operator declaim
+    (list (* (<<- declarations (declaration!)))) ; TODO only free declarations
+  ((declarations *> :evaluation nil)))
 
 (define-special-operator the
-    (list (<- type ((type-specifier! type-specifiers))) form)
+    (list (<- type ((type-specifier! type-specifiers)))
+          (<- form ((form! forms))))
   ((type 1 :evaluation nil)
    (form 1 :evaluation t)))
 
 ;;; SETQ
 
 (define-special-operator setq
-    (list (* (:seq (<<- names       ((variable-name! names)))
-                   (<<- value-forms ((form! forms))))))
+    (list (* (and :any
+                  (:must (seq (<<- names       (variable-name))
+                              (<<- value-forms ((form! forms))))
+                         "must be a variable name followed by an expression"))))
   ((names       * :evaluation nil       ; :type symbol :access :write
                 )
    (value-forms *))
@@ -450,7 +472,7 @@ may also be a lambda expression.")
 ;;;; `throw', `catch' and `unwind-protect'
 
 (define-special-operator throw
-    (list tag-form (<- result-form ((form! forms))))
+    (list (<- tag-form ((form! forms))) (<- result-form ((form! forms))))
   ((tag-form    1 :evaluation t)
    (result-form 1 :evaluation t))
   (:documentation
@@ -460,8 +482,8 @@ may also be a lambda expression.")
     CATCH whose tag is EQ to TAG."))
 
 (define-special-operator catch
-    (list* tag-form (<- forms ((forms forms))))
-  ((tag-form  1 :evaluation (make-instance 'binding-semantics
+    (list* (<- tag-form ((form! forms))) (<- forms ((forms forms))))
+  ((tag-form  1 :evaluation t #+no (make-instance 'binding-semantics
                                            :namespace 'tag
                                            :scope     'lexical
                                            :values    nil))
@@ -476,7 +498,7 @@ may also be a lambda expression.")
     returned."))
 
 (define-special-operator unwind-protect
-    (list* protected (<- cleanup ((forms forms))))
+    (list* (<- protected ((form! forms))) (<- cleanup ((forms forms))))
   ((protected 1  :evaluation t)
    (cleanup   *> :evaluation t))
   (:documentation
@@ -489,8 +511,18 @@ may also be a lambda expression.")
 
 ;;;; Multiple value stuff
 
+(define-special-operator multiple-value-bind
+    (list* (:must (list (* (<<- names ((variable-name! names)))))
+                  "must be a list of variable names") ; TODO unique variable name
+           (<- values-form ((form! forms)))
+           (<- (declarations forms) ((body forms))))
+  ((names        *) ; TODO binding semantics
+   (values-form  1  :evaluation t)
+   (declarations *>)
+   (forms        *> :evaluation t)))
+
 (define-special-operator multiple-value-call
-    (list* function-form (<- arguments ((forms forms))))
+    (list* (<- function-form ((form! forms))) (<- arguments ((forms forms))))
   ((function-form 1  :evaluation t)
    (arguments     *> :evaluation t))
   (:documentation
@@ -501,7 +533,7 @@ may also be a lambda expression.")
     argument, etc."))
 
 (define-special-operator multiple-value-prog1
-    (list* values-form (<- forms ((forms forms))))
+    (list* (<- values-form ((form! forms))) (<- forms ((forms forms))))
   ((values-form 1  :evaluation t)
    (forms       *> :evaluation t))
   (:documentation
@@ -510,17 +542,23 @@ may also be a lambda expression.")
     Evaluate VALUES-FORM and then the FORMS, but return all the values
     of VALUES-FORM."))
 
-;;;
+;;; Application
 
-#+no (parser:defrule lambda ()
-  (list* 'lambda '() (<- body (docstring-body)))
+(parser:defrule lambda ()
+    (list* 'lambda '() (<- body ((docstring-body forms))))
   (bp:node* ('lambda :documentation-string (first body))
     (* :declaration (second body))
     (* :form        (third body))))
 
-(parser:defrule application ()
+#+no (parser:defrule application ()
     (list (<- abstraction (or (reference) (lambda)))
           (* (<<- arguments)))
   (bp:node* (:application)
     (1 :abstraction abstraction)
     (* :argument    arguments)))
+
+(define-syntax application
+    (list (<- abstraction (or (function-name/symbol) (lambda)))
+          (* (<<- arguments ((form! forms)))))
+  ((abstraction 1 :evaluation t)
+   (arguments   * :evaluation t)))

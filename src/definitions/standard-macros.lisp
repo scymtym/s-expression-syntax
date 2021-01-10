@@ -1,3 +1,9 @@
+;;;; standard-macros.lisp ---  Syntax of various Common Lisp standard macros.
+;;;;
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;;
+;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
 (cl:in-package #:syntax)
 
 (parser:in-grammar special-operators)
@@ -5,24 +11,24 @@
 ;;; `defconstant', `defvar' and `defparameter'
 
 (define-macro defconstant
-    (list (<- name (variable-name))
-          (<- initial-value (form))
-          (? (:guard documentation stringp)))
+    (list (<- name ((variable-name! names)))
+          (<- initial-value ((form! forms)))
+          (? (guard documentation stringp))) ; TODO must
   ((name          1)
    (initial-value 1 :evaluation t)
    (documentation ?)))
 
 (define-macro defvar
-    (list (<- name (variable-name))
-          (? (:seq (<- initial-value (form))
-                   (? (:guard documentation stringp)))) )
+    (list (<- name ((variable-name! names)))
+          (? (seq (<- initial-value ((form! forms)))
+                  (? (guard documentation stringp)))))
   ((name          1)
    (initial-value ? :evaluation t)
    (documentation ?)))
 
 (define-macro defparameter
-    (list (<- name (variable-name))
-          (<- initial-value (form))
+    (list (<- name ((variable-name! names)))
+          (<- initial-value ((form! forms)))
           (? (:guard documentation stringp)))
   ((name          1)
    (initial-value 1 :evaluation t)
@@ -31,9 +37,9 @@
 ;;; `defun'
 
 (define-macro defun
-    (list* (<- name (function-name))
+    (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
-           (:compose (docstring-body) (list documentation declarations forms)))
+           (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1)
    (documentation ?)
@@ -43,32 +49,111 @@
 ;;; `defmacro'
 
 (define-macro defmacro
-    (list* (<- name (function-name/symbol))
+    (list* (<- name ((function-name/symbol! names)))
            (<- lambda-list ((destructuring-lambda-list destructuring-lambda-list) 'nil)) ; TODO macro lambda list
-           (:compose (docstring-body) (list documentation declarations forms)))
+           (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1)
    (documentation ?)
    (declarations  *>)
    (forms         *> :evaluation t)))
 
+;;; `defstruct' including slots
+
+#+maybe (parser:defrule defstruct-slot-options
+            ())
+
+(define-syntax slot-description
+    (or (list (<- name ((variable-name! names)))
+              (? (seq (<- initform ((form! forms)))
+                       (* (or (seq :read-only (<- read-only))
+                              (seq :type      (<- type ((type-specifier! type-specifiers)))))))))
+        (<- name ((variable-name! names))))
+  ((name      1)
+   (initform  ? :evaluation t)
+   (read-only ?)
+   (type      ?)))
+
+(parser:defrule structure-constructor ()
+    (list :constructor
+          (? (or (<- name 'nil)
+                 (seq (<- name ((function-name/symbol! names)))
+                       (? (<- lambda-list ((ordinary-lambda-list lambda-lists) '()))))))) ; TODO boa-lambda-list
+  (list name lambda-list))
+
+(macrolet ((define-function-option (name option &optional (symbol? t))
+             `(parser:defrule ,name ()
+                ,(let ((list-syntax `(list ,option (? (<- name (or 'nil ((function-name/symbol! names))))))))
+                   (if symbol?
+                       `(or ,option ,list-syntax)
+                       list-syntax))
+                (or name t))))
+  (define-function-option structure-copier         :copier)
+  (define-function-option structure-predicate      :predicate)
+  (define-function-option structure-print-object   :print-object   nil)
+  (define-function-option structure-print-function :print-function nil))
+
+(parser:defrule structure-include ()
+    (list :include (<- name ((class-name! names)))
+          (* (<<- slots (slot-description))))
+    (list name slots))
+
+(parser:defrule structure-initial-offset ()
+    (list :initial-offset (:must (guard offset (typep '(integer 0))) "a valid offset"))
+  offset)
+
+(parser:defrule structure-type ()
+    (list :type (<- type ((type-specifier! type-specifiers))))
+  type)
+
+(parser:defrule structure-name ()
+    (or (list (<- name ((class-name! names)))
+              (* (or (<- constructor             (structure-constructor))
+                     (<- copier                  (structure-copier))
+                     (<- (include include-slots) (structure-include))
+                     (<- offset                  (structure-initial-offset))
+                     (<- named                   :named)
+                     (<- predicate               (structure-predicate))
+                     (<- print-object            (structure-print-object))
+                     (<- print-function          (structure-print-function))
+                     (<- type                    (structure-type)))))
+        (<- name ((class-name! names))))
+  (when (and offset (not type))
+    (:fail ; "Cannot specify ~S without ~S" :initial-offset :type
+     ))
+  (when (and type (or print-object print-function))
+    (:fail ; "The options ~S and ~S are mutually exclusive"
+     ))
+  (list name constructor))
+
+(define-macro defstruct
+    (list (<- (name constructor) (structure-name))
+          (? (guard documentation stringp))
+          (* (<<- slots (slot-description))))
+  ((name          1)
+   (constructor   ?)
+   (documentation ?)
+   (slots         *)))
+
 ;;; `defclass' including slots
 
-(parser:defrule slot-name ()
-  (:guard symbolp))
+(parser:defrule allocation-type ()
+  (or :instance :class))
 
-(define-syntax slot-options
-    (list (* (or (:seq :reader        (<<- readers    (function-name/symbol))) ; TODO fail for something like :reader 1
-                 (:seq :writer        (<<- writers    (function-name)))
-                 (:seq :accessor      (<<- accessor   (function-name/symbol)))
-                 (:seq :allocation    (<-  allocation allocation-type))
-                 (:seq :initform      (<-  initform   :any)) ; TODO rule for form?
-                 (:seq :type          (<-  type       (type-specifier)))
-                 (:seq :documentation (:guard documentation string) ; TODO rule for documentation
+#+unused (define-syntax slot-options
+    (list (* (or (seq :reader        (<<- readers       (:must (function-name/symbol)))) ; TODO fail for something like :reader 1
+                 (seq :writer        (<<- writers       (:must (function-name))))
+                 (seq :accessor      (<<- accessor      (:must (function-name/symbol))))
+                 (seq :allocation    (<-  allocation    (:must (allocation-type))))
+                 (seq :initarg       (<<- initargs      (:must (guard symbolp))))
+                 (seq :initform      (<-  initform      :any)) ; TODO rule for form?
+                 (seq :type          (<-  type          (type-specifier)))
+                 (seq :documentation (<-  documentation (:must (guard stringp))) ; TODO rule for documentation
                        )
-                 (:seq (<<- option-names  (:guard symbolp))
-                       (<<- option-values :any)))))
-  ((readers       *)
+                 (seq (<<- option-names  (guard symbolp))
+                       (<<- option-values)))))
+  ((initargs      *)
+   (readers       *)
    (writers       *)
    (accessor      *)
    (allocation    ?)
@@ -80,34 +165,64 @@
    (option-values *)))
 
 (define-syntax slot-specifier
-    (or (<- name (slot-name))
-        (list* (<- name (slot-name)) (<- options (slot-options))))
+    (or (and (not (list* :any)) (<- name ((slot-name! names))))
+        (list (:must (<- name ((slot-name! names))) "slot must have a name")
+              #+no (<- options (slot-options))
+              (* (or (seq :reader        (<<- readers       (:must ((function-name/symbol names)) "reader must be a symbol function name")))
+                     (seq :writer        (<<- writers       (:must ((function-name names))        "writer must be an extended function name")))
+                     (seq :accessor      (<<- accessors     (:must ((function-name/symbol names)) "accessor must be a symbol function name")))
+                     (seq :allocation    (<-  allocation    (:must (allocation-type))))
+                     (seq :initarg       (<<- initargs      (:must (guard symbolp)       "initarg must be a symbol")))
+                     (seq :initform      (<-  initform      :any)) ; TODO rule for form?
+                     (seq :type          (<-  type          ((type-specifier! type-specifiers))))
+                     (seq :documentation (<-  documentation (:must (guard stringp)       "documentation must be a string")) ; TODO rule for documentation
+                           )
+                     (seq (<<- option-names  (guard symbolp))
+                          (<<- option-values))))))
   ((name    1)
-   (options 1)))
+   ;; Options
+   #+no (options 1)
+   (initargs      *)
+   (readers       *)
+   (writers       *)
+   (accessors     *)
+   (allocation    ?)
+   (initform      ? :evaluation t)
+   (type          ?)
+   (documentation ?)
+   ;; Non-standard options
+   (option-names  *)
+   (option-values *)))
 
 (define-macro defclass
-    (list (<- name (class-name))
-          (list (* (<<- superclasses (class-name))))
+    (list (<- name ((class-name! names)))
+          (and superclass-list (list (* (and :any (:must (<<- superclasses ((class-name names)))
+                                                         "superclass must be a class name")))))
           (list (* (<<- slots (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
                  (list :default-initargs
-                       (* (:seq (<<- default-initargs  (:guard symbolp))
-                                (<<- default-initforms :any))))
+                       (* (and :any
+                               (:must (seq (<<- default-initargs  (guard symbolp))
+                                           (<<- default-initforms :any))
+                                      "default initarg must a symbol followed by an expression"))))
                  (list :metaclass
-                       (<- metaclass (class-name)))
-                 (list :documentation
-                       (:guard documentation stringp))
+                       (:must (<- metaclass ((class-name names))) "metaclass must be a class name"))
+                 (and (list :documentation
+                            (:must (guard documentation stringp) "documentation must be a string"))
+                      documentation-raw)
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-names (:guard symbolp))
+                 (list* (<<- option-names (:must (guard symbolp)))
                         (<<- option-values)))))
   ((name              1)
-   (superclasses      *)
+   (superclasses      * ; :form superclass-list
+                      )
    (slots             *)
    ;; Standard options
    (default-initargs  *)
    (default-initforms * :evaluation t)
    (metaclass         ?)
-   (documentation     ?)
+   (documentation     ? ; :form documentation-raw
+                      )
    ;; Non-standard options
    (option-names      *)
    (option-values     *)))
@@ -115,9 +230,9 @@
 ;;; `deftype'
 
 (define-macro deftype
-    (list* (<- name (class-name))
+    (list* (<- name ((class-name! names)))
            (<- lambda-list ((deftype-lambda-list deftype-lambda-list) 'nil))
-           (:compose (docstring-body) (list documentation declarations forms)))
+           (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1)
    (documentation ?)
@@ -127,15 +242,17 @@
 ;;; `defgeneric'
 
 (define-macro defgeneric
-    (list (<- name (function-name))
+    (list (<- name ((function-name! names)))
           (<- lambda-list ((generic-function-lambda-list lambda-lists) 'nil))
           (* (or ;; Standard options
-                 (list :generic-function-class    (:must (:guard generic-function-class symbolp) "must be a class name"))
-                 (list :argument-precedence-order (<- argument-precedence-order (or :most-specific-first
-                                                                                    :most-specific-last)))
-                 (list :documentation             (:guard documentation stringp))
+                 (list :generic-function-class    (<- generic-function-class ((class-name! names))))
+                 (list :argument-precedence-order (<- argument-precedence-order (guard (:must (or :most-specific-first ; TODO how to force this :must to work on the value context?
+                                                                                                  :most-specific-last))
+                                                                                        symbolp)))
+                 (list :documentation             (:must (guard documentation stringp) "a documentation string"))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-names (:guard keywordp)) (<<- option-values)))))
+                 (list* (<<- option-names (guard keywordp))
+                        (<<- option-values)))))
   ((name                      1)
    (lambda-list               1)
    ;; Standard options
@@ -146,41 +263,74 @@
    (option-names              *)
    (option-values             *)))
 
+;;; `defmethod'
+
+(define-macro defmethod
+    (list* (<- name ((function-name! names)))
+           (* (<<- qualifiers (guard (not 'nil) symbolp)))
+           (and (:must (<- lambda-list ((specialized-lambda-list lambda-lists) 'nil)) "expected lambda list")
+                lambda-list-raw)
+           (<- (documentation declarations #+later declarations-raw forms #+later forms-raw) ((docstring-body forms))))
+  ((name          1)
+   (qualifiers    *)
+   (lambda-list   1                ; :form lambda-list-raw
+                  )
+   (documentation ?)
+   (declarations  *>               ; :form declarations-raw
+                  )
+   (forms         *> :evaluation t ; :form forms-raw
+                  )))
+
 ;;; `defpackage' and `in-package'
 
 (parser:defrule string-designator ()
-  (:guard (typep '(or character string symbol))))
+  (guard (typep '(or character string symbol))))
+
+(parser:defrule string-designator! ()
+  (:must (string-designator) "must be a string designator"))
 
 (parser:defrule package-designator ()
-  (or (string-designator) (:guard packagep)))
+  (or (string-designator) (guard packagep)))
+
+(parser:defrule package-designator! ()
+  (:must (package-designator) "must be a package designator"))
+
+(parser:defrule non-standard-package-option ()
+  (or (list :locked (:must (guard (typep 'boolean)) "must be a Boolean"))
+      (list :local-nicknames (* (list (:must (string-designator!) "expected TODO")
+                                      (:must (string-designator!) "expected TODO"))))))
 
 (define-macro defpackage
-    (list (<- name (string-designator))
-          (* (or (list :nicknames (* (<<- nicknames (string-designator))))
-                 (list :documentation (:guard documentation stringp))
-                 (list :use (* (<<- use (package-designator))))
-                 (list :shadow (* (<<- shadow (:guard symbolp))))
+    (list (:must (<- name (string-designator!)) "name is required")
+          ;; TODO (* (and :any (:must (or …) "unknown options"))
+          (* (or (list :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
+                 (list :documentation (<- documentation (guard stringp)))
+                 (list :use           (* (<<- use (and :any (package-designator!)))))
+                 (list :shadow        (* (<<- shadow (guard symbolp))))
                  (list :shadowing-import-from
-                       (<<- shadowing-import-from-packages (package-designator))
+                       (<<- shadowing-import-from-packages (package-designator!))
                        (<<- shadowing-import-from-names    (:transform
-                                                            (* (<<- temp (string-designator)))
+                                                            (* (<<- temp (and :any (string-designator!))))
                                                             (prog1
                                                                 (nreverse temp)
                                                               (setf temp '())))))
                  (list :import-from
-                       (<<- import-from-packages (package-designator))
+                       (<<- import-from-packages (package-designator!))
                        (<<- import-from-names    (:transform
-                                                  (* (<<- temp (string-designator)))
+                                                  (* (<<- temp (and :any (string-designator!))))
                                                   (prog1
                                                       (nreverse temp)
                                                     (setf temp '())))))
-                 (list :export (* (<<- export (string-designator))))
-                 (list :intern (* (<<- intern (string-designator))))
-                 (list :size (:guard size (typep '(integer 0)))))))
+                 (list :export (* (<<- export (and :any (string-designator!)))))
+                 (list :intern (* (<<- intern (and :any (string-designator!)))))
+                 (list :size   (<- size (guard (typep '(integer 0)))))
+                 (non-standard-package-option)
+                 (list* (:must (not :any) "unknown option") :any)
+                 (and :any (:must (guard (not :any) atom) "options must be list")))))
   ((name                           1)
    (nicknames                      *)
    (documentation                  ?)
-   (use                            *)
+   (use                            *) ; TODO cannot distinguish empty option, i.e. (:use), from absent
    (shadow                         *)
    (shadowing-import-from-packages *)
    (shadowing-import-from-names    *)
@@ -191,5 +341,5 @@
    (size                           ?)))
 
 (define-macro in-package
-    (list (<- name (string-designator)))
+    (list (<- name (:must (string-designator!) "name is required")))
   ((name 1)))

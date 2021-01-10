@@ -106,16 +106,17 @@
          :bar 1)
         (:my-class-option 1))
       (name foo syntax::superclasses (bar baz)
-       syntax::slots ((name foo syntax::options
-                       (syntax::readers (bar)
-                        syntax::writers ()
-                        syntax::accessor ()
-                        syntax::allocation nil
-                        syntax::initform (+ 1)
-                        type nil
-                        documentation nil
-                        syntax::option-names (:custom-option)
-                        syntax::option-values (:foo))))
+       syntax::slots ((name foo
+                       syntax::initargs ()
+                       syntax::readers (bar)
+                       syntax::writers ()
+                       syntax::accessors ()
+                       syntax::allocation nil
+                       syntax::initform (+ 1)
+                       type nil
+                       documentation nil
+                       syntax::option-names (:custom-option)
+                       syntax::option-values (:foo)))
        syntax::default-initargs (:bar)
        syntax::default-initforms (1)
        syntax::metaclass foo
@@ -170,7 +171,12 @@
         (:size 1)
         (:import-from :foo #\c :bar)
         (:shadowing-import-from :foo2 "BAZ2" :bar2))
-      invalid-syntax-error)
+      (name foo syntax::nicknames () documentation "bla" syntax::use (:bar "bar")
+       shadow () syntax::shadowing-import-from-packages (:foo2)
+       syntax::shadowing-import-from-names (("BAZ2" :bar2))
+       syntax::import-from-packages (:foo)
+       syntax::import-from-names ((#\c :bar))
+       export () intern () syntax::size 1))
 
     '((defpackage foo
         (:documentation "bla")
