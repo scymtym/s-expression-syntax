@@ -8,13 +8,45 @@
 
 (in-suite :syntax.concrete-syntax-tree)
 
-(test client.smoke
-  "Smoke test for the `cst-client' class."
+(defmacro rule-test-cases (((rule grammar) &rest arguments) &body cases)
+  `(let ((syntax.expression-grammar:*client* syntax.concrete-syntax-tree::*client*))
+     (syntax.test::rule-test-cases ((,rule ,grammar) ,@arguments)
+       ,@cases)))
 
-  (let ((syntax.expression-grammar:*client* syntax.concrete-syntax-tree::*client*))
-    (is-true (parser.packrat:parse `((syntax::specialized-lambda-list syntax::lambda-lists)
-                                     ,(make-hash-table :test #'eq))
-                                   (cst:cstify `((a integer) b c &optional d &rest r &key e))))
-    (is-false (parser.packrat:parse `((syntax::specialized-lambda-list syntax::lambda-lists)
-                                      ,(make-hash-table :test #'eq))
-                                    (cst:cstify `((a 1 2) b c &optional d &rest r &key e))))))
+(test names.smoke
+  "Smoke test for using the `cst-client' with names."
+
+  (rule-test-cases ((syntax::function-name syntax::names))
+    (list (cst:cst-from-expression 1) nil t nil)
+
+    (let ((cst (cst:cst-from-expression 'a)))
+      (list cst t t cst))
+
+    (list (cst:cst-from-expression '(setf 1))
+          :fatal t "second element of SETF function name must be a symbol")))
+
+(test lambda-lists.smoke
+  "Smoke test for using the `cst-client' with lambda list."
+
+  (rule-test-cases ((syntax::specialized-lambda-list syntax::lambda-lists)
+                    (make-hash-table :test #'eq))
+    (let* ((a           (cst:cst-from-expression 'a))
+           (specializer (cst:cst-from-expression 'integer))
+           (parameter   (cst:list a specializer))
+           (b           (cst:cst-from-expression 'b))
+           (c           (cst:cst-from-expression 'c))
+           (d           (cst:cst-from-expression 'd))
+           (r           (cst:cst-from-expression 'r))
+           (e           (cst:cst-from-expression 'e))
+           (cst         (cst:list parameter b c
+                                  (cst:cst-from-expression '&optional) d
+                                  (cst:cst-from-expression '&rest) r
+                                  (cst:cst-from-expression '&key) e)))
+      (list cst t t `(((,a ,specializer) (,b nil) (,c nil))
+                      ((,d nil nil))
+                      ,r
+                      (((keyword ,e) ,e nil nil)) nil
+                      ())))
+
+    (list (cst:cst-from-expression `((a 1 2) b c &optional d &rest r &key e))
+          :fatal t "must be a class name")))

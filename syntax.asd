@@ -46,6 +46,7 @@
   :in-order-to ((test-op (test-op "syntax/test"))))
 
 (asdf:defsystem "syntax/test"
+  :version    (:read-file-form "version-string.sexp")
   :depends-on ("alexandria"
 
                (:version "fiveam" "1.4")

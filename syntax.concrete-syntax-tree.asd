@@ -20,7 +20,10 @@
 (asdf:defsystem "syntax.concrete-syntax-tree/test"
   :version      (:read-file-form "version-string.sexp")
   :depends-on   ((:version "fiveam"                      "1.4")
-                 (:version "syntax.concrete-syntax-tree" (:read-file-form "version-string.sexp")))
+
+                 (:version "syntax.concrete-syntax-tree" (:read-file-form "version-string.sexp"))
+
+                 (:version "syntax/test"                 (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "concrete-syntax-tree"
                  :pathname   "test/concrete-syntax-tree"
