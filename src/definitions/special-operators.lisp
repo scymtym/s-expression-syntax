@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Standard special operators supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -271,10 +271,15 @@ may also be a lambda expression.")
             (error "~@<Exactly one of ~S and ~S must be supplied.~@:>"
                    :name :lambda-list))))))
 
+(defrule lambda ()
+    (list* 'lambda
+           (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
+           (<- (documentation declarations forms) ((docstring-body forms))))
+  (list lambda-list documentation declarations forms))
+
 (define-special-operator function
     (list (or (<- name ((function-name names)))
-              (list* 'lambda (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
-                     (<- (documentation declarations forms) ((docstring-body forms))))))
+              (<- (lambda-list documentation declarations forms) (lambda))))
   ((name          ?  :evaluation nil)
    (lambda-list   ?  :evaluation nil)     ; TODO binding
    (documentation ?  :evaluation nil)
@@ -542,23 +547,15 @@ may also be a lambda expression.")
     Evaluate VALUES-FORM and then the FORMS, but return all the values
     of VALUES-FORM."))
 
-;;; Application
-
-(defrule lambda ()
-    (list* 'lambda '() (<- body ((docstring-body forms))))
-  (bp:node* ('lambda :documentation-string (first body))
-    (* :declaration (second body))
-    (* :form        (third body))))
-
-#+no (parser:defrule application ()
-    (list (<- abstraction (or (reference) (lambda)))
-          (* (<<- arguments)))
-  (bp:node* (:application)
-    (1 :abstraction abstraction)
-    (* :argument    arguments)))
+;;; Pseudo-operator "application"
+;;;
+;;; This handles the two cases
+;;;
+;;;   (FUNCTION-NAME ARGUMENT1 ARGUMENT2 ...)
+;;;   ((lambda (LAMBDA-LIST) BODY) ARGUMENT1 ARGUMENT2 ...)
 
 (define-syntax application
-    (list (<- abstraction (or (function-name/symbol) (lambda)))
+    (list (<- abstraction (or ((function-name/symbol names)) (lambda)))
           (* (<<- arguments ((form! forms)))))
   ((abstraction 1 :evaluation t)
    (arguments   * :evaluation t)))

@@ -399,3 +399,17 @@
                          '(multiple-value-prog1 1)
                          '(multiple-value-prog1 1 2)
                          '(multiple-value-prog1 1 2 3)))
+
+;;; Application
+
+(test application
+  "Test for the \"application\" pseudo-operator."
+
+  (is (equal '(syntax::abstraction foo syntax::arguments ())
+             (syntax:parse nil (find-syntax 'syntax::application) '(foo))))
+  (is (equal '(syntax::abstraction foo syntax::arguments (1))
+             (syntax:parse nil (find-syntax 'syntax::application) '(foo 1))))
+
+  (is (equal '(syntax::abstraction (((x) () nil () nil ()) nil () (x))
+               syntax::arguments (1))
+             (syntax:parse nil (find-syntax 'syntax::application) '((lambda (x) x) 1)))))
