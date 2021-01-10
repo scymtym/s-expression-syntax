@@ -1,6 +1,6 @@
 ;;;; standard-macros.lisp ---  Syntax of various Common Lisp standard macros.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -146,9 +146,9 @@
                  (seq :accessor      (<<- accessor       (must (function-name/symbol))))
                  (seq :allocation    (once allocation    (must (allocation-type))))
                  (seq :initarg       (<<- initargs       (must (guard symbolp))))
-                 (seq :initform      (once initform      :any)) ; TODO rule for form?
+                 (seq :initform      (once initform      ((form! forms))))
                  (seq :type          (once type          (type-specifier)))
-                 (seq :documentation (once documentation (must (guard stringp))) ; TODO rule for documentation
+                 (seq :documentation (once documentation ((documentation-string! forms)))
                        )
                  (seq (<<- option-names  (guard symbolp))
                        (<<- option-values)))))
@@ -177,7 +177,7 @@
                      (seq :allocation    (once allocation    (must (allocation-type))))
                      (seq :initarg       (<<- initargs       (must (guard symbolp)
                                                                    "initarg must be a symbol")))
-                     (seq :initform      (once initform      :any)) ; TODO rule for form?
+                     (seq :initform      (once initform      ((form! forms))))
                      (seq :type          (once type          ((type-specifier! type-specifiers))))
                      (seq :documentation (once documentation ((documentation-string! forms))))
                      (seq (<<- option-names  (guard symbolp))

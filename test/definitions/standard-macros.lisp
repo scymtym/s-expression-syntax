@@ -91,6 +91,40 @@
        syntax::declarations ((ignore (a)))
        syntax::forms ((list 'cons b b))))))
 
+(test slot-specifier
+  "Test for `slot-specifier' rule."
+
+  (rule-test-cases ((syntax::slot-specifier syntax::special-operators))
+    ;; Invalid syntax
+    '((foo :reader 1)                             :fatal 1          "reader must be a symbol function name")
+    '((foo :reader (setf foo))                    :fatal (setf foo) "reader must be a symbol function name")
+    '((foo :writer 1)                             :fatal 1          "writer must be an extended function name")
+    '((foo :writer (setf 1))                      :fatal 1          "second element of SETF function name must be a symbol")
+    '((foo :accessor 1)                           :fatal 1          "accessor must be a symbol function name")
+    '((foo :accessor (setf foo))                  :fatal (setf foo) "accessor must be a symbol function name")
+    '((foo :initarg 1)                            :fatal 1          "initarg must be a symbol")
+    '((foo :initform (declare))                   :fatal 1          "declare is not allowed here")
+    '((foo :type 1)                               :fatal 1          "must be a type specifier")
+    '((foo :documentation 1)                      :fatal 1          "must be a documentation string")
+    ;; Repeated options
+    '((foo :allocation :class :allocation :class) :fatal :class     "option must not be repeated")
+    '((foo :initform 1 :initform 1)               :fatal 1          "option must not be repeated")
+    '((foo :type bit :type bit)                   :fatal bit        "option must not be repeated")
+    '((foo :documentation "" :documentation "")   :fatal ""         "option must not be repeated")
+    ;; Valid syntax
+    '((foo :initform (+ 1) :custom-option :foo :reader bar)
+      t t (name foo
+           syntax::initargs ()
+           syntax::readers (bar)
+           syntax::writers ()
+           syntax::accessors ()
+           syntax::allocation nil
+           syntax::initform (+ 1)
+           type nil
+           documentation nil
+           syntax::option-names (:custom-option)
+           syntax::option-values (:foo)))))
+
 (test defclass
   "Test for `defclass' standard macro syntax."
 
