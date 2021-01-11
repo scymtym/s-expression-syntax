@@ -11,7 +11,8 @@
 
                 (:version "syntax.expression-grammar"     (:read-file-form "version-string.sexp")))
 
-  :components  ((:module     "src"
+  :components  ((:module     "base"
+                 :pathname   "code"
                  :serial     t
                  :components ((:file       "package")
 
@@ -25,8 +26,8 @@
                               (:file       "macros")))
 
                 (:module     "definitions"
-                 :pathname   "src/definitions"
-                 :depends-on ("src")
+                 :pathname   "code/definitions"
+                 :depends-on ("base")
                  :serial     t
                  :components (; (:file       "package")
 

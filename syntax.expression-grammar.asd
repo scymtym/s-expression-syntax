@@ -8,7 +8,7 @@
   :depends-on ((:version "parser.packrat" "0.1"))
 
   :components ((:module     "expression-grammar"
-                :pathname   "src/expression-grammar"
+                :pathname   "code/expression-grammar"
                 :serial     t
                 :components ((:file       "package")
 

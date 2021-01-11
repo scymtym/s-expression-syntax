@@ -10,7 +10,7 @@
                 "concrete-syntax-tree")
 
   :components  ((:module     "concrete-syntax-tree"
-                 :pathname   "src/concrete-syntax-tree"
+                 :pathname   "code/concrete-syntax-tree"
                  :serial     t
                  :components ((:file       "package")
                               (:file       "client"))))
