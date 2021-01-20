@@ -26,8 +26,8 @@
   "Test for the `extended-loop' rule."
 
   (rule-test-cases ((syn::extended-loop syn::special-operators))
-    '((:named foo :with 1)
-      :fatal 1 "variable name must be a symbol")))
+    '((:named 1)           :fatal 1 "name must be a symbol")
+    '((:named foo :with 1) :fatal 1 "variable name must be a symbol")))
 
 #+TODO (defrule loop-with-clauses-helper ()
    (list :skip (* (loop-with-clause)))
@@ -46,4 +46,4 @@
 
   (syntax-test-cases (loop)
     '((loop)           (syn::clauses (:loop)))
-    '((loop named foo) (syn::clauses (:loop :name foo)))))
+    '((loop named foo) (syn::clauses (:loop :name foo :variable-clauses () :main-clauses ())))))
