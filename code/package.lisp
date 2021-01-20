@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,13 +11,17 @@
   (:local-nicknames
    (#:a  #:alexandria)
 
+   (#:parser #:parser.packrat)
+   (#:bp     #:architecture.builder-protocol)
+
    (#:eg #:s-expression-syntax.expression-grammar))
 
   (:import-from #:parser.packrat
    #:defrule)
 
   (:import-from #:parser.packrat.grammar.base
-   #:<- #:<<- #:guard #:must)
+   #:<- #:<<- #:guard #:must
+   #:value)
 
   (:import-from #:parser.packrat.grammar.sequence
    #:seq #:? #:bounds) ; bounds is for format
@@ -57,8 +61,4 @@
 
   ;; Macros
   (:export
-   #:define-syntax)
-
-  (:local-nicknames
-   (#:parser #:parser.packrat)
-   (#:bp     #:architecture.builder-protocol)))
+   #:define-syntax))
