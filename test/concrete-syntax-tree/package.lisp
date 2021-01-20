@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the concrete-syntax-tree module.
 ;;;;
-;;;; Copyright (C) 2020 Jan Moringen
+;;;; Copyright (C) 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

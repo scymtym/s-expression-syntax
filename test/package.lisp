@@ -1,3 +1,9 @@
+;;;; package.lisp --- Package definition for tests of the s-expression-syntax system.
+;;;;
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;;
+;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
 (cl:defpackage #:syntax.test
   (:use
    #:cl
