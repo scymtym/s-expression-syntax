@@ -4,18 +4,22 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:syntax.concrete-syntax-tree.test
+(cl:defpackage #:s-expression-syntax.concrete-syntax-tree.test
   (:use
    #:cl
 
    #:fiveam)
 
+  (:local-nicknames
+   (#:syn #:s-expression-syntax)
+   (#:eg  #:s-expression-syntax.expression-grammar))
+
   (:export
    #:run-tests))
 
-(cl:in-package #:syntax.concrete-syntax-tree.test)
+(cl:in-package #:s-expression-syntax.concrete-syntax-tree.test)
 
-(def-suite :syntax.concrete-syntax-tree)
+(def-suite :s-expression-syntax.concrete-syntax-tree)
 
 (defun run-tests ()
-  (run! :syntax.concrete-syntax-tree))
+  (run! :s-expression-syntax.concrete-syntax-tree))

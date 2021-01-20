@@ -1,15 +1,15 @@
 ;;;; grammar.lisp --- Grammar for special operator and standard macros.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 ;;; Grammar
 
 (parser:defgrammar special-operators
-  (:class syntax.expression-grammar::expression-grammar)
+  (:class eg::expression-grammar)
   (:use names
         lambda-lists
         destructuring-lambda-list

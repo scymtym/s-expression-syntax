@@ -4,19 +4,19 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.concrete-syntax-tree.test)
+(cl:in-package #:s-expression-syntax.concrete-syntax-tree.test)
 
-(in-suite :syntax.concrete-syntax-tree)
+(in-suite :s-expression-syntax.concrete-syntax-tree)
 
 (defmacro rule-test-cases (((rule grammar) &rest arguments) &body cases)
-  `(let ((syntax.expression-grammar:*client* syntax.concrete-syntax-tree::*client*))
-     (syntax.test::rule-test-cases ((,rule ,grammar) ,@arguments)
+  `(let ((eg:*client* s-expression-syntax.concrete-syntax-tree::*client*))
+     (s-expression-syntax.test::rule-test-cases ((,rule ,grammar) ,@arguments)
        ,@cases)))
 
 (test names.smoke
   "Smoke test for using the `cst-client' with names."
 
-  (rule-test-cases ((syntax::function-name syntax::names))
+  (rule-test-cases ((syn::function-name syn::names))
     (list (cst:cst-from-expression 1) nil t nil)
 
     (let ((cst (cst:cst-from-expression 'a)))
@@ -28,7 +28,7 @@
 (test lambda-lists.smoke
   "Smoke test for using the `cst-client' with lambda list."
 
-  (rule-test-cases ((syntax::specialized-lambda-list syntax::lambda-lists)
+  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists)
                     (make-hash-table :test #'eq))
     (let* ((a           (cst:cst-from-expression 'a))
            (specializer (cst:cst-from-expression 'integer))

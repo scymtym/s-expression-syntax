@@ -1,4 +1,4 @@
-#+TITLE:    syntax README
+#+TITLE:    s-expression-syntax README
 #+AUTHOR:   Jan Moringen
 #+EMAIL:    jmoringe@techfak.uni-bielefeld.de
 #+LANGUAGE: en
@@ -7,13 +7,13 @@
 #+SEQ_TODO: TODO STARTED | DONE
 
 #+BEGIN_SRC lisp :exports both :results silent
-  (ql:quicklaod :syntax)
+  (ql:quicklaod :s-expression-syntax)
 #+END_SRC
 
 * STARTED Introduction
 
-  The ~syntax~ library provides declarative rules for parsing the
-  various bits of Common Lisp's s-expression syntax:
+  The ~s-expression-syntax~ library provides declarative rules for
+  parsing the various bits of Common Lisp's s-expression syntax:
 
   + Special operators
 
@@ -25,22 +25,26 @@
 
   + Standard macros
 
+    + ~cl:loop~
+
+  + Feature expressions
+
 * STARTED Tutorial
 
   #+BEGIN_SRC lisp :exports both :results output
-    (let* ((syntax     (syntax:find-syntax 'let))
+    (let* ((syntax     (s-expression-syntax:find-syntax 'let))
            (form       '(let ((a 1) (b 2))
                           (declare (type integer a))
                           (declare (type integer b))
                           (format t "~S" a)
                           (list a b)))
-           (components (syntax:parse t syntax form)))
+           (components (s-expression-syntax:parse t syntax form)))
       (loop :for (component-name form) :on components :by #'cddr
-            :for component = (syntax:find-component component-name syntax)
+            :for component = (s-expression-syntax:find-component component-name syntax)
             :do (format t "~16A -> ~16S~%~2@Tcardinality: ~S~%~2@Tevaluation:  ~S~2%"
                         component-name form
-                        (syntax:cardinality component)
-                        (syntax:evaluation component))))
+                        (s-expression-syntax:cardinality component)
+                        (s-expression-syntax:evaluation component))))
   #+END_SRC
 
   #+RESULTS:

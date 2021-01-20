@@ -1,10 +1,10 @@
 ;;;; conditions.lisp --- Conditions signaled by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 ;;;
 

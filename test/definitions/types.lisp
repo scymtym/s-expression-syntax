@@ -1,18 +1,18 @@
 ;;;; types.lisp --- Tests for type specifier rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :syntax.type-specifiers
-  :in :syntax)
+(def-suite* :s-expression-syntax.type-specifiers
+  :in :s-expression-syntax)
 
 (test type-specifier
   "Smoke test for the `type-specifier' rule."
 
-  (rule-test-cases ((syntax::type-specifier syntax::type-specifiers))
+  (rule-test-cases ((syn::type-specifier syn::type-specifiers))
     `(1                  nil nil nil)
     `((1)                nil nil nil)
 

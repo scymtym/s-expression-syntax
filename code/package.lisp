@@ -4,12 +4,14 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:syntax
+(cl:defpackage #:s-expression-syntax
   (:use
    #:cl)
 
   (:local-nicknames
-   (#:a #:alexandria))
+   (#:a  #:alexandria)
+
+   (#:eg #:s-expression-syntax.expression-grammar))
 
   (:import-from #:parser.packrat
    #:defrule)
@@ -19,9 +21,6 @@
 
   (:import-from #:parser.packrat.grammar.sequence
    #:seq #:? #:bounds) ; bounds is for format
-
-  (:import-from #:syntax.expression-grammar
-   #:once)
 
   ;; Conditions
   (:export

@@ -1,10 +1,10 @@
 ;;;; package.lisp --- Package definition for the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:syntax.expression-grammar
+(cl:defpackage #:s-expression-syntax.expression-grammar
   (:use
    #:cl
    #:let-plus)
@@ -37,4 +37,8 @@
    #:rest*
 
    #:equal*
-   #:eql*))
+   #:eql*)
+
+  ;; Grammar rule macros
+  (:export
+   #:once))

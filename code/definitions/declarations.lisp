@@ -1,13 +1,13 @@
 ;;;; declarations.lisp --- Rules for parsing declarations.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 (parser:defgrammar declarations
-  (:class syntax.expression-grammar::expression-grammar)
+  (:class eg::expression-grammar)
   (:use names
         type-specifiers))
 

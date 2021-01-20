@@ -1,18 +1,18 @@
 ;;;; declarations.lisp --- Tests for declaration rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :syntax.declarations
-  :in :syntax)
+(def-suite* :s-expression-syntax.declarations
+  :in :s-expression-syntax)
 
 (test declaration
   "Smoke test for the `declaration' rule."
 
-  (rule-test-cases ((declaration syntax::special-operators))
+  (rule-test-cases ((declaration syn::special-operators))
     `((1)                    :fatal nil "declaration kind must be a symbol")
 
     `((type 1 a)             :fatal nil "must be a type specifier")

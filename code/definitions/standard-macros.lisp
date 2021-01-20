@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 (parser:in-grammar special-operators)
 
@@ -141,14 +141,14 @@
   (or :instance :class))
 
 #+unused (define-syntax slot-options
-    (list (* (or (seq :reader        (<<- readers        (must (function-name/symbol)))) ; TODO fail for something like :reader 1
-                 (seq :writer        (<<- writers        (must (function-name))))
-                 (seq :accessor      (<<- accessor       (must (function-name/symbol))))
-                 (seq :allocation    (once allocation    (must (allocation-type))))
-                 (seq :initarg       (<<- initargs       (must (guard symbolp))))
-                 (seq :initform      (once initform      ((form! forms))))
-                 (seq :type          (once type          (type-specifier)))
-                 (seq :documentation (once documentation ((documentation-string! forms)))
+    (list (* (or (seq :reader        (<<- readers           (must (function-name/symbol)))) ; TODO fail for something like :reader 1
+                 (seq :writer        (<<- writers           (must (function-name))))
+                 (seq :accessor      (<<- accessor          (must (function-name/symbol))))
+                 (seq :allocation    (eg:once allocation    (must (allocation-type))))
+                 (seq :initarg       (<<- initargs          (must (guard symbolp))))
+                 (seq :initform      (eg:once initform      ((form! forms))))
+                 (seq :type          (eg:once type          (type-specifier)))
+                 (seq :documentation (eg:once documentation ((documentation-string! forms)))
                        )
                  (seq (<<- option-names  (guard symbolp))
                        (<<- option-values)))))
@@ -168,18 +168,18 @@
     (or (and (not (list* :any)) (<- name ((slot-name! names))))
         (list (must (<- name ((slot-name! names))) "slot must have a name")
               #+no (<- options (slot-options))
-              (* (or (seq :reader        (<<- readers        (must ((function-name/symbol names))
-                                                                   "reader must be a symbol function name")))
-                     (seq :writer        (<<- writers        (must ((function-name names))
-                                                                   "writer must be an extended function name")))
-                     (seq :accessor      (<<- accessors      (must ((function-name/symbol names))
-                                                                   "accessor must be a symbol function name")))
-                     (seq :allocation    (once allocation    (must (allocation-type))))
-                     (seq :initarg       (<<- initargs       (must (guard symbolp)
-                                                                   "initarg must be a symbol")))
-                     (seq :initform      (once initform      ((form! forms))))
-                     (seq :type          (once type          ((type-specifier! type-specifiers))))
-                     (seq :documentation (once documentation ((documentation-string! forms))))
+              (* (or (seq :reader        (<<- readers           (must ((function-name/symbol names))
+                                                                      "reader must be a symbol function name")))
+                     (seq :writer        (<<- writers           (must ((function-name names))
+                                                                      "writer must be an extended function name")))
+                     (seq :accessor      (<<- accessors         (must ((function-name/symbol names))
+                                                                      "accessor must be a symbol function name")))
+                     (seq :allocation    (eg:once allocation    (must (allocation-type))))
+                     (seq :initarg       (<<- initargs          (must (guard symbolp)
+                                                                      "initarg must be a symbol")))
+                     (seq :initform      (eg:once initform      ((form! forms))))
+                     (seq :type          (eg:once type          ((type-specifier! type-specifiers))))
+                     (seq :documentation (eg:once documentation ((documentation-string! forms))))
                      (seq (<<- option-names  (guard symbolp))
                           (<<- option-values))))))
   ((name    1)
@@ -209,8 +209,8 @@
                                           (<<- default-initforms :any))
                                      "default initarg must a symbol followed by an expression"))))
                  (list :metaclass
-                       (must (once metaclass ((class-name names))) "metaclass must be a class name"))
-                 (list :documentation (once documentation ((documentation-string! forms))))
+                       (must (eg:once metaclass ((class-name names))) "metaclass must be a class name"))
+                 (list :documentation (eg:once documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
                         (<<- option-values)))))
@@ -244,11 +244,11 @@
     (list (<- name ((function-name! names)))
           (<- lambda-list ((generic-function-lambda-list lambda-lists) 'nil))
           (* (or ;; Standard options
-                 (list :generic-function-class    (once generic-function-class ((class-name! names))))
-                 (list :argument-precedence-order (once argument-precedence-order (guard (must (or :most-specific-first ; TODO how to force this `must' to work on the value context?
+                 (list :generic-function-class    (eg:once generic-function-class ((class-name! names))))
+                 (list :argument-precedence-order (eg:once argument-precedence-order (guard (must (or :most-specific-first ; TODO how to force this `must' to work on the value context?
                                                                                                  :most-specific-last))
                                                                                         symbolp)))
-                 (list :documentation             (once documentation ((documentation-string! forms))))
+                 (list :documentation             (eg:once documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-names (guard keywordp))
                         (<<- option-values)))))
@@ -299,7 +299,7 @@
     (list (must (<- name (string-designator!)) "name is required")
           ;; TODO (* (and :any (must (or …) "unknown options"))
           (* (or (list :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
-                 (list :documentation (once documentation ((documentation-string! forms))))
+                 (list :documentation (eg:once documentation ((documentation-string! forms))))
                  (list :use           (* (<<- use (and :any (package-designator!)))))
                  (list :shadow        (* (<<- shadow (guard symbolp))))
                  (list :shadowing-import-from
@@ -318,7 +318,7 @@
                                                     (setf temp '())))))
                  (list :export (* (<<- export (and :any (string-designator!)))))
                  (list :intern (* (<<- intern (and :any (string-designator!)))))
-                 (list :size   (once size (guard (typep '(integer 0)))))
+                 (list :size   (eg:once size (guard (typep '(integer 0)))))
                  (non-standard-package-option)
                  (list* (must (not :any) "unknown option") :any)
                  (and :any (must (guard (not :any) atom) "options must be list")))))

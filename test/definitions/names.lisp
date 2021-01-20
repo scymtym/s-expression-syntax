@@ -1,20 +1,20 @@
 ;;;; names.lisp --- Tests for name-related rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :syntax.names
-  :in :syntax)
+(def-suite* :s-expression-syntax.names
+  :in :s-expression-syntax)
 
 ;;; Names
 
 (test variable-name
   "Smoke test for the `variable-name' rule."
 
-  (rule-test-cases ((syntax::variable-name syntax::names))
+  (rule-test-cases ((syn::variable-name syn::names))
     '(1    nil 1    nil)
     '(:foo nil :foo nil)
     '(nil  nil nil  nil)
@@ -25,7 +25,7 @@
 (test variable-name!
   "Smoke test for the `variable-name!' rule."
 
-  (rule-test-cases ((syntax::variable-name! syntax::names))
+  (rule-test-cases ((syn::variable-name! syn::names))
     '(1    :fatal 1    "variable name must be a symbol")
     '(:foo :fatal :foo "variable name must not be a keyword")
     '(nil  :fatal nil  "variable name must not designate a constant")
@@ -36,7 +36,7 @@
 (test function-name
   "Smoke test for the `function-name' rule."
 
-  (rule-test-cases ((syntax::function-name syntax::names))
+  (rule-test-cases ((syn::function-name syn::names))
     '(1           nil    1          nil)
     '(nil         nil    nil        nil)
     '(foo         t      foo        foo)
@@ -49,7 +49,7 @@
 (test function-reference
   "Smoke test for `function-reference' rule."
 
-  (rule-test-cases ((syntax::function-reference syntax::names))
+  (rule-test-cases ((syn::function-reference syn::names))
     '((function 1)           :fatal nil                   "must be a function name")
     '((function nil)         :fatal nil                   "must be a function name")
     '((function foo)         t      (function foo)        (function foo))

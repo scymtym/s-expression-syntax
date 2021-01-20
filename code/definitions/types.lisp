@@ -1,13 +1,13 @@
 ;;;; types.lisp --- Rules for parsing type specifiers.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 (parser:defgrammar type-specifiers
-  (:class syntax.expression-grammar::expression-grammar))
+  (:class eg::expression-grammar))
 
 (parser:in-grammar type-specifiers)
 

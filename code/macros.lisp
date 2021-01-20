@@ -1,10 +1,10 @@
 ;;;; macros.lisp --- Macros provided by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 (defmacro define-syntax (name syntax components &rest options)
   (let ((documentation   (second (find :documentation options :key #'first)))

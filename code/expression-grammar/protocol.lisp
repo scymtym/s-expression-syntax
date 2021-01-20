@@ -1,10 +1,10 @@
 ;;;; protocol.lisp --- Protocol provided by the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.expression-grammar)
+(cl:in-package #:s-expression-syntax.expression-grammar)
 
 ;;; TODO have the client return a bunch of functions at the beginning
 ;;;      of each rule and make them available lexically?

@@ -1,10 +1,10 @@
 ;;;; grammar.lisp --- Grammar class, compilation rules for the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2020 Jan Moringen
+;;;; Copyright (C) 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.expression-grammar)
+(cl:in-package #:s-expression-syntax.expression-grammar)
 
 ;;; grammar
 

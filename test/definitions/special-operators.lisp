@@ -4,31 +4,31 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :syntax.special-operators
-  :in :syntax)
+(def-suite* :s-expression-syntax.special-operators
+  :in :s-expression-syntax)
 
 ;;; Utilities
 
 (defun check-roundtrip (special-operator form)
-  (let ((syntax   (find-syntax special-operator))
+  (let ((syntax   (syn:find-syntax special-operator))
          ; (parser   (sb-c::special-operator-info-parser info))
          ; (unparser (sb-c::special-operator-info-unparser info))
         )
-    (finishes (parse nil syntax form))
-    ; (assert (equal form (parse nil syntax form)))
+    (finishes (syn:parse nil syntax form))
+    ; (assert (equal form (syn:parse nil syntax form)))
     ))
 
 (defun check-roundtrip-cases (special-operator &rest forms)
   (dolist (form forms) (check-roundtrip special-operator form)))
 
 (defun check-error (special-operator form expected-error)
-  (let ((syntax (find-syntax special-operator))
+  (let ((syntax (syn:find-syntax special-operator))
          ; (parser (sb-c::special-operator-info-parser info))
         )
-    (signals invalid-syntax-error
-      (parse nil syntax form))))
+    (signals syn:invalid-syntax-error
+      (syn:parse nil syntax form))))
 
 (defun check-error-cases (special-operator &rest specs)
   (loop :for (form expected-error) :in specs
@@ -43,8 +43,8 @@
    'progn
    '((progn . 1) foo))
 
-  (is (equal '(syntax::forms ())
-             (parse nil (find-syntax 'progn) '(progn)))))
+  (is (equal '(syn::forms ())
+             (syn:parse nil (syn:find-syntax 'progn) '(progn)))))
 
 (test if
   "Test for `if' special operator."
@@ -62,8 +62,8 @@
 (test block
   "Test for `block' special operator."
 
-  (is (equal '(syntax::name foo syntax::forms (1))
-             (parse nil (find-syntax 'block) '(block foo 1))))
+  (is (equal '(syn::name foo syn::forms (1))
+             (syn:parse nil (syn:find-syntax 'block) '(block foo 1))))
   (check-error-cases 'block
                      '(block))
   (check-roundtrip-cases '(block foo a b)))
@@ -71,10 +71,10 @@
 (test return-from
   "Test for `return-from' special operator."
 
-  (is (equal '(syntax::name foo syntax::value 1)
-             (parse nil (find-syntax 'return-from) '(return-from foo 1))))
-  (is (equal '(syntax::name foo syntax::value nil)
-             (parse nil (find-syntax 'return-from) '(return-from foo))))
+  (is (equal '(syn::name foo syn::value 1)
+             (syn:parse nil (syn:find-syntax 'return-from) '(return-from foo 1))))
+  (is (equal '(syn::name foo syn::value nil)
+             (syn:parse nil (syn:find-syntax 'return-from) '(return-from foo))))
   #+TODO (apply #'unparse-return-from-special-operator
                 (parse-return-from-special-operator
                  (lambda (&rest args) (print args))
@@ -84,17 +84,17 @@
   "Test for the `return' special operator"
 
   (syntax-test-cases (return)
-    '((return (declare)) invalid-syntax-error)
-    '((return 1 2)       invalid-syntax-error)
+    '((return (declare)) syn:invalid-syntax-error)
+    '((return 1 2)       syn:invalid-syntax-error)
 
-    '((return)           (value nil))
-    '((return 1)         (value 1))))
+    '((return)           (syn::value nil))
+    '((return 1)         (syn::value 1))))
 
 (test tagbody
   "Test for `tagbody' special operator."
 
-  (parse nil (find-syntax 'tagbody) '(tagbody 0 1 "bla" "bli" 2 (list 1) (list 3)))
-  (parse nil (find-syntax 'tagbody) '(tagbody (1+ a) (1+ b) :foo))
+  (syn:parse nil (syn:find-syntax 'tagbody) '(tagbody 0 1 "bla" "bli" 2 (list 1) (list 3)))
+  (syn:parse nil (syn:find-syntax 'tagbody) '(tagbody (1+ a) (1+ b) :foo))
 
   (check-error-cases 'tagbody
                      '((tagbody nil nil) program-error))
@@ -117,7 +117,7 @@
 (test go
   "test for `go' special operator."
 
-  (is (equal '(syntax::tag 1) (parse nil (find-syntax 'go) '(go 1)))))
+  (is (equal '(syn::tag 1) (syn:parse nil (syn:find-syntax 'go) '(go 1)))))
 
 ;;;; Compiler-magic special forms
 ;;;; TODO test internal ones as well
@@ -125,16 +125,16 @@
 (test eval-when
   "Test for `eval-when' special operator."
 
-  (is (equal '(syntax::situations (:execute) syntax::forms (1))
-             (parse nil (find-syntax 'eval-when) '(eval-when (:execute) 1))))
+  (is (equal '(syn::situations (:execute) syn::forms (1))
+             (syn:parse nil (syn:find-syntax 'eval-when) '(eval-when (:execute) 1))))
   ;; TODO
   )
 
 (test load-time-value
   "Test for `load-time-value' special operator"
 
-  (is (equal '(syntax::form foo syntax::read-only-p nil)
-             (parse nil (find-syntax 'load-time-value) '(load-time-value foo nil))))
+  (is (equal '(syn::form foo syn::read-only-p nil)
+             (syn:parse nil (syn:find-syntax 'load-time-value) '(load-time-value foo nil))))
 
   #+no (check-error-cases 'load-time-value
                      '((load-time-value) sb-kernel::arg-count-error)
@@ -148,8 +148,8 @@
 (test quote
   "Test for `quote' special operator."
 
-  (is (equal '(syntax::material 1)
-             (parse nil (find-syntax 'quote) '(quote 1))))
+  (is (equal '(syn::material 1)
+             (syn:parse nil (syn:find-syntax 'quote) '(quote 1))))
   #+no (check-error-cases 'quote
                      '((quote) sb-kernel::arg-count-error)
                      '((quote x y) sb-kernel::arg-count-error))
@@ -161,24 +161,24 @@
 (test function
   "Test for `function' special operator."
 
-  (is (equal '(name foo
-               syntax::lambda-list ()
+  (is (equal '(syn::name foo
+               syn::lambda-list ()
                documentation nil
-               syntax::declarations ()
-               syntax::forms ())
-             (parse nil (find-syntax 'function) '(function foo))))
-  (is (equal '(name (setf foo)
-               syntax::lambda-list ()
+               syn::declarations ()
+               syn::forms ())
+             (syn:parse nil (syn:find-syntax 'function) '(function foo))))
+  (is (equal '(syn::name (setf foo)
+               syn::lambda-list ()
                documentation nil
-               syntax::declarations ()
-               syntax::forms ())
-             (parse nil (find-syntax 'function) '(function (setf foo)))))
-  (is (equal '(name nil
-               syntax::lambda-list ((a) () b () nil ())
+               syn::declarations ()
+               syn::forms ())
+             (syn:parse nil (syn:find-syntax 'function) '(function (setf foo)))))
+  (is (equal '(syn::name nil
+               syn::lambda-list ((a) () b () nil ())
                documentation nil
-               syntax::declarations nil
-               syntax::forms ((foo)))
-             (parse nil (find-syntax 'function) '(function (lambda (a &rest b) (foo))))))
+               syn::declarations nil
+               syn::forms ((foo)))
+             (syn:parse nil (syn:find-syntax 'function) '(function (lambda (a &rest b) (foo))))))
 
   #+no (check-error-cases 'function
                      '((function) sb-kernel::arg-count-error)
@@ -197,11 +197,11 @@
 (test symbol-macrolet
   "Test for `symbol-macrolet' special operator."
 
-  (is (equal '(syntax::names (foo bar)
+  (is (equal '(syn::names (foo bar)
                values (1 2)
-               syntax::declarations nil
-               syntax::forms ((list foo bar)))
-             (parse nil (find-syntax 'symbol-macrolet)
+               syn::declarations nil
+               syn::forms ((list foo bar)))
+             (syn:parse nil (syn:find-syntax 'symbol-macrolet)
                     '(symbol-macrolet ((foo 1) (bar 2)) (list foo bar)))))
 
   (check-error-cases 'symbol-macrolet
@@ -215,8 +215,8 @@
 (test let
   "Test for `let' special operator."
 
-  (is (equal '(syntax::names (foo bar) syntax::values (1 2) syntax::declarations () syntax::forms ((list foo bar)))
-             (parse nil (find-syntax 'let) '(let ((foo 1) (bar 2)) (list foo bar)))))
+  (is (equal '(syn::names (foo bar) syn::values (1 2) syn::declarations () syn::forms ((list foo bar)))
+             (syn:parse nil (syn:find-syntax 'let) '(let ((foo 1) (bar 2)) (list foo bar)))))
   #+no (check-error-cases 'let
                      '((let) sb-kernel::arg-count-error))
   (check-roundtrip-cases 'let
@@ -235,8 +235,8 @@
 (test locally
   "Test for `locally' special operator."
 
-  (is (equal '(syntax::declarations ((type (integer x)) (type (double-float x))) syntax::forms (x))
-             (parse nil (find-syntax 'locally) '(locally (declare (type integer x) (type double-float x)) x))))
+  (is (equal '(syn::declarations ((type (integer x)) (type (double-float x))) syn::forms (x))
+             (syn:parse nil (syn:find-syntax 'locally) '(locally (declare (type integer x) (type double-float x)) x))))
 
   (check-roundtrip-cases 'locally
                          '(locally)
@@ -259,14 +259,14 @@
 (test macrolet
   "Test for `macrolet' special operator."
 
-  (is (equal '(syntax::names (foo bar baz)
-               syntax::functions
-               ((syntax::parsed-lambda ((a b) () bla () nil ()) nil nil ((list a b)))
-                (syntax::parsed-lambda (() () nil () nil ()) nil nil ("not-doc-string"))
-                (syntax::parsed-lambda (() () nil () nil ()) "doc-string" nil (1)))
-               syntax::declarations nil
-               syntax::forms ((foo 1 2)))
-             (parse nil (find-syntax 'macrolet) '(macrolet ((foo (a b &rest bla) (list a b))
+  (is (equal '(syn::names (foo bar baz)
+               syn::functions
+               ((syn::parsed-lambda ((a b) () bla () nil ()) nil nil ((list a b)))
+                (syn::parsed-lambda (() () nil () nil ()) nil nil ("not-doc-string"))
+                (syn::parsed-lambda (() () nil () nil ()) "doc-string" nil (1)))
+               syn::declarations nil
+               syn::forms ((foo 1 2)))
+             (syn:parse nil (syn:find-syntax 'macrolet) '(macrolet ((foo (a b &rest bla) (list a b))
                                                             (bar ()
                                                               "not-doc-string")
                                                             (baz ()
@@ -309,7 +309,7 @@
 (test the
   "Test for `the' special operator."
 
-  (parse nil (find-syntax 'the) '(the integer x))
+  (syn:parse nil (syn:find-syntax 'the) '(the integer x))
 
   (check-error-cases 'the
                      '((the) #+no sb-kernel::arg-count-error)
@@ -342,7 +342,7 @@
 (test throw
   "Test for `throw' special operator."
 
-  (parse nil (find-syntax 'throw) '(throw (+ 1 2) :value))
+  (syn:parse nil (syn:find-syntax 'throw) '(throw (+ 1 2) :value))
   #+no (check-error-cases 'throw
                      '((throw) sb-kernel::arg-count-error)
                      '((throw 'foo) sb-kernel::arg-count-error)
@@ -354,8 +354,8 @@
 (test catch
   "Test for `catch' special operator."
 
-  (is (equal '(syntax::tag-form (+ 1 2) syntax::forms (:value))
-             (parse nil (find-syntax 'catch) '(catch (+ 1 2) :value))))
+  (is (equal '(syn::tag-form (+ 1 2) syn::forms (:value))
+             (syn:parse nil (syn:find-syntax 'catch) '(catch (+ 1 2) :value))))
   #+no (check-error-cases 'catch
                      '((catch) sb-kernel::arg-count-error))
   (check-roundtrip-cases 'catch
@@ -367,8 +367,8 @@
 (test unwind-protect
   "Test for `unwind-protect' special operator."
 
-  (is (equal '(syntax::protected (progn 1 2) syntax::cleanup (3 4))
-             (parse nil (find-syntax 'unwind-protect) '(unwind-protect (progn 1 2) 3 4))))
+  (is (equal '(syn::protected (progn 1 2) syn::cleanup (3 4))
+             (syn:parse nil (syn:find-syntax 'unwind-protect) '(unwind-protect (progn 1 2) 3 4))))
 
   #+no (check-error-cases 'unwind-protect
                           '((unwind-protect) sb-kernel::arg-count-error))
@@ -382,8 +382,8 @@
 (test multiple-value-call
   "Test for `multiple-value-call' special operator."
 
-  (is (equal '(syntax::function-form foo syntax::arguments (1 2))
-             (parse nil (find-syntax 'multiple-value-call) '(multiple-value-call foo 1 2))))
+  (is (equal '(syn::function-form foo syn::arguments (1 2))
+             (syn:parse nil (syn:find-syntax 'multiple-value-call) '(multiple-value-call foo 1 2))))
   #+no (check-error-cases 'multiple-value-call
                      '((multiple-value-call) sb-kernel::arg-count-error))
   (check-roundtrip-cases 'multiple-value-call
@@ -405,11 +405,11 @@
 (test application
   "Test for the \"application\" pseudo-operator."
 
-  (is (equal '(syntax::abstraction foo syntax::arguments ())
-             (syntax:parse nil (find-syntax 'syntax::application) '(foo))))
-  (is (equal '(syntax::abstraction foo syntax::arguments (1))
-             (syntax:parse nil (find-syntax 'syntax::application) '(foo 1))))
+  (is (equal '(syn::abstraction foo syn::arguments ())
+             (syn:parse nil (syn:find-syntax 'syn::application) '(foo))))
+  (is (equal '(syn::abstraction foo syn::arguments (1))
+             (syn:parse nil (syn:find-syntax 'syn::application) '(foo 1))))
 
-  (is (equal '(syntax::abstraction (((x) () nil () nil ()) nil () (x))
-               syntax::arguments (1))
-             (syntax:parse nil (find-syntax 'syntax::application) '((lambda (x) x) 1)))))
+  (is (equal '(syn::abstraction (((x) () nil () nil ()) nil () (x))
+               syn::arguments (1))
+             (syn:parse nil (syn:find-syntax 'syn::application) '((lambda (x) x) 1)))))

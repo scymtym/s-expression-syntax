@@ -1,10 +1,10 @@
 ;;;; stubs.lisp --- Inlinable functions for common operations.
 ;;;;
-;;;; Copyright (C) 2020 Jan Moringen
+;;;; Copyright (C) 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.expression-grammar)
+(cl:in-package #:s-expression-syntax.expression-grammar)
 
 (declaim (inline %%natural? %natural? %listp %null %first %rest %equal %eql))
 

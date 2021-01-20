@@ -1,27 +1,28 @@
 ;;;; package.lisp --- Package definition for tests of the s-expression-syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:syntax.test
+(cl:defpackage #:s-expression-syntax.test
   (:use
    #:cl
    #:alexandria
 
-   #:fiveam
+   #:fiveam)
 
-   #:syntax)
+  (:local-nicknames
+   (#:syn #:s-expression-syntax))
 
   (:export
    #:run-tests))
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite :syntax)
+(def-suite :s-expression-syntax)
 
 (defun run-tests ()
-  (run! :syntax))
+  (run! :s-expression-syntax))
 
 ;;; Utilities
 
@@ -45,14 +46,14 @@
 (defun %syntax-test-case (syntax case)
   (destructuring-bind (input expected) case
     (flet ((do-it ()
-             (parse nil syntax input)))
+             (syn:parse nil syntax input)))
       (case expected
-        (invalid-syntax-error
-         (signals invalid-syntax-error (do-it)))
+        (syn:invalid-syntax-error
+         (signals syn:invalid-syntax-error (do-it)))
         (t
          (is (equal expected (do-it))))))))
 
 (defmacro syntax-test-cases ((syntax-name) &body cases)
-  `(let ((syntax (find-syntax ',syntax-name)))
+  `(let ((syntax (syn:find-syntax ',syntax-name)))
      (mapc (curry #'%syntax-test-case syntax)
            (list ,@cases))))

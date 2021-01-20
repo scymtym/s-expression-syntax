@@ -4,17 +4,17 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :syntax.lambda-lists
-  :in :syntax)
+(def-suite* :s-expression-syntax.lambda-lists
+  :in :s-expression-syntax)
 
 ;;; Ordinary lambda list
 
 (test keyword-parameter
   "Smoke test for the `keyword-parameter' rule."
 
-  (rule-test-cases ((syntax::keyword-parameter syntax::lambda-lists)
+  (rule-test-cases ((syn::keyword-parameter syn::lambda-lists)
                     (make-hash-table :test #'eq))
     '((x (declare)) :fatal (declare) "declare is not allowed here")
     '(5             :fatal 5         "must be a lambda list variable name")
@@ -23,7 +23,7 @@
 (test ordinary-lambda-list
   "Smoke test for the `ordinary-lambda-list' rule."
 
-  (rule-test-cases ((syntax::ordinary-lambda-list syntax::lambda-lists)
+  (rule-test-cases ((syn::ordinary-lambda-list syn::lambda-lists)
                     (make-hash-table :test #'eq))
     '((&optional (foo (declare)))
       :fatal (declare) "declare is not allowed here")
@@ -51,7 +51,7 @@
 (test specialized-lambda-list
   "Smoke test for the `specialized-lambda-list' rule."
 
-  (rule-test-cases ((syntax::specialized-lambda-list syntax::lambda-lists)
+  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists)
                     (make-hash-table :test #'eq))
     '(((foo 1))
       :fatal 1 "must be a class name")
@@ -72,7 +72,7 @@
 (test destructuring-lambda-list
   "Smoke test for the `destructuring-lambda-list' rule."
 
-  (rule-test-cases ((syntax::destructuring-lambda-list syntax::destructuring-lambda-list)
+  (rule-test-cases ((syn::destructuring-lambda-list syn::destructuring-lambda-list)
                     (make-hash-table :test #'eq))
     '(((foo bar))
       t nil (:destructuring-lambda-list
@@ -116,7 +116,7 @@
 (test deftype-lambda-list
   "Smoke test for the `deftype-lambda-list' rule."
 
-  (rule-test-cases ((syntax::deftype-lambda-list syntax::deftype-lambda-list)
+  (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list)
                     (make-hash-table :test #'eq))
     '((foo bar)
       t nil (:destructuring-lambda-list

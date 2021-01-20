@@ -4,10 +4,10 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 (parser:defgrammar names
-  (:class syntax.expression-grammar::expression-grammar))
+  (:class eg::expression-grammar))
 
 (parser:in-grammar names)
 

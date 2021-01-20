@@ -4,14 +4,14 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(in-suite :syntax)
+(in-suite :s-expression-syntax)
 
 (test body
   "Smoke test for the `body' rule."
 
-  (rule-test-cases ((syntax::body syntax::special-operators))
+  (rule-test-cases ((syn::body syn::special-operators))
     '(()                                          t      nil (() ()))
     ;; No declarations
     '((1)                                         t      nil (() (1)))
@@ -33,7 +33,7 @@
 (test docstring-body
   "Smoke test for the `docstring-body' rule."
 
-  (rule-test-cases ((syntax::docstring-body syntax::special-operators))
+  (rule-test-cases ((syn::docstring-body syn::special-operators))
     ;; Empty
     '(()                           t nil (nil   () ()))
     ;; Only forms

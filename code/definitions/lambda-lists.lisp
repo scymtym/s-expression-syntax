@@ -4,10 +4,10 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax)
+(cl:in-package #:s-expression-syntax)
 
 (parser:defgrammar lambda-lists
-  (:class syntax.expression-grammar::expression-grammar)
+  (:class eg::expression-grammar)
   (:use names
         forms))
 
@@ -74,25 +74,25 @@
 ;;; Reusable sections of lambda lists
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrule (required-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (required-section :environment (make-instance 'eg::expression-environment)) (seen)
       (+ (<<- parameters (required-parameter! seen)))
     (nreverse parameters))
 
-  (defrule (optional-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (optional-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&optional (* (<<- parameters (optional-parameter seen))))
     (nreverse parameters))
 
-  (defrule (rest-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (rest-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&rest (<- parameter (rest-parameter seen)))
     parameter)
 
-  (defrule (keyword-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (keyword-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&key
            (* (<<- keyword-parameters (keyword-parameter seen)))
            (? (<- allow-other-keys? '&allow-other-keys)))
     (list (nreverse keyword-parameters) allow-other-keys?))
 
-  (defrule (aux-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (aux-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&aux (* (<<- parameters (aux-parameter! seen))))
     (nreverse parameters)))
 
@@ -140,7 +140,7 @@
 ;;; 3.4.5 Destructuring Lambda Lists
 
 (parser:defgrammar destructuring-lambda-list
-  (:class syntax.expression-grammar::expression-grammar)
+  (:class eg::expression-grammar)
   (:use lambda-lists))
 
 (parser:in-grammar destructuring-lambda-list)
@@ -151,11 +151,11 @@
         ((unique-variable-name lambda-lists) seen)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrule (whole-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (whole-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&whole (<- name (unique-variable-name! seen)))
     name)
 
-  (defrule (environment-section :environment (make-instance 'syntax.expression-grammar::expression-environment)) (seen)
+  (defrule (environment-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&environment (<- name (unique-variable-name! seen)))
     name))
 
@@ -187,7 +187,7 @@
 ;;; parameter is the symbol * (rather than nil).
 
 (parser:defgrammar deftype-lambda-list
-  (:class syntax.expression-grammar::expression-grammar)
+  (:class eg::expression-grammar)
   (:use destructuring-lambda-list))
 
 (parser:in-grammar deftype-lambda-list)

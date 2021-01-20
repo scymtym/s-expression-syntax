@@ -1,15 +1,15 @@
-(asdf:defsystem "syntax"
+(asdf:defsystem "s-expression-syntax"
   :description "A declarative description of Common Lisp's s-expression syntax."
   :license     "MIT"
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     (:read-file-form "version-string.sexp")
-  :depends-on  ((:version "parser.packrat"                "0.1")
+  :depends-on  ((:version "parser.packrat"                         "0.1")
 
-                (:version "architecture.builder-protocol" "0.10")
+                (:version "architecture.builder-protocol"          "0.10")
 
-                (:version "syntax.expression-grammar"     (:read-file-form "version-string.sexp")))
+                (:version "s-expression-syntax.expression-grammar" (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "base"
                  :pathname   "code"
@@ -44,15 +44,15 @@
                               (:file       "special-operators")
                               (:file       "standard-macros"))))
 
-  :in-order-to ((test-op (test-op "syntax/test"))))
+  :in-order-to ((test-op (test-op "s-expression-syntax/test"))))
 
-(asdf:defsystem "syntax/test"
+(asdf:defsystem "s-expression-syntax/test"
   :version    (:read-file-form "version-string.sexp")
   :depends-on ("alexandria"
 
-               (:version "fiveam" "1.4")
+               (:version "fiveam"              "1.4")
 
-               (:version "syntax" (:read-file-form "version-string.sexp")))
+               (:version "s-expression-syntax" (:read-file-form "version-string.sexp")))
 
   :components ((:module     "test"
                 :serial     t
@@ -75,4 +75,4 @@
                              (:file       "standard-macros"))))
 
   :perform    (test-op (operation component)
-                (uiop:symbol-call '#:syntax.test '#:run-tests)))
+                (uiop:symbol-call '#:s-expression-syntax.test '#:run-tests)))

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.expression-grammar)
+(cl:in-package #:s-expression-syntax.expression-grammar)
 
 (parser.packrat:defgrammar meta-grammar
   (:class   sexp:sexp-grammar)
