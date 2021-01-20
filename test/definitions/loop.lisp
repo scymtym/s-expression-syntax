@@ -4,23 +4,28 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:syntax.test)
+(cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :syntax.standard-macros.loop
-  :in :syntax.standard-macros)
+(def-suite* :s-expression-syntax.standard-macros.loop
+  :in :s-expression-syntax.standard-macros)
 
 ;;; Helper rules
 
 (test loop-form-or-it
 
-  (parser.packrat:parse '(syntax::loop-form-or-it :unconditional) ':it))
+  (parser.packrat:parse '(syn::loop-form-or-it :unconditional) ':it))
+
+(parser.packrat:parse '(syn::extended-loop)
+                      '(:named foo :with 1)
+                      :grammar 'syn::special-operators)
+
 
 ;;; Clauses
 
 (test extended-loop
   "Test for the `extended-loop' rule."
 
-  (rule-test-cases ((syntax::extended-loop syntax::special-operators))
+  (rule-test-cases ((syn::extended-loop syn::special-operators))
     '((:named foo :with 1)
       :fatal 1 "variable name must be a symbol")))
 
@@ -31,7 +36,7 @@
 #+TODO (test loop-with-clause
   "Test for the `loop-with-clause' rule."
 
-  (rule-test-cases ((loop-with-clauses-helper syntax::special-operators))
+  (rule-test-cases ((loop-with-clauses-helper syn::special-operators))
     '((:skip with bar with foo) t t t)))
 
 ;;; `loop' macro
@@ -40,5 +45,5 @@
   "Test for the `loop' standard macro syntax."
 
   (syntax-test-cases (loop)
-    '((loop)           (syntax::clauses (:loop)))
-    '((loop named foo) (syntax::clauses (:loop :name foo)))))
+    '((loop)           (syn::clauses (:loop)))
+    '((loop named foo) (syn::clauses (:loop :name foo)))))
