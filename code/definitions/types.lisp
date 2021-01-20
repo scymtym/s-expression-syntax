@@ -20,6 +20,7 @@
 
 (defrule type-specifier ()
     (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
+         (must (not 'values) "the symbol VALUES is not a valid type specifier")
          (or (guard symbolp) ; TODO control whether * is allowed
              (list (guard symbolp) (* :any)))))
 
@@ -28,9 +29,15 @@
 
 ;;; `values' type specifier
 
+;; TODO The symbol * may not be among the value-types.
 (defrule values-type-specifier ()
     (list 'values
-          (* (<<- required (type-specifier)))
-          (? (seq '&optional (<<- optional (type-specifier))))
-          (? (seq &rest (<- rest (type-specifier))))
-          (? (<- allow-other-keys '&allow-other-keys))))
+          (* (<<- required (and :any
+                                (not (or '&optional '&rest '&allow-other-keys))
+                                (type-specifier!))))
+          (? (seq '&optional (<<- optional (and :any
+                                                (not (or '&rest '&allow-other-keys))
+                                                (type-specifier!)))))
+          (? (seq '&rest (<- rest (type-specifier!))))
+          (? (<- allow-other-keys? '&allow-other-keys)))
+  (list required optional rest allow-other-keys?))

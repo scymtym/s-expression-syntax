@@ -13,9 +13,24 @@
   "Smoke test for the `type-specifier' rule."
 
   (rule-test-cases ((syn::type-specifier syn::type-specifiers))
-    `(1                  nil nil nil)
-    `((1)                nil nil nil)
+    `(1                  nil    nil      nil)
+    `((1)                nil    nil      nil)
+    `(values             :fatal values   "the symbol VALUES is not a valid type specifier")
+    `((values)           :fatal (values) "VALUES type is invalid in this context")
 
     '(bit                t   nil bit)
     '((vector t)         t   nil (vector t))
     '((unsigned-byte 32) t nil (unsigned-byte 32))))
+
+(test values-type-specifier
+  "Smoke test for the `values-type-specifier' rule."
+
+  (rule-test-cases ((syn::values-type-specifier syn::type-specifiers))
+    '(1                          nil nil nil)
+    '(bit                        nil nil nil)
+
+    '((values)                   t nil (() () nil nil))
+    '((values bit)               t nil ((bit) () nil nil))
+    '((values &optional bit)     t nil (() (bit) nil nil))
+    '((values &rest bit)         t nil (() () bit nil))
+    '((values &allow-other-keys) t nil (() () nil &allow-other-keys))))
