@@ -342,7 +342,7 @@ NIL."))
   ((declarations *> :evaluation nil)))
 
 (define-special-operator the
-    (list (<- type ((type-specifier! type-specifiers)))
+    (list (<- type ((type-specifier! type-specifiers))) ; TODO can be a values type
           (<- form ((form! forms))))
   ((type 1 :evaluation nil)
    (form 1 :evaluation t)))
