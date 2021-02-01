@@ -55,6 +55,8 @@
                     (make-hash-table :test #'eq))
     '(((foo 1))
       :fatal 1 "must be a class name")
+    '(((foo t 1))
+      :fatal 1 "must be of the form (NAME SPECIALIZER)")
     '(((foo (eql 1 2)))
       :fatal (1 2) "must be a single object")
 

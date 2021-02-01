@@ -122,8 +122,10 @@
         ((class-name! names))))
 
 (defrule specialized-parameter (seen)
-    (or (list (<- name (required-parameter! seen))
-              (<- specializer (specializer)))
+    (or (and (list* :any)
+             (must (list (<- name (required-parameter! seen))
+                         (<- specializer (specializer)))
+                   "must be of the form (NAME SPECIALIZER)"))
         (<- name (required-parameter! seen)))
   (list name specializer))
 

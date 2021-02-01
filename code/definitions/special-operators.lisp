@@ -100,13 +100,13 @@ NIL."))
                            (:transform
                               (<<- tags (new-tag! tags))
                             (prog1
-                                forms
+                                (nreverse forms)
                               (print forms *trace-output*)
                               (setf forms '()))))
                       (:transform
                          (seq)
                        (unless forms (:fail))
-                       (push forms segments)
+                       (push (nreverse forms) segments)
                        (setf forms '()))))))
   ((tags     * :evaluation nil) #+later (make-instance 'binding-semantics
                                                :namespace 'tag
@@ -154,9 +154,9 @@ NIL."))
   `(member ,@+eval-when-situations+))
 
 (define-special-operator eval-when
-    (list* (list (* (<<- situations (guard (typep 'eval-when-situation)))))
-           forms)
-  ((situations 1 :evaluation nil)
+    (list (list (* (<<- situations (guard (typep 'eval-when-situation)))))
+          (* (<<- forms ((form! forms)))))
+  ((situations * :evaluation nil)
    (forms      * :evaluation t))
   (:documentation
    "EVAL-WHEN (situation*) form*
@@ -271,13 +271,13 @@ NIL."))
 (define-special-operator progv
     (list* (<- symbols ((form! forms))) (<- values ((form! forms)))
            (<- (declarations forms) ((body forms))))
-  ((symbols      1 :evaluation (make-instance 'binding-semantics
-                                              :namespace 'variable
-                                              :scope     :dynamic
-                                              :values    'values))
-   (values       1 :evaluation t)
-   (declarations 1 :evaluation nil)
-   (forms        * :evaluation t))
+  ((symbols      1  :evaluation (make-instance 'binding-semantics
+                                               :namespace 'variable
+                                               :scope     :dynamic
+                                               :values    'values))
+   (values       1  :evaluation t)
+   (declarations 1  :evaluation nil)
+   (forms        *> :evaluation t))
   (:documentation
    "PROGV symbols values form*
 
@@ -378,11 +378,11 @@ NIL."))
 
 (define-special-operator catch
     (list* (<- tag-form ((form! forms))) (<- forms ((forms forms))))
-  ((tag-form  1 :evaluation t #+no (make-instance 'binding-semantics
+  ((tag-form  1  :evaluation t #+no (make-instance 'binding-semantics
                                            :namespace 'tag
                                            :scope     'lexical
                                            :values    nil))
-   (forms     * :evaluation t))
+   (forms     *> :evaluation t))
   (:documentation
    "CATCH tag form*
 
