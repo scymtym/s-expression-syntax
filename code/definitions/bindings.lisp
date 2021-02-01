@@ -45,12 +45,12 @@
 
 (defrule symbol-macro-binding ()
     (list (<- name ((variable-name! names)))
-          (<- value ((form! forms))))
-  (list name value))
+          (<- form ((form! forms))))
+  (list name form))
 
 (defrule symbol-macro-binding! ()
   (must (symbol-macro-binding) "must be a binding of the form (NAME FORM)"))
 
 (defrule symbol-macro-bindings ()
-    (list (* (<<- (names values) (symbol-macro-binding!))))
-  (list (nreverse names) (nreverse values)))
+    (list (* (<<- (names forms) (symbol-macro-binding!))))
+  (list (nreverse names) (nreverse forms)))

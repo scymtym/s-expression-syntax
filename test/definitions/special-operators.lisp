@@ -34,7 +34,7 @@
   (loop :for (form expected-error) :in specs
         :do (check-error special-operator form expected-error)))
 
-;;;; Special operators for control
+;;; Special operators for control
 
 (test progn
   "Test for `progn' special operator."
@@ -57,7 +57,7 @@
                          '(if foo bar)
                          '(if foo bar baz)))
 
-;;; BLOCK, RETURN-FROM and TAGBODY
+;;; Special operators `block', `return-from', `return', `tagbody' and `go'
 
 (test block
   "Test for `block' special operator."
@@ -119,8 +119,7 @@
 
   (is (equal '(syn::tag 1) (syn:parse nil (syn:find-syntax 'go) '(go 1)))))
 
-;;;; Compiler-magic special forms
-;;;; TODO test internal ones as well
+;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
 (test eval-when
   "Test for `eval-when' special operator."
@@ -192,13 +191,13 @@
                          '(function (lambda (x) x))
                          '(function (lambda (x) x y))))
 
-;;;; SYMBOL-MACROLET, LET[*], LOCALLY and PROGV
+;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 
 (test symbol-macrolet
   "Test for `symbol-macrolet' special operator."
 
   (is (equal '(syn::names (foo bar)
-               values (1 2)
+               syn::expansions (1 2)
                syn::declarations nil
                syn::forms ((list foo bar)))
              (syn:parse nil (syn:find-syntax 'symbol-macrolet)
@@ -254,7 +253,7 @@
                          '(progv () () 1)
                          '(progv () () 1 2)))
 
-;;;; MACROLET, FLET and LABELS
+;;; Special operators `macrolet', `flet' and `labels'
 
 (test macrolet
   "Test for `macrolet' special operator."
@@ -304,7 +303,7 @@
                          '(labels ((f ())))
                          '(labels ((f (a &rest b) (declare (type string a)) a)))))
 
-;;;; THE
+;;; Special operators `declaim' and `the'
 
 (test the
   "Test for `the' special operator."
@@ -318,7 +317,7 @@
   (check-roundtrip-cases 'the
                          '(the symbol 1)))
 
-;;;; SETQ
+;;; Special operator `setq'
 
 (define-symbol-macro special-operators.setq.global
     (cdr foo))
@@ -337,7 +336,7 @@
                          '(setq a 1 b 2)
                          '(setq special-operators.setq.global 1)))
 
-;;;; THROW, CATCH and UNWIND-PROTECT
+;;; Special operators `throw', `catch' and `unwind-protect'
 
 (test throw
   "Test for `throw' special operator."
@@ -377,7 +376,7 @@
                          '(unwind-protect foo bar)
                          '(unwind-protect foo bar baz)))
 
-;;;; multiple-value stuff
+;;; Special operators for multiple values
 
 (test multiple-value-call
   "Test for `multiple-value-call' special operator."
@@ -385,7 +384,7 @@
   (is (equal '(syn::function-form foo syn::arguments (1 2))
              (syn:parse nil (syn:find-syntax 'multiple-value-call) '(multiple-value-call foo 1 2))))
   #+no (check-error-cases 'multiple-value-call
-                     '((multiple-value-call) sb-kernel::arg-count-error))
+                          '((multiple-value-call) sb-kernel::arg-count-error))
   (check-roundtrip-cases 'multiple-value-call
                          '(multiple-value-call fun)
                          '(multiple-value-call fun 1)))
@@ -400,7 +399,7 @@
                          '(multiple-value-prog1 1 2)
                          '(multiple-value-prog1 1 2 3)))
 
-;;; Application
+;;; Pseudo-operator "application"
 
 (test application
   "Test for the \"application\" pseudo-operator."

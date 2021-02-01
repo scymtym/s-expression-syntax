@@ -8,7 +8,7 @@
 
 (parser:in-grammar special-operators)
 
-;;;; Special operators for control
+;;; Special operators for control
 
 (define-special-operator progn
     (list* (<- forms ((forms forms))))
@@ -33,7 +33,7 @@ If TEST evaluates to true, evaluate THEN and return its values,
 otherwise evaluate ELSE and return its values. ELSE defaults to
 NIL."))
 
-;;;; `block', `return-from', `return' and `tagbody'
+;;; Special operators `block', `return-from', `return', `tagbody' and `go'
 
 (defrule block-name ()
     (guard name symbolp)
@@ -92,8 +92,6 @@ NIL."))
 (defrule new-tag! (seen)
   (must (new-tag seen) "must be a unique tag name"))
 
-#+test (parser:parse '(test) '(foo foo foz))
-
 ;;; TODO make a rule for parsing segments
 (define-special-operator tagbody
     (list (* (seq (* (<<- forms (and (not (tag)) ((form! forms)))))
@@ -125,26 +123,6 @@ NIL."))
     control is transferred to the next statement following that tag. A
     TAG must be an integer or a symbol. A STATEMENT must be a
     list. Other objects are illegal within the body.")
-  #+no (:parser
-        ;; Collect tags and segments in an alternating manner. We must
-        ;; allow empty segments to not get confused by adjacent tags.
-        (collect ((tags) (segments))
-          (let ((current body))
-            (loop
-              (let ((next-segment (member-if #'atom current)))
-                (unless next-segment
-                  (segments `(progn ,@current))
-                  (return))
-                (let ((tag (car next-segment)))
-                  (when (member tag (tags))
-                    (compiler-error
-                     "~@<The tag ~S appears more than once in a ~S.~@:>"
-                     tag 'tagbody))
-                  (tags tag)
-                  (segments `(progn ,@(ldiff current next-segment))))
-                (setf current (rest next-segment)))))
-          (component :tags     (tags))
-          (component :segments (segments))))
   #+no (:unparser
         ;; Temporarily prepend a NIL tag for ease of implementation.
         (rest (mapcan (lambda (tag segment)
@@ -164,7 +142,7 @@ NIL."))
     TAGBODY. This is constrained to be used only within the dynamic
     extent of the TAGBODY."))
 
-;;;; `eval-when', `load-time-value', `quote' and `function'
+;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
 (a:define-constant +eval-when-situations+
     '(:compile-toplevel compile
@@ -174,17 +152,6 @@ NIL."))
 
 (deftype eval-when-situation ()
   `(member ,@+eval-when-situations+))
-
-;;; Parse an EVAL-WHEN situations list, returning three flags, (VALUES
-;;; COMPILE-TOPLEVEL LOAD-TOPLEVEL EXECUTE), indicating the types of
-;;; situations present in the list.
-#+no-used (defun parse-eval-when-situations (situations)
-  (awhen (intersection situations '(compile load eval))
-    (style-warn "~@<Using deprecated ~S situation name~P ~{~S~^, ~}.~@:>"
-                'eval-when (length it) it))
-  (values (intersection '(:compile-toplevel compile) situations)
-          (intersection '(:load-toplevel load) situations)
-          (intersection '(:execute eval) situations)))
 
 (define-special-operator eval-when
     (list* (list (* (<<- situations (guard (typep 'eval-when-situation)))))
@@ -203,7 +170,9 @@ NIL."))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil))
   (:documentation
-   "Arrange for FORM to be evaluated at load-time and use the value
+   "LOAD-TIME-VALUE form [read-only-p]
+
+    Arrange for FORM to be evaluated at load-time and use the value
     produced as if it were a constant.
 
     If READ-ONLY-P is non-NIL, then the resultant object is guaranteed
@@ -213,63 +182,9 @@ NIL."))
     (list material)
   ((material 1 :evaluation nil))
   (:documentation
-   "Return MATERIAL without evaluating it."))
+   "QUOTE material
 
-;; There are two cases for this special operator:
-;; 1) (function NAME)
-;; 2) (function (lambda LAMBDA-LIST [DECLARATIONS] [DOCUMENTATION] BODY))
-;; which produce disjoint sets of components, namely:
-;; 1) :name NAME
-;; 2) :lambda-list LAMBDA-LIST :declarations DECLARATIONS ...
-;; In 2), the :declarations and :documentation components are omitted
-;; if they are not present in the form being processed.
-#+not-now (define-special-operator function (thing)
-  (;; Components for (function NAME) case.
-   (:name          ? :evaluated nil)
-   ;; Components for (function (lambda (...) ...)) case.
-   (:lambda-list   ? :evaluated nil)
-   (:declarations  t :evaluated nil)
-   (:documentation ? :evaluated nil)
-   (:body          t))
-  #!+sb-doc
-  (:documentation
-   "FUNCTION name
-Return the lexically apparent definition of the function NAME. NAME
-may also be a lambda expression.")
-  (:parser
-   (flet ((process-lambda-like (lambda-list body)
-            ;; Components in reverse evaluation-order.
-            (multiple-value-bind (body declarations documentation)
-                (parse-body body nil)
-              (component :body body)
-              (when documentation
-                (component :documentation documentation))
-              (component :declarations declarations))
-            (component :lambda-list lambda-list)))
-     (cond
-       ((legal-fun-name-p thing)
-        (component :name thing))
-       ((typep thing '(cons (eql lambda) (cons list)))
-        (process-lambda-like (second thing) (nthcdr 2 thing)))
-       ((typep thing '(cons (eql sb!int:named-lambda) (cons list)))
-        (process-lambda-like (third thing) (nthcdr 3 thing)))
-       (t
-        (compiler-error "~@<Invalid argument to ~S special operator: ~
-                       ~S.~@:>"
-                        'function thing)))))
-  (:unparser
-   (list (cond
-           ((componentp :name)
-            (component :name))
-           ((componentp :lambda-list)
-            `(lambda ,(component :lambda-list)
-               ,@(component :declarations)
-               ,@(when (componentp :documentation)
-                   `(,(component :documentation)))
-               ,@(component :body)))
-           (t
-            (error "~@<Exactly one of ~S and ~S must be supplied.~@:>"
-                   :name :lambda-list))))))
+    Return MATERIAL without evaluating it."))
 
 (defrule lambda ()
     (list* 'lambda
@@ -281,45 +196,23 @@ may also be a lambda expression.")
     (list (or (<- name ((function-name names)))
               (<- (lambda-list documentation declarations forms) (lambda))))
   ((name          ?  :evaluation nil)
-   (lambda-list   ?  :evaluation nil)     ; TODO binding
+   (lambda-list   ?  :evaluation nil) ; TODO binding
    (documentation ?  :evaluation nil)
    (declarations  *> :evaluation nil)
    (forms         *> :evaluation t)))
 
-;;;; SYMBOL-MACROLET, LET[*], LOCALLY and PROGV
-
-#+no (defun parse-symbol-macrolet-binding (context spec)
-  (unless (proper-list-of-length-p spec 2)
-    (compiler-error "~@<Malformed symbol-expansion pair in ~S: ~S~@:>"
-                    context spec)) ; TODO should be compiler-error or simple-program-error depending on the context
-  (values (check-variable-name (first spec) "local symbol-macro name")
-          (second spec)))
-
-#+no (defun parse-let-binding (context spec)
-  (multiple-value-bind (name value suppliedp)
-      (cond
-        ((atom spec)
-         spec)
-        ((not (proper-list-of-length-p spec 1 2))
-         (compiler-error "~@<The ~S binding spec ~S is malformed.~@:>"
-                         context spec))
-        (t
-         (values (first spec) (second spec) t)))
-    (values (check-variable-name name "local variable") value suppliedp)))
-
-#+no (defun unparse-let-binding (name value suppliedp)
-  (if suppliedp
-      (list name value)
-      name))
+;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
+;;;
+;;; Lexically scoped bindings of values declarations.
 
 (define-special-operator symbol-macrolet
-    (list* (<- (names values) (symbol-macro-bindings))
+    (list* (<- (names expansions) (symbol-macro-bindings))
            (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace :symbol-macro
                                                :scope     :lexical
                                                :values    'values))
-   (values       *> :evaluation nil)
+   (expansions   *> :evaluation nil)
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t))
   (:documentation
@@ -395,7 +288,9 @@ may also be a lambda expression.")
     bindings \(including making variables unbound) are undone on exit
     from the PROGV form."))
 
-;;;; `macrolet', `flet' and `labels'
+;;; Special operators `macrolet', `flet' and `labels'
+;;;
+;;; Lexically scope bindings of function-ish things.
 
 (define-special-operator parsed-lambda
     (list lambda-list declarations documentation-string body)
@@ -439,7 +334,7 @@ may also be a lambda expression.")
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t)))
 
-;;;; `declaim' and `the'
+;;; Special operators `declaim' and `the'
 
 (define-special-operator declaim
     (list (* (<<- declarations (declaration!)))) ; TODO only free declarations
@@ -451,7 +346,7 @@ may also be a lambda expression.")
   ((type 1 :evaluation nil)
    (form 1 :evaluation t)))
 
-;;; SETQ
+;;; Special operator `setq'
 
 (define-special-operator setq
     (list (* (and :any
@@ -466,15 +361,10 @@ may also be a lambda expression.")
 
     Assign the value of each FORM to the variable name by the
     preceding VAR.")
-  #+no (:parser
-   (multiple-value-bind (names value-forms)
-       (parse-setq-contents form names-and-value-forms)
-     (component :names       names)
-     (component :value-forms value-forms)))
   #+no (:unparser
    (nconc (mapcan #'list (component :names) (component :value-forms)))))
 
-;;;; `throw', `catch' and `unwind-protect'
+;;; Special operators `throw', `catch' and `unwind-protect'
 
 (define-special-operator throw
     (list (<- tag-form ((form! forms))) (<- result-form ((form! forms))))
@@ -514,7 +404,7 @@ may also be a lambda expression.")
     form is exited (either due to normal completion or a non-local
     exit such as THROW)."))
 
-;;;; Multiple value stuff
+;;; Special operators for multiple values
 
 (define-special-operator multiple-value-bind
     (list* (must (list (* (<<- names ((variable-name! names)))))
