@@ -16,10 +16,22 @@
 
   (rule-test-cases ((syn::keyword-parameter syn::lambda-lists)
                     (make-hash-table :test #'eq))
-    '((x (declare)) :fatal (declare) "declare is not allowed here")
-    '(5             :fatal 5         "must be a lambda list variable name")
-    '(((#3=6))     :fatal #3#        "must be a symbol")
-    '(x             t      t         ((keyword x) x nil nil))))
+    '((x (declare))    :fatal (declare) "declare is not allowed here")
+    '(5                :fatal 5         "must be a lambda list variable name")
+    '(((#3=6))         :fatal #3#       "must be a symbol")
+
+    '(#4=x             t      t         (:keyword-parameter (:name ((x))) :source #4#))
+    '(#5=(x 1 xp)      t      t         (:keyword-parameter
+                                         (:name     ((x))
+                                          :default  ((1))
+                                          :supplied ((xp)))
+                                         :source #5#))
+    '(#6=((:x x) 1 xp) t      t         (:keyword-parameter
+                                         (:name     ((x))
+                                          :keyword  ((:x))
+                                          :default  ((1))
+                                          :supplied ((xp)))
+                                         :source #6#))))
 
 (test ordinary-lambda-list
   "Smoke test for the `ordinary-lambda-list' rule."
@@ -34,30 +46,63 @@
     '((&aux (foo (declare)))
       :fatal (declare) "declare is not allowed here")
 
-    '(#4=(&aux a)
-      t nil (:ordinary-lambda-list (:aux (((a nil)))) :source #4#))
+    '(#4=(&aux #5=a)
+      t nil (:ordinary-lambda-list
+             (:aux (((:aux-parameter (:name ((a))) :source #5#))))
+             :source #4#))
 
-    '(#5=(foo bar &optional (hash-table-rehash-size default)
+    '(#6=(#7=foo #8=bar &optional #9=(hash-table-rehash-size default)
           &rest x
-          &key ((:x-kw y) 1 supplied?) b &allow-other-keys &aux (a 1))
+          &key #11=((:x-kw y) 1 supplied?) #12=b &allow-other-keys
+          &aux #13=(a 1))
       t nil (:ordinary-lambda-list
-             (:required         ((foo) (bar))
-              :optional         (((hash-table-rehash-size default nil)))
+             (:required         (((:required-parameter
+                                   (:name ((foo)))
+                                   :source #7#))
+                                 ((:required-parameter
+                                   (:name ((bar)))
+                                   :source #8#)))
+              :optional         (((:optional-parameter
+                                   (:name    ((hash-table-rehash-size))
+                                    :default ((default)))
+                                   :source #9#)))
               :rest             ((x))
-              :keyword          (((:x-kw y 1 supplied?))
-                                 (((keyword b) b nil nil)))
+              :keyword          (((:keyword-parameter
+                                   (:name     ((y))
+                                    :keyword  ((:x-kw))
+                                    :default  ((1))
+                                    :supplied ((supplied?)))
+                                   :source #11#))
+                                 ((:keyword-parameter
+                                   (:name ((b)))
+                                   :source #12#)))
               :allow-other-keys ((&allow-other-keys))
-              :aux              (((a 1))))
-             :source #5#))
+              :aux              (((:aux-parameter
+                                   (:name  ((a))
+                                    :value ((1)))
+                                   :source #13#))))
+             :source #6#))
 
-    '(#6=(foo foo2 &rest pie &key ((:foo bar) :default bar-p)
-          &aux (a 1) b)
+    '(#14=(#15=foo #16=foo2 &rest pie &key #18=((:foo bar) :default bar-p)
+           &aux #19=(a 1) #20=b)
       t nil (:ordinary-lambda-list
-             (:required ((foo) (foo2))
+             (:required (((:required-parameter (:name ((foo))) :source #15#))
+                         ((:required-parameter (:name ((foo2))) :source #16#)))
               :rest     ((pie))
-              :keyword  (((:foo bar :default bar-p)))
-              :aux      (((a 1)) ((b nil))))
-             :source #6#))))
+              :keyword  (((:keyword-parameter
+                           (:name     ((bar))
+                            :keyword  ((:foo))
+                            :default  ((:default))
+                            :supplied ((bar-p)))
+                           :source #18#)))
+              :aux      (((:aux-parameter
+                           (:name  ((a))
+                            :value ((1)))
+                           :source #19#))
+                         ((:aux-parameter
+                           (:name ((b)))
+                           :source #20#))))
+             :source #14#))))
 
 ;;; Specialized lambda list
 
@@ -75,16 +120,23 @@
     '(((baz fez) (foo bar) &rest foo)
       :fatal foo "must be a lambda list variable name")
 
-    '(#4=((baz fez) (foo bar) &rest whoop)
+    '(#4=(#5=(baz fez) #6=(foo bar) &rest whoop)
       t nil (:specialized-lambda-list
-             (:required (((baz fez)) ((foo bar)))
+             (:required (((:specialized-parameter
+                           (:name        ((baz))
+                            :specializer ((fez)))
+                           :source #5#))
+                         ((:specialized-parameter
+                           (:name        ((foo))
+                            :specializer ((bar)))
+                           :source #6#)))
               :rest     ((whoop)))
              :source #4#))
 
-    '(#5=(&aux a)
+    '(#8=(&aux #9=a)
       t nil (:specialized-lambda-list
-             (:aux (((a nil))))
-             :source #5#))))
+             (:aux (((:aux-parameter (:name ((a))):source #9#))))
+             :source #8#))))
 
 ;;; Destructuring lambda list
 
@@ -96,42 +148,65 @@
     '((&environment e1 foo bar #1=&environment e2)
       :fatal #1# "&ENVIRONMENT must not be repeated")
     ;; Valid syntax
-    '(#2=(#3=(foo bar))
+    '(#2=(#3=(#4=foo #5=bar))
       t nil (:destructuring-lambda-list
-             (:required (((:pattern
-                           (:required ((foo) (bar)))
+             (:required (((:required-parameter
+                           (:name (((:pattern
+                                     (:required (((:required-parameter
+                                                   (:name ((foo)))
+                                                   :source #4#))
+                                                 ((:required-parameter
+                                                   (:name ((bar)))
+                                                   :source #5#))))
+                                     :source #3#))))
                            :source #3#))))
              :source #2#))
 
-    '(#4=(&whole whole #5=(foo &key a) . (&rest fez))
+    '(#6=(&whole whole #7=(#8=foo &key #9=a) . #10=(&rest fez))
       t nil (:destructuring-lambda-list
              (:whole    ((whole))
-              :required (((:pattern
-                           (:required ((foo))
-                            :keyword  ((((keyword a) a nil nil))))
-                           :source #5#)))
+              :required (((:required-parameter
+                           (:name (((:pattern
+                                     (:required (((:required-parameter
+                                                   (:name ((foo)))
+                                                   :source #8#)))
+                                      :keyword  (((:keyword-parameter
+                                                   (:name ((a)))
+                                                   :source #9#))))
+                                     :source #7#))))
+                           :source #7#)))
               :rest     ((fez)))
-             :source #4#))
-
-    '(#6=(&optional (#7=(bar baz) (5 6) bar-baz-p))
-      t nil (:destructuring-lambda-list
-             (:optional ((((:pattern
-                            (:required ((bar) (baz)))
-                            :source #7#)
-                           (5 6)
-                           bar-baz-p))))
              :source #6#))
 
-    '(#8=(&aux a (b 1))
+    '(#12=(&optional #13=(#14=(#15=bar #16=baz) (5 6) bar-baz-p))
       t nil (:destructuring-lambda-list
-             (:aux (((a nil)) ((b 1))))
-             :source #8#))
+             (:optional (((:optional-parameter
+                           (:name     (((:pattern
+                                         (:required (((:required-parameter
+                                                       (:name ((bar)))
+                                                       :source #15#))
+                                                     ((:required-parameter
+                                                       (:name ((baz)))
+                                                       :source #16#))))
+                                         :source #14#)))
+                            :default  (((5 6)))
+                            :supplied ((bar-baz-p)))
+                           :source #13#))))
+             :source #12#))
 
-    '(#9=(a . rest)
+    '(#17=(&aux #18=a #19=(b 1))
       t nil (:destructuring-lambda-list
-             (:required ((a))
+             (:aux (((:aux-parameter (:name ((a))) :source #18#))
+                    ((:aux-parameter
+                      (:name ((b)) :value ((1)))
+                      :source #19#))))
+             :source #17#))
+
+    '(#20=(#21=a . rest)
+      t nil (:destructuring-lambda-list
+             (:required (((:required-parameter (:name ((a))) :source #21#)))
               :cdr      ((rest)))
-             :source #9#))))
+             :source #20#))))
 
 ;;; Deftype lambda list
 
@@ -139,7 +214,8 @@
   "Smoke test for the `deftype-lambda-list' rule."
 
   (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list))
-    '(#1=(foo bar)
+    '(#1=(#2=foo #3=bar)
       t nil (:destructuring-lambda-list
-             (:required ((foo) ( bar)))
+             (:required (((:required-parameter (:name ((foo))) :source #2#))
+                         ((:required-parameter (:name ((bar))) :source #3#))))
              :source #1#))))

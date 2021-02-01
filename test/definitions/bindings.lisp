@@ -68,12 +68,19 @@
                                     ()
                                     :source #7#))))
                    :source #6#))))
-    '((#8=(a #9=(&whole w #11=(a b))))
+    '((#8=(a #9=(&whole w #11=(#12=a #13=b))))
       t nil ((a) ((:local-macro-function
                    (:lambda-list (((:destructuring-lambda-list
                                     (:whole    ((w))
-                                     :required (((:pattern
-                                                  (:required ((a) (b)))
+                                     :required (((:required-parameter
+                                                  (:name (((:pattern
+                                                            (:required (((:required-parameter
+                                                                          (:name ((a)))
+                                                                          :source #12#))
+                                                                        ((:required-parameter
+                                                                          (:name ((b)))
+                                                                          :source #13#))))
+                                                            :source #11#))))
                                                   :source #11#))))
                                     :source #9#))))
                    :source #8#))))

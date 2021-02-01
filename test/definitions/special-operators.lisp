@@ -172,11 +172,13 @@
                  (:lambda-list (((:ordinary-lambda-list () :source #10#))))
                  :source #9#))))
      :source #8#))
-  '(#11=(function #12=(lambda #13=(a &rest b) (foo)))
+  '(#11=(function #12=(lambda #13=(#14=a &rest b) (foo)))
     (:function
      (:lambda (((:lambda-expression
                  (:lambda-list (((:ordinary-lambda-list
-                                  (:required ((a))
+                                  (:required (((:required-parameter
+                                                (:name ((a)))
+                                                :source #14#)))
                                    :rest     ((b)))
                                   :source #13#)))
                   :form        (((foo))))
@@ -305,22 +307,29 @@
                                      :source #9#))))
                     :source #8#))))
      :source #7#))
-  '(#10=(macrolet (#11=(f #12=(&whole w #13=(a b) &rest c)
-                        (declare #14=(type string a))
+  '(#10=(macrolet (#11=(f #12=(&whole w #13=(#14=a #15=b) &rest c)
+                        (declare #16=(type string a))
                         a)))
     (:macrolet
      (:names     ((f))
       :functions (((:local-macro-function
                     (:lambda-list  (((:destructuring-lambda-list
                                       (:whole    ((w))
-                                       :required (((:pattern
-                                                    (:required ((a) (b)))
+                                       :required (((:required-parameter
+                                                    (:name (((:pattern
+                                                              (:required (((:required-parameter
+                                                                            (:name ((a)))
+                                                                            :source #14#))
+                                                                          ((:required-parameter
+                                                                            (:name ((b)))
+                                                                            :source #15#))))
+                                                              :source #13#))))
                                                     :source #13#)))
                                        :rest     ((c)))
                                       :source #12#)))
                      :declarations (((:declaration
                                       (:argument ((string) (a)))
-                                      :kind type :source #14#)))
+                                      :kind type :source #16#)))
                      :forms        ((a)))
                     :source #11#))))
      :source #10#))
@@ -356,38 +365,40 @@
                     (:lambda-list (((:ordinary-lambda-list () :source #9#))))
                     :source #8#))))
      :source #7#))
-  '(#10=(flet (#11=(f #12=(a &rest b))))
+  '(#10=(flet (#11=(f #12=(#13=a &rest b))))
     (:flet
      (:names     ((f))
       :functions (((:local-function
                     (:lambda-list (((:ordinary-lambda-list
-                                     (:required ((a))
+                                     (:required (((:required-parameter
+                                                   (:name ((a)))
+                                                   :source #13#)))
                                       :rest     ((b)))
                                      :source #12#))))
                     :source #11#))))
      :source #10#))
-  '(#13=(flet (#14=(f #15=() (declare #16=(type bit a)))))
+  '(#14=(flet (#15=(f #16=() (declare #17=(type bit a)))))
     (:flet
      (:names     ((f))
       :functions (((:local-function
                     (:lambda-list  (((:ordinary-lambda-list
                                       ()
-                                      :source #15#)))
+                                      :source #16#)))
                      :declarations (((:declaration
                                       (:argument ((bit) (a)))
-                                      :kind type :source #16#))))
-                    :source #14#))))
-     :source #13#))
-  '(#17=(flet (#18=(f #19=() a)))
+                                      :kind type :source #17#))))
+                    :source #15#))))
+     :source #14#))
+  '(#18=(flet (#19=(f #20=() a)))
     (:flet
      (:names     ((f))
       :functions (((:local-function
                     (:lambda-list   (((:ordinary-lambda-list
                                        ()
-                                       :source #19#)))
+                                       :source #20#)))
                      :forms         ((a)))
-                    :source #18#))))
-     :source #17#)))
+                    :source #19#))))
+     :source #18#)))
 
 (define-syntax-test (labels)
   '((labels)          syn:invalid-syntax-error)
@@ -408,38 +419,40 @@
                                      :source #9#))))
                     :source #8#))))
      :source #7#))
-  '(#10=(labels (#11=(f #12=(a &rest b))))
+  '(#10=(labels (#11=(f #12=(#13=a &rest b))))
     (:labels
      (:names     ((f))
       :functions (((:local-function
                     (:lambda-list (((:ordinary-lambda-list
-                                     (:required ((a))
+                                     (:required (((:required-parameter
+                                                   (:name ((a)))
+                                                   :source #13#)))
                                       :rest     ((b)))
                                      :source #12#))))
                     :source #11#))))
      :source #10#))
-  '(#13=(labels (#14=(f #15=() (declare #16=(type bit a)))))
+  '(#14=(labels (#15=(f #16=() (declare #17=(type bit a)))))
     (:labels
      (:names     ((f))
       :functions (((:local-function
                     (:lambda-list  (((:ordinary-lambda-list
                                       ()
-                                      :source #15#)))
+                                      :source #16#)))
                      :declarations (((:declaration
                                       (:argument ((bit) (a)))
-                                      :kind type :source #16#))))
-                    :source #14#))))
-     :source #13#))
-  '(#17=(labels (#18=(f #19=() #20=a)))
+                                      :kind type :source #17#))))
+                    :source #15#))))
+     :source #14#))
+  '(#18=(labels (#19=(f #20=() #21=a)))
     (:labels
      (:names     ((f))
       :functions (((:local-function
                     (:lambda-list (((:ordinary-lambda-list
                                      ()
-                                     :source #19#)))
-                     :forms       ((#20#)))
-                    :source #18#))))
-     :source #17#)))
+                                     :source #20#)))
+                     :forms       ((#21#)))
+                    :source #19#))))
+     :source #18#)))
 
 ;;; Special operators `declaim' and `the'
 
@@ -580,11 +593,13 @@
      (:abstraction ((foo))
       :arguments   ((1)))
      :source #5#))
-  '(#6=(#7=(lambda #8=(x) x) 1)
+  '(#6=(#7=(lambda #8=(#9=x) x) 1)
     (:application
      (:abstraction (((:lambda-expression
                       (:lambda-list (((:ordinary-lambda-list
-                                       (:required ((x)))
+                                       (:required (((:required-parameter
+                                                     (:name ((x)))
+                                                     :source #9#))))
                                        :source #8#)))
                        :form        ((x)))
                       :source #7#)))

@@ -76,19 +76,24 @@
   '((defun foo () (declare 1))
     syn:invalid-syntax-error)
   ;; Valid syntax
-  '(#6=(defun foo #7=(bar baz)
+  '(#6=(defun foo #7=(#8=bar #9=baz)
          "bla"
-         (declare #8=(type integer bar baz))
+         (declare #10=(type integer bar baz))
          (+ 1 2))
     (:defun
      (:name ((foo))
       :lambda-list   (((:ordinary-lambda-list
-                        (:required ((bar) (baz)))
+                        (:required (((:required-parameter
+                                      (:name ((bar)))
+                                      :source #8#))
+                                    ((:required-parameter
+                                      (:name ((baz)))
+                                      :source #9#))))
                         :source #7#)))
       :documentation (("bla"))
       :declarations  (((:declaration
                         (:argument ((integer) (bar) (baz)))
-                        :kind type :source #8#)))
+                        :kind type :source #10#)))
       :forms         (((+ 1 2))))
      :source #6#)))
 
@@ -100,19 +105,24 @@
   '((defmacro foo (x (y #4=x)))
     syn:invalid-syntax-error #4# "must be a lambda list variable name")
   ;; Valid syntax
-  `(#5=(defmacro foo #6=(a b)
+  `(#5=(defmacro foo #6=(#7=a #8=b)
          "bla"
-         (declare #7=(ignore a))
+         (declare #9=(ignore a))
          (list 'cons b b))
     (:defmacro
      (:name          ((foo))
       :lambda-list   (((:destructuring-lambda-list
-                        (:required ((a) (b)))
+                        (:required (((:required-parameter
+                                      (:name ((a)))
+                                      :source #7#))
+                                    ((:required-parameter
+                                      (:name ((b)))
+                                      :source #8#))))
                         :source #6#)))
       :documentation (("bla"))
       :declarations  (((:declaration
                         (:argument ((a)))
-                        :kind ignore :source #7#)))
+                        :kind ignore :source #9#)))
       :forms         (((list 'cons b b))))
      :source #5#)))
 
@@ -173,19 +183,24 @@
      (:name         ((foo))
       :constructors (((nil nil))))
     :source #12#))
-  '(#13=(defstruct (foo (:constructor foo #14=(a b))))
+  '(#13=(defstruct (foo (:constructor foo #14=(#15=a #16=b))))
     (:defstruct
-        (:name         ((foo))
-         :constructors (((foo
-                          (:ordinary-lambda-list
-                           (:required ((a) (b)))
-                           :source #14#)))))
-      :source #13#))
-  '(#15=(defstruct foo "doc")
+     (:name         ((foo))
+      :constructors (((foo
+                       (:ordinary-lambda-list
+                        (:required (((:required-parameter
+                                      (:name ((a)))
+                                      :source #15#))
+                                    ((:required-parameter
+                                      (:name ((b)))
+                                      :source #16#))))
+                        :source #14#)))))
+     :source #13#))
+  '(#17=(defstruct foo "doc")
     (:defstruct
      (:name          ((foo))
       :documentation (("doc")))
-     :source #15#)))
+     :source #17#)))
 
 ;;; `defclass' including slots
 
@@ -283,24 +298,28 @@
   '((deftype foo (x #5=x))
     syn:invalid-syntax-error #5# "must be a lambda list variable name")
   ;; Valid syntax
-  '(#6=(deftype foo #7=(a &key b)
+  '(#6=(deftype foo #7=(#8=a &key #9=b)
          "bla bli"
-         (declare #8=(ignore a))
-         (declare #9=(ignore b))
+         (declare #10=(ignore a))
+         (declare #11=(ignore b))
          (list a b))
     (:deftype
      (:name          ((foo))
       :lambda-list   (((:destructuring-lambda-list
-                        (:required ((a))
-                         :keyword  ((((keyword b) b nil nil))))
+                        (:required (((:required-parameter
+                                      (:name ((a)))
+                                      :source #8#)))
+                         :keyword  (((:keyword-parameter
+                                      (:name ((b)))
+                                      :source #9#))))
                         :source #7#)))
       :documentation (("bla bli"))
       :declarations  (((:declaration
                         (:argument ((a)))
-                        :kind ignore :source #8#))
+                        :kind ignore :source #10#))
                       ((:declaration
                         (:argument ((b)))
-                        :kind ignore :source #9#)))
+                        :kind ignore :source #11#)))
       :forms         (((list a b))))
      :source #6#)))
 
@@ -346,40 +365,56 @@
       #13=(:documentation "foo"))
     syn:invalid-syntax-error #13# ":DOCUMENTATION option must not be repeated")
   ;; Valid syntax
-  '(#14=(defgeneric foo #15=(a b)
+  '(#14=(defgeneric foo #15=(#16=a #17=b)
          (:documentation "foo")
          (:generic-function-class clazz))
     (:defgeneric
      (:name                      ((foo))
       :lambda-list               (((:generic-function-lambda-list
-                                    (:required ((a) (b)))
+                                    (:required (((:required-parameter
+                                                  (:name ((a)))
+                                                  :source #16#))
+                                                ((:required-parameter
+                                                  (:name ((b)))
+                                                  :source #17#))))
                                     :source #15#)))
       :generic-function-class    ((clazz))
       :documentation             (("foo")))
      :source #14#))
-  '(#16=(defgeneric foo #17=(a b)
+  '(#18=(defgeneric foo #19=(#20=a #21=b)
           (:argument-precedence-order b a))
     (:defgeneric
      (:name                      ((foo))
       :lambda-list               (((:generic-function-lambda-list
-                                    (:required ((a) (b)))
-                                    :source #17#)))
+                                    (:required (((:required-parameter
+                                                  (:name ((a)))
+                                                  :source #20#))
+                                                ((:required-parameter
+                                                  (:name ((b)))
+                                                  :source #21#))))
+                                    :source #19#)))
       :argument-precedence-order (((b a))))
-      :source #16#))
-  '(#18=(defgeneric foo #19=(a)
-          #20=(:method :custom 1 "foo" #21=(a)))
+      :source #18#))
+  '(#22=(defgeneric foo #23=(#24=a)
+          #25=(:method :custom 1 "foo" #26=(#27=a)))
     (:defgeneric
      (:name        ((foo))
       :lambda-list (((:generic-function-lambda-list
-                      (:required ((a)))
-                      :source #19#)))
+                      (:required (((:required-parameter
+                                    (:name ((a)))
+                                    :source #24#))))
+                      :source #23#)))
       :methods     (((:method-description
                       (:qualifiers  ((:custom) (1) ("foo"))
                        :lambda-list (((:specialized-lambda-list
-                                       (:required (((a nil))))
-                                       :source #21#))))
-                      :source #20#))))
-     :source #18#)))
+                                       (:required (((:specialized-parameter
+                                                     (:name (((:required-parameter
+                                                               (:name ((a)))
+                                                               :source #27#))))
+                                                     :source #27#))))
+                                       :source #26#))))
+                      :source #25#))))
+     :source #22#)))
 
 (define-macro-test (defmethod)
   '((defmethod 1)
@@ -414,22 +449,25 @@
                       ()
                       :source #12#))))
      :source #11#))
-  '(#13=(defmethod foo #14=((x t)))
+  '(#13=(defmethod foo #14=(#15=(x t)))
     (:defmethod
      (:name        ((foo))
       :lambda-list (((:specialized-lambda-list
-                      (:required (((x t))))
+                      (:required (((:specialized-parameter
+                                    (:name        ((x))
+                                     :specializer ((t)))
+                                    :source #15#))))
                       :source #14#))))
      :source #13#))
-  '(#15=(defmethod foo #16=()
-          "foo" (declare #17=(ignore)) 1)
+  '(#16=(defmethod foo #17=()
+          "foo" (declare #18=(ignore)) 1)
     (:defmethod
      (:name          ((foo))
-      :lambda-list   (((:specialized-lambda-list () :source #16#)))
+      :lambda-list   (((:specialized-lambda-list () :source #17#)))
       :documentation (("foo"))
-      :declarations  (((:declaration () :kind ignore :source #17#)))
+      :declarations  (((:declaration () :kind ignore :source #18#)))
       :forms         ((1)))
-     :source #15#)))
+     :source #16#)))
 
 (define-macro-test (defpackage)
   '((defpackage #1=1)
@@ -521,16 +559,23 @@
     syn:invalid-syntax-error #4# "NO-ERROR must not be repeated")
   ;; Valid syntax
   '(#5=(handler-case (foo)
-         (bar (x) (baz))
-         (:no-error #6=(y z) (fez)))
+         (bar (#6=x) (baz))
+         (:no-error #7=(#8=y #9=z) (fez)))
     (:handler-case
      (:form                 (((foo)))
       :types                ((bar))
-      :variables            ((x))
+      :variables            (((:required-parameter
+                               (:name ((x)))
+                               :source #6#)))
       :forms                ((((baz))))
       :no-error-lambda-list (((:ordinary-lambda-list
-                               (:required ((y) (z)))
-                               :source #6#)))
+                               (:required (((:required-parameter
+                                             (:name ((y)))
+                                             :source #8#))
+                                           ((:required-parameter
+                                             (:name ((z)))
+                                             :source #9#))))
+                               :source #7#)))
       :no-error-forms       (((fez))))
      :source #5#)))
 
