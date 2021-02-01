@@ -7,7 +7,7 @@
 #+SEQ_TODO: TODO STARTED | DONE
 
 #+BEGIN_SRC lisp :exports both :results silent
-  (ql:quicklaod :s-expression-syntax)
+  (ql:quickload :s-expression-syntax)
 #+END_SRC
 
 * STARTED Introduction
@@ -69,3 +69,7 @@
   #+end_example
 
 * TODO Dictionary
+
+# Local Variables:
+# eval: (require 'ob-lisp)
+# End:
