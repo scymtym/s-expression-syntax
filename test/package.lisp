@@ -44,12 +44,25 @@
            (list ,@cases))))
 
 (defun %syntax-test-case (syntax case)
-  (destructuring-bind (input expected) case
+  (destructuring-bind (input expected
+                       &optional expected-value expected-message)
+      case
     (flet ((do-it ()
              (syn:parse nil syntax input)))
       (case expected
         (syn:invalid-syntax-error
-         (signals syn:invalid-syntax-error (do-it)))
+         (signals (syn:invalid-syntax-error
+                   "~@<For input form ~S, the ~S parser did not signal ~
+                   an error.~@:>"
+                   input (syn:name syntax) expected)
+           (do-it))
+         (handler-case (do-it)
+           (syn:invalid-syntax-error (condition)
+             (is (eq syntax (syn:syntax condition)))
+             (when expected-value
+               (is (eql expected-value (syn::value condition))))
+             (when expected-message
+               (is (string= expected-message (syn::message condition)))))))
         (t
          (is (equal expected (do-it))))))))
 
