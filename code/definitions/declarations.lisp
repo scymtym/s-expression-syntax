@@ -20,24 +20,24 @@
   arguments #+later (bp:node* (:declaration-arguments :arguments arguments)))
 
 (defrule declaration ()
-    (or (list (<- kind (or 'ignore 'ignorable 'dynamic-extent))
-              (* (<<- arguments (bound-declaration-reference!))))
+    (value (source)
+      (or (list (<- kind (or 'ignore 'ignorable 'dynamic-extent))
+                (* (<<- arguments (bound-declaration-reference!))))
 
-        (list (<- kind 'special)
-              (* (<<- arguments (variable-name!))))
+          (list (<- kind 'special)
+                (* (<<- arguments (variable-name!))))
 
-        (list (<- kind (or 'type 'ftype))
-              (must (<<- arguments (type-specifier!)) "must be a type specifier")
-              (* (<<- arguments (variable-name!))))
+          (list (<- kind (or 'type 'ftype))
+                (must (<<- arguments (type-specifier!)) "must be a type specifier")
+                (* (<<- arguments (variable-name!))))
 
-        (list (<- kind 'optimize)
-              (* (<<- arguments (optimization-specification!))))
+          (list (<- kind 'optimize)
+                (* (<<- arguments (optimization-specification!))))
 
-        (list* (must (guard kind symbolp) "declaration kind must be a symbol")
-               (<- arguments (declaration-arguments))))
-  (list kind (nreverse arguments))
-  #+later (bp:node* (:declaration :kind kind)
-    (1 :arguments arguments)))
+          (list* (must (guard kind symbolp) "declaration kind must be a symbol")
+                 (<- arguments (declaration-arguments)))))
+  (bp:node* (:declaration :kind kind :source source)
+    (* :argument (nreverse arguments))))
 
 (defrule declaration! ()
     (must (declaration) "must be a declaration"))

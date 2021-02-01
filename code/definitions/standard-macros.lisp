@@ -298,7 +298,7 @@
                       (<- argument-precedence-order (:transform :any (nreverse names))))
                  (eg:option  :method-combination        (<- method-combination (must (guard symbolp)
                                                                                      "method combination name must be a symbol"))
-                                                        (* (<<- method-combination-arguments)))
+                             (* (<<- method-combination-arguments)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
                  (eg:option* declare                    (and (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
                                                              (<<- declarations ((declaration! declarations)))))

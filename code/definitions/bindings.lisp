@@ -11,12 +11,13 @@
 ;;; Value bindings
 
 (defrule value-binding ()
-    (or (:transform
-         (or (<- name ((variable-name names))) ; TODO repeated variable names
-             (list (<- name ((variable-name! names)))))
-         (setf value nil))
-        (list (<- name ((variable-name! names)))
-              (<- value ((form! forms)))))
+    (value (source)
+      (or (:transform
+             (or (<- name ((variable-name names))) ; TODO repeated variable names
+                 (list (<- name ((variable-name! names)))))
+           (setf value nil))
+          (list (<- name ((variable-name! names)))
+                (<- value ((form! forms))))))
   (list name value))
 
 (defrule value-binding! ()
@@ -32,10 +33,16 @@
 ;;; Function bindings
 
 (defrule local-function ()
-    (list* (<- name ((function-name! names)))
-           (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (docstring declarations forms) ((docstring-body forms))))
-  (list name (list 'parsed-lambda lambda-list docstring declarations forms)))
+    (value (source)
+      (list* (<- name ((function-name! names)))
+             (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
+             (<- (docstring declarations forms) ((docstring-body forms)))))
+  (list name
+        (bp:node* (:local-function :source source)
+          (1    :lambda-list   lambda-list)
+          (bp:? :documentation docstring)
+          (*    :declarations  declarations)
+          (*    :forms         forms))))
 
 (defrule local-function! ()
     (must (local-function)
@@ -48,10 +55,16 @@
 ;;; Macro function bindings
 
 (defrule local-macro-function ()
-    (list* (<- name ((function-name! names)))
-           (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
-           (<- (docstring declarations forms) ((docstring-body forms))))
-  (list name (list 'parsed-lambda lambda-list docstring declarations forms)))
+    (value (source)
+      (list* (<- name ((function-name! names)))
+             (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
+             (<- (docstring declarations forms) ((docstring-body forms)))))
+  (list name
+        (bp:node* (:local-macro-function :source source)
+          (1    :lambda-list   lambda-list)
+          (bp:? :documentation docstring)
+          (*    :declarations  declarations)
+          (*    :forms         forms))))
 
 (defrule local-macro-function! ()
     (must (local-macro-function)

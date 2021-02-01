@@ -1,6 +1,6 @@
 ;;;; database.lisp --- TODO.
 ;;;;
-;;;; Copyright (C) 2018, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -56,7 +56,9 @@
         (funcall rule context form)))))
 
 (defmethod parse ((client t) (syntax parser-mixin) (form t))
-  (multiple-value-bind (success? components value) (funcall (%parser syntax) form)
+  (multiple-value-bind (success? components value)
+      (bp:with-builder (client)
+        (funcall (%parser syntax) form))
     (if (eq success? t)
         components
         (error 'invalid-syntax-error :syntax  syntax

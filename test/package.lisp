@@ -32,7 +32,8 @@
     (declare (ignore expected-position))
     (let ((arguments (map 'list #'funcall arguments)))
       (multiple-value-bind (success? position value)
-          (parser.packrat:parse `(,rule ,@arguments) input :grammar grammar)
+          (architecture.builder-protocol:with-builder ('list)
+            (parser.packrat:parse `(,rule ,@arguments) input :grammar grammar))
         (declare (ignore position))
         (is (eq expected-success? success?))
         (is (equal expected-value value))))))
@@ -48,7 +49,7 @@
                        &optional expected-value expected-message)
       case
     (flet ((do-it ()
-             (syn:parse nil syntax input)))
+             (syn:parse 'list syntax input)))
       (case expected
         (syn:invalid-syntax-error
          (signals (syn:invalid-syntax-error

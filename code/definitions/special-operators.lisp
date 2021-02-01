@@ -195,11 +195,11 @@ NIL."))
 
 (define-special-operator (lambda-expression :operator lambda)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((lambda-list   1  :evaluation nil) ; TODO binding
    (documentation ?  :evaluation nil)
-   (declarations  *> :evaluation nil)
-   (forms         *> :evaluation t)))
+   (declaration   *> :evaluation nil)
+   (form          *> :evaluation t)))
 
 (define-special-operator function
     (list* (must (list (or (<- name ((function-name names)))

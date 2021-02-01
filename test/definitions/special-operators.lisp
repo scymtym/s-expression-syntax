@@ -18,19 +18,26 @@
 ;;; Special operators for control
 
 (define-syntax-test (progn)
-  '((progn . 1) syn:invalid-syntax-error)
+  '((progn . 1)    syn:invalid-syntax-error)
 
-  '((progn)     (syn::forms ()))
-  '((progn 1)   (syn::forms (1)))
-  '((progn 1 2) (syn::forms (1 2))))
+  '(#2=(progn)     (:progn () :source #2#))
+  '(#3=(progn 1)   (:progn (:forms ((1))) :source #3#))
+  '(#4=(progn 1 2) (:progn (:forms ((1) (2))) :source #4#)))
 
 (define-syntax-test (if)
   '((if)                 syn:invalid-syntax-error)
   '((if foo)             syn:invalid-syntax-error)
   '((if foo bar baz fez) syn:invalid-syntax-error)
 
-  '((if foo bar)         (syn::test foo syn::then bar syn::else nil))
-  '((if foo bar baz)     (syn::test foo syn::then bar syn::else baz)))
+  '((if foo bar)         (:if
+                          (:test ((foo))
+                            :then ((bar)))
+                          :source  (if foo bar)))
+  '((if foo bar baz)     (:if
+                          (:test ((foo))
+                            :then ((bar))
+                            :else ((baz)))
+                          :source  (if foo bar baz))))
 
 ;;; Special operators `block', `return-from', `return', `tagbody' and `go'
 
@@ -38,15 +45,26 @@
   '((block)         syn:invalid-syntax-error)
   '((block (foo))   syn:invalid-syntax-error)
 
-  '((block foo 1)   (syn::name foo syn::forms (1)))
-  '((block foo a b) (syn::name foo syn::forms (a b))))
+  '((block foo 1)   (:block
+                        (:name  ((foo))
+                         :forms ((1)))
+                      :source (block foo 1)))
+  '((block foo a b) (:block
+                        (:name  ((foo))
+                         :forms ((a) (b)))
+                      :source (block foo a b))))
 
 (define-syntax-test (return-from)
   '((return-from)         syn:invalid-syntax-error)
   '((return-from foo 1 2) syn:invalid-syntax-error)
 
-  '((return-from foo)     (syn::name foo syn::value nil))
-  '((return-from foo 1)   (syn::name foo syn::value 1))
+  '((return-from foo)     (:return-from
+                           (:name ((foo)))
+                            :source (return-from foo)))
+  '((return-from foo 1)   (:return-from
+                           (:name  ((foo))
+                            :value ((1)))
+                            :source (return-from foo 1)))
 
   #+TODO (apply #'unparse-return-from-special-operator
                 (parse-return-from-special-operator
@@ -57,18 +75,26 @@
   '((return (declare)) syn:invalid-syntax-error)
   '((return 1 2)       syn:invalid-syntax-error)
 
-  '((return)           (syn::value nil))
-  '((return 1)         (syn::value 1)))
+  '((return)           (:return
+                         ()
+                         :source (return)))
+  '((return 1)         (:return
+                         (:value ((1)))
+                         :source (return 1))))
 
 (define-syntax-test (tagbody)
   '((tagbody nil nil) syn:invalid-syntax-error)
 
-  '((tagbody 0 1 "bla" "bli" 2 (list 1) (list 3))
-    (syn::tags     (0 1 2)
-     syn::segments (() () ("bla" "bli") ((list 1) (list 3)))))
-  '((tagbody (1+ a) (1+ b) :foo)
-    (syn::tags     (:foo)
-     syn::segments (((1+ a) (1+ b)))))
+  '(#2=(tagbody 0 1 "bla" "bli" 2 (list 1) (list 3))
+    (:tagbody
+       (:tags     ((0) (1) (2))
+        :segments ((("bla" "bli")) (((list 1) (list 3)))))
+     :source #2#))
+  '(#3=(tagbody (1+ a) (1+ b) :foo)
+    (:tagbody
+       (:tags     ((:foo))
+        :segments ((((1+ a) (1+ b)))))
+     :source #3#))
 
   #+TODO (check-roundtrip-cases 'tagbody
                          '(tagbody)
@@ -90,7 +116,7 @@
   '((go 1 2)   syn:invalid-syntax-error)
   '((go (foo)) syn:invalid-syntax-error)
 
-  '((go 1)     (syn::tag 1)))
+  '(#4=(go 1)  (:go (:tag ((1))) :source #4#)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
@@ -102,24 +128,29 @@
   '((eval-when (#3=:foo))
     syn:invalid-syntax-error #3# "must be one of :COMPILE-TOPLEVEL, COMPILE, :LOAD-TOPLEVEL, LOAD, :EXECUTE, EVAL")
 
-  '((eval-when ())         (syn::situations ()         syn::forms ()))
-  '((eval-when (:execute)) (syn::situations (:execute) syn::forms ()))
-  '((eval-when () a)       (syn::situations ()         syn::forms (a))))
+  '(#4=(eval-when ())
+    (:eval-when () :source #4#))
+  '(#5=(eval-when (:execute))
+    (:eval-when (:situations ((:execute))) :source #5#))
+  '(#6=(eval-when () a)
+    (:eval-when (:forms ((a))) :source #6#)))
 
 (define-syntax-test (load-time-value)
   '((load-time-value)       syn:invalid-syntax-error)
   '((load-time-value 1 2)   syn:invalid-syntax-error)
 
-  '((load-time-value foo)   (syn::form foo syn::read-only-p nil))
-  '((load-time-value foo t) (syn::form foo syn::read-only-p t)))
+  '(#3=(load-time-value foo)
+    (:load-time-value (:form ((foo))) :source #3#))
+  '(#4=(load-time-value foo t)
+    (:load-time-value (:form ((foo)) :read-only-p ((t))) :source #4#)))
 
 (define-syntax-test (quote)
-  '((quote)       syn:invalid-syntax-error)
-  '((quote x y)   syn:invalid-syntax-error)
+  '((quote)          syn:invalid-syntax-error)
+  '((quote x y)      syn:invalid-syntax-error)
 
-  '((quote 1)     (syn::material 1))
-  '((quote x)     (syn::material x))
-  '((quote quote) (syn::material quote)))
+  '(#3=(quote 1)     (:quote (:material ((1))) :source #3#))
+  '(#4=(quote x)     (:quote (:material ((x))) :source #4#))
+  '(#5=(quote quote) (:quote (:material ((quote))) :source #5#)))
 
 (define-syntax-test (function)
   '((function)
@@ -133,24 +164,24 @@
   '((function (lambda (x #5=x)))
     syn:invalid-syntax-error #5# "must be a lambda list variable name")
 
-  '((function foo)
-    (syn::name   foo
-     syn::lambda nil))
-  '((function (setf foo))
-    (syn::name   (setf foo)
-     syn::lambda nil))
-  '((function (lambda ()))
-    (syn::name   nil
-     syn::lambda (syn::lambda-list   (() () nil () nil ())
-                  syn::documentation nil
-                  syn::declarations  ()
-                  syn::forms         ())))
-  '((function (lambda (a &rest b) (foo)))
-    (syn::name   nil
-     syn::lambda (syn::lambda-list   ((a) () b () nil ())
-                  syn::documentation nil
-                  syn::declarations  ()
-                  syn::forms         ((foo))))))
+  '(#6=(function foo)        (:function (:name ((foo))) :source #6#))
+  '(#7=(function (setf foo)) (:function (:name (((setf foo)))) :source #7#))
+  '(#8=(function #9=(lambda #10=()))
+    (:function
+     (:lambda (((:lambda-expression
+                 (:lambda-list (((:ordinary-lambda-list () :source #10#))))
+                 :source #9#))))
+     :source #8#))
+  '(#11=(function #12=(lambda #13=(a &rest b) (foo)))
+    (:function
+     (:lambda (((:lambda-expression
+                 (:lambda-list (((:ordinary-lambda-list
+                                  (:required ((a))
+                                   :rest     ((b)))
+                                  :source #13#)))
+                  :form        (((foo))))
+                 :source #12#))))
+     :source #11#)))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 
@@ -161,15 +192,17 @@
   '((symbol-macrolet ((foo)))    syn:invalid-syntax-error)
   '((symbol-macrolet ((:bla 1))) syn:invalid-syntax-error)
 
-  '((symbol-macrolet ())         (syn::names        ()
-                                  syn::expansions   ()
-                                  syn::declarations ()
-                                  syn::forms        ()))
-  '((symbol-macrolet ((a 1) (b 2)) (declare (type bit d)) c)
-    (syn::names        (a b)
-     syn::expansions   (1 2)
-     syn::declarations ((type (bit d)))
-     syn::forms        (c))))
+  '(#6=(symbol-macrolet ())
+    (:symbol-macrolet () :source #6#))
+  '(#7=(symbol-macrolet ((a 1) (b 2)) (declare #8=(type bit d)) c)
+    (:symbol-macrolet
+        (:names        ((a) (b))
+         :expansions   ((1) (2))
+         :declarations (((:declaration
+                          (:argument ((bit) (d)))
+                          :kind type :source #8#)))
+         :forms ((c)))
+      :source #7#)))
 
 (define-syntax-test (let)
   '((let)       syn:invalid-syntax-error)
@@ -177,21 +210,18 @@
   '((let (1))   syn:invalid-syntax-error)
   '((let ((1))) syn:invalid-syntax-error)
 
-  '((let ())    (syn::names        ()
-                 syn::values       ()
-                 syn::declarations ()
-                 syn::forms        ()))
-  '((let (a))   (syn::names        (a)
-                 syn::values       (nil)
-                 syn::declarations ()
-                 syn::forms        ()))
-  '((let ((a 1) b (c 2))
-      (declare (type boolean a))
-      a)
-    (syn::names        (a b c)
-     syn::values       (1 nil 2)
-     syn::declarations ((type (boolean a)))
-     syn::forms        (a)))
+  '(#5=(let ())     (:let () :source #5#))
+  '(#6=(let (#7=a)) (:let (:names ((#7#)) #+TODO :values #+TODO ((nil))) :source #6#))
+  '(#8=(let ((a 1) b (c 2))
+         (declare #9=(type boolean a)) a)
+    (:let
+     (:names        ((a) (b)   (c))
+      :values       ((1) #+TODO (nil) (2))
+      :declarations (((:declaration
+                       (:argument ((boolean) (a)))
+                       :kind type :source #9#)))
+      :forms        ((a)))
+     :source #8#))
 
   #+TODO (is (equal '(syn::names (foo bar) syn::values (1 2) syn::declarations () syn::forms ((list foo bar)))
              (syn:parse nil (syn:find-syntax 'let) '(let ((foo 1) (bar 2)) (list foo bar))))))
@@ -202,60 +232,57 @@
   '((let* (1))   syn:invalid-syntax-error)
   '((let* ((1))) syn:invalid-syntax-error)
 
-  '((let* ())    (syn::names        ()
-                  syn::values       ()
-                  syn::declarations ()
-                  syn::forms        ()))
-  '((let* (a))   (syn::names        (a)
-                  syn::values       (nil)
-                  syn::declarations ()
-                  syn::forms        ()))
-  '((let* ((a 1) b (c 2))
-      (declare (type boolean a))
-      a)
-    (syn::names        (a b c)
-     syn::values       (1 nil 2)
-     syn::declarations ((type (boolean a)))
-     syn::forms        (a))))
+  '(#5=(let* ())     (:let* () :source #5#))
+  '(#6=(let* (#7=a)) (:let* (:names ((#7#)) #+TODO :values #+TODO ((nil))) :source #6#))
+  '(#8=(let* ((a 1) b (c 2))
+         (declare #9=(type boolean a))
+         a)
+    (:let*
+     (:names        ((a) (b)   (c))
+      :values       ((1) #+TODO (nil) (2))
+      :declarations (((:declaration
+                       (:argument ((boolean) (a)))
+                       :kind type :source #9#)))
+      :forms        ((a)))
+     :source #8#)))
 
 (define-syntax-test (locally)
-  '((locally)
-    (syn::declarations () syn::forms ()))
-  '((locally (declare (type bit a)))
-    (syn::declarations ((type (bit a))) syn::forms ()))
-  '((locally a)
-    (syn::declarations () syn::forms (a)))
-  '((locally (declare (type bit a)) a)
-    (syn::declarations ((type (bit a))) syn::forms (a)))
+  '(#1=(locally)
+    (:locally () :source #1#))
+  '(#2=(locally (declare #3=(type bit a)))
+    (:locally
+     (:declarations (((:declaration
+                       (:argument ((bit) (a)))
+                       :kind type :source #3#))))
+     :source #2#))
+  '(#4=(locally a)
+    (:locally (:forms ((a))) :source #4#))
+  '(#5=(locally (declare #6=(type bit a)) a)
+    (:locally
+     (:declarations (((:declaration
+                       (:argument ((bit) (a)))
+                       :kind type :source #6#)))
+      :forms        ((a)))
+     :source #5#))
 
   #+TODO (is (equal '(syn::declarations ((type (integer x)) (type (double-float x))) syn::forms (x))
              (syn:parse nil (syn:find-syntax 'locally) '(locally (declare (type integer x) (type double-float x)) x)))))
 
 (define-syntax-test (progv)
-  '((progv)           syn:invalid-syntax-error)
-  '((progv 1)         syn:invalid-syntax-error)
-  '((progv ())        syn:invalid-syntax-error)
+  '((progv)    syn:invalid-syntax-error)
+  '((progv 1)  syn:invalid-syntax-error)
+  '((progv ()) syn:invalid-syntax-error)
 
-  '((progv () ())     (syn::symbols      nil
-                       syn::values       nil
-                       syn::declarations ()
-                       syn::forms        ()))
-  '((progv (a) (b))   (syn::symbols      (a)
-                       syn::values       (b)
-                       syn::declarations ()
-                       syn::forms        ()))
-  '((progv '(a) '(b)) (syn::symbols      '(a)
-                       syn::values       '(b)
-                       syn::declarations ()
-                       syn::forms        ()))
-  '((progv () () 1)   (syn::symbols      nil
-                       syn::values       nil
-                       syn::declarations ()
-                       syn::forms        (1)))
-  '((progv () () 1 2) (syn::symbols      nil
-                       syn::values       nil
-                       syn::declarations ()
-                       syn::forms        (1 2))))
+  '(#4=(progv () ())
+    (:progv () :source #4#))
+  '(#5=(progv (a) (b))
+    (:progv (:symbols (((a))) :values (((b)))) :source #5#))
+  '(#6=(progv '(a) '(b))
+    (:progv (:symbols (('(a))) :values (('(b)))) :source #6#))
+  '(#7=(progv () () 1)
+    (:progv (:forms ((1))) :source #7#))
+  '(#8=(progv () () 1 2)
+    (:progv (:forms ((1) (2))) :source #8#)))
 
 ;;; Special operators `macrolet', `flet' and `labels'
 
@@ -267,33 +294,36 @@
   '((macrolet ((f (x #5=x))))
     syn:invalid-syntax-error #5# "must be a lambda list variable name")
   ;; Valid syntax
-  '((macrolet ())
-    (syn::names        ()
-     syn::functions    ()
-     syn::declarations ()
-     syn::forms        ()))
-  '((macrolet ((f ())))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (:destructuring-lambda-list
-                          nil nil () () nil () nil () nil)
-                         nil () ()))
-     syn::declarations ()
-     syn::forms        ())
-    )
-  '((macrolet ((f (&whole w (a b) &rest c)
-                 (declare (type string a))
-                 a)))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (:destructuring-lambda-list
-                          w nil
-                          ((:pattern
-                            nil (a b) () nil () nil () nil))
-                          () c () nil () nil)
-                         nil ((type (string a))) (a)))
-     syn::declarations ()
-     syn::forms        ()))
+  '(#6=(macrolet ())
+    (:macrolet () :source #6#))
+  '(#7=(macrolet (#8=(f #9=())))
+    (:macrolet
+     (:names     ((f))
+      :functions (((:local-macro-function
+                    (:lambda-list (((:destructuring-lambda-list
+                                     ()
+                                     :source #9#))))
+                    :source #8#))))
+     :source #7#))
+  '(#10=(macrolet (#11=(f #12=(&whole w #13=(a b) &rest c)
+                        (declare #14=(type string a))
+                        a)))
+    (:macrolet
+     (:names     ((f))
+      :functions (((:local-macro-function
+                    (:lambda-list  (((:destructuring-lambda-list
+                                      (:whole    ((w))
+                                       :required (((:pattern
+                                                    (:required ((a) (b)))
+                                                    :source #13#)))
+                                       :rest     ((c)))
+                                      :source #12#)))
+                     :declarations (((:declaration
+                                      (:argument ((string) (a)))
+                                      :kind type :source #14#)))
+                     :forms        ((a)))
+                    :source #11#))))
+     :source #10#))
   #+TODO (is (equal '(syn::names (foo bar baz)
                syn::functions
                ((syn::parsed-lambda ((a b) () bla () nil ()) nil nil ((list a b)))
@@ -317,35 +347,47 @@
   '((flet ((f (x #5=x))))
     syn:invalid-syntax-error #5# "must be a lambda list variable name")
   ;; Valid syntax
-  '((flet ())
-    (syn::names        ()
-     syn::functions    ()
-     syn::declarations ()
-     syn::forms        ()))
-  '((flet ((f ())))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil () ()))
-     syn::declarations ()
-     syn::forms        ()))
-  '((flet ((f (a &rest b))))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         ((a) () b () nil ()) nil () ()))
-     syn::declarations ()
-     syn::forms        ()))
-  '((flet ((f () (declare (type bit a)))))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil ((type (bit a))) ()))
-     syn::declarations ()
-     syn::forms        ()))
-  '((flet ((f () a)))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil () (a)))
-     syn::declarations ()
-     syn::forms        ())))
+  '(#6=(flet ())
+    (:flet () :source #6#))
+  '(#7=(flet (#8=(f #9=())))
+    (:flet
+     (:names ((f))
+      :functions (((:local-function
+                    (:lambda-list (((:ordinary-lambda-list () :source #9#))))
+                    :source #8#))))
+     :source #7#))
+  '(#10=(flet (#11=(f #12=(a &rest b))))
+    (:flet
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list (((:ordinary-lambda-list
+                                     (:required ((a))
+                                      :rest     ((b)))
+                                     :source #12#))))
+                    :source #11#))))
+     :source #10#))
+  '(#13=(flet (#14=(f #15=() (declare #16=(type bit a)))))
+    (:flet
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list  (((:ordinary-lambda-list
+                                      ()
+                                      :source #15#)))
+                     :declarations (((:declaration
+                                      (:argument ((bit) (a)))
+                                      :kind type :source #16#))))
+                    :source #14#))))
+     :source #13#))
+  '(#17=(flet (#18=(f #19=() a)))
+    (:flet
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list   (((:ordinary-lambda-list
+                                       ()
+                                       :source #19#)))
+                     :forms         ((a)))
+                    :source #18#))))
+     :source #17#)))
 
 (define-syntax-test (labels)
   '((labels)          syn:invalid-syntax-error)
@@ -355,111 +397,169 @@
   '((labels ((f (x #5=x))))
     syn:invalid-syntax-error #5# "must be a lambda list variable name")
   ;; Valid syntax
-  '((labels ())
-    (syn::names        ()
-     syn::functions    ()
-     syn::declarations ()
-     syn::forms        ()))
-  '((labels ((f ())))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil () ()))
-     syn::declarations ()
-     syn::forms        ()))
-  '((labels ((f (a &rest b))))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         ((a) () b () nil ()) nil () ()))
-     syn::declarations ()
-     syn::forms        ()))
-  '((labels ((f () (declare (type bit a)))))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil ((type (bit a))) ()))
-     syn::declarations ()
-     syn::forms        ()))
-  '((labels ((f () a)))
-    (syn::names        (f)
-     syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil () (a)))
-     syn::declarations ()
-     syn::forms        ())))
+  '(#6=(labels ())
+    (:labels () :source #6#))
+  '(#7=(labels (#8=(f #9=())))
+    (:labels
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list (((:ordinary-lambda-list
+                                     ()
+                                     :source #9#))))
+                    :source #8#))))
+     :source #7#))
+  '(#10=(labels (#11=(f #12=(a &rest b))))
+    (:labels
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list (((:ordinary-lambda-list
+                                     (:required ((a))
+                                      :rest     ((b)))
+                                     :source #12#))))
+                    :source #11#))))
+     :source #10#))
+  '(#13=(labels (#14=(f #15=() (declare #16=(type bit a)))))
+    (:labels
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list  (((:ordinary-lambda-list
+                                      ()
+                                      :source #15#)))
+                     :declarations (((:declaration
+                                      (:argument ((bit) (a)))
+                                      :kind type :source #16#))))
+                    :source #14#))))
+     :source #13#))
+  '(#17=(labels (#18=(f #19=() #20=a)))
+    (:labels
+     (:names     ((f))
+      :functions (((:local-function
+                    (:lambda-list (((:ordinary-lambda-list
+                                     ()
+                                     :source #19#)))
+                     :forms       ((#20#)))
+                    :source #18#))))
+     :source #17#)))
 
 ;;; Special operators `declaim' and `the'
 
 (define-syntax-test (declaim)
-  '((declaim 1)            syn:invalid-syntax-error)
+  '((declaim 1)                  syn:invalid-syntax-error)
 
-  '((declaim)              (syn::declarations ()))
-  '((declaim (type bit a)) (syn::declarations ((type (bit a))))))
+  '(#2=(declaim)                 (:declaim () :source #2#))
+  '(#3=(declaim #4=(type bit a)) (:declaim
+                                  (:declarations (((:declaration
+                                                    (:argument ((bit) (a)))
+                                                    :kind type :source #4#))))
+                                  :source #3#)))
 
 (define-syntax-test (the)
   '((the)             syn:invalid-syntax-error)
   '((the bit)         syn:invalid-syntax-error)
   '((the bit 1 extra) syn:invalid-syntax-error)
 
-  '((the bit 1)       (syn::type bit syn::form 1)))
+  '(#5=(the bit 1)    (:the (:type ((bit)) :form ((1))) :source #5#)))
 
 ;;; Special operator `setq'
 
 (define-syntax-test (setq)
-  '((setq a)        syn:invalid-syntax-error)
-  '((setq a 1 b)    syn:invalid-syntax-error)
-  '((setq 1 1)      syn:invalid-syntax-error)
-  '((setq (1+ a) 1) syn:invalid-syntax-error)
+  '((setq a)          syn:invalid-syntax-error)
+  '((setq a 1 b)      syn:invalid-syntax-error)
+  '((setq 1 1)        syn:invalid-syntax-error)
+  '((setq (1+ a) 1)   syn:invalid-syntax-error)
 
-  '((setq)          (syn::names ()    syn::value-forms ()))
-  '((setq a 1)      (syn::names (a)   syn::value-forms (1)))
-  '((setq a 1 b 2)  (syn::names (a b) syn::value-forms (1 2))))
+  '(#5=(setq)         (:setq () :source #5#))
+  '(#6=(setq a 1)     (:setq
+                       (:names       ((a))
+                        :value-forms ((1)))
+                       :source #6#))
+  '(#7=(setq a 1 b 2) (:setq
+                       (:names       ((a) (b))
+                        :value-forms ((1) (2)))
+                       :source #7#)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
 
 (define-syntax-test (throw)
-  '((throw)                syn:invalid-syntax-error)
-  '((throw 'foo)           syn:invalid-syntax-error)
-  '((throw 'foo 1 :extra)  syn:invalid-syntax-error)
+  '((throw)                   syn:invalid-syntax-error)
+  '((throw 'foo)              syn:invalid-syntax-error)
+  '((throw 'foo 1 :extra)     syn:invalid-syntax-error)
 
-  '((throw 'foo 1)         (syn::tag-form    'foo
-                            syn::result-form 1))
-  '((throw (+ 1 2) :value) (syn::tag-form    (+ 1 2)
-                            syn::result-form :value)))
+  '(#4=(throw 'foo 1)         (:throw
+                                  (:tag-form    (('foo))
+                                   :result-form ((1)))
+                                :source #4#))
+  '(#5=(throw (+ 1 2) :value) (:throw
+                                  (:tag-form    (((+ 1 2)))
+                                   :result-form ((:value)))
+                                :source #5#)))
 
 (define-syntax-test (catch)
-  '((catch)                syn:invalid-syntax-error)
+  '((catch)                   syn:invalid-syntax-error)
 
-  '((catch 'foo 1 2)       (syn::tag-form 'foo
-                            syn::forms    (1 2)))
-  '((catch (+ 1 2) :value) (syn::tag-form (+ 1 2)
-                            syn::forms    (:value))))
+  '(#2=(catch 'foo 1 2)       (:catch
+                                  (:tag-form (('foo))
+                                   :forms    ((1) (2)))
+                                :source #2#))
+  '(#3=(catch (+ 1 2) :value) (:catch
+                                  (:tag-form (((+ 1 2)))
+                                   :forms    ((:value)))
+                                :source #3#)))
 
 (define-syntax-test (unwind-protect)
-  '((unwind-protect)                 syn:invalid-syntax-error)
+  '((unwind-protect)                    syn:invalid-syntax-error)
 
-  '((unwind-protect foo)             (syn::protected foo syn::cleanup ()))
-  '((unwind-protect foo bar)         (syn::protected foo syn::cleanup (bar)))
-  '((unwind-protect foo bar baz)     (syn::protected foo
-                                      syn::cleanup   (bar baz)))
-  '((unwind-protect (progn 1 2) 3 4) (syn::protected (progn 1 2)
-                                      syn::cleanup   (3 4))))
+  '(#2=(unwind-protect foo)             (:unwind-protect
+                                             (:protected ((foo)))
+                                          :source #2#))
+  '(#3=(unwind-protect foo bar)         (:unwind-protect
+                                             (:protected ((foo))
+                                              :cleanup   ((bar)))
+                                          :source #3#))
+  '(#4=(unwind-protect foo bar baz)     (:unwind-protect
+                                             (:protected ((foo))
+                                              :cleanup   ((bar) (baz)))
+                                          :source #4#))
+  '(#5=(unwind-protect (progn 1 2) 3 4) (:unwind-protect
+                                             (:protected (((progn 1 2)))
+                                              :cleanup   ((3) (4)))
+                                          :source #5#)))
 
 ;;; Special operators for multiple values
 
 (define-syntax-test (multiple-value-call)
-  '((multiple-value-call)         syn:invalid-syntax-error)
+  '((multiple-value-call) syn:invalid-syntax-error)
 
-  '((multiple-value-call foo)     (syn::function-form foo
-                                   syn::arguments     ()))
-  '((multiple-value-call foo 1)   (syn::function-form foo
-                                   syn::arguments     (1)))
-  '((multiple-value-call foo 1 2) (syn::function-form foo
-                                   syn::arguments     (1 2))))
+  '(#2=(multiple-value-call foo)
+    (:multiple-value-call (:function-form ((foo))) :source #2#))
+  '(#3=(multiple-value-call foo 1)
+    (:multiple-value-call
+        (:function-form ((foo))
+         :arguments ((1)))
+      :source #3#))
+  '(#4=(multiple-value-call foo 1 2)
+    (:multiple-value-call
+        (:function-form ((foo))
+         :arguments     ((1) (2)))
+      :source #4#)))
 
 (define-syntax-test (multiple-value-prog1)
-  '((multiple-value-prog1)       syn:invalid-syntax-error)
+  '((multiple-value-prog1) syn:invalid-syntax-error)
 
-  '((multiple-value-prog1 1)     (syn::values-form 1 syn::forms ()))
-  '((multiple-value-prog1 1 2)   (syn::values-form 1 syn::forms (2)))
-  '((multiple-value-prog1 1 2 3) (syn::values-form 1 syn::forms (2 3))))
+  '(#2=(multiple-value-prog1 1)
+    (:multiple-value-prog1
+        (:values-form ((1)))
+      :source #2#))
+  '(#3=(multiple-value-prog1 1 2)
+    (:multiple-value-prog1
+        (:values-form ((1))
+         :forms       ((2)))
+      :source #3#))
+  '(#4=(multiple-value-prog1 1 2 3)
+    (:multiple-value-prog1
+        (:values-form ((1))
+         :forms       ((2) (3)))
+      :source #4#)))
 
 ;;; Pseudo-operator "application"
 
@@ -471,12 +571,22 @@
   '(((lambda (x #3=x)) 1)
     syn:invalid-syntax-error #3# "must be a lambda list variable name")
   ;; Valid syntax
-  '((foo)              (syn::abstraction foo
-                        syn::arguments   ()))
-  '((foo 1)            (syn::abstraction foo
-                        syn::arguments   (1)))
-  '(((lambda (x) x) 1) (syn::abstraction (syn::lambda-list   ((x) nil nil nil nil nil)
-                                          syn::documentation nil
-                                          syn::declarations  nil
-                                          syn::forms         (x))
-                        syn::arguments   (1))))
+  '(#4=(foo)
+    (:application
+     (:abstraction ((foo)))
+     :source #4#))
+  '(#5=(foo 1)
+    (:application
+     (:abstraction ((foo))
+      :arguments   ((1)))
+     :source #5#))
+  '(#6=(#7=(lambda #8=(x) x) 1)
+    (:application
+     (:abstraction (((:lambda-expression
+                      (:lambda-list (((:ordinary-lambda-list
+                                       (:required ((x)))
+                                       :source #8#)))
+                       :form        ((x)))
+                      :source #7#)))
+      :arguments   ((1)))
+     :source #6#)))

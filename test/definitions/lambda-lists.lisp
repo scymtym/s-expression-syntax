@@ -34,19 +34,30 @@
     '((&aux (foo (declare)))
       :fatal (declare) "declare is not allowed here")
 
-    '((&aux a)
-      t nil (() () nil () nil ((a nil))))
+    '(#4=(&aux a)
+      t nil (:ordinary-lambda-list (:aux (((a nil)))) :source #4#))
 
-    '((foo bar &optional (hash-table-rehash-size default)
-       &rest x
-       &key ((:x-kw y) 1 supplied?) b &allow-other-keys &aux (a 1))
-      t nil ((foo bar) ((hash-table-rehash-size default nil)) x
-             ((:x-kw y 1 supplied?) ((keyword b) b nil nil)) &allow-other-keys
-             ((a 1))))
+    '(#5=(foo bar &optional (hash-table-rehash-size default)
+          &rest x
+          &key ((:x-kw y) 1 supplied?) b &allow-other-keys &aux (a 1))
+      t nil (:ordinary-lambda-list
+             (:required         ((foo) (bar))
+              :optional         (((hash-table-rehash-size default nil)))
+              :rest             ((x))
+              :keyword          (((:x-kw y 1 supplied?))
+                                 (((keyword b) b nil nil)))
+              :allow-other-keys ((&allow-other-keys))
+              :aux              (((a 1))))
+             :source #5#))
 
-    '((foo foo2 &rest pie &key ((:foo bar) :default bar-p)
-       &aux (a 1) b)
-      t nil ((foo foo2) () pie ((:foo bar :default bar-p)) nil ((a 1) (b nil))))))
+    '(#6=(foo foo2 &rest pie &key ((:foo bar) :default bar-p)
+          &aux (a 1) b)
+      t nil (:ordinary-lambda-list
+             (:required ((foo) (foo2))
+              :rest     ((pie))
+              :keyword  (((:foo bar :default bar-p)))
+              :aux      (((a 1)) ((b nil))))
+             :source #6#))))
 
 ;;; Specialized lambda list
 
@@ -64,11 +75,16 @@
     '(((baz fez) (foo bar) &rest foo)
       :fatal foo "must be a lambda list variable name")
 
-    '(((baz fez) (foo bar) &rest whoop)
-      t nil (((baz fez) (foo bar)) () whoop () nil ()))
+    '(#4=((baz fez) (foo bar) &rest whoop)
+      t nil (:specialized-lambda-list
+             (:required (((baz fez)) ((foo bar)))
+              :rest     ((whoop)))
+             :source #4#))
 
-    '((&aux a)
-      t nil (() () nil () nil ((a nil))))))
+    '(#5=(&aux a)
+      t nil (:specialized-lambda-list
+             (:aux (((a nil))))
+             :source #5#))))
 
 ;;; Destructuring lambda list
 
@@ -80,42 +96,42 @@
     '((&environment e1 foo bar #1=&environment e2)
       :fatal #1# "&ENVIRONMENT must not be repeated")
     ;; Valid syntax
-    '(((foo bar))
+    '(#2=(#3=(foo bar))
       t nil (:destructuring-lambda-list
-             nil nil
-             ((:pattern nil (foo bar) () nil () nil () nil))
-             ()
-             nil
-             ()
-             nil
-             ()
-             nil))
+             (:required (((:pattern
+                           (:required ((foo) (bar)))
+                           :source #3#))))
+             :source #2#))
 
-    '((&whole whole (foo &key a) . (&rest fez))
+    '(#4=(&whole whole #5=(foo &key a) . (&rest fez))
       t nil (:destructuring-lambda-list
-             whole nil
-             ((:pattern nil (foo) () nil (((keyword a) a nil nil)) nil () nil))
-             ()
-             fez
-             ()
-             nil
-             ()
-             nil))
+             (:whole    ((whole))
+              :required (((:pattern
+                           (:required ((foo))
+                            :keyword  ((((keyword a) a nil nil))))
+                           :source #5#)))
+              :rest     ((fez)))
+             :source #4#))
 
-    '((&optional ((bar baz) (5 6) bar-baz-p))
+    '(#6=(&optional (#7=(bar baz) (5 6) bar-baz-p))
       t nil (:destructuring-lambda-list
-             nil nil ()
-             (((:pattern nil (bar baz) () nil () nil () nil)
-               (5 6) bar-baz-p))
-             nil () nil () nil))
+             (:optional ((((:pattern
+                            (:required ((bar) (baz)))
+                            :source #7#)
+                           (5 6)
+                           bar-baz-p))))
+             :source #6#))
 
-    '((&aux a (b 1))
+    '(#8=(&aux a (b 1))
       t nil (:destructuring-lambda-list
-             nil nil () () nil () nil ((a nil) (b 1)) nil))
+             (:aux (((a nil)) ((b 1))))
+             :source #8#))
 
-    '((a . rest)
+    '(#9=(a . rest)
       t nil (:destructuring-lambda-list
-             nil nil (a) () nil () nil () rest))))
+             (:required ((a))
+              :cdr      ((rest)))
+             :source #9#))))
 
 ;;; Deftype lambda list
 
@@ -123,6 +139,7 @@
   "Smoke test for the `deftype-lambda-list' rule."
 
   (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list))
-    '((foo bar)
+    '(#1=(foo bar)
       t nil (:destructuring-lambda-list
-             nil nil (foo bar) () nil () nil () nil))))
+             (:required ((foo) ( bar)))
+             :source #1#))))

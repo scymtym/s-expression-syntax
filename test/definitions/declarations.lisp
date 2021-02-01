@@ -13,14 +13,22 @@
   "Smoke test for the `declaration' rule."
 
   (rule-test-cases ((declaration syn::special-operators))
-    `((1)                    :fatal nil "declaration kind must be a symbol")
+    '((1)                       :fatal nil "declaration kind must be a symbol")
 
-    `((type 1 a)             :fatal nil "must be a type specifier")
-    `((type bit a)           t      nil (type (bit a)))
+    '((type 1 a)                :fatal nil "must be a type specifier")
+    '(#3=(type bit a)           t      nil (:declaration
+                                            (:argument ((bit) (a)))
+                                            :kind type :source #3#))
 
-    `((optimize 1)           :fatal nil "must be a quality name or a list (QUALITY {0,1,2,3})")
-    `((optimize (speed 5))   :fatal nil "must be an optimization level, i.e. 0, 1, 2 or 3")
-    `((optimize speed debug) t      nil (optimize (speed debug)))
-    `((optimize (speed 1))   t      nil (optimize ((speed 1))))
+    '((optimize 1)              :fatal nil "must be a quality name or a list (QUALITY {0,1,2,3})")
+    '((optimize (speed 5))      :fatal nil "must be an optimization level, i.e. 0, 1, 2 or 3")
+    '(#6=(optimize speed debug) t      nil (:declaration
+                                            (:argument ((speed) (debug)))
+                                            :kind optimize :source #6#))
+    '(#7=(optimize (speed 1))   t      nil (:declaration
+                                            (:argument (((speed 1))))
+                                            :kind optimize :source #7#))
 
-    `((ignore a #'b)         t      nil (ignore (a (function b))))))
+    '(#8=(ignore a #'b)         t      nil (:declaration
+                                            (:argument ((a) ((function b))))
+                                            :kind ignore :source #8#))))

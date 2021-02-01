@@ -7,35 +7,41 @@
 (cl:in-package #:s-expression-syntax)
 
 (defmacro define-syntax (name syntax components &rest options)
-  (let ((documentation   (second (find :documentation options :key #'first)))
+  (let ((kind            (a:make-keyword name))
+        (documentation   (second (find :documentation options :key #'first)))
         (component-forms '())
-        (value-forms     '()))
+        (relations       '()))
     (map nil (lambda (component)
                (destructuring-bind (name cardinality &key evaluation)
                    component
-                 (push `(make-instance 'component
-                                       :name        ',name
-                                       :cardinality ',(case cardinality
-                                                        (*> '*)
-                                                        (t  cardinality))
-                                       :evaluation  ,evaluation)
-                       component-forms)
-                 (push `',name value-forms)
-                 (push (ecase cardinality
-                         (*     `(nreverse ,name))
-                         (*>    name)
-                         ((? 1) name))
-                       value-forms)))
+                 (let ((relation     (a:make-keyword name))
+                       (cardinality* (case cardinality
+                                       (*> '*)
+                                       (?  'bp:?)
+                                       (t  cardinality))))
+                   (push `(make-instance 'component
+                                         :name        ',name
+                                         :cardinality ',cardinality*
+                                         :evaluation  ,evaluation)
+                         component-forms)
+                   (push `(,cardinality*
+                           ,relation
+                           ,(ecase cardinality
+                              (*        `(nreverse ,name))
+                              ((*> ? 1) name)))
+                         relations))))
          components)
-    `(progn
-       (parser.packrat:defrule (,name :grammar special-operators) ()
-           ,syntax
-         (list ,@(nreverse value-forms)))
-       (ensure-syntax ',name 'special-operator
-                      :components (list ,@(nreverse component-forms))
-                      :rule       ',name
-                      ,@(when documentation
-                          `(:documentation ,documentation))))))
+    (a:with-unique-names (source)
+     `(progn
+        (parser.packrat:defrule (,name :grammar special-operators) ()
+            (value (,source) ,syntax)
+          (bp:node* (,kind :source ,source)
+            ,@(nreverse relations)))
+        (ensure-syntax ',name 'special-operator
+                       :components (list ,@(nreverse component-forms))
+                       :rule       ',name
+                       ,@(when documentation
+                           `(:documentation ,documentation)))))))
 
 (defmacro define-special-operator (name-and-options syntax &rest components)
   (check-type syntax (cons (member list list*)))

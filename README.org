@@ -38,7 +38,7 @@
                           (declare (type integer b))
                           (format t "~S" a)
                           (list a b)))
-           (components (s-expression-syntax:parse t syntax form)))
+           (components (s-expression-syntax:parse 'list syntax form)))
       (loop :for (component-name form) :on components :by #'cddr
             :for component = (s-expression-syntax:find-component component-name syntax)
             :do (format t "~16A -> ~16S~%~2@Tcardinality: ~S~%~2@Tevaluation:  ~S~2%"

@@ -22,10 +22,14 @@
   '((defconstant foo 1 2)    syn:invalid-syntax-error)
   '((defconstant foo 1 "" 2) syn:invalid-syntax-error)
 
-  '((defconstant foo
-      (bar 1)
-      "bla")
-    (syn::name foo syn::initial-value (bar 1) documentation "bla")))
+  '(#5=(defconstant foo
+         (bar 1)
+         "bla")
+    (:defconstant
+     (:name          ((foo))
+      :initial-value (((bar 1)))
+      :documentation (("bla")))
+     :source #5#)))
 
 (define-macro-test (defvar)
   '((defvar)            syn:invalid-syntax-error)
@@ -33,12 +37,16 @@
   '((defvar foo 1 2)    syn:invalid-syntax-error)
   '((defvar foo 1 "" 2) syn:invalid-syntax-error)
 
-  '((defvar foo)
-    (syn::name foo syn::initial-value nil documentation nil))
-  '((defvar foo
-      (bar 1)
-      "bla")
-    (syn::name foo syn::initial-value (bar 1) documentation "bla")))
+  '(#5=(defvar foo)
+    (:defvar (:name ((foo))) :source #5#))
+  '(#6=(defvar foo
+         (bar 1)
+         "bla")
+    (:defvar
+     (:name          ((foo))
+      :initial-value (((bar 1)))
+      :documentation (("bla")))
+     :source #6#)))
 
 (define-macro-test (defparameter)
   '((defparameter)            syn:invalid-syntax-error)
@@ -47,10 +55,14 @@
   '((defparameter foo 1 2)    syn:invalid-syntax-error)
   '((defparameter foo 1 "" 2) syn:invalid-syntax-error)
 
-  '((defparameter foo
-      (bar 1)
-      "bla")
-    (syn::name foo syn::initial-value (bar 1) documentation "bla")))
+  '(#6=(defparameter foo
+         (bar 1)
+         "bla")
+    (:defparameter
+     (:name          ((foo))
+      :initial-value (((bar 1)))
+      :documentation (("bla")))
+     :source #6#)))
 
 (define-macro-test (defun)
   '((defun (setf 1) ())
@@ -64,33 +76,45 @@
   '((defun foo () (declare 1))
     syn:invalid-syntax-error)
   ;; Valid syntax
-  '((defun foo (bar baz)
-      "bla"
-      (declare (type integer bar baz))
-      (+ 1 2))
-    (syn::name foo syn::lambda-list ((bar baz) () nil () nil ())
-     documentation "bla"
-     syn::declarations ((type (integer bar baz)))
-     syn::forms ((+ 1 2)))))
+  '(#6=(defun foo #7=(bar baz)
+         "bla"
+         (declare #8=(type integer bar baz))
+         (+ 1 2))
+    (:defun
+     (:name ((foo))
+      :lambda-list   (((:ordinary-lambda-list
+                        (:required ((bar) (baz)))
+                        :source #7#)))
+      :documentation (("bla"))
+      :declarations  (((:declaration
+                        (:argument ((integer) (bar) (baz)))
+                        :kind type :source #8#)))
+      :forms         (((+ 1 2))))
+     :source #6#)))
 
 (define-macro-test (defmacro)
   '((defmacro)       syn:invalid-syntax-error)
   '((defmacro 1)     syn:invalid-syntax-error)
   '((defmacro foo 1)
     syn:invalid-syntax-error 1 "must be a destructuring lambda list")
-  '((defmacro foo (x (y #3=x)))
-    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+  '((defmacro foo (x (y #4=x)))
+    syn:invalid-syntax-error #4# "must be a lambda list variable name")
   ;; Valid syntax
-  `((defmacro foo (a b)
-      "bla"
-      (declare (ignore a))
-      (list 'cons b b))
-    (syn::name         foo
-     syn::lambda-list  (:destructuring-lambda-list
-                        nil nil (a b) () nil () nil () nil)
-     documentation     "bla"
-     syn::declarations ((ignore (a)))
-     syn::forms        ((list 'cons b b)))))
+  `(#5=(defmacro foo #6=(a b)
+         "bla"
+         (declare #7=(ignore a))
+         (list 'cons b b))
+    (:defmacro
+     (:name          ((foo))
+      :lambda-list   (((:destructuring-lambda-list
+                        (:required ((a) (b)))
+                        :source #6#)))
+      :documentation (("bla"))
+      :declarations  (((:declaration
+                        (:argument ((a)))
+                        :kind ignore :source #7#)))
+      :forms         (((list 'cons b b))))
+     :source #5#)))
 
 ;;; `defstruct' including slots
 
@@ -107,16 +131,17 @@
   '((foo nil :type bit . #5=(:type bit))
     syn:invalid-syntax-error #5# ":TYPE option must not be repeated")
   ;; Valid
-  '(foo
-    (syn::name      foo
-     syn::initform  nil
-     syn::read-only nil
-     syn::type      nil))
-  '((foo 1 :type bit :read-only t)
-    (syn::name      foo
-     syn::initform  1
-     syn::read-only t
-     syn::type      bit)))
+  '(#6=foo
+    (:slot-description
+     (:name ((foo)))
+     :source #6#))
+  '(#7=(foo 1 :type bit :read-only t)
+    (:slot-description
+     (:name      ((foo))
+      :initform  ((1))
+      :read-only ((t))
+      :type      ((bit)))
+     :source #7#)))
 
 (define-macro-test (defstruct)
   '((defstruct)
@@ -139,41 +164,28 @@
   '((defstruct (foo (:type list) #9=(:type list)))
     syn:invalid-syntax-error #9# ":TYPE option must not be repeated")
   ;; Valid
-  '((defstruct foo)
-    (syn::name          foo
-     syn::constructors  ()
-     syn::include       nil
-     syn::include-slots ()
-     syn::documentation nil
-     syn::slots         ()))
-  '((defstruct (foo))
-    (syn::name          foo
-     syn::constructors  ()
-     syn::include       nil
-     syn::include-slots ()
-     syn::documentation nil
-     syn::slots         ()))
-  '((defstruct (foo (:constructor nil)))
-    (syn::name          foo
-     syn::constructors  ((nil nil))
-     syn::include       nil
-     syn::include-slots ()
-     syn::documentation nil
-     syn::slots         ()))
-  '((defstruct (foo (:constructor foo (a b))))
-    (syn::name          foo
-     syn::constructors  ((foo ((a b) () nil () nil ())))
-     syn::include       nil
-     syn::include-slots ()
-     syn::documentation nil
-     syn::slots         ()))
-  '((defstruct foo "doc")
-    (syn::name          foo
-     syn::constructors  ()
-     syn::include       nil
-     syn::include-slots ()
-     syn::documentation "doc"
-     syn::slots         ())))
+  '(#10=(defstruct foo)
+    (:defstruct (:name ((foo))) :source #10#))
+  '(#11=(defstruct (foo))
+    (:defstruct (:name ((foo))) :source #11#))
+  '(#12=(defstruct (foo (:constructor nil)))
+    (:defstruct
+     (:name         ((foo))
+      :constructors (((nil nil))))
+    :source #12#))
+  '(#13=(defstruct (foo (:constructor foo #14=(a b))))
+    (:defstruct
+        (:name         ((foo))
+         :constructors (((foo
+                          (:ordinary-lambda-list
+                           (:required ((a) (b)))
+                           :source #14#)))))
+      :source #13#))
+  '(#15=(defstruct foo "doc")
+    (:defstruct
+     (:name          ((foo))
+      :documentation (("doc")))
+     :source #15#)))
 
 ;;; `defclass' including slots
 
@@ -198,18 +210,14 @@
     '((foo :type bit :type bit)                   :fatal bit        ":TYPE option must not be repeated")
     '((foo :documentation "" :documentation "")   :fatal ""         ":DOCUMENTATION option must not be repeated")
     ;; Valid syntax
-    '((foo :initform (+ 1) :custom-option :foo :reader bar)
-      t t (syn::name foo
-           syn::initargs ()
-           syn::readers (bar)
-           syn::writers ()
-           syn::accessors ()
-           syn::allocation nil
-           syn::initform (+ 1)
-           type nil
-           documentation nil
-           syn::option-names (:custom-option)
-           syn::option-values (:foo)))))
+    '(#15=(foo :initform (+ 1) :custom-option :foo :reader bar)
+      t t (:slot-specifier
+           (:name          ((foo))
+            :readers       ((bar))
+            :initform      (((+ 1)))
+            :option-names  ((:custom-option))
+            :option-values ((:foo)))
+           :source #15#))))
 
 (define-macro-test (defclass)
   '((defclass)
@@ -242,57 +250,65 @@
   '((defclass foo () ((a :type t . #13=(:type t))))
     syn:invalid-syntax-error #13# ":TYPE option must not be repeated")
   ;; Valid syntax
-  '((defclass foo (bar baz)
-      ((foo :initform (+ 1) :custom-option :foo :reader bar))
-      (:metaclass foo)
-      (:default-initargs
-       :bar 1)
-      (:my-class-option 1))
-    (syn::name             foo
-     syn::superclasses     (bar baz)
-     syn::slots            ((syn::name foo
-                             syn::initargs ()
-                             syn::readers (bar)
-                             syn::writers ()
-                             syn::accessors ()
-                             syn::allocation nil
-                             syn::initform (+ 1)
-                             type nil
-                             documentation nil
-                             syn::option-names (:custom-option)
-                             syn::option-values (:foo)))
-     syn::default-initargs (:bar)
-     syn::default-initforms (1)
-     syn::metaclass         foo
-     documentation          nil
-     syn::option-names      (:my-class-option) syn::option-values ((1)))))
+  '(#14=(defclass foo (bar baz)
+         (#15=(foo :initform (+ 1) :custom-option :foo :reader bar))
+         (:metaclass foo)
+         (:documentation "foo")
+         (:default-initargs
+          :bar 1)
+         (:my-class-option 1))
+    (:defclass
+     (:name              ((foo))
+      :superclasses      ((bar) (baz))
+      :slots             (((:slot-specifier
+                            (:name          ((foo))
+                             :readers       ((bar))
+                             :initform      (((+ 1)))
+                             :option-names  ((:custom-option))
+                             :option-values ((:foo)))
+                            :source #15#)))
+      :default-initargs  ((:bar))
+      :default-initforms ((1))
+      :metaclass         ((foo))
+      :documentation     (("foo"))
+      :option-names      ((:my-class-option))
+      :option-values     (((1))))
+     :source #14#)))
 
 (define-macro-test (deftype)
   '((deftype)       syn:invalid-syntax-error)
   '((deftype 1)     syn:invalid-syntax-error)
   '((deftype foo)   syn:invalid-syntax-error)
-  '((deftype foo #4=1)
-    syn:invalid-syntax-error #4#"must be a DEFTYPE lambda list")
+  '((deftype foo 1) syn:invalid-syntax-error 1 "must be a DEFTYPE lambda list")
   '((deftype foo (x #5=x))
     syn:invalid-syntax-error #5# "must be a lambda list variable name")
   ;; Valid syntax
-  '((deftype foo (a &key b)
-      "bla bli"
-      (declare (ignore a))
-      (declare (ignore b))
-      (list a b))
-    (syn::name         foo
-     syn::lambda-list  (:destructuring-lambda-list
-                        nil nil (a) () nil (((keyword b) b nil nil)) nil () nil)
-     documentation     "bla bli"
-     syn::declarations ((ignore (a)) (ignore (b)))
-     syn::forms        ((list a b)))))
+  '(#6=(deftype foo #7=(a &key b)
+         "bla bli"
+         (declare #8=(ignore a))
+         (declare #9=(ignore b))
+         (list a b))
+    (:deftype
+     (:name          ((foo))
+      :lambda-list   (((:destructuring-lambda-list
+                        (:required ((a))
+                         :keyword  ((((keyword b) b nil nil))))
+                        :source #7#)))
+      :documentation (("bla bli"))
+      :declarations  (((:declaration
+                        (:argument ((a)))
+                        :kind ignore :source #8#))
+                      ((:declaration
+                        (:argument ((b)))
+                        :kind ignore :source #9#)))
+      :forms         (((list a b))))
+     :source #6#)))
 
 (define-macro-test (defgeneric)
-  '((defgeneric foo 1)
-    syn:invalid-syntax-error 1 "must be a generic function lambda list")
-  #+TODO '((defgeneric foo (&key (a 1)))
-           syn:invalid-syntax-error 1 "must be a generic function lambda list")
+  '((defgeneric foo #1=1)
+    syn:invalid-syntax-error #1# "must be a generic function lambda list")
+  #+TODO '((defgeneric foo #2=(&key (a 1)))
+           syn:invalid-syntax-error #2# "must be a generic function lambda list")
   '((defgeneric foo (x #3=x))
     syn:invalid-syntax-error #3# "must be a lambda list variable name")
   '((defgeneric foo ()
@@ -330,53 +346,40 @@
       #13=(:documentation "foo"))
     syn:invalid-syntax-error #13# ":DOCUMENTATION option must not be repeated")
   ;; Valid syntax
-  '((defgeneric foo (a b)
-      (:documentation "foo")
-      (:generic-function-class clazz))
-    (syn::name                         foo
-     syn::lambda-list                  ((a b) () nil () nil)
-     syn::generic-function-class       clazz
-     syn::argument-precedence-order    nil
-     method-combination                ()
-     syn::method-combination-arguments ()
-     syn::method-class                 nil
-     syn::declarations                 ()
-     documentation                     "foo"
-     syn::methods                      ()
-     syn::option-names                 ()
-     syn::option-values                ()))
-  '((defgeneric foo (a b)
-      (:argument-precedence-order b a))
-    (syn::name                         foo
-     syn::lambda-list                  ((a b) () nil () nil)
-     syn::generic-function-class       nil
-     syn::argument-precedence-order    (b a)
-     method-combination                ()
-     syn::method-combination-arguments ()
-     syn::method-class                 nil
-     syn::declarations                 ()
-     documentation                     nil
-     syn::methods                      ()
-     syn::option-names                 ()
-     syn::option-values                ()))
-  '((defgeneric foo (a)
-      (:method :custom 1 "foo" (a)))
-    (syn::name                         foo
-     syn::lambda-list                  ((a) () nil () nil)
-     syn::generic-function-class       nil
-     syn::argument-precedence-order    ()
-     method-combination                ()
-     syn::method-combination-arguments ()
-     syn::method-class                 nil
-     syn::declarations                 ()
-     documentation                     nil
-     syn::methods                      ((syn::qualifiers   (:custom 1 "foo")
-                                         syn::lambda-list  (((a nil)) () nil () nil ())
-                                         documentation     nil
-                                         syn::declarations ()
-                                         syn::forms        ()))
-     syn::option-names                 ()
-     syn::option-values                ())))
+  '(#14=(defgeneric foo #15=(a b)
+         (:documentation "foo")
+         (:generic-function-class clazz))
+    (:defgeneric
+     (:name                      ((foo))
+      :lambda-list               (((:generic-function-lambda-list
+                                    (:required ((a) (b)))
+                                    :source #15#)))
+      :generic-function-class    ((clazz))
+      :documentation             (("foo")))
+     :source #14#))
+  '(#16=(defgeneric foo #17=(a b)
+          (:argument-precedence-order b a))
+    (:defgeneric
+     (:name                      ((foo))
+      :lambda-list               (((:generic-function-lambda-list
+                                    (:required ((a) (b)))
+                                    :source #17#)))
+      :argument-precedence-order (((b a))))
+      :source #16#))
+  '(#18=(defgeneric foo #19=(a)
+          #20=(:method :custom 1 "foo" #21=(a)))
+    (:defgeneric
+     (:name        ((foo))
+      :lambda-list (((:generic-function-lambda-list
+                      (:required ((a)))
+                      :source #19#)))
+      :methods     (((:method-description
+                      (:qualifiers  ((:custom) (1) ("foo"))
+                       :lambda-list (((:specialized-lambda-list
+                                       (:required (((a nil))))
+                                       :source #21#))))
+                      :source #20#))))
+     :source #18#)))
 
 (define-macro-test (defmethod)
   '((defmethod 1)
@@ -392,42 +395,41 @@
   '((defmethod foo (#6=(x t 1)))
     syn:invalid-syntax-error #6# "must be of the form (NAME SPECIALIZER)")
   ;; Valid syntax
-  '((defmethod foo ())
-    (syn::name          foo
-     syn::qualifiers    ()
-     syn::lambda-list   (() () nil () nil ())
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ()))
-  '((defmethod foo :around ())
-    (syn::name          foo
-     syn::qualifiers    (:around)
-     syn::lambda-list   (() () nil () nil ())
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ()))
-  '((defmethod foo :custom 1 "foo" ())
-    (syn::name          foo
-     syn::qualifiers    (:custom 1 "foo")
-     syn::lambda-list   (() () nil () nil ())
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ()))
-  '((defmethod foo ((x t)))
-    (syn::name          foo
-     syn::qualifiers    ()
-     syn::lambda-list   (((x t)) () nil () nil ())
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ()))
-  '((defmethod foo ()
-      "foo" (declare (ignore)) 1)
-    (syn::name          foo
-     syn::qualifiers    ()
-     syn::lambda-list   (() () nil () nil ())
-     syn::documentation "foo"
-     syn::declarations  ((ignore nil))
-     syn::forms         (1))))
+  '(#7=(defmethod foo #8=())
+    (:defmethod
+     (:name        ((foo))
+      :lambda-list (((:specialized-lambda-list () :source #8#))))
+     :source #7#))
+  '(#9=(defmethod foo :around #10=())
+    (:defmethod
+     (:name        ((foo))
+      :qualifiers  ((:around))
+      :lambda-list (((:specialized-lambda-list () :source #10#))))
+     :source #9#))
+  '(#11=(defmethod foo :custom 1 "foo" #12=())
+    (:defmethod
+     (:name        ((foo))
+      :qualifiers  ((:custom) (1) ("foo"))
+      :lambda-list (((:specialized-lambda-list
+                      ()
+                      :source #12#))))
+     :source #11#))
+  '(#13=(defmethod foo #14=((x t)))
+    (:defmethod
+     (:name        ((foo))
+      :lambda-list (((:specialized-lambda-list
+                      (:required (((x t))))
+                      :source #14#))))
+     :source #13#))
+  '(#15=(defmethod foo #16=()
+          "foo" (declare #17=(ignore)) 1)
+    (:defmethod
+     (:name          ((foo))
+      :lambda-list   (((:specialized-lambda-list () :source #16#)))
+      :documentation (("foo"))
+      :declarations  (((:declaration () :kind ignore :source #17#)))
+      :forms         ((1)))
+     :source #15#)))
 
 (define-macro-test (defpackage)
   '((defpackage #1=1)
@@ -446,51 +448,48 @@
   '((defpackage foo (:size 1) #7=(:size 2))
     syn:invalid-syntax-error #7# ":SIZE option must not be repeated")
   ;; Valid syntax
-  '((defpackage foo
-      (:documentation "bla")
-      (:use :bar "bar")
-      (:size 1)
-      (:import-from :foo #\c :bar)
-      (:shadowing-import-from :foo2 "BAZ2" :bar2))
-    (syn::name                           foo
-     syn::nicknames                      ()
-     documentation                       "bla"
-     syn::use                            (:bar "bar")
-     shadow                              ()
-     syn::shadowing-import-from-packages (:foo2)
-     syn::shadowing-import-from-names    (("BAZ2" :bar2))
-     syn::import-from-packages           (:foo)
-     syn::import-from-names              ((#\c :bar))
-     export                              ()
-     intern                              ()
-     syn::size                           1))
+  '(#8=(defpackage foo
+         (:documentation "bla")
+         (:use :bar "bar")
+         (:size 1)
+         (:import-from :foo #\c :bar)
+         (:shadowing-import-from :foo2 "BAZ2" :bar2))
+    (:defpackage
+     (:name                           ((foo))
+      :documentation                  (("bla"))
+      :use                            ((:bar) ("bar"))
+      :shadowing-import-from-packages ((:foo2))
+      :shadowing-import-from-names    ((("BAZ2" :bar2)))
+      :import-from-packages           ((:foo))
+      :import-from-names              (((#\c :bar)))
+      :size                           ((1)))
+     :source #8#))
 
-  '((defpackage foo
-      (:documentation "bla")
-      (:use :bar "bar")
-      (:size 1)
-      (:import-from :foo :bar :baz)
-      (:shadowing-import-from :foo2 "BAZ2" :bar2))
-    (syn::name                           foo
-     syn::nicknames                      ()
-     documentation                       "bla"
-     syn::use                            (:bar "bar")
-     shadow                              ()
-     syn::shadowing-import-from-packages (:foo2)
-     syn::shadowing-import-from-names    (("BAZ2" :bar2))
-     syn::import-from-packages           (:foo)
-     syn::import-from-names              ((:bar :baz))
-     export                              ()
-     intern                              ()
-     syn::size                           1)))
+  '(#9=(defpackage foo
+         (:documentation "bla")
+         (:use :bar "bar")
+         (:size 1)
+         (:import-from :foo :bar :baz)
+         (:shadowing-import-from :foo2 "BAZ2" :bar2))
+    (:defpackage
+     (:name                           ((foo))
+      :documentation                  (("bla"))
+      :use                            ((:bar) ("bar"))
+      :shadowing-import-from-packages ((:foo2))
+      :shadowing-import-from-names    ((("BAZ2" :bar2)))
+      :import-from-packages           ((:foo))
+      :import-from-names              (((:bar :baz)))
+      :size                           ((1)))
+     :source #9#)))
 
 (define-macro-test (in-package)
-  '((in-package)       syn:invalid-syntax-error)
-  '((in-package 1)     syn:invalid-syntax-error)
-  '((in-package foo 1) syn:invalid-syntax-error)
+  '((in-package)          syn:invalid-syntax-error)
+  '((in-package 1)        syn:invalid-syntax-error)
+  '((in-package foo 1)    syn:invalid-syntax-error)
 
-  '((in-package foo)   (syn::name foo))
-  '((in-package "FOO") (syn::name "FOO")))
+  '(#4=(in-package foo)   (:in-package (:name ((foo)))   :source #4#))
+  '(#5=(in-package "FOO") (:in-package (:name (("FOO"))) :source #5#)))
+
 
 ;;; `handler-{bind,case}' and  `restart-{bind,case}'
 
@@ -502,11 +501,13 @@
   '((handler-bind ((#3=1 (lambda (x)))))
     syn:invalid-syntax-error #3# "must be a type specifier")
   ;; Valid syntax
-  '((handler-bind ((foo (lambda (x) (bar))))
-      (baz))
-    (syn::types         (foo)
-     syn::handler-forms ((lambda (x) (bar)))
-     syn::forms         ((baz)))))
+  '(#4=(handler-bind ((foo (lambda (x) (bar))))
+         (baz))
+    (:handler-bind
+     (:types         ((foo))
+      :handler-forms (((lambda (x) (bar))))
+      :forms         (((baz))))
+     :source #4#)))
 
 (define-macro-test (handler-case)
   '((handler-case nil (#1=1))
@@ -519,17 +520,19 @@
   '((handler-case nil (:no-error ()) #4=(:no-error ()))
     syn:invalid-syntax-error #4# "NO-ERROR must not be repeated")
   ;; Valid syntax
-  '((handler-case (foo)
-      (bar (x) (baz))
-      (:no-error (y z) (fez)))
-    (syn::form                 (foo)
-     syn::types                (bar)
-     syn::variables             (x)
-     syn::declarations          (())
-     syn::forms                 (((baz)))
-     syn::no-error-lambda-list  ((y z) () nil () nil ())
-     syn::no-error-declarations ()
-     syn::no-error-forms        ((fez)))))
+  '(#5=(handler-case (foo)
+         (bar (x) (baz))
+         (:no-error #6=(y z) (fez)))
+    (:handler-case
+     (:form                 (((foo)))
+      :types                ((bar))
+      :variables            ((x))
+      :forms                ((((baz))))
+      :no-error-lambda-list (((:ordinary-lambda-list
+                               (:required ((y) (z)))
+                               :source #6#)))
+      :no-error-forms       (((fez))))
+     :source #5#)))
 
 (define-macro-test (restart-bind)
   '((restart-bind 1)
@@ -541,20 +544,15 @@
   '((restart-bind ((foo bar :test-function baz . #4=(:test-function fez))))
     syn:invalid-syntax-error #4# ":TEST-FUNCTION option must not be repeated")
   ;; Valid syntax
-  '((restart-bind () 1)
-    (syn::names                 ()
-     syn::functions             ()
-     syn::interactive-functions ()
-     syn::report-functions      ()
-     syn::test-functions        ()
-     syn::forms                 (1)))
-  '((restart-bind ((foo bar :report-function baz)) 1)
-    (syn::names                 (foo)
-     syn::functions             (bar)
-     syn::interactive-functions (nil)
-     syn::report-functions      (baz)
-     syn::test-functions        (nil)
-     syn::forms                 (1))))
+  '(#5=(restart-bind () 1)
+    (:restart-bind (:forms ((1))) :source #5#))
+  '(#6=(restart-bind ((foo bar :report-function baz)) 1)
+    (:restart-bind
+     (:names            ((foo))
+      :functions        ((bar))
+      :report-functions ((baz))
+      :forms            ((1)))
+     :source #6#)))
 
 (define-macro-test (restart-case)
   '((restart-case #1=(declare))
@@ -566,21 +564,15 @@
   '((restart-case 1 (foo #4=1))
     syn:invalid-syntax-error #4# "must be an ordinary lambda list")
   ;; Valid syntax
-  '((restart-case 1)
-    (syn::form         1
-     syn::names        ()
-     syn::lambda-lists ()
-     syn::interactives ()
-     syn::reports      ()
-     syn::tests        ()
-     syn::declarations ()
-     syn::forms        ()))
-  '((restart-case 1 (foo (x) :report "bar" :test baz))
-    (syn::form         1
-     syn::names        (foo)
-     syn::lambda-lists (((x) () nil () nil ()))
-     syn::interactives (nil)
-     syn::reports      ("bar")
-     syn::tests        (baz)
-     syn::declarations (())
-     syn::forms        (()))))
+  '(#5=(restart-case 1)
+    (:restart-case (:form ((1))) :source #5#))
+  '(#6=(restart-case 1 (foo #7=(x) :report "bar" :test baz))
+    (:restart-case
+     (:form         ((1))
+      :names        ((foo))
+      :lambda-lists (((:ordinary-lambda-list
+                       (:required ((x)))
+                       :source #7#)))
+      :reports      (("bar"))
+      :tests        ((baz)))
+     :source #6#)))
