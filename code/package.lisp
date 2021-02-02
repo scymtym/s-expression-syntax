@@ -37,7 +37,7 @@
 
    #:invalid-syntax-error
    #:syntax
-   #:value)
+   #:value) ; TODO collides with symbol from grammar.base
 
   ;; Component protocol
   (:export
