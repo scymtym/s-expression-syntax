@@ -83,10 +83,10 @@
 
 (macrolet ((define-function-option (name option &optional (symbol? t))
              `(defrule ,name ()
-                ,(let ((list-syntax `(list ,option (? (<- name (or 'nil ((function-name/symbol! names))))))))
-                   (if symbol?
-                       `(or ,option ,list-syntax)
-                       list-syntax))
+                  ,(let ((list-syntax `(list ,option (? (<- name (or 'nil ((function-name/symbol! names))))))))
+                     (if symbol?
+                         `(or ,option ,list-syntax)
+                         list-syntax))
                 (or name t))))
   (define-function-option structure-copier         :copier)
   (define-function-option structure-predicate      :predicate)
@@ -141,17 +141,17 @@
   (or :instance :class))
 
 #+unused (define-syntax slot-options
-    (list (* (or (seq :reader        (<<- readers           (must (function-name/symbol)))) ; TODO fail for something like :reader 1
-                 (seq :writer        (<<- writers           (must (function-name))))
-                 (seq :accessor      (<<- accessor          (must (function-name/symbol))))
-                 (seq :allocation    (eg:once allocation    (must (allocation-type))))
-                 (seq :initarg       (<<- initargs          (must (guard symbolp))))
-                 (seq :initform      (eg:once initform      ((form! forms))))
-                 (seq :type          (eg:once type          (type-specifier)))
-                 (seq :documentation (eg:once documentation ((documentation-string! forms)))
+    (list (* (or (seq :reader                  (<<- readers      (must (function-name/symbol)))) ; TODO fail for something like :reader 1
+                 (seq :writer                  (<<- writers      (must (function-name))))
+                 (seq :accessor                (<<- accessor     (must (function-name/symbol))))
+                 (seq (eq:once :allocation)    (<- allocation    (must (allocation-type))))
+                 (seq :initarg                 (<<- initargs     (must (guard symbolp))))
+                 (seq (eg:once :initform)      (<- initform      ((form! forms))))
+                 (seq (eg:once :type)          (<- type          (type-specifier)))
+                 (seq (eg:once :documentation) (<- documentation ((documentation-string! forms)))
                        )
                  (seq (<<- option-names  (guard symbolp))
-                       (<<- option-values)))))
+                      (<<- option-values)))))
   ((initargs      *)
    (readers       *)
    (writers       *)
@@ -168,18 +168,18 @@
     (or (and (not (list* :any)) (<- name ((slot-name! names))))
         (list (must (<- name ((slot-name! names))) "slot must have a name")
               #+no (<- options (slot-options))
-              (* (or (seq :reader        (<<- readers           (must ((function-name/symbol names))
-                                                                      "reader must be a symbol function name")))
-                     (seq :writer        (<<- writers           (must ((function-name names))
-                                                                      "writer must be an extended function name")))
-                     (seq :accessor      (<<- accessors         (must ((function-name/symbol names))
-                                                                      "accessor must be a symbol function name")))
-                     (seq :allocation    (eg:once allocation    (must (allocation-type))))
-                     (seq :initarg       (<<- initargs          (must (guard symbolp)
-                                                                      "initarg must be a symbol")))
-                     (seq :initform      (eg:once initform      ((form! forms))))
-                     (seq :type          (eg:once type          ((type-specifier! type-specifiers))))
-                     (seq :documentation (eg:once documentation ((documentation-string! forms))))
+              (* (or (eg:poption* :reader        (<<- readers      (must ((function-name/symbol names))
+                                                                         "reader must be a symbol function name")))
+                     (eg:poption* :writer        (<<- writers      (must ((function-name names))
+                                                                         "writer must be an extended function name")))
+                     (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
+                                                                         "accessor must be a symbol function name")))
+                     (eg:poption  :allocation    (<- allocation    (must (allocation-type))))
+                     (eg:poption* :initarg       (<<- initargs     (must (guard symbolp)
+                                                                         "initarg must be a symbol")))
+                     (eg:poption  :initform      (<- initform      ((form! forms))))
+                     (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
+                     (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
                      (seq (<<- option-names  (guard symbolp))
                           (<<- option-values))))))
   ((name    1)
@@ -203,14 +203,14 @@
                                    "superclass must be a class name"))))
           (list (* (<<- slots (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
-                 (list :default-initargs ; TODO once
-                       (* (and :any
+                 (eg:option :default-initargs
+                            (* (and :any
                                (must (seq (<<- default-initargs  (guard symbolp))
                                           (<<- default-initforms :any))
-                                     "default initarg must a symbol followed by an expression"))))
-                 (list :metaclass
-                       (must (eg:once metaclass ((class-name names))) "metaclass must be a class name"))
-                 (list :documentation (eg:once documentation ((documentation-string! forms))))
+                                     "default initarg must be a symbol followed by an expression"))))
+                 (eg:option :metaclass     (must (<- metaclass ((class-name names)))
+                                                 "metaclass must be a class name"))
+                 (eg:option :documentation (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
                         (<<- option-values)))))
@@ -244,13 +244,13 @@
     (list (<- name ((function-name! names)))
           (<- lambda-list ((generic-function-lambda-list lambda-lists) 'nil))
           (* (or ;; Standard options
-                 (list :generic-function-class    (eg:once generic-function-class ((class-name! names))))
-                 (list :argument-precedence-order (eg:once argument-precedence-order (guard (must (or :most-specific-first ; TODO how to force this `must' to work on the value context?
+                 (eg:option :generic-function-class    (<- generic-function-class ((class-name! names))))
+                 (eg:option :argument-precedence-order (<- argument-precedence-order (guard (must (or :most-specific-first ; TODO how to force this `must' to work on the value context?
                                                                                                  :most-specific-last))
                                                                                         symbolp)))
-                 (list :documentation             (eg:once documentation ((documentation-string! forms))))
+                 (eg:option :documentation             (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-names (guard keywordp))
+                 (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
                         (<<- option-values)))))
   ((name                      1)
    (lambda-list               1)
@@ -291,37 +291,38 @@
   (must (package-designator) "must be a package designator"))
 
 (defrule non-standard-package-option ()
-  (or (list :locked (must (guard (typep 'boolean)) "must be a Boolean"))
-      (list :local-nicknames (* (list (must (string-designator!) "expected TODO")
+  (or (eg:option  :locked (must (guard (typep 'boolean)) "must be a Boolean")) ; TODO the `once' within this does not work
+      (eg:option* :local-nicknames (* (list (must (string-designator!) "expected TODO")
                                       (must (string-designator!) "expected TODO"))))))
 
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
           ;; TODO (* (and :any (must (or …) "unknown options"))
-          (* (or (list :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
-                 (list :documentation (eg:once documentation ((documentation-string! forms))))
-                 (list :use           (* (<<- use (and :any (package-designator!)))))
-                 (list :shadow        (* (<<- shadow (guard symbolp))))
-                 (list :shadowing-import-from
-                       (<<- shadowing-import-from-packages (package-designator!))
-                       (<<- shadowing-import-from-names    (:transform
-                                                            (* (<<- temp (and :any (string-designator!))))
-                                                            (prog1
-                                                                (nreverse temp)
-                                                              (setf temp '())))))
-                 (list :import-from
-                       (<<- import-from-packages (package-designator!))
-                       (<<- import-from-names    (:transform
-                                                  (* (<<- temp (and :any (string-designator!))))
-                                                  (prog1
-                                                      (nreverse temp)
-                                                    (setf temp '())))))
-                 (list :export (* (<<- export (and :any (string-designator!)))))
-                 (list :intern (* (<<- intern (and :any (string-designator!)))))
-                 (list :size   (eg:once size (guard (typep '(integer 0)))))
+          (* (or (eg:option* :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
+                 (eg:option  :documentation (<- documentation ((documentation-string! forms))))
+                 (eg:option* :use           (* (<<- use (and :any (package-designator!)))))
+                 (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
+                 (eg:option* :shadowing-import-from
+                             (<<- shadowing-import-from-packages (package-designator!))
+                             (<<- shadowing-import-from-names    (:transform
+                                                                     (* (<<- temp (and :any (string-designator!))))
+                                                                   (prog1
+                                                                       (nreverse temp)
+                                                                     (setf temp '())))))
+                 (eg:option* :import-from
+                             (<<- import-from-packages (package-designator!))
+                             (<<- import-from-names    (:transform
+                                                           (* (<<- temp (and :any (string-designator!))))
+                                                         (prog1
+                                                             (nreverse temp)
+                                                           (setf temp '())))))
+                 (eg:option* :export (* (<<- export (and :any (string-designator!)))))
+                 (eg:option* :intern (* (<<- intern (and :any (string-designator!)))))
+                 (eg:option  :size   (<- size (must (guard (typep '(integer 0)))
+                                                    "must be a non-negative integer")))
                  (non-standard-package-option)
                  (list* (must (not :any) "unknown option") :any)
-                 (and :any (must (guard (not :any) atom) "options must be list")))))
+                 (and :any (must (guard (not :any) atom) "option must be a list")))))
   ((name                           1)
    (nicknames                      *)
    (documentation                  ?)

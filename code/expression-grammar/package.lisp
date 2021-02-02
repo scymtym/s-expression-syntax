@@ -23,7 +23,7 @@
    (#:sexp #:parser.packrat.grammar.sexp))
 
   (:import-from #:parser.packrat.grammar.base
-   #:<- #:guard #:must)
+   #:<- #:<<- #:guard #:must)
 
   (:export
    #:*client*
@@ -41,4 +41,7 @@
 
   ;; Grammar rule macros
   (:export
-   #:once))
+   #:once
+
+   #:option  #:option*
+   #:poption #:poption*))
