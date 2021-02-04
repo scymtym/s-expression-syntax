@@ -294,8 +294,15 @@
           (<- lambda-list ((generic-function-lambda-list! lambda-lists)))
           (* (or ;; Standard options
                  (eg:option  :generic-function-class    (<- generic-function-class ((class-name! names))))
-                 (and (eg:option  :argument-precedence-order (* (<<- names ((lambda-list-variable-name! lambda-lists)))))
-                      (<- argument-precedence-order (:transform :any (nreverse names))))
+                 (and (eg:option :argument-precedence-order (* (<<- names ((lambda-list-variable-name! lambda-lists)))))
+                      (<- argument-precedence-order
+                          (:transform :any
+                            (let ((required (map 'list (a:curry #'bp:node-relation* :name)
+                                                 (bp:node-relation* :required lambda-list))))
+                              (unless (a:set-equal names required :test #'eg::%eql)
+                                (:fatal (format nil "~S must be the set of required parameters ~S"
+                                                names required)))
+                              (nreverse names)))))
                  (eg:option  :method-combination        (<- method-combination (must (guard symbolp)
                                                                                      "method combination name must be a symbol"))
                              (* (<<- method-combination-arguments)))
