@@ -292,13 +292,6 @@ NIL."))
 ;;;
 ;;; Lexically scope bindings of function-ish things.
 
-(define-special-operator parsed-lambda
-    (list lambda-list declarations documentation-string body)
-  ((lambda-list          1 :evaluation nil)
-   (declarations         1 :evaluation nil)
-   (documentation-string 1 :evaluation nil)
-   (body                 * :evaluation t)))
-
 (define-special-operator macrolet
     (list* (<- (names functions) (function-bindings))
            (<- (declarations forms) ((body forms))))
