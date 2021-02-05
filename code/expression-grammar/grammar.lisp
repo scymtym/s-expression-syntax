@@ -74,7 +74,10 @@
   (let+ ((value (env:value environment))
          ((&with-gensyms vector-function vector-value)))
     `(flet ((,vector-function (,vector-value)
-              ,(call-next-method)))
+              ,(let ((vector-environment (env:environment-at
+                                          environment (list :value vector-value))))
+                 (call-next-method grammar vector-environment expression
+                                   success-cont failure-cont))))
        (if (%natural? ,value)
            (,vector-function ,value)
            (,vector-function (naturalize *client* ,value))))))
