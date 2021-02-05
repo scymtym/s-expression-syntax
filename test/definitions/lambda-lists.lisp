@@ -25,6 +25,8 @@
   "Smoke test for the `ordinary-lambda-list' rule."
 
   (rule-test-cases ((syn::ordinary-lambda-list syn::lambda-lists))
+    '(((a))
+      :fatal (a) "must be a lambda list variable name")
     '((&optional (foo (declare)))
       :fatal (declare) "declare is not allowed here")
     '((&key (foo (declare)))

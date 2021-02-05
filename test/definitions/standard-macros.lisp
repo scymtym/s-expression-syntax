@@ -59,6 +59,8 @@
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
   '((defun foo (x #3=x))
     syn:invalid-syntax-error #3# "must be a lambda list variable name")
+  #+TODO '((defun foo ((a b)))
+           syn:invalid-syntax-error) ; this should fail but doesn't because of the way grammars use each other
   '((defun foo () (declare 1))
     syn:invalid-syntax-error)
   ;; Valid syntax
