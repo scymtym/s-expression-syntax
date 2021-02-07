@@ -191,32 +191,69 @@
 
 (define-macro-test (defgeneric)
   '((defgeneric foo ()
-      (:generic-function-class #1="foo"))
-    syn:invalid-syntax-error #1# "must be a class name")
+      (:generic-function-class))
+    syn:invalid-syntax-error nil ":GENERIC-FUNCTION-CLASS option accepts one value")
+  '((defgeneric foo ()
+      (:generic-function-class . #1=(bar 1)))
+    syn:invalid-syntax-error #1# ":GENERIC-FUNCTION-CLASS option accepts one value")
+  '((defgeneric foo ()
+      (:generic-function-class #2="foo"))
+    syn:invalid-syntax-error #2# "must be a class name")
+  '((defgeneric foo ()
+      (:argument-precedence-order #3=1))
+    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+  '((defgeneric foo ()
+      (:method-combination #4=1))
+    syn:invalid-syntax-error #4# "method combination name must be a symbol")
+  '((defgeneric foo ()
+      (:method-class #5=1))
+    syn:invalid-syntax-error #5# "must be a class name")
+  '((defgeneric foo ()
+      (:method))
+    syn:invalid-syntax-error nil "expected lambda list")
   ;; Repeated options
   '((defgeneric foo ()
       (:generic-function-class bar)
-      #2=(:generic-function-class bar))
-    syn:invalid-syntax-error #2# ":GENERIC-FUNCTION-CLASS option must not be repeated")
-  '((defgeneric foo ()
-      (:argument-precedence-order :most-specific-first)
-      #3=(:argument-precedence-order :most-specific-first))
-    syn:invalid-syntax-error #3# ":ARGUMENT-PRECEDENCE-ORDER option must not be repeated")
+      #6=(:generic-function-class bar))
+    syn:invalid-syntax-error #6# ":GENERIC-FUNCTION-CLASS option must not be repeated")
+  '((defgeneric foo (a)
+      (:argument-precedence-order a)
+      #7=(:argument-precedence-order a))
+    syn:invalid-syntax-error #7# ":ARGUMENT-PRECEDENCE-ORDER option must not be repeated")
   '((defgeneric foo ()
       (:documentation "foo")
-      #4=(:documentation "foo"))
-    syn:invalid-syntax-error #4# ":DOCUMENTATION option must not be repeated")
+      #8=(:documentation "foo"))
+    syn:invalid-syntax-error #8# ":DOCUMENTATION option must not be repeated")
   ;; Valid syntax
   '((defgeneric foo (a b)
       (:documentation "foo")
       (:generic-function-class clazz))
-    (syn::name                      foo
-     syn::lambda-list               ((a b) () nil () nil)
-     syn::generic-function-class    clazz
-     syn::argument-precedence-order nil
-     documentation                  "foo"
-     syn::option-names              ()
-     syn::option-values             ())))
+    (syn::name                         foo
+     syn::lambda-list                  ((a b) () nil () nil)
+     syn::generic-function-class       clazz
+     syn::argument-precedence-order    nil
+     method-combination                ()
+     syn::method-combination-arguments ()
+     syn::method-class                 nil
+     syn::declarations                 ()
+     documentation                     "foo"
+     syn::methods                      ()
+     syn::option-names                 ()
+     syn::option-values                ()))
+  '((defgeneric foo (a b)
+      (:argument-precedence-order b a))
+    (syn::name                         foo
+     syn::lambda-list                  ((a b) () nil () nil)
+     syn::generic-function-class       nil
+     syn::argument-precedence-order    (b a)
+     method-combination                ()
+     syn::method-combination-arguments ()
+     syn::method-class                 nil
+     syn::declarations                 ()
+     documentation                     nil
+     syn::methods                      ()
+     syn::option-names                 ()
+     syn::option-values                ())))
 
 (define-macro-test (defmethod)
   '((defmethod 1)

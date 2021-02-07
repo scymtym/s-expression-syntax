@@ -19,9 +19,12 @@
 (defun lambda-list-keyword? (symbol)
   (member symbol '(&whole &optional &rest &key &aux &allow-other-keys) :test #'eq))
 
-(defrule (lambda-list-variable-name) ()
+(defrule lambda-list-variable-name ()
   (and (not (guard lambda-list-keyword?))
        ((variable-name names))))
+
+(defrule lambda-list-variable-name! ()
+  (must (lambda-list-variable-name) "must be a lambda list variable name"))
 
 (defrule unique-variable-name (seen)
     (<- name (lambda-list-variable-name))

@@ -214,27 +214,50 @@
 
 ;;; `defgeneric'
 
+(define-syntax method-description
+    (must (list* :method
+                 (* (<<- qualifiers (guard (not 'nil) symbolp))) ; TODO repeated in `defmethod'
+                 (must (<- lambda-list ((specialized-lambda-list lambda-lists) 'nil)) "expected lambda list")
+                 (<- (documentation declarations forms) ((docstring-body forms))))
+          "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
+  ((qualifiers    *)
+   (lambda-list   1)
+   (documentation ?)
+   (declarations  *>)
+   (forms         *> :evaluation t)))
+
 (define-macro defgeneric
     (list (<- name ((function-name! names)))
           (<- lambda-list ((generic-function-lambda-list lambda-lists) 'nil))
           (* (or ;; Standard options
-                 (eg:option :generic-function-class    (<- generic-function-class ((class-name! names))))
-                 (eg:option :argument-precedence-order (<- argument-precedence-order (guard (must (or :most-specific-first ; TODO how to force this `must' to work on the value context?
-                                                                                                 :most-specific-last))
-                                                                                        symbolp)))
-                 (eg:option :documentation             (<- documentation ((documentation-string! forms))))
+                 (eg:option  :generic-function-class    (<- generic-function-class ((class-name! names))))
+                 (and (eg:option  :argument-precedence-order (* (<<- names ((lambda-list-variable-name! lambda-lists)))))
+                      (<- argument-precedence-order (:transform :any (nreverse names))))
+                 (eg:option  :method-combination        (<- method-combination (must (guard symbolp)
+                                                                                     "method combination name must be a symbol"))
+                                                        (* (<<- method-combination-arguments)))
+                 (eg:option  :method-class              (<- method-class ((class-name! names))))
+                 (eg:option* declare                    (and (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
+                                                             (<<- declarations ((declaration! declarations)))))
+                 (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
+                 (<<- methods (method-description))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
                         (<<- option-values)))))
-  ((name                      1)
-   (lambda-list               1)
+  ((name                         1)
+   (lambda-list                  1)
    ;; Standard options
-   (generic-function-class    ?)
-   (argument-precedence-order ?)
-   (documentation             ?)
+   (generic-function-class       ?)
+   (argument-precedence-order    ?)
+   (method-combination           ?)
+   (method-combination-arguments *)
+   (method-class                 ?)
+   (declarations                 *)
+   (documentation                ?)
+   (methods                      *)
    ;; Other options
-   (option-names              *)
-   (option-values             *)))
+   (option-names                 *)
+   (option-values                *)))
 
 ;;; `defmethod'
 
