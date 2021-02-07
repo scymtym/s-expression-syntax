@@ -60,30 +60,35 @@
 
 ;;; `defstruct' including slots
 
-#+maybe (defrule defstruct-slot-options
-            ())
-
 (define-syntax slot-description
-    (or (list (<- name ((variable-name! names)))
-              (? (seq (<- initform ((form! forms)))
-                       (* (or (seq :read-only (<- read-only))
-                              (seq :type      (<- type ((type-specifier! type-specifiers)))))))))
+    (or (and (list* :any)
+             (must (list (<- name ((variable-name! names)))
+                         (? (seq (<- initform ((form! forms)))
+                                 (* (or (eg:poption :read-only (<- read-only))
+                                        (eg:poption :type      (<- type ((type-specifier! type-specifiers)))))))))
+                   "must be of the form (NAME [INITFORM] ...)"))
         (<- name ((variable-name! names))))
   ((name      1)
    (initform  ? :evaluation t)
    (read-only ?)
    (type      ?)))
 
-(defrule structure-constructor ()
-    (list :constructor
-          (? (or (<- name 'nil)
-                 (seq (<- name ((function-name/symbol! names)))
-                       (? (<- lambda-list ((ordinary-lambda-list lambda-lists) '()))))))) ; TODO boa-lambda-list
+(defrule structure-constructor (other-constructors)
+    (eg:option* :constructor
+                (? (or 'nil ; NAME remains `nil'
+                       (seq (<- name ((function-name/symbol! names)))
+                            (? (<- lambda-list ((ordinary-lambda-list lambda-lists) '()))))))) ; TODO boa-lambda-list
+  (let ((names (list* name (map 'list #'first other-constructors))))
+    (when (and (not (= (length names) 1)) (member nil names))
+      (:fatal "(:constructor nil) and named constructors are mutually exclusive")))
   (list name lambda-list))
 
 (macrolet ((define-function-option (name option &optional (symbol? t))
              `(defrule ,name ()
-                  ,(let ((list-syntax `(list ,option (? (<- name (or 'nil ((function-name/symbol! names))))))))
+                  ,(let ((list-syntax `(eg:option*
+                                        ,option
+                                        (? (<- name (or 'nil
+                                                        ((function-name/symbol! names))))))))
                      (if symbol?
                          `(or ,option ,list-syntax)
                          list-syntax))
@@ -93,45 +98,42 @@
   (define-function-option structure-print-object   :print-object   nil)
   (define-function-option structure-print-function :print-function nil))
 
-(defrule structure-include ()
-    (list :include (<- name ((class-name! names)))
-          (* (<<- slots (slot-description))))
-    (list name slots))
-
-(defrule structure-initial-offset ()
-    (list :initial-offset (must (guard offset (typep '(integer 0))) "a valid offset"))
-  offset)
-
-(defrule structure-type ()
-    (list :type (<- type ((type-specifier! type-specifiers))))
-  type)
-
 (defrule structure-name ()
-    (or (list (<- name ((class-name! names)))
-              (* (or (<- constructor             (structure-constructor))
-                     (<- copier                  (structure-copier))
-                     (<- (include include-slots) (structure-include))
-                     (<- offset                  (structure-initial-offset))
-                     (<- named                   :named)
-                     (<- predicate               (structure-predicate))
-                     (<- print-object            (structure-print-object))
-                     (<- print-function          (structure-print-function))
-                     (<- type                    (structure-type)))))
+    (or (list (and (<- name ((class-name! names)))
+                   (<- constructors (:transform :any '()))) ; HACK
+              (:transform
+                 (* (or (<<- constructors           (structure-constructor constructors))
+                        (<- copier                  (structure-copier))
+                        (eg:option :include         (<- include ((class-name! names)))
+                                                    (* (<<- include-slots (slot-description))))
+                        (eg:option :initial-offset  (must (guard offset (typep '(integer 0)))
+                                                          "must be a valid offset"))
+                        (<- named                   :named)
+                        (<- predicate               (structure-predicate))
+                        (<- print-object            (structure-print-object))
+                        (<- print-function          (structure-print-function))
+                        (eg:option :type            (<- type ((type-specifier! type-specifiers))))
+                        (:transform :any
+                                    (:fatal "must be a DEFSTRUCT option"))))
+                 (when (and offset (not type))
+                   (:fatal (format nil "Cannot specify ~S without ~S"
+                                   :initial-offset :type)))
+                 (when (and type (or print-object print-function))
+                   (:fatal (format nil "The options ~S and ~S are mutually exclusive"
+                                   :type (cond (print-object   :print-object)
+                                               (print-function :print-function)))))))
         (<- name ((class-name! names))))
-  (when (and offset (not type))
-    (:fail ; "Cannot specify ~S without ~S" :initial-offset :type
-     ))
-  (when (and type (or print-object print-function))
-    (:fail ; "The options ~S and ~S are mutually exclusive"
-     ))
-  (list name constructor))
+    (list name constructors include include-slots))
 
 (define-macro defstruct
-    (list (<- (name constructor) (structure-name))
+    (list (<- (name constructors include include-slots)
+              (structure-name))
           (? (<- documentation ((documentation-string forms))))
           (* (<<- slots (slot-description))))
   ((name          1)
-   (constructor   ?)
+   (constructors  *>)
+   (include       ?)
+   (include-slots *>)
    (documentation ?)
    (slots         *)))
 

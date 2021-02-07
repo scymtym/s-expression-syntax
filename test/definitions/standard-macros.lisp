@@ -81,6 +81,87 @@
      syn::declarations ((ignore (a)))
      syn::forms        ((list 'cons b b)))))
 
+;;; `defstruct' including slots
+
+(define-syntax-test (syn::slot-description)
+  '((#1=1)
+    syn:invalid-syntax-error #1# "variable name must be a symbol")
+  '((foo #2=(declare))
+    syn:invalid-syntax-error #2# "declare is not allowed here")
+  '(#3=(foo 1 :bar 2)
+    syn:invalid-syntax-error #3# "must be of the form (NAME [INITFORM] ...)")
+  ;; Repeated options
+  '((foo nil :read-only t . #4=(:read-only t))
+    syn:invalid-syntax-error #4# ":READ-ONLY option must not be repeated")
+  '((foo nil :type bit . #5=(:type bit))
+    syn:invalid-syntax-error #5# ":TYPE option must not be repeated")
+  ;; Valid
+  '(foo
+    (syn::name      foo
+     syn::initform  nil
+     syn::read-only nil
+     syn::type      nil))
+  '((foo 1 :type bit :read-only t)
+    (syn::name      foo
+     syn::initform  1
+     syn::read-only t
+     syn::type      bit)))
+
+(define-macro-test (defstruct)
+  '((defstruct)
+    syn:invalid-syntax-error)
+  '((defstruct #2=1)
+    syn:invalid-syntax-error #2# "must be a class name")
+  '((defstruct (foo (:constructor nil) #3=(:constructor bar)))
+    syn:invalid-syntax-error #3# "(:constructor nil) and named constructors are mutually exclusive")
+  '((defstruct (foo (:constructor . #4=(foo () 1))))
+    syn:invalid-syntax-error #4# ":CONSTRUCTOR option accepts one value")
+  ;; Repeated options
+  '((defstruct (foo (:include bar) #5=(:include bar)))
+    syn:invalid-syntax-error #5# ":INCLUDE option must not be repeated")
+  '((defstruct (foo (:initial-offset 1) #6=(:initial-offset 1)))
+    syn:invalid-syntax-error #6# ":INITIAL-OFFSET option must not be repeated")
+  '((defstruct (foo (:type list) #7=(:type list)))
+    syn:invalid-syntax-error #7# ":TYPE option must not be repeated")
+  ;; Valid
+  '((defstruct foo)
+    (syn::name          foo
+     syn::constructors  ()
+     syn::include       nil
+     syn::include-slots ()
+     syn::documentation nil
+     syn::slots         ()))
+  '((defstruct (foo))
+    (syn::name          foo
+     syn::constructors  ()
+     syn::include       nil
+     syn::include-slots ()
+     syn::documentation nil
+     syn::slots         ()))
+  '((defstruct (foo (:constructor nil)))
+    (syn::name          foo
+     syn::constructors  ((nil nil))
+     syn::include       nil
+     syn::include-slots ()
+     syn::documentation nil
+     syn::slots         ()))
+  '((defstruct (foo (:constructor foo (a b))))
+    (syn::name          foo
+     syn::constructors  ((foo ((a b) () nil () nil ())))
+     syn::include       nil
+     syn::include-slots ()
+     syn::documentation nil
+     syn::slots         ()))
+  '((defstruct foo "doc")
+    (syn::name          foo
+     syn::constructors  ()
+     syn::include       nil
+     syn::include-slots ()
+     syn::documentation "doc"
+     syn::slots         ())))
+
+;;; `defclass' including slots
+
 (test slot-specifier
   "Test for `slot-specifier' rule."
 
