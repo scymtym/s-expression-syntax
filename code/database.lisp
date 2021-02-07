@@ -91,8 +91,10 @@
 (defmethod print-items:print-items append ((object component))
   (let ((semantics (a:when-let ((semantics (evaluation object)))
                      (print-items:print-items semantics))))
-    `((:name      ,(name object) "~A")
-      (:sematnics ,semantics     " ~/print-items:format-print-items/" ((:after :name))))))
+    `((:name        ,(name object)        "~A")
+      (:cardinality ,(cardinality object) " ~A" ((:after :name)))
+      ,@(when semantics
+          `((:semantics ,semantics " ~/print-items:format-print-items/" ((:after :cardinality))))))))
 
 ;;;
 
