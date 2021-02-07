@@ -21,6 +21,49 @@
     '(((a))     t      nil ((a) (nil)))
     '(((a 1))   t      nil ((a) (1)))))
 
+(test function-bindings
+  "Smoke test for the `function-bindings' rule."
+
+  (rule-test-cases ((syn::function-bindings syn::special-operators))
+    '((1)           :fatal 1     "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((1))         :fatal 1     "must be a function name")
+    '(((a))         :fatal (a)   "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((a 1))       :fatal (a 1) "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+
+    '(()            t      nil (()  ()))
+    '(((a ()))      t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) () () ()))))
+    '(((a () 1))    t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) () () (1)))))
+    '(((a () "" 1)) t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) "" () (1)))))))
+
+(test macro-function-bindings
+  "Smoke test for the `macro-function-bindings' rule."
+
+  (rule-test-cases ((syn::macro-function-bindings syn::special-operators))
+    '((1)                    :fatal 1     "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((1))                  :fatal 1     "must be a function name")
+    '(((a))                  :fatal (a)   "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((a 1))                :fatal (a 1) "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+
+    '(()                     t      nil (()  ()))
+    '(((a ()))               t      nil ((a) ((syn::parsed-lambda
+                                               (:destructuring-lambda-list
+                                                nil nil () () nil () nil () nil)
+                                               () () ()))))
+    '(((a (&whole w (a b)))) t      nil ((a) ((syn::parsed-lambda
+                                               (:destructuring-lambda-list
+                                                w nil
+                                                ((:pattern nil (a b) () nil () nil () nil))
+                                                () nil () nil () nil)
+                                               () () ()))))
+    '(((a () 1))             t      nil ((a) ((syn::parsed-lambda
+                                               (:destructuring-lambda-list
+                                                nil nil () () nil () nil () nil)
+                                               () () (1)))))
+    '(((a () "" 1))          t      nil ((a) ((syn::parsed-lambda
+                                               (:destructuring-lambda-list
+                                                nil nil () () nil () nil () nil)
+                                               "" () (1)))))))
+
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."
 
@@ -32,17 +75,3 @@
 
     '(()        t      nil     (() ()))
     '(((a 1))   t      nil     ((a) (1)))))
-
-(test function-bindings
-  "Smoke test for the `function-bindings' rule."
-
-  (rule-test-cases ((syn::function-bindings syn::special-operators))
-    '((1)           nil    nil nil)
-    '(((1))         :fatal 1   "must be a function name")
-    '(((a))         nil    nil nil)
-    '(((a 1))       nil    nil nil)
-
-    '(()            t      nil (()  ()))
-    '(((a ()))      t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) () () ()))))
-    '(((a () 1))    t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) () () (1)))))
-    '(((a () "" 1)) t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) "" () (1)))))))

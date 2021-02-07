@@ -271,16 +271,23 @@
   '((macrolet ((f ())))
     (syn::names        (f)
      syn::functions    ((syn::parsed-lambda
-                         (() () nil () nil ()) nil () ()))
+                         (:destructuring-lambda-list
+                          nil nil () () nil () nil () nil)
+                         nil () ()))
      syn::declarations ()
      syn::forms        ())
     )
-  '((macrolet ((f (a &rest b)
+  '((macrolet ((f (&whole w (a b) &rest c)
                  (declare (type string a))
                  a)))
     (syn::names        (f)
      syn::functions    ((syn::parsed-lambda
-                         ((a) () b () nil ()) nil ((type (string a))) (a)))
+                         (:destructuring-lambda-list
+                          w nil
+                          ((:pattern
+                            nil (a b) () nil () nil () nil))
+                          () c () nil () nil)
+                         nil ((type (string a))) (a)))
      syn::declarations ()
      syn::forms        ()))
   #+TODO (is (equal '(syn::names (foo bar baz)

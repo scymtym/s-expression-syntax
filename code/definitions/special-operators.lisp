@@ -293,7 +293,7 @@ NIL."))
 ;;; Lexically scope bindings of function-ish things.
 
 (define-special-operator macrolet
-    (list* (<- (names functions) (function-bindings))
+    (list* (<- (names functions) (macro-function-bindings))
            (<- (declarations forms) ((body forms))))
   ((names        *> :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
