@@ -188,7 +188,7 @@ NIL."))
 
 (defrule lambda ()
     (list* 'lambda
-           (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
+           (<- lambda-list ((ordinary-lambda-list! lambda-lists) 'nil))
            (<- (documentation declarations forms) ((docstring-body forms))))
   (list lambda-list documentation declarations forms))
 
@@ -438,7 +438,9 @@ NIL."))
 ;;;   ((lambda (LAMBDA-LIST) BODY) ARGUMENT1 ARGUMENT2 ...)
 
 (define-syntax application
-    (list (<- abstraction (or ((function-name/symbol names)) (lambda)))
+    (list (<- abstraction (or ((function-name/symbol names))
+                              (must (lambda)
+                                    "must be a symbol naming a function or a lambda expression")))
           (* (<<- arguments ((form! forms)))))
   ((abstraction 1 :evaluation t)
    (arguments   * :evaluation t)))

@@ -109,6 +109,9 @@
           (? (<- aux (aux-section seen))))
   (list required optional rest keyword allow-other-keys? aux))
 
+(defrule ordinary-lambda-list! (seen)
+  (must (ordinary-lambda-list seen) "must be an ordinary lambda list"))
+
 ;;; 3.4.2 Generic Function Lambda Lists
 
 (defrule generic-function-lambda-list (seen)
@@ -117,6 +120,10 @@
           (? (<- rest (rest-section seen)))
           (? (<- (keyword allow-other-keys?) (keyword-section seen)))) ; TODO disallow defaults
   (list required optional rest keyword allow-other-keys?))
+
+(defrule generic-function-lambda-list! (seen)
+  (must (generic-function-lambda-list seen)
+        "must be a generic function lambda list"))
 
 ;;; 3.4.3 Specialized Lambda Lists
 
@@ -139,6 +146,10 @@
           (? (<- (keyword allow-other-keys?) (keyword-section seen)))
           (? (<- aux (aux-section seen))))
   (list (nreverse required) optional rest keyword allow-other-keys? aux))
+
+(defrule specialized-lambda-list! (seen)
+  (must (specialized-lambda-list seen)
+        "must be a specialized lambda list"))
 
 ;;; 3.4.4 Macro Lambda Lists
 
@@ -184,6 +195,10 @@
                      (? (<- aux                     (aux-section seen)))     (? (<- env (environment-section seen))))))
   (list :destructuring-lambda-list whole env required optional rest key allow-other-keys? aux cdr))
 
+(defrule destructuring-lambda-list! (seen)
+  (must (destructuring-lambda-list seen)
+        "must be a destructuring lambda list"))
+
 ;;; 3.4.8 Deftype Lambda Lists
 ;;;
 ;;; A deftype lambda list differs from a macro lambda list only in
@@ -199,3 +214,6 @@
 
 (defrule deftype-lambda-list (seen)
   ((destructuring-lambda-list destructuring-lambda-list) seen))
+
+(defrule deftype-lambda-list! (seen)
+  (must (deftype-lambda-list seen) "must be a DEFTYPE lambda list"))

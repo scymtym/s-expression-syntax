@@ -38,7 +38,7 @@
 
 (define-macro defun
     (list* (<- name ((function-name! names)))
-           (<- lambda-list ((ordinary-lambda-list lambda-lists) 'nil))
+           (<- lambda-list ((ordinary-lambda-list! lambda-lists) 'nil))
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1)
@@ -50,7 +50,7 @@
 
 (define-macro defmacro
     (list* (<- name ((function-name/symbol! names)))
-           (<- lambda-list ((destructuring-lambda-list destructuring-lambda-list) 'nil)) ; TODO macro lambda list
+           (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list) 'nil)) ; TODO macro lambda list
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1)
@@ -77,7 +77,7 @@
     (eg:option* :constructor
                 (? (or 'nil ; NAME remains `nil'
                        (seq (<- name ((function-name/symbol! names)))
-                            (? (<- lambda-list ((ordinary-lambda-list lambda-lists) '()))))))) ; TODO boa-lambda-list
+                            (? (<- lambda-list ((ordinary-lambda-list! lambda-lists) '()))))))) ; TODO boa-lambda-list
   (let ((names (list* name (map 'list #'first other-constructors))))
     (when (and (not (= (length names) 1)) (member nil names))
       (:fatal "(:constructor nil) and named constructors are mutually exclusive")))
@@ -206,7 +206,7 @@
 
 (define-macro deftype
     (list* (<- name ((class-name! names)))
-           (<- lambda-list ((deftype-lambda-list deftype-lambda-list) 'nil))
+           (<- lambda-list ((deftype-lambda-list! deftype-lambda-list) 'nil))
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1)
@@ -219,7 +219,7 @@
 (define-syntax method-description
     (must (list* :method
                  (* (<<- qualifiers (guard (not 'nil) symbolp))) ; TODO repeated in `defmethod'
-                 (must (<- lambda-list ((specialized-lambda-list lambda-lists) 'nil)) "expected lambda list")
+                 (<- lambda-list ((specialized-lambda-list! lambda-lists) 'nil))
                  (<- (documentation declarations forms) ((docstring-body forms))))
           "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
   ((qualifiers    *)
@@ -230,7 +230,7 @@
 
 (define-macro defgeneric
     (list (<- name ((function-name! names)))
-          (<- lambda-list ((generic-function-lambda-list lambda-lists) 'nil))
+          (<- lambda-list ((generic-function-lambda-list! lambda-lists) 'nil))
           (* (or ;; Standard options
                  (eg:option  :generic-function-class    (<- generic-function-class ((class-name! names))))
                  (and (eg:option  :argument-precedence-order (* (<<- names ((lambda-list-variable-name! lambda-lists)))))
@@ -266,7 +266,7 @@
 (define-macro defmethod
     (list* (<- name ((function-name! names)))
            (* (<<- qualifiers (guard (not 'nil) symbolp)))
-           (must (<- lambda-list ((specialized-lambda-list lambda-lists) 'nil)) "expected lambda list")
+           (<- lambda-list ((specialized-lambda-list! lambda-lists) 'nil))
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
    (qualifiers    *)

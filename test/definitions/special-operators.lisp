@@ -119,9 +119,11 @@
   '((quote quote) (syn::material quote)))
 
 (define-syntax-test (function)
-  '((function)     syn:invalid-syntax-error)
-  '((function 1)   syn:invalid-syntax-error)
-  '((function x y) syn:invalid-syntax-error)
+  '((function)            syn:invalid-syntax-error)
+  '((function 1)          syn:invalid-syntax-error)
+  '((function x y)        syn:invalid-syntax-error)
+  '((function (lambda 1))
+    syn:invalid-syntax-error 1 "must be an ordinary lambda list")
 
   '((function foo)
     (syn::name          foo
@@ -456,7 +458,10 @@
 ;;; Pseudo-operator "application"
 
 (define-syntax-test (syn::application)
-  '((1)                syn:invalid-syntax-error)
+  '((1)
+    syn:invalid-syntax-error 1 "must be a symbol naming a function or a lambda expression")
+  '(((lambda 1) 1)
+    syn:invalid-syntax-error 1 "must be an ordinary lambda list")
 
   '((foo)              (syn::abstraction foo
                         syn::arguments   ()))

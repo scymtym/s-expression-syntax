@@ -25,10 +25,10 @@
   "Smoke test for the `function-bindings' rule."
 
   (rule-test-cases ((syn::function-bindings syn::special-operators))
-    '((1)           :fatal 1     "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
-    '(((1))         :fatal 1     "must be a function name")
-    '(((a))         :fatal (a)   "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
-    '(((a 1))       :fatal (a 1) "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '((1)           :fatal 1   "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((1))         :fatal 1   "must be a function name")
+    '(((a))         :fatal (a) "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((a 1))       :fatal 1   "must be an ordinary lambda list")
 
     '(()            t      nil (()  ()))
     '(((a ()))      t      nil ((a) ((syn::parsed-lambda (() () nil () nil ()) () () ()))))
@@ -39,10 +39,10 @@
   "Smoke test for the `macro-function-bindings' rule."
 
   (rule-test-cases ((syn::macro-function-bindings syn::special-operators))
-    '((1)                    :fatal 1     "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
-    '(((1))                  :fatal 1     "must be a function name")
-    '(((a))                  :fatal (a)   "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
-    '(((a 1))                :fatal (a 1) "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '((1)                    :fatal 1   "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((1))                  :fatal 1   "must be a function name")
+    '(((a))                  :fatal (a) "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
+    '(((a 1))                :fatal 1   "must be a destructuring lambda list")
 
     '(()                     t      nil (()  ()))
     '(((a ()))               t      nil ((a) ((syn::parsed-lambda
