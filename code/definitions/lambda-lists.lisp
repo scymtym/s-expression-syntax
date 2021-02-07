@@ -57,7 +57,7 @@
     (unique-variable-name! seen))
 
 (defrule keyword-parameter (seen)
-    (or (list (or (list (<- keyword (must (guard keywordp) "must be a keyword"))
+    (or (list (or (list (<- keyword (must (guard symbolp) "must be a symbol"))
                         (<- name (unique-variable-name! seen)))
                   (<- name (unique-variable-name! seen)))
               (? (seq (<- default ((form! forms)))

@@ -18,6 +18,7 @@
                     (make-hash-table :test #'eq))
     '((x (declare)) :fatal (declare) "declare is not allowed here")
     '(5             :fatal 5         "must be a lambda list variable name")
+    '(((#3=6))     :fatal #3#        "must be a symbol")
     '(x             t      t         ((keyword x) x nil nil))))
 
 (test ordinary-lambda-list
