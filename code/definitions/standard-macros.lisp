@@ -140,34 +140,9 @@
 (defrule allocation-type ()
   (or :instance :class))
 
-#+unused (define-syntax slot-options
-    (list (* (or (seq :reader                  (<<- readers      (must (function-name/symbol)))) ; TODO fail for something like :reader 1
-                 (seq :writer                  (<<- writers      (must (function-name))))
-                 (seq :accessor                (<<- accessor     (must (function-name/symbol))))
-                 (seq (eq:once :allocation)    (<- allocation    (must (allocation-type))))
-                 (seq :initarg                 (<<- initargs     (must (guard symbolp))))
-                 (seq (eg:once :initform)      (<- initform      ((form! forms))))
-                 (seq (eg:once :type)          (<- type          (type-specifier)))
-                 (seq (eg:once :documentation) (<- documentation ((documentation-string! forms)))
-                       )
-                 (seq (<<- option-names  (guard symbolp))
-                      (<<- option-values)))))
-  ((initargs      *)
-   (readers       *)
-   (writers       *)
-   (accessor      *)
-   (allocation    ?)
-   (initform      ? :evaluation t)
-   (type          ?)
-   (documentation ?)
-   ;; Non-standard options
-   (option-names  *)
-   (option-values *)))
-
 (define-syntax slot-specifier
     (or (and (not (list* :any)) (<- name ((slot-name! names))))
         (list (must (<- name ((slot-name! names))) "slot must have a name")
-              #+no (<- options (slot-options))
               (* (or (eg:poption* :reader        (<<- readers      (must ((function-name/symbol names))
                                                                          "reader must be a symbol function name")))
                      (eg:poption* :writer        (<<- writers      (must ((function-name names))
@@ -182,9 +157,8 @@
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
                      (seq (<<- option-names  (guard symbolp))
                           (<<- option-values))))))
-  ((name    1)
+  ((name          1)
    ;; Options
-   #+no (options 1)
    (initargs      *)
    (readers       *)
    (writers       *)
