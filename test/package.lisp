@@ -61,9 +61,17 @@
            (syn:invalid-syntax-error (condition)
              (is (eq syntax (syn:syntax condition)))
              (when expected-value
-               (is (eql expected-value (syn::value condition))))
+               (let ((value (syn::value condition)))
+                 (is (eql expected-value value)
+                     "~@<For input form ~S, expected value ~S, but got ~
+                      ~S.~@:>"
+                     input expected-value value)))
              (when expected-message
-               (is (string= expected-message (syn::message condition)))))))
+               (let ((message (syn::message condition)))
+                 (is (string= expected-message message)
+                     "~@<For input form ~S, expected message ~S, but ~
+                      got ~S.~@:>"
+                     input expected-message message))))))
         (t
          (is (equal expected (do-it))))))))
 
