@@ -15,6 +15,11 @@
   (or (%%natural? thing)
       (natural? *client* thing)))
 
+(defun %naturalize (thing)
+  (if (%natural? thing)
+      thing
+      (naturalize *client* thing)))
+
 ;;; List operations
 
 (defun %listp (maybe-list)
