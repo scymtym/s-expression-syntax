@@ -43,7 +43,11 @@
                               (:file       "bindings")
                               (:file       "pseudo-operators")
                               (:file       "special-operators")
-                              (:file       "standard-macros"))))
+                              (:file       "standard-macros")))
+
+                (:file        "classify"
+                 :pathname    "code/classify"
+                 :depends-on  ("definitions")))
 
   :in-order-to ((test-op (test-op "s-expression-syntax/test"))))
 
@@ -57,7 +61,8 @@
 
   :components ((:module     "test"
                 :serial     t
-                :components ((:file       "package")))
+                :components ((:file       "package")
+                             (:file       "classify")))
 
                (:module     "definitions"
                 :pathname   "test/definitions"

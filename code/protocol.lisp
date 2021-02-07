@@ -51,11 +51,3 @@
 
 (defmethod parse ((client t) (syntax symbol) (expression t))
   (parse client (find-syntax syntax) expression))
-
-(defmethod parse ((client t) (syntax (eql t)) (expression t))
-  (if (and (eg::%listp expression)
-           (not (eg::%null expression)))
-      (let* ((operator (eg::%first expression))
-             (syntax   (find-syntax operator)))
-        (parse client  syntax expression))
-      (call-next-method)))
