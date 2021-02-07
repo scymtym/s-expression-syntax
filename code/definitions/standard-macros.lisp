@@ -341,3 +341,52 @@
 (define-macro in-package
     (list (<- name (must (string-designator!) "name is required")))
   ((name 1)))
+
+;;; `handler-{bind,case}' and  `restart-{bind,case}'
+
+(defrule handler-binding ()
+  (list (<- type    ((type-specifier! type-specifiers)))
+        (<- handler ((form! forms)))))
+
+(defrule handler-binding! ()
+  (must (handler-binding) "must be of the form (TYPE HANDLER-FORM)"))
+
+(define-macro handler-bind
+    (list* (list (* (<<- (types handler-forms) (handler-binding!))))
+           (<- forms (forms)))
+  (;; Handler bindings
+   (types         *)
+   (handler-forms *  :evaluation t)
+   ;; Body forms
+   (forms         *> :evaluation t)))
+
+(defrule handler-clause ()
+    (list* (<- type ((type-specifier! type-specifiers)))
+           (must (list (? (<- variable ((required-parameter! lambda-lists) 'nil))))
+                 "must be a lambda list with zero or one required parameter")
+           (<- (declarations forms) ((body forms))))
+  (list type variable declarations forms))
+
+(define-macro handler-case
+    (list (<- form ((form! forms)))
+          (* (or (list* (eg:once :no-error)
+                        (<- no-error-lambda-list
+                            ((ordinary-lambda-list! lambda-lists)))
+                        (<- (no-error-declarations no-error-forms)
+                            ((body forms))))
+                 (<<- (types variables declarations forms)
+                      (handler-clause)))))
+  (;; Body form
+   (form                  1 :evaluation t)
+   ;; Handler clauses
+   (types                 *)
+   (variables             * :evaluation (make-instance 'binding-semantics
+                                                       :namespace 'variable
+                                                       :scope     :lexical
+                                                       :values    nil))
+   (declarations          *)
+   (forms                 * :evaluation t)
+   ;; No-error clause
+   (no-error-lambda-list  ?)
+   (no-error-declarations *)
+   (no-error-forms        * :evaluation t)))

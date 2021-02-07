@@ -489,3 +489,42 @@
 
   '((in-package foo)   (syn::name foo))
   '((in-package "FOO") (syn::name "FOO")))
+
+;;; `handler-{bind,case}' and  `restart-{bind,case}'
+
+(define-macro-test (handler-bind)
+  '((handler-bind)
+    syn:invalid-syntax-error)
+  '((handler-bind (#2=1))
+    syn:invalid-syntax-error #2# "must be of the form (TYPE HANDLER-FORM)")
+  '((handler-bind ((#3=1 (lambda (x)))))
+    syn:invalid-syntax-error #3# "must be a type specifier")
+  ;; Valid syntax
+  '((handler-bind ((foo (lambda (x) (bar))))
+      (baz))
+    (syn::types         (foo)
+     syn::handler-forms ((lambda (x) (bar)))
+     syn::forms         ((baz)))))
+
+(define-macro-test (handler-case)
+  '((handler-case nil (#1=1))
+    syn:invalid-syntax-error #1# "must be a type specifier")
+  '((handler-case nil (foo #2=1))
+    syn:invalid-syntax-error #2# "must be a lambda list with zero or one required parameter")
+  '((handler-case nil (foo (#3=1)))
+    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+  ;; Repeated option
+  '((handler-case nil (:no-error ()) #4=(:no-error ()))
+    syn:invalid-syntax-error #4# "NO-ERROR must not be repeated")
+  ;; Valid syntax
+  '((handler-case (foo)
+      (bar (x) (baz))
+      (:no-error (y z) (fez)))
+    (syn::form                 (foo)
+     syn::types                (bar)
+     syn::variables             (x)
+     syn::declarations          (())
+     syn::forms                 (((baz)))
+     syn::no-error-lambda-list  ((y z) () nil () nil ())
+     syn::no-error-declarations ()
+     syn::no-error-forms        ((fez)))))
