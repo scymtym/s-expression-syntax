@@ -19,29 +19,30 @@
                                        (*> '*)
                                        (?  'bp:?)
                                        (t  cardinality))))
-                   (push `(make-instance 'component
-                                         :name        ',name
-                                         :cardinality ',cardinality*
-                                         :evaluation  ,evaluation)
+                   (push `(make-instance 'component :name        ',name
+                                                    :cardinality ',cardinality*
+                                                    :evaluation  ,evaluation)
                          component-forms)
                    (push `(,cardinality*
-                           ,relation
+                           ,(case cardinality
+                              (1 `(,relation . 1))
+                              (t relation))
                            ,(ecase cardinality
                               (*        `(nreverse ,name))
                               ((*> ? 1) name)))
                          relations))))
          components)
     (a:with-unique-names (source)
-     `(progn
-        (parser.packrat:defrule (,name :grammar special-operators) ()
-            (value (,source) ,syntax)
-          (bp:node* (,kind :source ,source)
-            ,@(nreverse relations)))
-        (ensure-syntax ',name 'special-operator
-                       :components (list ,@(nreverse component-forms))
-                       :rule       ',name
-                       ,@(when documentation
-                           `(:documentation ,documentation)))))))
+      `(progn
+         (parser.packrat:defrule (,name :grammar special-operators) ()
+             (value (,source) ,syntax)
+           (bp:node* (,kind :source ,source)
+             ,@(nreverse relations)))
+         (ensure-syntax ',name 'special-operator
+                        :components (list ,@(nreverse component-forms))
+                        :rule       ',name
+                        ,@(when documentation
+                            `(:documentation ,documentation)))))))
 
 (defmacro define-special-operator (name-and-options syntax &rest components)
   (check-type syntax (cons (member list list*)))

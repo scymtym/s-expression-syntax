@@ -30,13 +30,13 @@
   '((if foo bar baz fez) syn:invalid-syntax-error)
 
   '((if foo bar)         (:if
-                          (:test ((foo))
-                            :then ((bar)))
+                          ((:test . 1) ((foo))
+                           (:then . 1) ((bar)))
                           :source  (if foo bar)))
   '((if foo bar baz)     (:if
-                          (:test ((foo))
-                            :then ((bar))
-                            :else ((baz)))
+                          ((:test . 1) ((foo))
+                           (:then . 1) ((bar))
+                           :else       ((baz)))
                           :source  (if foo bar baz))))
 
 ;;; Special operators `block', `return-from', `return', `tagbody' and `go'
@@ -46,25 +46,25 @@
   '((block (foo))   syn:invalid-syntax-error)
 
   '((block foo 1)   (:block
-                        (:name  ((foo))
-                         :forms ((1)))
-                      :source (block foo 1)))
+                     ((:name . 1) ((foo))
+                      :forms      ((1)))
+                     :source (block foo 1)))
   '((block foo a b) (:block
-                        (:name  ((foo))
-                         :forms ((a) (b)))
-                      :source (block foo a b))))
+                     ((:name . 1) ((foo))
+                      :forms      ((a) (b)))
+                     :source (block foo a b))))
 
 (define-syntax-test (return-from)
   '((return-from)         syn:invalid-syntax-error)
   '((return-from foo 1 2) syn:invalid-syntax-error)
 
   '((return-from foo)     (:return-from
-                           (:name ((foo)))
-                            :source (return-from foo)))
+                           ((:name . 1) ((foo)))
+                           :source (return-from foo)))
   '((return-from foo 1)   (:return-from
-                           (:name  ((foo))
-                            :value ((1)))
-                            :source (return-from foo 1)))
+                           ((:name . 1)  ((foo))
+                            (:value . 1) ((1)))
+                           :source (return-from foo 1)))
 
   #+TODO (apply #'unparse-return-from-special-operator
                 (parse-return-from-special-operator
@@ -76,11 +76,11 @@
   '((return 1 2)       syn:invalid-syntax-error)
 
   '((return)           (:return
-                         ()
-                         :source (return)))
+                        ()
+                        :source (return)))
   '((return 1)         (:return
-                         (:value ((1)))
-                         :source (return 1))))
+                        ((:value . 1) ((1)))
+                        :source (return 1))))
 
 (define-syntax-test (tagbody)
   '((tagbody nil nil) syn:invalid-syntax-error)
@@ -116,7 +116,7 @@
   '((go 1 2)   syn:invalid-syntax-error)
   '((go (foo)) syn:invalid-syntax-error)
 
-  '(#4=(go 1)  (:go (:tag ((1))) :source #4#)))
+  '(#4=(go 1)  (:go ((:tag . 1) ((1))) :source #4#)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
@@ -140,17 +140,17 @@
   '((load-time-value 1 2)   syn:invalid-syntax-error)
 
   '(#3=(load-time-value foo)
-    (:load-time-value (:form ((foo))) :source #3#))
+    (:load-time-value ((:form . 1) ((foo))) :source #3#))
   '(#4=(load-time-value foo t)
-    (:load-time-value (:form ((foo)) :read-only-p ((t))) :source #4#)))
+    (:load-time-value ((:form . 1) ((foo)) :read-only-p ((t))) :source #4#)))
 
 (define-syntax-test (quote)
   '((quote)          syn:invalid-syntax-error)
   '((quote x y)      syn:invalid-syntax-error)
 
-  '(#3=(quote 1)     (:quote (:material ((1))) :source #3#))
-  '(#4=(quote x)     (:quote (:material ((x))) :source #4#))
-  '(#5=(quote quote) (:quote (:material ((quote))) :source #5#)))
+  '(#3=(quote 1)     (:quote ((:material . 1) ((1)))     :source #3#))
+  '(#4=(quote x)     (:quote ((:material . 1) ((x)))     :source #4#))
+  '(#5=(quote quote) (:quote ((:material . 1) ((quote))) :source #5#)))
 
 (define-syntax-test (function)
   '((function)
@@ -169,19 +169,19 @@
   '(#8=(function #9=(lambda #10=()))
     (:function
      (:lambda (((:lambda-expression
-                 (:lambda-list (((:ordinary-lambda-list () :source #10#))))
+                 ((:lambda-list . 1) (((:ordinary-lambda-list () :source #10#))))
                  :source #9#))))
      :source #8#))
   '(#11=(function #12=(lambda #13=(#14=a &rest b) (foo)))
     (:function
      (:lambda (((:lambda-expression
-                 (:lambda-list (((:ordinary-lambda-list
-                                  (:required (((:required-parameter
-                                                ((:name . 1) ((a)))
-                                                :source #14#)))
-                                   :rest     ((b)))
-                                  :source #13#)))
-                  :form        (((foo))))
+                 ((:lambda-list . 1) (((:ordinary-lambda-list
+                                        (:required (((:required-parameter
+                                                      ((:name . 1) ((a)))
+                                                      :source #14#)))
+                                         :rest     ((b)))
+                                        :source #13#)))
+                  :form              (((foo))))
                  :source #12#))))
      :source #11#)))
 
@@ -198,13 +198,13 @@
     (:symbol-macrolet () :source #6#))
   '(#7=(symbol-macrolet ((a 1) (b 2)) (declare #8=(type bit d)) c)
     (:symbol-macrolet
-        (:names        ((a) (b))
-         :expansions   ((1) (2))
-         :declarations (((:declaration
-                          (:argument ((bit) (d)))
-                          :kind type :source #8#)))
-         :forms ((c)))
-      :source #7#)))
+     (:names        ((a) (b))
+      :expansions   ((1) (2))
+      :declarations (((:declaration
+                       (:argument ((bit) (d)))
+                       :kind type :source #8#)))
+      :forms ((c)))
+     :source #7#)))
 
 (define-syntax-test (let)
   '((let)       syn:invalid-syntax-error)
@@ -278,9 +278,9 @@
   '(#4=(progv () ())
     (:progv () :source #4#))
   '(#5=(progv (a) (b))
-    (:progv (:symbols (((a))) :values (((b)))) :source #5#))
+    (:progv ((:symbols . 1) (((a))) (:values . 1) (((b)))) :source #5#))
   '(#6=(progv '(a) '(b))
-    (:progv (:symbols (('(a))) :values (('(b)))) :source #6#))
+    (:progv ((:symbols . 1) (('(a))) (:values . 1) (('(b)))) :source #6#))
   '(#7=(progv () () 1)
     (:progv (:forms ((1))) :source #7#))
   '(#8=(progv () () 1 2)
@@ -471,7 +471,10 @@
   '((the bit)         syn:invalid-syntax-error)
   '((the bit 1 extra) syn:invalid-syntax-error)
 
-  '(#5=(the bit 1)    (:the (:type ((bit)) :form ((1))) :source #5#)))
+  '(#5=(the bit 1)    (:the
+                       ((:type . 1) ((bit))
+                        (:form . 1) ((1)))
+                       :source #5#)))
 
 ;;; Special operator `setq'
 
@@ -499,44 +502,44 @@
   '((throw 'foo 1 :extra)     syn:invalid-syntax-error)
 
   '(#4=(throw 'foo 1)         (:throw
-                                  (:tag-form    (('foo))
-                                   :result-form ((1)))
-                                :source #4#))
+                               ((:tag-form . 1)    (('foo))
+                                (:result-form . 1) ((1)))
+                               :source #4#))
   '(#5=(throw (+ 1 2) :value) (:throw
-                                  (:tag-form    (((+ 1 2)))
-                                   :result-form ((:value)))
-                                :source #5#)))
+                               ((:tag-form . 1)    (((+ 1 2)))
+                                (:result-form . 1) ((:value)))
+                               :source #5#)))
 
 (define-syntax-test (catch)
   '((catch)                   syn:invalid-syntax-error)
 
   '(#2=(catch 'foo 1 2)       (:catch
-                                  (:tag-form (('foo))
-                                   :forms    ((1) (2)))
-                                :source #2#))
+                               ((:tag-form . 1) (('foo))
+                                :forms          ((1) (2)))
+                               :source #2#))
   '(#3=(catch (+ 1 2) :value) (:catch
-                                  (:tag-form (((+ 1 2)))
-                                   :forms    ((:value)))
-                                :source #3#)))
+                               ((:tag-form . 1) (((+ 1 2)))
+                                :forms          ((:value)))
+                               :source #3#)))
 
 (define-syntax-test (unwind-protect)
   '((unwind-protect)                    syn:invalid-syntax-error)
 
   '(#2=(unwind-protect foo)             (:unwind-protect
-                                             (:protected ((foo)))
-                                          :source #2#))
+                                         ((:protected . 1) ((foo)))
+                                         :source #2#))
   '(#3=(unwind-protect foo bar)         (:unwind-protect
-                                             (:protected ((foo))
-                                              :cleanup   ((bar)))
-                                          :source #3#))
+                                         ((:protected . 1) ((foo))
+                                          :cleanup   ((bar)))
+                                         :source #3#))
   '(#4=(unwind-protect foo bar baz)     (:unwind-protect
-                                             (:protected ((foo))
-                                              :cleanup   ((bar) (baz)))
-                                          :source #4#))
+                                         ((:protected . 1) ((foo))
+                                          :cleanup   ((bar) (baz)))
+                                         :source #4#))
   '(#5=(unwind-protect (progn 1 2) 3 4) (:unwind-protect
-                                             (:protected (((progn 1 2)))
-                                              :cleanup   ((3) (4)))
-                                          :source #5#)))
+                                         ((:protected . 1) (((progn 1 2)))
+                                          :cleanup         ((3) (4)))
+                                         :source #5#)))
 
 ;;; Special operators for multiple values
 
@@ -544,32 +547,34 @@
   '((multiple-value-call) syn:invalid-syntax-error)
 
   '(#2=(multiple-value-call foo)
-    (:multiple-value-call (:function-form ((foo))) :source #2#))
+    (:multiple-value-call
+     ((:function-form . 1) ((foo)))
+     :source #2#))
   '(#3=(multiple-value-call foo 1)
     (:multiple-value-call
-        (:function-form ((foo))
-         :arguments ((1)))
-      :source #3#))
+     ((:function-form . 1) ((foo))
+      :arguments           ((1)))
+     :source #3#))
   '(#4=(multiple-value-call foo 1 2)
     (:multiple-value-call
-        (:function-form ((foo))
-         :arguments     ((1) (2)))
-      :source #4#)))
+     ((:function-form . 1) ((foo))
+      :arguments           ((1) (2)))
+     :source #4#)))
 
 (define-syntax-test (multiple-value-prog1)
   '((multiple-value-prog1) syn:invalid-syntax-error)
 
   '(#2=(multiple-value-prog1 1)
     (:multiple-value-prog1
-        (:values-form ((1)))
-      :source #2#))
+     ((:values-form . 1) ((1)))
+     :source #2#))
   '(#3=(multiple-value-prog1 1 2)
     (:multiple-value-prog1
-        (:values-form ((1))
-         :forms       ((2)))
-      :source #3#))
+     ((:values-form . 1) ((1))
+      :forms             ((2)))
+     :source #3#))
   '(#4=(multiple-value-prog1 1 2 3)
     (:multiple-value-prog1
-        (:values-form ((1))
-         :forms       ((2) (3)))
-      :source #4#)))
+     ((:values-form . 1) ((1))
+      :forms       ((2) (3)))
+     :source #4#)))

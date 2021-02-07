@@ -26,9 +26,9 @@
          (bar 1)
          "bla")
     (:defconstant
-     (:name          ((foo))
-      :initial-value (((bar 1)))
-      :documentation (("bla")))
+     ((:name . 1)          ((foo))
+      (:initial-value . 1) (((bar 1)))
+      :documentation       (("bla")))
      :source #5#)))
 
 (define-macro-test (defvar)
@@ -38,12 +38,12 @@
   '((defvar foo 1 "" 2) syn:invalid-syntax-error)
 
   '(#5=(defvar foo)
-    (:defvar (:name ((foo))) :source #5#))
+    (:defvar ((:name . 1) ((foo))) :source #5#))
   '(#6=(defvar foo
          (bar 1)
          "bla")
     (:defvar
-     (:name          ((foo))
+     ((:name . 1)    ((foo))
       :initial-value (((bar 1)))
       :documentation (("bla")))
      :source #6#)))
@@ -59,9 +59,9 @@
          (bar 1)
          "bla")
     (:defparameter
-     (:name          ((foo))
-      :initial-value (((bar 1)))
-      :documentation (("bla")))
+     ((:name . 1)          ((foo))
+      (:initial-value . 1) (((bar 1)))
+      :documentation       (("bla")))
      :source #6#)))
 
 (define-macro-test (defun)
@@ -81,20 +81,20 @@
          (declare #10=(type integer bar baz))
          (+ 1 2))
     (:defun
-     (:name ((foo))
-      :lambda-list   (((:ordinary-lambda-list
-                        (:required (((:required-parameter
-                                      ((:name . 1) ((bar)))
-                                      :source #8#))
-                                    ((:required-parameter
-                                      ((:name . 1) ((baz)))
-                                      :source #9#))))
-                        :source #7#)))
-      :documentation (("bla"))
-      :declarations  (((:declaration
-                        (:argument ((integer) (bar) (baz)))
-                        :kind type :source #10#)))
-      :forms         (((+ 1 2))))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:ordinary-lambda-list
+                            (:required (((:required-parameter
+                                          ((:name . 1) ((bar)))
+                                          :source #8#))
+                                        ((:required-parameter
+                                          ((:name . 1) ((baz)))
+                                          :source #9#))))
+                            :source #7#)))
+      :documentation     (("bla"))
+      :declarations      (((:declaration
+                            (:argument ((integer) (bar) (baz)))
+                            :kind type :source #10#)))
+      :forms             (((+ 1 2))))
      :source #6#)))
 
 (define-macro-test (defmacro)
@@ -110,20 +110,20 @@
          (declare #9=(ignore a))
          (list 'cons b b))
     (:defmacro
-     (:name          ((foo))
-      :lambda-list   (((:destructuring-lambda-list
-                        (:required (((:required-parameter
-                                      ((:name . 1) ((a)))
-                                      :source #7#))
-                                    ((:required-parameter
-                                      ((:name . 1) ((b)))
-                                      :source #8#))))
-                        :source #6#)))
-      :documentation (("bla"))
-      :declarations  (((:declaration
-                        (:argument ((a)))
-                        :kind ignore :source #9#)))
-      :forms         (((list 'cons b b))))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:destructuring-lambda-list
+                            (:required (((:required-parameter
+                                          ((:name . 1) ((a)))
+                                          :source #7#))
+                                        ((:required-parameter
+                                          ((:name . 1) ((b)))
+                                          :source #8#))))
+                            :source #6#)))
+      :documentation     (("bla"))
+      :declarations      (((:declaration
+                            (:argument ((a)))
+                            :kind ignore :source #9#)))
+      :forms             (((list 'cons b b))))
      :source #5#)))
 
 ;;; `defstruct' including slots
@@ -143,14 +143,14 @@
   ;; Valid
   '(#6=foo
     (:slot-description
-     (:name ((foo)))
+     ((:name . 1) ((foo)))
      :source #6#))
   '(#7=(foo 1 :type bit :read-only t)
     (:slot-description
-     (:name      ((foo))
-      :initform  ((1))
-      :read-only ((t))
-      :type      ((bit)))
+     ((:name . 1) ((foo))
+      :initform   ((1))
+      :read-only  ((t))
+      :type       ((bit)))
      :source #7#)))
 
 (define-macro-test (defstruct)
@@ -175,17 +175,17 @@
     syn:invalid-syntax-error #9# ":TYPE option must not be repeated")
   ;; Valid
   '(#10=(defstruct foo)
-    (:defstruct (:name ((foo))) :source #10#))
+    (:defstruct ((:name . 1) ((foo))) :source #10#))
   '(#11=(defstruct (foo))
-    (:defstruct (:name ((foo))) :source #11#))
+    (:defstruct ((:name . 1) ((foo))) :source #11#))
   '(#12=(defstruct (foo (:constructor nil)))
     (:defstruct
-     (:name         ((foo))
+     ((:name . 1)   ((foo))
       :constructors (((nil nil))))
     :source #12#))
   '(#13=(defstruct (foo (:constructor foo #14=(#15=a #16=b))))
     (:defstruct
-     (:name         ((foo))
+     ((:name . 1)   ((foo))
       :constructors (((foo
                        (:ordinary-lambda-list
                         (:required (((:required-parameter
@@ -198,7 +198,7 @@
      :source #13#))
   '(#17=(defstruct foo "doc")
     (:defstruct
-     (:name          ((foo))
+     ((:name . 1)    ((foo))
       :documentation (("doc")))
      :source #17#)))
 
@@ -227,7 +227,7 @@
     ;; Valid syntax
     '(#15=(foo :initform (+ 1) :custom-option :foo :reader bar)
       t t (:slot-specifier
-           (:name          ((foo))
+           ((:name . 1)    ((foo))
             :readers       ((bar))
             :initform      (((+ 1)))
             :option-names  ((:custom-option))
@@ -273,10 +273,10 @@
           :bar 1)
          (:my-class-option 1))
     (:defclass
-     (:name              ((foo))
+     ((:name . 1)        ((foo))
       :superclasses      ((bar) (baz))
       :slots             (((:slot-specifier
-                            (:name          ((foo))
+                            ((:name . 1)    ((foo))
                              :readers       ((bar))
                              :initform      (((+ 1)))
                              :option-names  ((:custom-option))
@@ -304,23 +304,23 @@
          (declare #11=(ignore b))
          (list a b))
     (:deftype
-     (:name          ((foo))
-      :lambda-list   (((:destructuring-lambda-list
-                        (:required (((:required-parameter
-                                      ((:name . 1) ((a)))
-                                      :source #8#)))
-                         :keyword  (((:keyword-parameter
-                                      (:name ((b)))
-                                      :source #9#))))
-                        :source #7#)))
-      :documentation (("bla bli"))
-      :declarations  (((:declaration
-                        (:argument ((a)))
-                        :kind ignore :source #10#))
-                      ((:declaration
-                        (:argument ((b)))
-                        :kind ignore :source #11#)))
-      :forms         (((list a b))))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:destructuring-lambda-list
+                            (:required (((:required-parameter
+                                          ((:name . 1) ((a)))
+                                          :source #8#)))
+                             :keyword  (((:keyword-parameter
+                                          (:name ((b)))
+                                          :source #9#))))
+                            :source #7#)))
+      :documentation     (("bla bli"))
+      :declarations      (((:declaration
+                            (:argument ((a)))
+                            :kind ignore :source #10#))
+                          ((:declaration
+                            (:argument ((b)))
+                            :kind ignore :source #11#)))
+      :forms             (((list a b))))
      :source #6#)))
 
 (define-macro-test (defgeneric)
@@ -369,8 +369,8 @@
          (:documentation "foo")
          (:generic-function-class clazz))
     (:defgeneric
-     (:name                      ((foo))
-      :lambda-list               (((:generic-function-lambda-list
+     ((:name . 1)                ((foo))
+      (:lambda-list . 1)         (((:generic-function-lambda-list
                                     (:required (((:required-parameter
                                                   ((:name . 1) ((a)))
                                                   :source #16#))
@@ -384,8 +384,8 @@
   '(#18=(defgeneric foo #19=(#20=a #21=b)
           (:argument-precedence-order b a))
     (:defgeneric
-     (:name                      ((foo))
-      :lambda-list               (((:generic-function-lambda-list
+     ((:name . 1)                ((foo))
+      (:lambda-list . 1)         (((:generic-function-lambda-list
                                     (:required (((:required-parameter
                                                   ((:name . 1) ((a)))
                                                   :source #20#))
@@ -398,22 +398,22 @@
   '(#22=(defgeneric foo #23=(#24=a)
           #25=(:method :custom 1 "foo" #26=(#27=a)))
     (:defgeneric
-     (:name        ((foo))
-      :lambda-list (((:generic-function-lambda-list
-                      (:required (((:required-parameter
-                                    ((:name . 1) ((a)))
-                                    :source #24#))))
-                      :source #23#)))
-      :methods     (((:method-description
-                      (:qualifiers  ((:custom) (1) ("foo"))
-                       :lambda-list (((:specialized-lambda-list
-                                       (:required (((:specialized-parameter
-                                                     (:name (((:required-parameter
-                                                               ((:name . 1) ((a)))
-                                                               :source #27#))))
-                                                     :source #27#))))
-                                       :source #26#))))
-                      :source #25#))))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:generic-function-lambda-list
+                            (:required (((:required-parameter
+                                          ((:name . 1) ((a)))
+                                          :source #24#))))
+                            :source #23#)))
+      :methods           (((:method-description
+                            (:qualifiers        ((:custom) (1) ("foo"))
+                             (:lambda-list . 1) (((:specialized-lambda-list
+                                                   (:required (((:specialized-parameter
+                                                                 (:name (((:required-parameter
+                                                                           ((:name . 1) ((a)))
+                                                                           :source #27#))))
+                                                                 :source #27#))))
+                                                   :source #26#))))
+                            :source #25#))))
      :source #22#)))
 
 (define-macro-test (defmethod)
@@ -432,41 +432,41 @@
   ;; Valid syntax
   '(#7=(defmethod foo #8=())
     (:defmethod
-     (:name        ((foo))
-      :lambda-list (((:specialized-lambda-list () :source #8#))))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #8#))))
      :source #7#))
   '(#9=(defmethod foo :around #10=())
     (:defmethod
-     (:name        ((foo))
-      :qualifiers  ((:around))
-      :lambda-list (((:specialized-lambda-list () :source #10#))))
+     ((:name . 1)        ((foo))
+      :qualifiers        ((:around))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #10#))))
      :source #9#))
   '(#11=(defmethod foo :custom 1 "foo" #12=())
     (:defmethod
-     (:name        ((foo))
-      :qualifiers  ((:custom) (1) ("foo"))
-      :lambda-list (((:specialized-lambda-list
-                      ()
-                      :source #12#))))
+     ((:name . 1)        ((foo))
+      :qualifiers        ((:custom) (1) ("foo"))
+      (:lambda-list . 1) (((:specialized-lambda-list
+                            ()
+                            :source #12#))))
      :source #11#))
   '(#13=(defmethod foo #14=(#15=(x t)))
     (:defmethod
-     (:name        ((foo))
-      :lambda-list (((:specialized-lambda-list
-                      (:required (((:specialized-parameter
-                                    (:name        ((x))
-                                     :specializer ((t)))
-                                    :source #15#))))
-                      :source #14#))))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:specialized-lambda-list
+                            (:required (((:specialized-parameter
+                                          (:name        ((x))
+                                           :specializer ((t)))
+                                          :source #15#))))
+                            :source #14#))))
      :source #13#))
   '(#16=(defmethod foo #17=()
           "foo" (declare #18=(ignore)) 1)
     (:defmethod
-     (:name          ((foo))
-      :lambda-list   (((:specialized-lambda-list () :source #17#)))
-      :documentation (("foo"))
-      :declarations  (((:declaration () :kind ignore :source #18#)))
-      :forms         ((1)))
+     ((:name . 1)        ((foo))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #17#)))
+      :documentation     (("foo"))
+      :declarations      (((:declaration () :kind ignore :source #18#)))
+      :forms             ((1)))
      :source #16#)))
 
 (define-macro-test (defpackage)
@@ -493,7 +493,7 @@
          (:import-from :foo #\c :bar)
          (:shadowing-import-from :foo2 "BAZ2" :bar2))
     (:defpackage
-     (:name                           ((foo))
+     ((:name . 1)                     ((foo))
       :documentation                  (("bla"))
       :use                            ((:bar) ("bar"))
       :shadowing-import-from-packages ((:foo2))
@@ -510,7 +510,7 @@
          (:import-from :foo :bar :baz)
          (:shadowing-import-from :foo2 "BAZ2" :bar2))
     (:defpackage
-     (:name                           ((foo))
+     ((:name . 1)                     ((foo))
       :documentation                  (("bla"))
       :use                            ((:bar) ("bar"))
       :shadowing-import-from-packages ((:foo2))
@@ -525,9 +525,8 @@
   '((in-package 1)        syn:invalid-syntax-error)
   '((in-package foo 1)    syn:invalid-syntax-error)
 
-  '(#4=(in-package foo)   (:in-package (:name ((foo)))   :source #4#))
-  '(#5=(in-package "FOO") (:in-package (:name (("FOO"))) :source #5#)))
-
+  '(#4=(in-package foo)   (:in-package ((:name . 1) ((foo)))   :source #4#))
+  '(#5=(in-package "FOO") (:in-package ((:name . 1) (("FOO"))) :source #5#)))
 
 ;;; `handler-{bind,case}' and  `restart-{bind,case}'
 
@@ -562,7 +561,7 @@
          (bar (#6=x) (baz))
          (:no-error #7=(#8=y #9=z) (fez)))
     (:handler-case
-     (:form                 (((foo)))
+     ((:form . 1)           (((foo)))
       :types                ((bar))
       :variables            (((:required-parameter
                                (:name ((x)))
