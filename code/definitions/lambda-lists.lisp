@@ -42,14 +42,14 @@
 (defrule required-parameter (seen)
     (value (source) (<- name (unique-variable-name seen)))
   (bp:node* (:required-parameter :source source)
-    (1 :name name)))
+    (1 (:name . 1) name)))
 
 (defrule required-parameter! (seen)
     (value (source)
       (and (not (guard lambda-list-keyword?))
            (<- name (unique-variable-name! seen))))
   (bp:node* (:required-parameter :source source)
-    (1 :name name)))
+    (1 (:name . 1) name)))
 
 (defrule optional-parameter (seen)
     (value (source)

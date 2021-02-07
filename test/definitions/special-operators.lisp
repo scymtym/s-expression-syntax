@@ -177,7 +177,7 @@
      (:lambda (((:lambda-expression
                  (:lambda-list (((:ordinary-lambda-list
                                   (:required (((:required-parameter
-                                                (:name ((a)))
+                                                ((:name . 1) ((a)))
                                                 :source #14#)))
                                    :rest     ((b)))
                                   :source #13#)))
@@ -316,14 +316,14 @@
                     (:lambda-list  (((:destructuring-lambda-list
                                       (:whole    ((w))
                                        :required (((:required-parameter
-                                                    (:name (((:pattern
-                                                              (:required (((:required-parameter
-                                                                            (:name ((a)))
-                                                                            :source #14#))
-                                                                          ((:required-parameter
-                                                                            (:name ((b)))
-                                                                            :source #15#))))
-                                                              :source #13#))))
+                                                    ((:name . 1) (((:pattern
+                                                                    (:required (((:required-parameter
+                                                                                  ((:name . 1) ((a)))
+                                                                                  :source #14#))
+                                                                                ((:required-parameter
+                                                                                  ((:name . 1) ((b)))
+                                                                                  :source #15#))))
+                                                                    :source #13#))))
                                                     :source #13#)))
                                        :rest     ((c)))
                                       :source #12#)))
@@ -367,16 +367,16 @@
      :source #7#))
   '(#10=(flet (#11=(f #12=(#13=a &rest b))))
     (:flet
-     (:names     ((f))
-      :functions (((:local-function
-                    (:lambda-list (((:ordinary-lambda-list
-                                     (:required (((:required-parameter
-                                                   (:name ((a)))
-                                                   :source #13#)))
-                                      :rest     ((b)))
-                                     :source #12#))))
-                    :source #11#))))
-     :source #10#))
+        (:names     ((f))
+         :functions (((:local-function
+                       (:lambda-list (((:ordinary-lambda-list
+                                        (:required (((:required-parameter
+                                                      ((:name . 1) ((a)))
+                                                      :source #13#)))
+                                         :rest     ((b)))
+                                        :source #12#))))
+                       :source #11#))))
+      :source #10#))
   '(#14=(flet (#15=(f #16=() (declare #17=(type bit a)))))
     (:flet
      (:names     ((f))
@@ -425,7 +425,7 @@
       :functions (((:local-function
                     (:lambda-list (((:ordinary-lambda-list
                                      (:required (((:required-parameter
-                                                   (:name ((a)))
+                                                   ((:name . 1) ((a)))
                                                    :source #13#)))
                                       :rest     ((b)))
                                      :source #12#))))

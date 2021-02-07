@@ -84,10 +84,10 @@
      (:name ((foo))
       :lambda-list   (((:ordinary-lambda-list
                         (:required (((:required-parameter
-                                      (:name ((bar)))
+                                      ((:name . 1) ((bar)))
                                       :source #8#))
                                     ((:required-parameter
-                                      (:name ((baz)))
+                                      ((:name . 1) ((baz)))
                                       :source #9#))))
                         :source #7#)))
       :documentation (("bla"))
@@ -113,10 +113,10 @@
      (:name          ((foo))
       :lambda-list   (((:destructuring-lambda-list
                         (:required (((:required-parameter
-                                      (:name ((a)))
+                                      ((:name . 1) ((a)))
                                       :source #7#))
                                     ((:required-parameter
-                                      (:name ((b)))
+                                      ((:name . 1) ((b)))
                                       :source #8#))))
                         :source #6#)))
       :documentation (("bla"))
@@ -189,10 +189,10 @@
       :constructors (((foo
                        (:ordinary-lambda-list
                         (:required (((:required-parameter
-                                      (:name ((a)))
+                                      ((:name . 1) ((a)))
                                       :source #15#))
                                     ((:required-parameter
-                                      (:name ((b)))
+                                      ((:name . 1) ((b)))
                                       :source #16#))))
                         :source #14#)))))
      :source #13#))
@@ -307,7 +307,7 @@
      (:name          ((foo))
       :lambda-list   (((:destructuring-lambda-list
                         (:required (((:required-parameter
-                                      (:name ((a)))
+                                      ((:name . 1) ((a)))
                                       :source #8#)))
                          :keyword  (((:keyword-parameter
                                       (:name ((b)))
@@ -372,10 +372,10 @@
      (:name                      ((foo))
       :lambda-list               (((:generic-function-lambda-list
                                     (:required (((:required-parameter
-                                                  (:name ((a)))
+                                                  ((:name . 1) ((a)))
                                                   :source #16#))
                                                 ((:required-parameter
-                                                  (:name ((b)))
+                                                  ((:name . 1) ((b)))
                                                   :source #17#))))
                                     :source #15#)))
       :generic-function-class    ((clazz))
@@ -387,10 +387,10 @@
      (:name                      ((foo))
       :lambda-list               (((:generic-function-lambda-list
                                     (:required (((:required-parameter
-                                                  (:name ((a)))
+                                                  ((:name . 1) ((a)))
                                                   :source #20#))
                                                 ((:required-parameter
-                                                  (:name ((b)))
+                                                  ((:name . 1) ((b)))
                                                   :source #21#))))
                                     :source #19#)))
       :argument-precedence-order (((b a))))
@@ -401,7 +401,7 @@
      (:name        ((foo))
       :lambda-list (((:generic-function-lambda-list
                       (:required (((:required-parameter
-                                    (:name ((a)))
+                                    ((:name . 1) ((a)))
                                     :source #24#))))
                       :source #23#)))
       :methods     (((:method-description
@@ -409,7 +409,7 @@
                        :lambda-list (((:specialized-lambda-list
                                        (:required (((:specialized-parameter
                                                      (:name (((:required-parameter
-                                                               (:name ((a)))
+                                                               ((:name . 1) ((a)))
                                                                :source #27#))))
                                                      :source #27#))))
                                        :source #26#))))

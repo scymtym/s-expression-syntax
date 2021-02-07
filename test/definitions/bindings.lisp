@@ -73,14 +73,14 @@
                    (:lambda-list (((:destructuring-lambda-list
                                     (:whole    ((w))
                                      :required (((:required-parameter
-                                                  (:name (((:pattern
-                                                            (:required (((:required-parameter
-                                                                          (:name ((a)))
-                                                                          :source #12#))
-                                                                        ((:required-parameter
-                                                                          (:name ((b)))
-                                                                          :source #13#))))
-                                                            :source #11#))))
+                                                  ((:name . 1) (((:pattern
+                                                                  (:required (((:required-parameter
+                                                                                ((:name . 1) ((a)))
+                                                                                :source #12#))
+                                                                              ((:required-parameter
+                                                                                ((:name . 1) ((b)))
+                                                                                :source #13#))))
+                                                                  :source #11#))))
                                                   :source #11#))))
                                     :source #9#))))
                    :source #8#))))

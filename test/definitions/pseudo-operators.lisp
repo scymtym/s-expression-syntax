@@ -40,7 +40,7 @@
      (:abstraction (((:lambda-expression
                       (:lambda-list (((:ordinary-lambda-list
                                        (:required (((:required-parameter
-                                                     (:name ((x)))
+                                                     ((:name . 1) ((x)))
                                                      :source #9#))))
                                        :source #8#)))
                        :form        ((x)))

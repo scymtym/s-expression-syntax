@@ -57,10 +57,10 @@
           &aux #13=(a 1))
       t nil (:ordinary-lambda-list
              (:required         (((:required-parameter
-                                   (:name ((foo)))
+                                   ((:name . 1) ((foo)))
                                    :source #7#))
                                  ((:required-parameter
-                                   (:name ((bar)))
+                                   ((:name . 1) ((bar)))
                                    :source #8#)))
               :optional         (((:optional-parameter
                                    (:name    ((hash-table-rehash-size))
@@ -86,8 +86,12 @@
     '(#14=(#15=foo #16=foo2 &rest pie &key #18=((:foo bar) :default bar-p)
            &aux #19=(a 1) #20=b)
       t nil (:ordinary-lambda-list
-             (:required (((:required-parameter (:name ((foo))) :source #15#))
-                         ((:required-parameter (:name ((foo2))) :source #16#)))
+             (:required (((:required-parameter
+                           ((:name . 1) ((foo)))
+                           :source #15#))
+                         ((:required-parameter
+                           ((:name . 1) ((foo2)))
+                           :source #16#)))
               :rest     ((pie))
               :keyword  (((:keyword-parameter
                            (:name     ((bar))
@@ -151,14 +155,14 @@
     '(#2=(#3=(#4=foo #5=bar))
       t nil (:destructuring-lambda-list
              (:required (((:required-parameter
-                           (:name (((:pattern
-                                     (:required (((:required-parameter
-                                                   (:name ((foo)))
-                                                   :source #4#))
-                                                 ((:required-parameter
-                                                   (:name ((bar)))
-                                                   :source #5#))))
-                                     :source #3#))))
+                           ((:name . 1) (((:pattern
+                                           (:required (((:required-parameter
+                                                         ((:name . 1) ((foo)))
+                                                         :source #4#))
+                                                       ((:required-parameter
+                                                         ((:name . 1) ((bar)))
+                                                         :source #5#))))
+                                           :source #3#))))
                            :source #3#))))
              :source #2#))
 
@@ -166,14 +170,14 @@
       t nil (:destructuring-lambda-list
              (:whole    ((whole))
               :required (((:required-parameter
-                           (:name (((:pattern
-                                     (:required (((:required-parameter
-                                                   (:name ((foo)))
-                                                   :source #8#)))
-                                      :keyword  (((:keyword-parameter
-                                                   (:name ((a)))
-                                                   :source #9#))))
-                                     :source #7#))))
+                           ((:name . 1) (((:pattern
+                                           (:required (((:required-parameter
+                                                         ((:name . 1) ((foo)))
+                                                         :source #8#)))
+                                            :keyword  (((:keyword-parameter
+                                                         (:name ((a)))
+                                                         :source #9#))))
+                                           :source #7#))))
                            :source #7#)))
               :rest     ((fez)))
              :source #6#))
@@ -183,10 +187,10 @@
              (:optional (((:optional-parameter
                            (:name     (((:pattern
                                          (:required (((:required-parameter
-                                                       (:name ((bar)))
+                                                       ((:name . 1) ((bar)))
                                                        :source #15#))
                                                      ((:required-parameter
-                                                       (:name ((baz)))
+                                                       ((:name . 1) ((baz)))
                                                        :source #16#))))
                                          :source #14#)))
                             :default  (((5 6)))
@@ -204,7 +208,9 @@
 
     '(#20=(#21=a . rest)
       t nil (:destructuring-lambda-list
-             (:required (((:required-parameter (:name ((a))) :source #21#)))
+             (:required (((:required-parameter
+                           ((:name . 1) ((a)))
+                           :source #21#)))
               :cdr      ((rest)))
              :source #20#))))
 
@@ -216,6 +222,10 @@
   (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list))
     '(#1=(#2=foo #3=bar)
       t nil (:destructuring-lambda-list
-             (:required (((:required-parameter (:name ((foo))) :source #2#))
-                         ((:required-parameter (:name ((bar))) :source #3#))))
+             (:required (((:required-parameter
+                           ((:name . 1) ((foo)))
+                           :source #2#))
+                         ((:required-parameter
+                           ((:name . 1) ((bar)))
+                           :source #3#))))
              :source #1#))))
