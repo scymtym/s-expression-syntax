@@ -573,35 +573,3 @@
         (:values-form ((1))
          :forms       ((2) (3)))
       :source #4#)))
-
-;;; Pseudo-operator "application"
-
-(define-syntax-test (syn::application)
-  '((1)
-    syn:invalid-syntax-error 1 "must be a symbol naming a function or a lambda expression")
-  '(((lambda 1) 1)
-    syn:invalid-syntax-error 1 "must be an ordinary lambda list")
-  '(((lambda (x #3=x)) 1)
-    syn:invalid-syntax-error #3# "must be a lambda list variable name")
-  ;; Valid syntax
-  '(#4=(foo)
-    (:application
-     (:abstraction ((foo)))
-     :source #4#))
-  '(#5=(foo 1)
-    (:application
-     (:abstraction ((foo))
-      :arguments   ((1)))
-     :source #5#))
-  '(#6=(#7=(lambda #8=(#9=x) x) 1)
-    (:application
-     (:abstraction (((:lambda-expression
-                      (:lambda-list (((:ordinary-lambda-list
-                                       (:required (((:required-parameter
-                                                     (:name ((x)))
-                                                     :source #9#))))
-                                       :source #8#)))
-                       :form        ((x)))
-                      :source #7#)))
-      :arguments   ((1)))
-     :source #6#)))

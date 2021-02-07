@@ -437,18 +437,3 @@ NIL."))
 
     Evaluate VALUES-FORM and then the FORMS, but return all the values
     of VALUES-FORM."))
-
-;;; Pseudo-operator "application"
-;;;
-;;; This handles the two cases
-;;;
-;;;   (FUNCTION-NAME ARGUMENT1 ARGUMENT2 ...)
-;;;   ((lambda (LAMBDA-LIST) BODY) ARGUMENT1 ARGUMENT2 ...)
-
-(define-syntax application
-    (list (<- abstraction (or ((function-name/symbol names))
-                              (must (lambda-expression)
-                                    "must be a symbol naming a function or a lambda expression")))
-          (* (<<- arguments ((form! forms)))))
-  ((abstraction 1 :evaluation t)
-   (arguments   * :evaluation t)))
