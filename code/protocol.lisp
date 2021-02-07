@@ -1,14 +1,12 @@
 ;;;; protocol.lisp --- Protocol functions provided by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:s-expression-syntax)
 
-(defgeneric parse (client syntax expression))
-
-;;;
+;;; Syntax meta-data protocol
 
 (defgeneric find-syntax (name &key if-does-not-exist))
 
@@ -44,3 +42,20 @@
                                                     :name   name)))
         (t
          if-does-not-exist))))
+
+;;; Parse protocol
+
+(defgeneric parse (client syntax expression))
+
+;;; Default behavior
+
+(defmethod parse ((client t) (syntax symbol) (expression t))
+  (parse client (find-syntax syntax) expression))
+
+(defmethod parse ((client t) (syntax (eql t)) (expression t))
+  (if (and (eg::%listp expression)
+           (not (eg::%null expression)))
+      (let* ((operator (eg::%first expression))
+             (syntax   (find-syntax operator)))
+        (parse client  syntax expression))
+      (call-next-method)))
