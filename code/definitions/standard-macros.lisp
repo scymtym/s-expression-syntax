@@ -137,10 +137,15 @@
    (documentation ?)
    (slots         *)))
 
-;;; `defclass' including slots
+;;; `defclass' and `define-condition' including slots
 
 (defrule allocation-type ()
   (or :instance :class))
+
+(defrule superclasses ()
+    (list (* (and :any (must (<<- superclasses ((class-name names)))
+                             "superclass must be a class name"))))
+  (nreverse superclasses))
 
 (define-syntax slot-specifier
     (or (and (not (list* :any)) (<- name ((slot-name! names))))
@@ -175,14 +180,13 @@
 
 (define-macro defclass
     (list (<- name ((class-name! names)))
-          (list (* (and :any (must (<<- superclasses ((class-name names)))
-                                   "superclass must be a class name"))))
+          (<- superclasses (superclasses))
           (list (* (<<- slots (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
                  (eg:option :default-initargs
                             (* (and :any
                                (must (seq (<<- default-initargs  (guard symbolp))
-                                          (<<- default-initforms :any))
+                                          (<<- default-initforms ((form! forms))))
                                      "default initarg must be a symbol followed by an expression"))))
                  (eg:option :metaclass     (must (<- metaclass ((class-name names)))
                                                  "metaclass must be a class name"))
@@ -191,7 +195,7 @@
                  (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
                         (<<- option-values)))))
   ((name              1)
-   (superclasses      *)
+   (superclasses      *>)
    (slots             *)
    ;; Standard options
    (default-initargs  *)
@@ -201,6 +205,60 @@
    ;; Non-standard options
    (option-names      *)
    (option-values     *)))
+
+(define-syntax condition-slot-specifier
+    (or (and (not (list* :any)) (<- name ((slot-name! names))))
+        (list (must (<- name ((slot-name! names))) "slot must have a name")
+              (* (or (eg:poption* :reader        (<<- readers      (must ((function-name/symbol names))
+                                                                         "reader must be a symbol function name")))
+                     (eg:poption* :writer        (<<- writers      (must ((function-name names))
+                                                                         "writer must be an extended function name")))
+                     (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
+                                                                         "accessor must be a symbol function name")))
+                     (eg:poption  :allocation    (<- allocation    (must (allocation-type))))
+                     (eg:poption* :initarg       (<<- initargs     (must (guard symbolp)
+                                                                         "initarg must be a symbol")))
+                     (eg:poption  :initform      (<- initform      ((form! forms))))
+                     (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
+                     (eg:poption  :documentation (<- documentation ((documentation-string! forms))))))))
+  ((name          1)
+   ;; Options
+   (initargs      *)
+   (readers       *)
+   (writers       *)
+   (accessors     *)
+   (allocation    ?)
+   (initform      ? :evaluation t)
+   (type          ?)
+   (documentation ?)))
+
+(defrule condition-report ()
+    (or (guard (typep 'string))
+        ((function-name/symbol names))
+        (lambda-expression)))
+
+(defrule condition-report! ()
+  (must (condition-report)
+        "report must be a string, a symbol naming a function or a lambda expression"))
+
+(define-macro define-condition
+    (list (<- name ((class-name! names)))
+          (<- parent-types (superclasses))
+          (list (* (<<- slots (condition-slot-specifier))))
+          (* (or (eg:option :default-initargs
+                            (* (and :any
+                                    (must (seq (<<- default-initargs  (guard symbolp))
+                                               (<<- default-initforms ((form! forms))))
+                                          "default initarg must be a symbol followed by an expression"))))
+                 (eg:option :documentation    (<- documentation ((documentation-string! forms))))
+                 (eg:option :report           (<- report (condition-report!))))))
+  ((name              1)
+   (parent-types      *>)
+   (slots             *)
+   (default-initargs  *)
+   (default-initforms * :evaluation t)
+   (documentation     ?)
+   (report            ? :evaluation :depends))) ; TODO report is not quite evaluated
 
 ;;; `deftype'
 
