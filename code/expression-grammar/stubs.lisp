@@ -9,7 +9,7 @@
 (declaim (inline %%natural? %natural? %listp %null %first %rest %equal %eql))
 
 (defun %%natural? (thing)
-  (typep thing '(or list symbol string character number)))
+  (typep thing '(or list symbol array character number)))
 
 (defun %natural? (thing)
   (or (%%natural? thing)
