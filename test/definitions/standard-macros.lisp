@@ -525,77 +525,62 @@
          (:documentation "bla")
          (:use #10=:bar #11="bar")
          (:size 1)
-         (:import-from #12=:foo #13=#\c #14=:bar)
-         (:shadowing-import-from #15=:foo2 #16="BAZ2" #17=:bar2))
+         #12=(:import-from #13=:foo #14=#\c #15=:bar)
+         #16=(:shadowing-import-from #17=:foo2 #18="BAZ2" #19=:bar2))
     (:defpackage
-      ((:name . 1)                    (((:string-designator
-                                         ()
-                                         :string "FOO" :source #9#)))
-      :documentation                  (("bla"))
-      :use                            (((:string-designator
-                                         ()
-                                         :string "BAR" :source #10#))
-                                       ((:string-designator
-                                         ()
-                                         :string "bar" :source #11#)))
-      :shadowing-import-from-packages (((:string-designator
-                                         ()
-                                         :string "FOO2" :source #15#)))
-      :shadowing-import-from-names    ((((:string-designator
-                                          ()
-                                          :string "BAZ2" :source #16#)
-                                         (:string-designator
-                                          ()
-                                          :string "BAR2" :source #17#))))
-      :import-from-packages           (((:string-designator
-                                         ()
-                                         :string "FOO" :source #12#)))
-      :import-from-names              ((((:string-designator
-                                          ()
-                                          :string "c" :source #13#)
-                                         (:string-designator
-                                          ()
-                                          :string "BAR" :source #14#))))
-      :size                           ((1)))
+     ((:name . 1)            (((:string-designator
+                                ()
+                                :string "FOO" :source #9#)))
+      :documentation         (("bla"))
+      :use                   (((:string-designator
+                                ()
+                                :string "BAR" :source #10#))
+                              ((:string-designator
+                                ()
+                                :string "bar" :source #11#)))
+      :shadowing-import-from (((:import-from
+                                ((:package . 1) (((:string-designator
+                                                   ()
+                                                   :string "FOO2" :source #17#)))
+                                 :names         (((:string-designator
+                                                   ()
+                                                   :string "BAZ2" :source #18#))
+                                                 ((:string-designator
+                                                   ()
+                                                   :string "BAR2" :source #19#))))
+                                :source #16#)))
+      :import-from           (((:import-from
+                                ((:package . 1) (((:string-designator
+                                                   ()
+                                                   :string "FOO" :source #13#)))
+                                 :names         (((:string-designator
+                                                   ()
+                                                   :string "c" :source #14#))
+                                                 ((:string-designator
+                                                   ()
+                                                   :string "BAR" :source #15#))))
+                                :source #12#)))
+      :size                  ((1)))
      :source #8#))
 
-  '(#18=(defpackage #19=foo
-         (:documentation "bla")
-         (:use #20=:bar #21="bar")
-         (:size 1)
-         (:import-from #22=:foo #23=:bar #24=:baz)
-         (:shadowing-import-from #25=:foo2 #26="BAZ2" #27=:bar2))
+  '(#20=(defpackage #21=foo
+          (:nicknames #22="f" #23=:fo)
+          (:export #24="bar" #25=:baz))
     (:defpackage
-     ((:name . 1)                     (((:string-designator
-                                         ()
-                                         :string "FOO" :source #19#)))
-      :documentation                  (("bla"))
-      :use                            (((:string-designator
-                                         ()
-                                         :string "BAR" :source #20#))
-                                       ((:string-designator
-                                         ()
-                                         :string "bar" :source #21#)))
-      :shadowing-import-from-packages (((:string-designator
-                                         ()
-                                         :string "FOO2" :source #25#)))
-      :shadowing-import-from-names    ((((:string-designator
-                                          ()
-                                          :string "BAZ2" :source #26#)
-                                         (:string-designator
-                                          ()
-                                          :string "BAR2" :source #27#))))
-      :import-from-packages           (((:string-designator
-                                         ()
-                                         :string "FOO" :source #22#)))
-      :import-from-names              ((((:string-designator
-                                          ()
-                                          :string "BAR" :source #23#)
-                                         (:string-designator
-                                          ()
-                                          :string "BAZ" :source #24#))))
-      :size                           ((1)))
-     :source #18#)))
+     ((:name . 1)(((:string-designator () :string "FOO" :source #21#)))
+      :nicknames (((:string-designator
+                    ()
+                    :string "f" :source #22#))
+                  ((:string-designator
+                    ()
+                    :string "FO" :source #23#)))
+      :export    (((:string-designator
+                    ()
+                    :string "bar" :source #24#))
+                  ((:string-designator
+                    ()
+                    :string "BAZ" :source #25#))))
+     :source #20#)))
 
 (define-macro-test (in-package)
   '((in-package)          syn:invalid-syntax-error)

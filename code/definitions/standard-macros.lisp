@@ -365,33 +365,31 @@
   (must (package-designator) "must be a package designator"))
 
 (defrule non-standard-package-option ()
-  (or (eg:option  :locked (must (guard (typep 'boolean)) "must be a Boolean")) ; TODO the `once' within this does not work
+  (or (eg:option  :locked          (must (guard (typep 'boolean)) "must be a Boolean")) ; TODO the `once' within this does not work
       (eg:option* :local-nicknames (* (list (must (string-designator!) "expected TODO")
-                                      (must (string-designator!) "expected TODO"))))))
+                                            (must (string-designator!) "expected TODO"))))))
+
+(define-syntax import-from
+    (list* (or :import-from :shadowing-import-from)
+           (must (list (<- package (package-designator!))
+                       (* (<<- names (and :any (string-designator!)))))
+                 "import from options accept a package designator followed by string designators"))
+  ((package 1)
+   (names   *)))
 
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
           ;; TODO (* (and :any (must (or …) "unknown options"))
           (* (or (eg:option* :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
-                 (eg:option* :use           (* (<<- use (and :any (package-designator!)))))
+                 (eg:option* :use           (* (<<- use (package-designator!))))
                  (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
-                 (eg:option* :shadowing-import-from
-                             (<<- shadowing-import-from-packages (package-designator!))
-                             (<<- shadowing-import-from-names    (:transform
-                                                                     (* (<<- temp (and :any (string-designator!))))
-                                                                   (prog1
-                                                                       (nreverse temp)
-                                                                     (setf temp '())))))
-                 (eg:option* :import-from
-                             (<<- import-from-packages (package-designator!))
-                             (<<- import-from-names    (:transform
-                                                           (* (<<- temp (and :any (string-designator!))))
-                                                         (prog1
-                                                             (nreverse temp)
-                                                           (setf temp '())))))
-                 (eg:option* :export (* (<<- export (and :any (string-designator!)))))
-                 (eg:option* :intern (* (<<- intern (and :any (string-designator!)))))
+                 (<<- shadowing-import-from (and (list* :shadowing-import-from :any)
+                                                 (import-from)))
+                 (<<- import-from           (and (list* :import-from :any)
+                                                 (import-from)))
+                 (eg:option* :export (* (<<- export (string-designator!))))
+                 (eg:option* :intern (* (<<- intern (string-designator!))))
                  (eg:option  :size   (<- size (must (guard (typep '(integer 0)))
                                                     "must be a non-negative integer")))
                  (non-standard-package-option)
@@ -402,10 +400,12 @@
    (documentation                  ?)
    (use                            *) ; TODO cannot distinguish empty option, i.e. (:use), from absent
    (shadow                         *)
-   (shadowing-import-from-packages *)
-   (shadowing-import-from-names    *)
-   (import-from-packages           *)
-   (import-from-names              *)
+   ;; (shadowing-import-from-packages *)
+   ;; (shadowing-import-from-names    *)
+   (shadowing-import-from          *)
+   ;; (import-from-packages           *)
+   ;; (import-from-names              *)
+   (import-from                    *)
    (export                         *)
    (intern                         *)
    (size                           ?)))
