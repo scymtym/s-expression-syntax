@@ -17,9 +17,14 @@
     '(((1))     :fatal 1       "variable name must be a symbol")
     '(((a 1 2)) :fatal (a 1 2) "must be a binding of the form NAME, (NAME) or (NAME FORM)")
 
-    '(()        t      nil     (()  ()))
-    '(((a))     t      nil     ((a) (nil)))
-    '(((a 1))   t      nil     ((a) (1)))))
+    '(()
+      t nil (()  ()))
+    '(#1=((#2=a))
+      t #1# (((:variable-name () :name a :source #2#))
+             (nil)))
+    '(#3=((#4=a 1))
+      t #3# (((:variable-name () :name a :source #4#))
+             (1)))))
 
 (test function-bindings
   "Smoke test for the `function-bindings' rule."
@@ -31,26 +36,30 @@
     '(((a 1)) :fatal 1   "must be an ordinary lambda list")
 
     '(()               t      nil (()  ()))
-    '((#6=(a #7=()))   t      nil ((a) ((:local-function
-                                         (:lambda-list (((:ordinary-lambda-list
-                                                          ()
-                                                          :source #7#))))
-                                         :source #6#))))
-    '((#8=(a #9=() 1))      t      nil ((a)
-                                        ((:local-function
-                                          (:lambda-list (((:ordinary-lambda-list
-                                                           ()
-                                                           :source #9#)))
-                                           :forms       ((1)))
-                                          :source #8#))))
-    '((#10=(a #11=() "" 1)) t      nil ((a)
-                                        ((:local-function
-                                          (:lambda-list   (((:ordinary-lambda-list
-                                                             ()
-                                                             :source #11#)))
-                                           :documentation ((""))
-                                           :forms         ((1)))
-                                          :source #10#))))))
+    '((#6=(#7=a #8=()))
+      t #6# (((:function-name () :name a :source #7#))
+             ((:local-function
+               (:lambda-list (((:ordinary-lambda-list
+                                ()
+                                :source #8#))))
+               :source #6#))))
+    '((#9=(#10=a #11=() 1))
+      t #9# (((:function-name () :name a :source #10#))
+             ((:local-function
+               (:lambda-list (((:ordinary-lambda-list
+                                ()
+                                :source #11#)))
+                :forms       ((1)))
+               :source #9#))))
+    '((#12=(#13=a #14=() "" 1))
+      t #12# (((:function-name () :name a :source #13#))
+              ((:local-function
+                (:lambda-list   (((:ordinary-lambda-list
+                                   ()
+                                   :source #14#)))
+                 :documentation ((""))
+                 :forms         ((1)))
+                :source #12#))))))
 
 (test macro-function-bindings
   "Smoke test for the `macro-function-bindings' rule."

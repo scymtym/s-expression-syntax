@@ -28,13 +28,14 @@
 
 (defrule unique-variable-name (seen)
     (<- name (lambda-list-variable-name))
-  (cond ((not seen)
-         name)
-        ((not (gethash name seen))
-         (setf (gethash name seen) t)
-         name)
-        (t
-         (:fail))))
+  (let ((key (getf (bp:node-initargs* name) :name)))
+    (cond ((not seen)
+           name)
+          ((not (gethash key seen))
+           (setf (gethash key seen) t)
+           name)
+          (t
+           (:fail)))))
 
 (defrule unique-variable-name! (seen)
     (must (unique-variable-name seen) "must be a lambda list variable name"))

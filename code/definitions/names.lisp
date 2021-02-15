@@ -1,6 +1,6 @@
 ;;;; names.lisp --- Rules for different kinds of names.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,9 +15,9 @@
   (eq (sb-cltl2:variable-information name) :constant))
 
 (defrule variable-name/unchecked ()
-    :any
-    ;; (bp:node* (:variable-name :name name))
-  )
+    (value (source)
+      symbol)
+  (bp:node* (:variable-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule variable-name ()
     (and (guard symbolp)
@@ -31,21 +31,36 @@
          (must (not (guard constant?)) "variable name must not designate a constant")
          (variable-name/unchecked)))
 
+(defrule function-name/symbol/raw ()
+  (and (guard (typep 'symbol))
+       (not 't) (not 'nil)))
+
 (defrule function-name/symbol ()
-    (:guard (typep '(and symbol (not (member t nil))))))
+    (value (source)
+      (<- symbol (function-name/symbol/raw)))
+  (bp:node* (:function-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule function-name/symbol! ()
     (must (function-name/symbol) "function name must be symbol"))
 
+(defrule function-name/setf ()
+    (value (source)
+      (list 'setf (must (<- symbol (function-name/symbol/raw))
+                        "second element of SETF function name must be a symbol")))
+  (bp:node* (:function-name :name   `(setf ,(eg::%naturalize symbol))
+                            :source source)))
+
 (defrule function-name ()
   (or (function-name/symbol)
-      (list 'setf (:must (function-name/symbol) "second element of SETF function name must be a symbol"))))
+      (function-name/setf)))
 
 (defrule function-name! ()
     (must (function-name) "must be a function name"))
 
 (defrule class-name ()           ; TODO call this type name?
-    (and (guard symbolp) (not (guard null))))
+    (value (source)
+      (and (guard symbolp) (not 'nil) symbol))
+  (bp:node* (:type-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule class-name! ()
     (must (class-name) "must be a class name"))
@@ -59,7 +74,8 @@
 ;;; References
 
 (defrule function-reference ()
-    (list 'function (function-name!)))
+    (list 'function (<- name (function-name!)))
+  name)
 
 (defrule function-reference! ()
     (must (function-reference) "must be a function reference"))

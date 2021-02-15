@@ -20,7 +20,8 @@
     '(nil  nil nil  nil)
     '(t    nil t    nil)
     '(pi   nil pi   nil)
-    '(a    t   a    a)))
+    '(#6=a
+      t #6# (:variable-name () :name a :source #6#))))
 
 (test variable-name!
   "Smoke test for the `variable-name!' rule."
@@ -31,18 +32,22 @@
     '(nil  :fatal nil  "variable name must not designate a constant")
     '(t    :fatal t    "variable name must not designate a constant")
     '(pi   :fatal pi   "variable name must not designate a constant")
-    '(a    t      a    a)))
+    ;;
+    '(#6=a
+      t #6# (:variable-name () :name a :source #6#))))
 
 (test function-name
   "Smoke test for the `function-name' rule."
 
   (rule-test-cases ((syn::function-name syn::names))
-    '(1           nil    1          nil)
-    '(nil         nil    nil        nil)
-    '(foo         t      foo        foo)
-
-    '((setf 1)    :fatal nil        "second element of SETF function name must be a symbol")
-    '((setf foo)  t      (setf foo) (setf foo))))
+    '(1        nil    1   nil)
+    '(nil      nil    nil nil)
+    '((setf 1) :fatal nil "second element of SETF function name must be a symbol")
+    ;; Valid syntax
+    '(#3=foo
+      t #3# (:function-name () :name foo :source #3#))
+    '(#5=(setf foo)
+      t #5# (:function-name () :name (setf foo) :source #5#))))
 
 ;;; References
 
@@ -50,9 +55,11 @@
   "Smoke test for `function-reference' rule."
 
   (rule-test-cases ((syn::function-reference syn::names))
-    '((function 1)           :fatal nil                   "must be a function name")
-    '((function nil)         :fatal nil                   "must be a function name")
-    '((function foo)         t      (function foo)        (function foo))
+    '((function 1)        :fatal nil "must be a function name")
+    '((function nil)      :fatal nil "must be a function name")
+    '((function (setf 1)) :fatal nil "second element of SETF function name must be a symbol")
 
-    '((function (setf 1))    :fatal nil                   "second element of SETF function name must be a symbol")
-    '((function (setf foo))  t      (function (setf foo)) (function (setf foo)))))
+    '(#4=(function #5=foo)
+      t #4# (:function-name () :name foo :source #5#))
+    '(#6=(function #7=(setf foo))
+      t #6# (:function-name () :name (setf foo) :source #7#))))
