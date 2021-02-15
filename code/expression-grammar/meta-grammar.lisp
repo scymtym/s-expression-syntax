@@ -13,27 +13,38 @@
 
 (parser.packrat:in-grammar meta-grammar)
 
+;;; Once
+;;;
+;;; Make sure an expression (or one expression in a group of
+;;; expressions) only matches once.
+
 (parser.packrat:defrule once (context)  ; TODO define-macro-rule
-    (:compose (:transform (list 'once expression (seq:? name))
-                (let ((temp    (gensym))
-                      (message (format nil "~S option must not be repeated"
+    (:compose (:transform (list* 'once (must (list expression (* (or (seq:seq :name name)
+                                                                     (seq:seq :flag flag))))
+                                             "must be of the form EXPRESSION {:name NAME|:flag FLAG}"))
+                (let ((result  (gensym "RESULT"))
+                      (flag    (or flag (gensym)))
+                      (message (format nil "~A must not be repeated"
                                        (or name expression))))
-                  `(and ,expression
-                        (<- ,temp (:transform :any
-                                    (when ,temp
-                                      (:fatal ,message))
-                                    t)))))
+                  `(:compose (<- ,flag (:transform (<- ,result ,expression)
+                                         (when ,flag
+                                           (:fatal ,message))
+                                         t))
+                             (:transform :any ,result))))
               (base::expression context)))
 
 ;;; List-shaped options
 
 (defun emit-list-option-expression (name values repeated &key repeat?)
-  (let* ((required (- (length values) (length repeated)))
-         (message (format nil "~S option accepts~:[~; at least~] ~R ~
-                               value~:P"
-                          name repeated required)))
-    `(list* ,(if repeat? `',name `(once ',name ,name))
-            (must (list ,@(reverse values)) ,message))))
+  (let* ((required        (- (length values) (length repeated)))
+         (message         (format nil "~S option accepts~:[~; at least~] ~R ~
+                                       value~:P"
+                                  name repeated required))
+         (name-expression (if repeat?
+                              `',name
+                              (let ((name* (format nil "~S option" name)))
+                                `(once ',name :name ,name*)))))
+    `(list* ,name-expression (must (list ,@(reverse values)) ,message))))
 
 (parser.packrat:defrule option (context)
     ;; Transform (option NAME PARAMETER₁ … PARAMETERₖ) into an
@@ -58,10 +69,14 @@
 ;;; Property-shaped options
 
 (defun emit-property-option-expression (name value &key repeat?)
-  `(seq:seq ,(if repeat? `',name `(once ',name ,name)) ,value))
+  (let ((name-expression (if repeat?
+                             `',name
+                             (let ((name* (format nil "~S option" name)))
+                               `(once ',name :name ,name*)))))
+    `(seq:seq ,name-expression ,value)))
 
 (parser.packrat:defrule poption (context)
-  ;; Transform (poption NAME PARAMETER) into an expression that parses
+  ;; Transform (poption NAME PARAMETER) into an expression that
   ;; matches the option.
   (:compose
    (:transform (list 'poption name value)
