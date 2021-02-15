@@ -59,7 +59,7 @@ NIL."))
     (list (<- name (block-name!)) (? (<- value ((form! forms)))))
   ((name  1 :evaluation (make-instance 'reference-semantics
                                        :namespace 'block))
-   (value 1 #+later ? :evaluation t)) ; TODO value-form?
+   (value ? :evaluation t)) ; TODO value-form?
   (:documentation
    "RETURN-FROM block-name value-form
 
@@ -69,7 +69,7 @@ NIL."))
 
 (define-special-operator return
     (list (? (<- value ((form! forms)))))
-  ((value 1 :evaluation t)))
+  ((value ? :evaluation t)))
 
 ;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
 ;;; valid tag will be treated as a form.

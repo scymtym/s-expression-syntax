@@ -84,6 +84,7 @@
 (defclass component (named-mixin
                      print-items:print-items-mixin)
   ((%cardinality :initarg :cardinality
+                 :type    (member 1 bp:? *)
                  :reader  cardinality)
    (%evaluation :initarg  :evaluation   ; TODO change this to semantic
                 :reader   evaluation)))
