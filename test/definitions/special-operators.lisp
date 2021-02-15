@@ -95,9 +95,12 @@
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
 (define-syntax-test (eval-when)
-  '((eval-when)            syn:invalid-syntax-error)
-  '((eval-when 1)          syn:invalid-syntax-error)
-  '((eval-when (:foo))     syn:invalid-syntax-error)
+  '((eval-when)
+    syn:invalid-syntax-error)
+  '((eval-when #2=1)
+    syn:invalid-syntax-error #2# "must be a list of situations")
+  '((eval-when (#3=:foo))
+    syn:invalid-syntax-error #3# "must be one of :COMPILE-TOPLEVEL, COMPILE, :LOAD-TOPLEVEL, LOAD, :EXECUTE, EVAL")
 
   '((eval-when ())         (syn::situations ()         syn::forms ()))
   '((eval-when (:execute)) (syn::situations (:execute) syn::forms ()))

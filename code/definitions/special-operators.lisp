@@ -150,11 +150,18 @@ NIL."))
       :execute          eval)
   :test #'equal)
 
-(deftype eval-when-situation ()
-  `(member ,@+eval-when-situations+))
+(defrule eval-when-situation ()
+  (or . #.(mapcar (lambda (situation)
+                    `',situation)
+                  +eval-when-situations+)))
+
+(defrule eval-when-situation! ()
+  (must (eval-when-situation) #.(format nil "must be one of ~{~S~^, ~}"
+                                        +eval-when-situations+)))
 
 (define-special-operator eval-when
-    (list (list (* (<<- situations (guard (typep 'eval-when-situation)))))
+    (list (must (list (* (<<- situations (eval-when-situation!))))
+                "must be a list of situations")
           (* (<<- forms ((form! forms)))))
   ((situations * :evaluation nil)
    (forms      * :evaluation t))
