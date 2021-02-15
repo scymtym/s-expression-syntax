@@ -11,8 +11,8 @@
 ;;; Special operators for control
 
 (define-special-operator progn
-    (list* (<- forms ((forms forms))))
-  ((forms *> :evaluation t))
+    (list* (<- form ((forms forms))))
+  ((form *> :evaluation t))
   (:documentation
    "PROGN form*
 
@@ -59,7 +59,7 @@ NIL."))
     (list (<- name (block-name!)) (? (<- value ((form! forms)))))
   ((name  1 :evaluation (make-instance 'reference-semantics
                                        :namespace 'block))
-   (value ? :evaluation t)) ; TODO value-form?
+   (value ? :evaluation t)) ; TODO value-form? result?
   (:documentation
    "RETURN-FROM block-name value-form
 
@@ -69,7 +69,7 @@ NIL."))
 
 (define-special-operator return
     (list (? (<- value ((form! forms)))))
-  ((value ? :evaluation t)))
+  ((value ? :evaluation t))) ; TODO result
 
 ;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
 ;;; valid tag will be treated as a form.

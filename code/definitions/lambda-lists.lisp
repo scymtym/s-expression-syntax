@@ -16,11 +16,11 @@
 ;;; Shared rules
 
 ;; TODO could use lambda-list-keywords
-(defun lambda-list-keyword? (symbol)
-  (member symbol '(&whole &environment &optional &rest &key &aux &allow-other-keys) :test #'eq))
+(defrule lambda-list-keyword ()
+  (or '&whole '&environment '&optional '&rest '&key '&aux '&allow-other-keys))
 
 (defrule lambda-list-variable-name ()
-  (and (not (guard lambda-list-keyword?))
+  (and (not (lambda-list-keyword))
        ((variable-name names))))
 
 (defrule lambda-list-variable-name! ()
@@ -47,7 +47,7 @@
 
 (defrule required-parameter! (seen)
     (value (source)
-      (and (not (guard lambda-list-keyword?))
+      (and (not (lambda-list-keyword))
            (<- name (unique-variable-name! seen))))
   (bp:node* (:required-parameter :source source)
     (1 (:name . 1) name)))
@@ -57,7 +57,7 @@
       (or (list (<- name (unique-variable-name! seen))
                 (? (seq (<- default ((form! forms)))
                         (? (<- supplied (unique-variable-name! seen))))))
-          (<- name (and (not (guard lambda-list-keyword?))
+          (<- name (and (not (lambda-list-keyword))
                         (unique-variable-name! seen)))))
   (bp:node* (:optional-parameter :source source)
     (1    :name     name)

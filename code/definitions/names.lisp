@@ -14,22 +14,32 @@
 (defun constant? (name)
   (eq (sb-cltl2:variable-information name) :constant))
 
+(defrule constant ()
+    (structure 'symbol
+               (symbol-name symbol-name)
+               (symbol-package (structure 'package (package-name package-name))))
+  (a:if-let ((package (find-package package-name)))
+    (multiple-value-bind (symbol found?) (find-symbol symbol-name package)
+      (unless (and found? (constant? symbol))
+        (:fail)))
+    (:fail)))
+
 (defrule variable-name/unchecked ()
     (value (source)
       symbol)
   (bp:node* (:variable-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule variable-name ()
-    (and (guard symbolp)
-         (not (guard keywordp))
-         (not (guard constant?))
-         (variable-name/unchecked)))
+  (and (guard (typep 'symbol))
+       (not (guard (typep 'keyword)))
+       (not (constant))
+       (variable-name/unchecked)))
 
 (defrule variable-name! ()
-    (and (must (guard symbolp) "variable name must be a symbol")
-         (must (not (guard keywordp)) "variable name must not be a keyword")
-         (must (not (guard constant?)) "variable name must not designate a constant")
-         (variable-name/unchecked)))
+  (and (must (guard (typep 'symbol)) "variable name must be a symbol")
+       (must (not (guard (typep 'keyword))) "variable name must not be a keyword")
+       (must (not (constant)) "variable name must not designate a constant")
+       (variable-name/unchecked)))
 
 (defrule function-name/symbol/raw ()
   (and (guard (typep 'symbol))
@@ -41,7 +51,7 @@
   (bp:node* (:function-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule function-name/symbol! ()
-    (must (function-name/symbol) "function name must be symbol"))
+  (must (function-name/symbol) "function name must be symbol"))
 
 (defrule function-name/setf ()
     (value (source)
@@ -55,7 +65,7 @@
       (function-name/setf)))
 
 (defrule function-name! ()
-    (must (function-name) "must be a function name"))
+  (must (function-name) "must be a function name"))
 
 (defrule class-name ()           ; TODO call this type name?
     (value (source)
@@ -63,13 +73,13 @@
   (bp:node* (:type-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule class-name! ()
-    (must (class-name) "must be a class name"))
+  (must (class-name) "must be a class name"))
 
 (defrule slot-name ()
-    (variable-name))
+  (variable-name))
 
 (defrule slot-name! ()
-    (must (slot-name) "slot name must be a symbol that is a valid variable name"))
+  (must (slot-name) "slot name must be a symbol that is a valid variable name"))
 
 ;;; References
 
@@ -78,4 +88,4 @@
   name)
 
 (defrule function-reference! ()
-    (must (function-reference) "must be a function reference"))
+  (must (function-reference) "must be a function reference"))

@@ -21,8 +21,8 @@
 (defrule type-specifier ()
     (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
          (must (not 'values) "the symbol VALUES is not a valid type specifier")
-         (or (guard symbolp) ; TODO control whether * is allowed
-             (list (guard symbolp) (* :any)))))
+         (or (guard (typep 'symbol)) ; TODO control whether * is allowed
+             (list (guard (typep 'symbol)) (* :any)))))
 
 (defrule type-specifier! ()
     (must (type-specifier) "must be a type specifier"))

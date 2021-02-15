@@ -139,8 +139,9 @@
 
 ;;; `defclass' and `define-condition' including slots
 
-(defrule allocation-type ()
-  (or :instance :class))
+(defrule allocation-type! ()
+  (must (or :instance :class)
+        "allocation must be :INSTANCE or :CLASS"))
 
 (defrule superclasses ()
     (list (* (and :any (must (<<- superclasses ((class-name names)))
@@ -156,7 +157,7 @@
                                                                          "writer must be an extended function name")))
                      (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
-                     (eg:poption  :allocation    (<- allocation    (must (allocation-type))))
+                     (eg:poption  :allocation    (<- allocation    (allocation-type!)))
                      (eg:poption* :initarg       (<<- initargs     (must (guard symbolp)
                                                                          "initarg must be a symbol")))
                      (eg:poption  :initform      (<- initform      ((form! forms))))

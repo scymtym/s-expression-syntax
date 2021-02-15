@@ -33,12 +33,13 @@
 ;;;   ((lambda (LAMBDA-LIST) BODY) ARGUMENT1 ARGUMENT2 ...)
 
 (define-syntax application
-    (list (<- abstraction (or ((function-name/symbol names))
-                              (must (lambda-expression)
-                                    "must be a symbol naming a function or a lambda expression")))
-          (* (<<- arguments ((form! forms)))))
-  ((abstraction 1 :evaluation t)
-   (arguments   * :evaluation t)))
+    (list (or (<- function-name ((function-name/symbol names)))
+              (must (<- function (lambda-expression))
+                    "must be a symbol naming a function or a lambda expression"))
+          (* (<<- argument ((form! forms)))))
+  ((function-name ?)
+   (function      ? :evaluation :parsed)
+   (argument      * :evaluation t)))
 
 ;;; Pseudo-operator "self evaluating"
 ;;;
