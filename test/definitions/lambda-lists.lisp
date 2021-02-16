@@ -77,6 +77,10 @@
 
   (rule-test-cases ((syn::destructuring-lambda-list syn::destructuring-lambda-list)
                     (make-hash-table :test #'eq))
+    ;; Repeated section
+    '((&environment e1 foo bar #1=&environment e2)
+      :fatal #1# "&ENVIRONMENT must not be repeated")
+    ;; Valid syntax
     '(((foo bar))
       t nil (:destructuring-lambda-list
              nil nil

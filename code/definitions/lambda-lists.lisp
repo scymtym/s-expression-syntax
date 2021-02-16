@@ -17,7 +17,7 @@
 
 ;; TODO could use lambda-list-keywords
 (defun lambda-list-keyword? (symbol)
-  (member symbol '(&whole &optional &rest &key &aux &allow-other-keys) :test #'eq))
+  (member symbol '(&whole &environment &optional &rest &key &aux &allow-other-keys) :test #'eq))
 
 (defrule lambda-list-variable-name ()
   (and (not (guard lambda-list-keyword?))
@@ -186,13 +186,20 @@
   (list :pattern whole required optional rest key allow-other-keys? aux cdr))
 
 (defrule destructuring-lambda-list (seen)
-    (list* (? (<- whole    (whole-section seen)))    (? (<- env (environment-section seen)))
-           (? (<- required (required-section seen))) (? (<- env (environment-section seen)))
-           (? (<- optional (optional-section seen))) (? (<- env (environment-section seen)))
+    (list* (? (<- whole    (whole-section seen)))
+           (? (<- env      #1=(eg:once (environment-section seen)
+                                       :flag env? :name &environment)))
+           (? (<- required (required-section seen)))
+           (? (<- env      #1#))
+           (? (<- optional (optional-section seen)))
+           (? (<- env      #1#))
            (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
-               (list (? (<- rest                    (rest-section seen)))    (? (<- env (environment-section seen)))
-                     (? (<- (key allow-other-keys?) (keyword-section seen))) (? (<- env (environment-section seen)))
-                     (? (<- aux                     (aux-section seen)))     (? (<- env (environment-section seen))))))
+               (list (? (<- rest                    (rest-section seen)))
+                     (? (<- env                     #1#))
+                     (? (<- (key allow-other-keys?) (keyword-section seen)))
+                     (? (<- env                     #1#))
+                     (? (<- aux                     (aux-section seen)))
+                     (? (<- env                     #1#)))))
   (list :destructuring-lambda-list whole env required optional rest key allow-other-keys? aux cdr))
 
 (defrule destructuring-lambda-list! (seen)
