@@ -14,7 +14,7 @@
   (mapc (lambda (input-and-expected)
           (destructuring-bind (input expected) input-and-expected
             (let ((expected-syntax (syn:find-syntax expected))
-                  (actual-syntax   (syn::classify input)))
+                  (actual-syntax   (syn::classify t input)))
               (is (eq expected-syntax actual-syntax)
                   "When classifying ~S, expected syntax ~A but got ~A"
                   input expected-syntax actual-syntax))))
