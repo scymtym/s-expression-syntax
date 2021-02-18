@@ -30,6 +30,17 @@
 
 ;;; Base expression compilation
 
+(macrolet ((define-method (function replacement)
+             `(defmethod base::compile-call ((grammar     expression-grammar)
+                                             (environment t)
+                                             (expression  t)
+                                             (function    (eql ',function))
+                                             (arguments   t))
+                `(,',replacement ,@arguments))))
+  (define-method symbol-name    %symbol-name)
+  (define-method symbol-package %symbol-package)
+  (define-method package-name   %package-name))
+
 (defmethod base::compile-test ((grammar      expression-grammar)
                                (environment  t)
                                (expression   t)
@@ -61,6 +72,7 @@
                 `(if (,',replacement ,value ,@arguments)
                      ,(funcall success-cont environment)
                      ,(funcall failure-cont environment)))))
+  (define-method typep %typep)
   (define-method equal %equal)
   (define-method eql   %eql))
 
@@ -186,7 +198,8 @@
                                  (expression   sexp::structure-expression)
                                  (success-cont function)
                                  (failure-cont function))
-  (let+ ((value (env:value environment))
+  (call-next-method)
+  #+no (let+ ((value (env:value environment))
          ((&with-gensyms structure-function structure-value))
          (new-environment (env:environment-at
                            environment (list :value structure-value))))

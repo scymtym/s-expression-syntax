@@ -29,13 +29,24 @@
    #:*client*
 
    #:natural?
-   #:naturalize
+   #:naturalize)
 
+  ;; Symbol operations
+  (:export
+   #:symbol-name*
+   #:symbol-package*
+   #:package-name*)
+
+  ;; List operations
+  (:export
    #:listp*
    #:null*
    #:first*
-   #:rest*
+   #:rest*)
 
+  ;; Comparisons
+  (:export
+   #:typep*
    #:equal*
    #:eql*)
 

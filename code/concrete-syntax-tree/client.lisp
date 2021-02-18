@@ -24,6 +24,14 @@
 (defmethod eg:naturalize ((client cst-client) (thing cst:cst))
   (cst:raw thing))
 
+;;; Symbol operations
+
+(defmethod eg:symbol-name* ((client cst-client) (symbol cst:atom-cst))
+  (symbol-name (cst:raw symbol)))
+
+(defmethod eg:symbol-package* ((client cst-client) (symbol cst:atom-cst))
+  (symbol-package (cst:raw symbol)))
+
 ;;; List operations
 
 (defmethod eg:listp* ((client cst-client) (maybe-list t))
@@ -48,6 +56,9 @@
   (cst:rest maybe-list))
 
 ;;; Comparisons
+
+(defmethod eg:typep* ((client cst-client) (thing cst:cst) (type t))
+  (typep (cst:raw thing) type))
 
 (defmethod eg:equal* ((client cst-client) (left cst:cst) (right t))
   (equal (cst:raw left) right))

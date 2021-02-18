@@ -6,10 +6,13 @@
 
 (cl:in-package #:s-expression-syntax.expression-grammar)
 
-(declaim (inline %%natural? %natural? %listp %null %first %rest %equal %eql))
+(declaim (inline %%natural? %natural?
+                 %listp %null %first %rest
+                 %symbol-name %symbol-package
+                 %typep %equal %eql))
 
 (defun %%natural? (thing)
-  (typep thing '(or list symbol array character number)))
+  (typep thing '(or list symbol package array character number)))
 
 (defun %natural? (thing)
   (or (%%natural? thing)
@@ -43,7 +46,29 @@
       (rest maybe-list)
       (rest* *client* maybe-list)))
 
+;;; Symbols
+
+(defun %symbol-name (symbol)
+  (if (%natural? symbol)
+      (symbol-name symbol)
+      (symbol-name* *client* symbol)))
+
+(defun %symbol-package (symbol)
+  (if (%natural? symbol)
+      (symbol-package symbol)
+      (symbol-package* *client* symbol))) ; TODO a lexical variable to *client* in compile-rule method
+
+(defun %package-name (symbol)
+  (if (%natural? symbol)
+      (package-name symbol)
+      (package-name* *client* symbol)))
+
 ;;; Comparison
+
+(defun %typep (thing type)
+  (if (%natural? thing)
+      (typep thing type)
+      (typep* *client* thing type)))
 
 (defun %equal (left right)
   (if (%natural? left)

@@ -15,6 +15,8 @@
 
 (defgeneric naturalize (client thing))
 
+;;; List operations
+
 (defgeneric listp* (client maybe-list))
 
 (defgeneric null* (client maybe-list))
@@ -22,6 +24,18 @@
 (defgeneric first* (client maybe-list))
 
 (defgeneric rest* (client maybe-list))
+
+;;; Symbol operations
+
+(defgeneric symbol-name* (client symbol))
+
+(defgeneric symbol-package* (client symbol))
+
+(defgeneric package-name* (client package))
+
+;;; Comparisons
+
+(defgeneric typep* (client thing type))
 
 (defgeneric equal* (client left right))
 
