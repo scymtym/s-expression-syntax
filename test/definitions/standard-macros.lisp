@@ -521,47 +521,95 @@
   '((defpackage foo (:size 1) #7=(:size 2))
     syn:invalid-syntax-error #7# ":SIZE option must not be repeated")
   ;; Valid syntax
-  '(#8=(defpackage foo
+  '(#8=(defpackage #9=foo
          (:documentation "bla")
-         (:use :bar "bar")
+         (:use #10=:bar #11="bar")
          (:size 1)
-         (:import-from :foo #\c :bar)
-         (:shadowing-import-from :foo2 "BAZ2" :bar2))
+         (:import-from #12=:foo #13=#\c #14=:bar)
+         (:shadowing-import-from #15=:foo2 #16="BAZ2" #17=:bar2))
     (:defpackage
-     ((:name . 1)                     ((foo))
+      ((:name . 1)                    (((:string-designator
+                                         ()
+                                         :string "FOO" :source #9#)))
       :documentation                  (("bla"))
-      :use                            ((:bar) ("bar"))
-      :shadowing-import-from-packages ((:foo2))
-      :shadowing-import-from-names    ((("BAZ2" :bar2)))
-      :import-from-packages           ((:foo))
-      :import-from-names              (((#\c :bar)))
+      :use                            (((:string-designator
+                                         ()
+                                         :string "BAR" :source #10#))
+                                       ((:string-designator
+                                         ()
+                                         :string "bar" :source #11#)))
+      :shadowing-import-from-packages (((:string-designator
+                                         ()
+                                         :string "FOO2" :source #15#)))
+      :shadowing-import-from-names    ((((:string-designator
+                                          ()
+                                          :string "BAZ2" :source #16#)
+                                         (:string-designator
+                                          ()
+                                          :string "BAR2" :source #17#))))
+      :import-from-packages           (((:string-designator
+                                         ()
+                                         :string "FOO" :source #12#)))
+      :import-from-names              ((((:string-designator
+                                          ()
+                                          :string "c" :source #13#)
+                                         (:string-designator
+                                          ()
+                                          :string "BAR" :source #14#))))
       :size                           ((1)))
      :source #8#))
 
-  '(#9=(defpackage foo
+  '(#18=(defpackage #19=foo
          (:documentation "bla")
-         (:use :bar "bar")
+         (:use #20=:bar #21="bar")
          (:size 1)
-         (:import-from :foo :bar :baz)
-         (:shadowing-import-from :foo2 "BAZ2" :bar2))
+         (:import-from #22=:foo #23=:bar #24=:baz)
+         (:shadowing-import-from #25=:foo2 #26="BAZ2" #27=:bar2))
     (:defpackage
-     ((:name . 1)                     ((foo))
+     ((:name . 1)                     (((:string-designator
+                                         ()
+                                         :string "FOO" :source #19#)))
       :documentation                  (("bla"))
-      :use                            ((:bar) ("bar"))
-      :shadowing-import-from-packages ((:foo2))
-      :shadowing-import-from-names    ((("BAZ2" :bar2)))
-      :import-from-packages           ((:foo))
-      :import-from-names              (((:bar :baz)))
+      :use                            (((:string-designator
+                                         ()
+                                         :string "BAR" :source #20#))
+                                       ((:string-designator
+                                         ()
+                                         :string "bar" :source #21#)))
+      :shadowing-import-from-packages (((:string-designator
+                                         ()
+                                         :string "FOO2" :source #25#)))
+      :shadowing-import-from-names    ((((:string-designator
+                                          ()
+                                          :string "BAZ2" :source #26#)
+                                         (:string-designator
+                                          ()
+                                          :string "BAR2" :source #27#))))
+      :import-from-packages           (((:string-designator
+                                         ()
+                                         :string "FOO" :source #22#)))
+      :import-from-names              ((((:string-designator
+                                          ()
+                                          :string "BAR" :source #23#)
+                                         (:string-designator
+                                          ()
+                                          :string "BAZ" :source #24#))))
       :size                           ((1)))
-     :source #9#)))
+     :source #18#)))
 
 (define-macro-test (in-package)
   '((in-package)          syn:invalid-syntax-error)
   '((in-package 1)        syn:invalid-syntax-error)
   '((in-package foo 1)    syn:invalid-syntax-error)
 
-  '(#4=(in-package foo)   (:in-package ((:name . 1) ((foo)))   :source #4#))
-  '(#5=(in-package "FOO") (:in-package ((:name . 1) (("FOO"))) :source #5#)))
+  '(#4=(in-package #5=foo)
+    (:in-package
+     ((:name . 1) (((:string-designator () :string "FOO" :source #5#))))
+     :source #4#))
+  '(#6=(in-package #7="FOO")
+    (:in-package
+     ((:name . 1) (((:string-designator () :string "FOO" :source #7#))))
+     :source #6#)))
 
 ;;; `handler-{bind,case}' and  `restart-{bind,case}'
 

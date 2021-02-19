@@ -346,7 +346,13 @@
 ;;; `defpackage' and `in-package'
 
 (defrule string-designator ()
-  (guard (typep '(or character string symbol))))
+    (value (source)
+      (or (<- string (:transform (guard character (typep 'character))
+                       (string (eg::%naturalize character))))
+          (<- string (:transform (guard string (typep 'string))
+                       (eg::%naturalize string)))
+          (structure 'symbol (symbol-name string))))
+  (bp:node* (:string-designator :string string :source source)))
 
 (defrule string-designator! ()
   (must (string-designator) "must be a string designator"))
