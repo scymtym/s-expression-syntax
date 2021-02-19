@@ -44,6 +44,8 @@
   (rule-test-cases ((syn::ordinary-lambda-list syn::lambda-lists))
     '(((a))
       :fatal (a) "must be a lambda list variable name")
+    '(((a a))
+      :fatal a "the variable name A occurs more than once")
     '((&optional (foo (declare)))
       :fatal (declare) "declare is not allowed here")
     '((&key (foo (declare)))
@@ -158,7 +160,7 @@
       :fatal (1 2) "must be a single object")
 
     '(((baz fez) (foo bar) &rest foo)
-      :fatal foo "must be a lambda list variable name")
+      :fatal foo "the variable name FOO occurs more than once")
 
     '(#4=(#5=(#6=baz #7=fez) #8=(#9=foo #10=bar) &rest #11=whoop)
       t #4# (:specialized-lambda-list

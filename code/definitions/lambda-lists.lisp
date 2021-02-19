@@ -35,7 +35,7 @@
            (setf (gethash key seen) t)
            name)
           (t
-           (:fail)))))
+           (:fatal (format nil "the variable name ~S occurs more than once" key))))))
 
 (defrule unique-variable-name! (seen)
     (must (unique-variable-name seen) "must be a lambda list variable name"))
