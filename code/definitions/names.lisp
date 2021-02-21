@@ -69,7 +69,7 @@
 
 (defrule class-name ()           ; TODO call this type name?
     (value (source)
-      (and (guard symbolp) (not 'nil) symbol))
+      (and (guard (typep 'symbol)) (not 'nil) symbol))
   (bp:node* (:type-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule class-name! ()
