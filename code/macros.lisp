@@ -25,8 +25,8 @@
                          component-forms)
                    (push `(,cardinality*
                            ,(case cardinality
-                              (1 `(,relation . 1))
-                              (t relation))
+                              ((1 ?) `(,relation . 1))
+                              (t     relation))
                            ,(ecase cardinality
                               (*  `(nreverse ,name))
                               (*> name)

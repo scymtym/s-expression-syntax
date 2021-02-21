@@ -174,25 +174,25 @@
      :source #8#))
   '(#10=(function #11=(lambda #12=()))
     (:function
-     (:lambda (((:lambda-expression
-                 ((:lambda-list . 1) (((:ordinary-lambda-list () :source #12#))))
-                 :source #11#))))
+     ((:lambda . 1) (((:lambda-expression
+                       ((:lambda-list . 1) (((:ordinary-lambda-list () :source #12#))))
+                       :source #11#))))
      :source #10#))
   '(#13=(function #14=(lambda #15=(#16=a &rest #17=b) (foo)))
     (:function
-     (:lambda (((:lambda-expression
-                 ((:lambda-list . 1) (((:ordinary-lambda-list
-                                        (:required (((:required-parameter
-                                                      ((:name . 1) (((:variable-name
-                                                                      ()
-                                                                      :name a :source #16#))))
-                                                      :source #16#)))
-                                         :rest     (((:variable-name
-                                                      ()
-                                                      :name b :source #17#))))
-                                        :source #15#)))
-                  :form              (((foo))))
-                 :source #14#))))
+     ((:lambda . 1) (((:lambda-expression
+                       ((:lambda-list . 1) (((:ordinary-lambda-list
+                                              (:required (((:required-parameter
+                                                            ((:name . 1) (((:variable-name
+                                                                            ()
+                                                                            :name a :source #16#))))
+                                                            :source #16#)))
+                                               :rest     (((:variable-name
+                                                            ()
+                                                            :name b :source #17#))))
+                                              :source #15#)))
+                                           :form              (((foo))))
+                       :source #14#))))
      :source #13#)))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'

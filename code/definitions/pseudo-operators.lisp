@@ -22,7 +22,9 @@
 ;;; cannot be determined syntactically.
 
 (define-syntax variable-reference
-    (<- name (and (guard symbolp) (not (guard keywordp))))
+    (and (guard (typep 'symbol))
+         (not (guard (typep 'keyword)))
+         (<- name ((variable-name/unchecked names))))
   ((name 1)))
 
 ;;; Pseudo-operator "application"

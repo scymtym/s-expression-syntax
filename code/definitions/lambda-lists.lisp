@@ -24,10 +24,13 @@
        ((variable-name names))))
 
 (defrule lambda-list-variable-name! ()
-  (must (lambda-list-variable-name) "must be a lambda list variable name"))
+  (must (and (must (not (lambda-list-keyword))
+                   "must not be a lambda list keyword")
+             ((variable-name! names)))
+        "must be a lambda list variable name"))
 
-(defrule unique-variable-name (seen)
-    (<- name (lambda-list-variable-name))
+(defrule unique-name (seen)
+    name
   (let ((key (getf (bp:node-initargs* name) :name)))
     (cond ((not seen)
            name)
@@ -37,8 +40,13 @@
           (t
            (:fatal (format nil "the variable name ~S occurs more than once" key))))))
 
+(defrule unique-variable-name (seen)
+    (and (lambda-list-variable-name)
+         (:compose ((variable-name/unchecked names)) (unique-name seen))))
+
 (defrule unique-variable-name! (seen)
-    (must (unique-variable-name seen) "must be a lambda list variable name"))
+    (and (lambda-list-variable-name!)
+         (:compose ((variable-name/unchecked names)) (unique-name seen))))
 
 (defrule required-parameter (seen)
     (value (source) (<- name (unique-variable-name seen)))
