@@ -345,6 +345,24 @@
      documentation                     nil
      syn::methods                      ()
      syn::option-names                 ()
+     syn::option-values                ()))
+  '((defgeneric foo (a)
+      (:method :custom 1 "foo" (a)))
+    (syn::name                         foo
+     syn::lambda-list                  ((a) () nil () nil)
+     syn::generic-function-class       nil
+     syn::argument-precedence-order    ()
+     method-combination                ()
+     syn::method-combination-arguments ()
+     syn::method-class                 nil
+     syn::declarations                 ()
+     documentation                     nil
+     syn::methods                      ((syn::qualifiers   (:custom 1 "foo")
+                                         syn::lambda-list  (((a nil)) () nil () nil ())
+                                         documentation     nil
+                                         syn::declarations ()
+                                         syn::forms        ()))
+     syn::option-names                 ()
      syn::option-values                ())))
 
 (define-macro-test (defmethod)
@@ -373,6 +391,13 @@
      syn::documentation nil
      syn::declarations  ()
      syn::forms         ()))
+  '((defmethod foo :custom 1 "foo" ())
+    (syn::name          foo
+     syn::qualifiers    (:custom 1 "foo")
+     syn::lambda-list   (() () nil () nil ())
+     syn::documentation nil
+     syn::declarations  ()
+     syn::forms         ()))
   '((defmethod foo ((x t)))
     (syn::name          foo
      syn::qualifiers    ()
@@ -387,8 +412,7 @@
      syn::lambda-list   (() () nil () nil ())
      syn::documentation "foo"
      syn::declarations  ((ignore nil))
-     syn::forms         (1)))
-  )
+     syn::forms         (1))))
 
 (define-macro-test (defpackage)
   '((defpackage #1=1)

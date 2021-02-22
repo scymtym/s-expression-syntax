@@ -216,9 +216,12 @@
 
 ;;; `defgeneric'
 
+(defrule qualifier ()
+  (not (guard listp)))
+
 (define-syntax method-description
     (must (list* :method
-                 (* (<<- qualifiers (guard (not 'nil) symbolp))) ; TODO repeated in `defmethod'
+                 (* (<<- qualifiers (qualifier)))
                  (<- lambda-list ((specialized-lambda-list! lambda-lists) 'nil))
                  (<- (documentation declarations forms) ((docstring-body forms))))
           "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
@@ -265,7 +268,7 @@
 
 (define-macro defmethod
     (list* (<- name ((function-name! names)))
-           (* (<<- qualifiers (guard (not 'nil) symbolp)))
+           (* (<<- qualifiers (qualifier)))
            (<- lambda-list ((specialized-lambda-list! lambda-lists) 'nil))
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
