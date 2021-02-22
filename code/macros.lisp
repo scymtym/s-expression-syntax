@@ -37,11 +37,13 @@
                       ,@(when documentation
                           `(:documentation ,documentation))))))
 
-(defmacro define-special-operator (name syntax &rest components)
+(defmacro define-special-operator (name-and-options syntax &rest components)
   (check-type syntax (cons (member list list*)))
-  `(define-syntax ,name
-       (,(first syntax) ',name ,@(rest syntax))
-     ,@components))
+  (destructuring-bind (name &key (operator name))
+      (a:ensure-list name-and-options)
+    `(define-syntax ,name
+         (,(first syntax) ',operator ,@(rest syntax))
+       ,@components)))
 
 (defmacro define-macro (name syntax &rest components)
   (check-type syntax (cons (member list list*)))

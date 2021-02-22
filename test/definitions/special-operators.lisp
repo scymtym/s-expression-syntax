@@ -122,38 +122,33 @@
   '((quote quote) (syn::material quote)))
 
 (define-syntax-test (function)
-  '((function)            syn:invalid-syntax-error)
-  '((function 1)          syn:invalid-syntax-error)
-  '((function x y)        syn:invalid-syntax-error)
+  '((function)
+    syn:invalid-syntax-error nil "must be a function name or lambda expression")
+  '((function 1)
+    syn:invalid-syntax-error 1 "must be a function name or lambda expression")
+  '((function . #3=(x y))
+    syn:invalid-syntax-error #3# "nothing may follow function name or lambda expression")
   '((function (lambda 1))
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
 
   '((function foo)
-    (syn::name          foo
-     syn::lambda-list   nil
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ()))
+    (syn::name   foo
+     syn::lambda nil))
   '((function (setf foo))
-    (syn::name          (setf foo)
-     syn::lambda-list   nil
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ()))
+    (syn::name   (setf foo)
+     syn::lambda nil))
+  '((function (lambda ()))
+    (syn::name   nil
+     syn::lambda (syn::lambda-list   (() () nil () nil ())
+                  syn::documentation nil
+                  syn::declarations  ()
+                  syn::forms         ())))
   '((function (lambda (a &rest b) (foo)))
-    (syn::name          nil
-     syn::lambda-list   ((a) nil b nil nil nil)
-     syn::documentation nil
-     syn::declarations  ()
-     syn::forms         ((foo))))
-
-  #+TODO (check-roundtrip-cases 'function
-                         '(function foo)
-                         '(function (setf foo))
-                         '(function (lambda ()))
-                         '(function (lambda (x)))
-                         '(function (lambda (x) x))
-                         '(function (lambda (x) x y))))
+    (syn::name   nil
+     syn::lambda (syn::lambda-list   ((a) () b () nil ())
+                  syn::documentation nil
+                  syn::declarations  ()
+                  syn::forms         ((foo))))))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 
@@ -470,5 +465,8 @@
                         syn::arguments   ()))
   '((foo 1)            (syn::abstraction foo
                         syn::arguments   (1)))
-  '(((lambda (x) x) 1) (syn::abstraction (((x) nil nil nil nil nil) nil nil (x))
+  '(((lambda (x) x) 1) (syn::abstraction (syn::lambda-list   ((x) nil nil nil nil nil)
+                                          syn::documentation nil
+                                          syn::declarations  nil
+                                          syn::forms         (x))
                         syn::arguments   (1))))

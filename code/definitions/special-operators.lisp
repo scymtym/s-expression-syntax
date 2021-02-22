@@ -193,20 +193,21 @@ NIL."))
 
     Return MATERIAL without evaluating it."))
 
-(defrule lambda ()
-    (list* 'lambda
-           (<- lambda-list ((ordinary-lambda-list! lambda-lists) 'nil))
+(define-special-operator (lambda-expression :operator lambda)
+    (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists) 'nil))
            (<- (documentation declarations forms) ((docstring-body forms))))
-  (list lambda-list documentation declarations forms))
-
-(define-special-operator function
-    (list (or (<- name ((function-name names)))
-              (<- (lambda-list documentation declarations forms) (lambda))))
-  ((name          ?  :evaluation nil)
-   (lambda-list   ?  :evaluation nil) ; TODO binding
+  ((lambda-list   1  :evaluation nil) ; TODO binding
    (documentation ?  :evaluation nil)
    (declarations  *> :evaluation nil)
    (forms         *> :evaluation t)))
+
+(define-special-operator function
+    (list* (must (list (or (<- name ((function-name names)))
+                           (must (<- lambda (lambda-expression))
+                                 "must be a function name or lambda expression")))
+                 "nothing may follow function name or lambda expression"))
+  ((name   ? :evaluation nil)
+   (lambda ? :evaluation :compound)))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 ;;;
@@ -446,7 +447,7 @@ NIL."))
 
 (define-syntax application
     (list (<- abstraction (or ((function-name/symbol names))
-                              (must (lambda)
+                              (must (lambda-expression)
                                     "must be a symbol naming a function or a lambda expression")))
           (* (<<- arguments ((form! forms)))))
   ((abstraction 1 :evaluation t)
