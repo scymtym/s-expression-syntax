@@ -390,3 +390,55 @@
    (no-error-lambda-list  ?)
    (no-error-declarations *)
    (no-error-forms        * :evaluation t)))
+
+(defrule restart-binding ()
+    (list (<- name     ((variable-name! names)))
+          (<- function ((form! forms)))
+          (* (or (eg:poption :interactive-function
+                             (<- interactive-function ((form! forms))))
+                 (eg:poption :report-function
+                             (<- report-function ((form! forms))))
+                 (eg:poption :test-function
+                             (<- test-function ((form! forms)))))))
+  (list name function interactive-function report-function test-function))
+
+(defrule restart-binding! ()
+  (must (restart-binding) "must be of the form (NAME FUNCTION [OPTIONS])"))
+
+(define-macro restart-bind
+    (list* (list (* (<<- (names functions
+                          interactive-functions report-functions test-functions)
+                         (restart-binding!))))
+           (<- forms ((forms forms))))
+  (;; Handler bindings
+   (names                 *)
+   (functions             * :evaluation t)
+   (interactive-functions * :evaluation t)
+   (report-functions      * :evaluation t)
+   (test-functions        * :evaluation t)
+   ;; Body forms
+   (forms                 * :evaluation t)))
+
+(defrule restart-clause ()
+    (list* (<- name        ((variable-name! names)))
+           (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
+           (* (or (eg:poption :interactive (<- interactive ((form! forms))))
+                  (eg:poption :report      (<- report ((form! forms))))
+                  (eg:poption :test        (<- test ((form! forms))))))
+           (<- (declarations forms) ((body forms))))
+  (list name lambda-list interactive report test declarations forms))
+
+(define-macro restart-case
+    (list (<- form ((form forms)))
+          (* (<<- (names lambda-lists interactives reports tests declarations forms)
+                  (restart-clause))))
+  (;; Body form
+   (form         1 :evaluation t)
+   ;; Handler clauses
+   (names        *)
+   (lambda-lists *)
+   (interactives *)
+   (reports      *)
+   (tests        *)
+   (declarations *)
+   (forms        *)))

@@ -49,7 +49,7 @@
 
 (defrule body ()
     (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))
-         (<- forms (forms)))
+           (<- forms (forms)))
   (list (nreverse declarations) forms))
 
 (defrule docstring-body ()
