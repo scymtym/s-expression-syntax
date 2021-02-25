@@ -359,7 +359,7 @@
   (must (string-designator) "must be a string designator"))
 
 (defrule package-designator ()
-  (or (string-designator) (guard packagep)))
+  (or (string-designator) (guard (typep 'package))))
 
 (defrule package-designator! ()
   (must (package-designator) "must be a package designator"))
