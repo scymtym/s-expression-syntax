@@ -18,11 +18,22 @@
                (bp:node* (:compound-type-specifier :head )
                  (* :argument )))
 
+(defrule compound-type-specifier ()
+    (value (source)
+      (list (<- name ((class-name names)))
+            (* (<<- arguments (or (type-specifier)
+                                  :any)))))
+  (bp:node* (:compound-type-specifier :source source)
+    (1 :name     name)
+    (* :argument (nreverse arguments))))
+
 (defrule type-specifier ()
     (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
          (must (not 'values) "the symbol VALUES is not a valid type specifier")
          (or (guard (typep 'symbol)) ; TODO control whether * is allowed
-             (list (guard (typep 'symbol)) (* :any)))))
+             (compound-type-specifier)
+             ; (list (guard (typep 'symbol)) (* :any))
+             )))
 
 (defrule type-specifier! ()
     (must (type-specifier) "must be a type specifier"))
