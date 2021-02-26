@@ -681,6 +681,8 @@
     syn:invalid-syntax-error #3# "variable name must be a symbol")
   '((restart-case 1 (foo #4=1))
     syn:invalid-syntax-error #4# "must be an ordinary lambda list")
+  '((restart-case 1 (nil ()))
+    syn:invalid-syntax-error nil "for an unnamed restart, the :REPORT option must be supplied")
   ;; Valid syntax
   '(#5=(restart-case 1)
     (:restart-case (:form ((1))) :source #5#))

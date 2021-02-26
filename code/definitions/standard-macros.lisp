@@ -463,8 +463,8 @@
    (no-error-declarations *)
    (no-error-forms        * :evaluation t)))
 
-(defrule restart-binding ()
-    (list (<- name     ((variable-name! names)))
+(define-syntax restart-binding
+    (list (or 'nil (<- name     ((variable-name! names))))
           (<- function ((form! forms)))
           (* (or (eg:poption :interactive-function
                              (<- interactive-function ((form! forms))))
@@ -472,45 +472,49 @@
                              (<- report-function ((form! forms))))
                  (eg:poption :test-function
                              (<- test-function ((form! forms)))))))
-  (list name function interactive-function report-function test-function))
+  ((name                 1)
+   (function             1 :evaluation t)
+   (interactive-function ? :evaluation t)
+   (report-function      ? :evaluation t)
+   (test-function        ? :evaluation t)))
 
 (defrule restart-binding! ()
   (must (restart-binding) "must be of the form (NAME FUNCTION [OPTIONS])"))
 
 (define-macro restart-bind
-    (list* (list (* (<<- (names functions
-                          interactive-functions report-functions test-functions)
-                         (restart-binding!))))
+    (list* (list (* (<<- bindings (restart-binding!))))
            (<- forms ((forms forms))))
-  (;; Handler bindings
-   (names                 *)
-   (functions             * :evaluation t)
-   (interactive-functions * :evaluation t)
-   (report-functions      * :evaluation t)
-   (test-functions        * :evaluation t)
-   ;; Body forms
-   (forms                 * :evaluation t)))
+  ((bindings * :evaluation :compound)
+   (forms    * :evaluation t)))
 
-(defrule restart-clause ()
-    (list* (<- name        ((variable-name! names)))
+(define-syntax restart-clause
+    (list* (or 'nil (<- name ((variable-name! names))))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (* (or (eg:poption :interactive (<- interactive ((form! forms))))
-                  (eg:poption :report      (<- report ((form! forms))))
-                  (eg:poption :test        (<- test ((form! forms))))))
-           (<- (declarations forms) ((body forms))))
-  (list name lambda-list interactive report test declarations forms))
+           (* (or (eg:poption :interactive (or (<- interactive-name   ((function-name/symbol names)))
+                                               (<- interactive-lambda (lambda-expression))))
+                  (eg:poption :report      (or (<- report-string      (guard (typep 'string)))
+                                               (<- report-name        ((function-name/symbol names)))
+                                               (<- report-lambda      (lambda-expression))))
+                  (eg:poption :test        (or (<- test-name          ((function-name/symbol forms)))
+                                               (<- test-lambda        (lambda-expression))))))
+           (:transform
+            (<- (declarations forms) ((body forms)))
+            (when (not (or name report-string report-name report-lambda))
+              (:fatal "for an unnamed restart, the :REPORT option must be supplied"))))
+  ((name               1)
+   (lambda-list        1)
+   (interactive-name   ?)
+   (interactive-lambda ?)
+   (report-string      ?)
+   (report-name        ?)
+   (report-lambda      ?)
+   (test-name          ?)
+   (test-lambda        ?)
+   (declarations       *>)
+   (forms              *> :evaluation t)))
 
 (define-macro restart-case
     (list (<- form ((form forms)))
-          (* (<<- (names lambda-lists interactives reports tests declarations forms)
-                  (restart-clause))))
-  (;; Body form
-   (form         1 :evaluation t)
-   ;; Handler clauses
-   (names        *)
-   (lambda-lists *)
-   (interactives *)
-   (reports      *)
-   (tests        *)
-   (declarations *)
-   (forms        *)))
+          (* (<<- clauses (restart-clause))))
+  ((form    1 :evaluation t)
+   (clauses * :evaluation :compound)))
