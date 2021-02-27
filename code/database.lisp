@@ -29,31 +29,42 @@
 ;;; `parser-mixin'
 
 (defclass parser-mixin ()
-  ((%rule   :reader   rule
-            :accessor %rule)
-   (%parser :accessor %parser)))
+  ((%rule    :reader    rule
+             :accessor  %rule)
+   (%grammar :reader    grammar
+             :accessor  %grammar
+             :initform  nil)
+   (%parser  :accessor  %parser)))
 
 (defmethod shared-initialize :after ((instance   parser-mixin)
                                      (slot-names t)
-                                     &key
-                                     (rule nil rule-supplied?))
+                                     &key (rule    nil rule-supplied?)
+                                          (grammar nil grammar-supplied?))
   (when rule-supplied?
-    (setf (%rule instance) rule)))
+    (setf (%rule instance) rule))
+  (when grammar-supplied?
+    (setf (%grammar instance) grammar))
+  (when (or rule-supplied? grammar-supplied?)
+    (setf (%parser instance)
+          (compile-parser (%rule instance) (%grammar instance)))))
 
-(defmethod (setf %rule) :after ((new-value t) (syntax parser-mixin))
-  (setf (%parser syntax) (compile-parser new-value)))
-
-(defun compile-parser (rule)
-  (let* ((grammar    (parser.packrat.grammar:find-grammar 'special-operators))
-         (expression (make-instance 'parser.packrat.grammar.base:rule-invocation-expression
-                                    :rule rule))
-         (rule       (compile nil (parser.packrat.compiler:compile-rule
-                                   grammar rule '() expression))))
-    (declare (type function rule))
-    (lambda (form)
-      (let ((context (parser.packrat.grammar::make-context
-                      grammar expression form)))
-        (funcall rule context form)))))
+(defun compile-parser (rule grammar)
+  (destructuring-bind (rule &rest arguments) (a:ensure-list rule)
+    (let* ((grammar    (parser.packrat.grammar:find-grammar (or grammar
+                                                                'special-operators)))
+           (expression (make-instance 'parser.packrat.grammar.base:rule-invocation-expression
+                                      :rule rule
+                                      :arguments (map 'list (lambda (a)
+                                                              (make-instance 'parser.packrat.grammar.base:constant-expression
+                                                                             :value (second a)))
+                                                      arguments)))
+           (rule       (compile nil (parser.packrat.compiler:compile-rule
+                                     grammar rule '() expression))))
+      (declare (type function rule))
+      (lambda (form)
+        (let ((context (parser.packrat.grammar::make-context
+                        grammar expression form)))
+          (funcall rule context form))))))
 
 (defmethod parse ((client t) (syntax parser-mixin) (form t))
   (multiple-value-bind (success? components value)
