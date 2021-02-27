@@ -24,8 +24,7 @@
 (test ordinary-lambda-list
   "Smoke test for the `ordinary-lambda-list' rule."
 
-  (rule-test-cases ((syn::ordinary-lambda-list syn::lambda-lists)
-                    (make-hash-table :test #'eq))
+  (rule-test-cases ((syn::ordinary-lambda-list syn::lambda-lists))
     '((&optional (foo (declare)))
       :fatal (declare) "declare is not allowed here")
     '((&key (foo (declare)))
@@ -52,8 +51,7 @@
 (test specialized-lambda-list
   "Smoke test for the `specialized-lambda-list' rule."
 
-  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists)
-                    (make-hash-table :test #'eq))
+  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists))
     '(((foo 1))
       :fatal 1 "must be a class name")
     '(((foo t 1))
@@ -75,8 +73,7 @@
 (test destructuring-lambda-list
   "Smoke test for the `destructuring-lambda-list' rule."
 
-  (rule-test-cases ((syn::destructuring-lambda-list syn::destructuring-lambda-list)
-                    (make-hash-table :test #'eq))
+  (rule-test-cases ((syn::destructuring-lambda-list syn::destructuring-lambda-list))
     ;; Repeated section
     '((&environment e1 foo bar #1=&environment e2)
       :fatal #1# "&ENVIRONMENT must not be repeated")
@@ -123,8 +120,7 @@
 (test deftype-lambda-list
   "Smoke test for the `deftype-lambda-list' rule."
 
-  (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list)
-                    (make-hash-table :test #'eq))
+  (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list))
     '((foo bar)
       t nil (:destructuring-lambda-list
              nil nil (foo bar) () nil () nil () nil))))

@@ -130,6 +130,8 @@
     syn:invalid-syntax-error #3# "nothing may follow function name or lambda expression")
   '((function (lambda 1))
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
+  '((function (lambda (x #5=x)))
+    syn:invalid-syntax-error #5# "must be a lambda list variable name")
 
   '((function foo)
     (syn::name   foo
@@ -262,7 +264,9 @@
   '((macrolet 1)       syn:invalid-syntax-error)
   '((macrolet ((f)))   syn:invalid-syntax-error)
   '((macrolet ((f 1))) syn:invalid-syntax-error)
-
+  '((macrolet ((f (x #5=x))))
+    syn:invalid-syntax-error #5# "must be a lambda list variable name")
+  ;; Valid syntax
   '((macrolet ())
     (syn::names        ()
      syn::functions    ()
@@ -310,7 +314,9 @@
   '((flet 1)        syn:invalid-syntax-error)
   '((flet ((1 ()))) syn:invalid-syntax-error)
   '((flet ((f 1)))  syn:invalid-syntax-error)
-
+  '((flet ((f (x #5=x))))
+    syn:invalid-syntax-error #5# "must be a lambda list variable name")
+  ;; Valid syntax
   '((flet ())
     (syn::names        ()
      syn::functions    ()
@@ -346,7 +352,9 @@
   '((labels 1)        syn:invalid-syntax-error)
   '((labels ((1 ()))) syn:invalid-syntax-error)
   '((labels ((f 1)))  syn:invalid-syntax-error)
-
+  '((labels ((f (x #5=x))))
+    syn:invalid-syntax-error #5# "must be a lambda list variable name")
+  ;; Valid syntax
   '((labels ())
     (syn::names        ()
      syn::functions    ()
@@ -460,7 +468,9 @@
     syn:invalid-syntax-error 1 "must be a symbol naming a function or a lambda expression")
   '(((lambda 1) 1)
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
-
+  '(((lambda (x #3=x)) 1)
+    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+  ;; Valid syntax
   '((foo)              (syn::abstraction foo
                         syn::arguments   ()))
   '((foo 1)            (syn::abstraction foo

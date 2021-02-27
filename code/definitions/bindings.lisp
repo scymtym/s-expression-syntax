@@ -33,7 +33,7 @@
 
 (defrule local-function ()
     (list* (<- name ((function-name! names)))
-           (<- lambda-list ((ordinary-lambda-list! lambda-lists) 'nil))
+           (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (docstring declarations forms) ((docstring-body forms))))
   (list name (list 'parsed-lambda lambda-list docstring declarations forms)))
 
@@ -49,7 +49,7 @@
 
 (defrule local-macro-function ()
     (list* (<- name ((function-name! names)))
-           (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list) 'nil))
+           (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
            (<- (docstring declarations forms) ((docstring-body forms))))
   (list name (list 'parsed-lambda lambda-list docstring declarations forms)))
 

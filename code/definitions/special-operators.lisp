@@ -194,7 +194,7 @@ NIL."))
     Return MATERIAL without evaluating it."))
 
 (define-special-operator (lambda-expression :operator lambda)
-    (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists) 'nil))
+    (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((lambda-list   1  :evaluation nil) ; TODO binding
    (documentation ?  :evaluation nil)

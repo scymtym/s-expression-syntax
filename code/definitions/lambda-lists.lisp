@@ -101,7 +101,7 @@
 
 ;;; 3.4.1 Ordinary Lambda Lists
 
-(defrule ordinary-lambda-list (seen)
+(defrule %ordinary-lambda-list (seen)
     (list (? (<- required (required-section seen)))
           (? (<- optional (optional-section seen)))
           (? (<- rest (rest-section seen)))
@@ -109,20 +109,28 @@
           (? (<- aux (aux-section seen))))
   (list required optional rest keyword allow-other-keys? aux))
 
-(defrule ordinary-lambda-list! (seen)
-  (must (ordinary-lambda-list seen) "must be an ordinary lambda list"))
+(defrule ordinary-lambda-list ()
+  (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+       (%ordinary-lambda-list seen)))
+
+(defrule ordinary-lambda-list! ()
+  (must (ordinary-lambda-list) "must be an ordinary lambda list"))
 
 ;;; 3.4.2 Generic Function Lambda Lists
 
-(defrule generic-function-lambda-list (seen)
+(defrule %generic-function-lambda-list (seen)
     (list (? (<- required (required-section seen)))
           (? (<- optional (optional-section seen))) ; TODO disallow defaults
           (? (<- rest (rest-section seen)))
           (? (<- (keyword allow-other-keys?) (keyword-section seen)))) ; TODO disallow defaults
   (list required optional rest keyword allow-other-keys?))
 
-(defrule generic-function-lambda-list! (seen)
-  (must (generic-function-lambda-list seen)
+(defrule generic-function-lambda-list ()
+  (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+       (%generic-function-lambda-list seen)))
+
+(defrule generic-function-lambda-list! ()
+  (must (generic-function-lambda-list)
         "must be a generic function lambda list"))
 
 ;;; 3.4.3 Specialized Lambda Lists
@@ -139,7 +147,7 @@
         (<- name (required-parameter! seen)))
   (list name specializer))
 
-(defrule specialized-lambda-list (seen)
+(defrule %specialized-lambda-list (seen)
     (list (* (<<- required (specialized-parameter seen)))
           (? (<- optional (optional-section seen)))
           (? (<- rest (rest-section seen)))
@@ -147,8 +155,12 @@
           (? (<- aux (aux-section seen))))
   (list (nreverse required) optional rest keyword allow-other-keys? aux))
 
-(defrule specialized-lambda-list! (seen)
-  (must (specialized-lambda-list seen)
+(defrule specialized-lambda-list ()
+  (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+       (%specialized-lambda-list seen)))
+
+(defrule specialized-lambda-list! ()
+  (must (specialized-lambda-list )
         "must be a specialized lambda list"))
 
 ;;; 3.4.4 Macro Lambda Lists
@@ -185,7 +197,7 @@
                      (? (<- aux                     (aux-section seen))))))
   (list :pattern whole required optional rest key allow-other-keys? aux cdr))
 
-(defrule destructuring-lambda-list (seen)
+(defrule %destructuring-lambda-list (seen)
     (list* (? (<- whole    (whole-section seen)))
            (? (<- env      #1=(eg:once (environment-section seen)
                                        :flag env? :name &environment)))
@@ -202,8 +214,12 @@
                      (? (<- env                     #1#)))))
   (list :destructuring-lambda-list whole env required optional rest key allow-other-keys? aux cdr))
 
-(defrule destructuring-lambda-list! (seen)
-  (must (destructuring-lambda-list seen)
+(defrule destructuring-lambda-list ()
+  (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+       (%destructuring-lambda-list seen)))
+
+(defrule destructuring-lambda-list! ()
+  (must (destructuring-lambda-list)
         "must be a destructuring lambda list"))
 
 ;;; 3.4.8 Deftype Lambda Lists
@@ -219,8 +235,12 @@
 
 (parser:in-grammar deftype-lambda-list)
 
-(defrule deftype-lambda-list (seen)
-  ((destructuring-lambda-list destructuring-lambda-list) seen))
+(defrule %deftype-lambda-list (seen)
+  ((%destructuring-lambda-list destructuring-lambda-list) seen))
 
-(defrule deftype-lambda-list! (seen)
-  (must (deftype-lambda-list seen) "must be a DEFTYPE lambda list"))
+(defrule deftype-lambda-list ()
+  (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+       (%deftype-lambda-list seen)))
+
+(defrule deftype-lambda-list! ()
+  (must (deftype-lambda-list) "must be a DEFTYPE lambda list"))
