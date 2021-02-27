@@ -307,7 +307,7 @@ NIL."))
                                                :namespace 'function
                                                :scope     :lexical
                                                :values    'functions))
-   (functions    *> :evaluation nil)
+   (functions    *> :evaluation :compound)
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t)))
 
@@ -319,7 +319,7 @@ NIL."))
                                                :scope     :lexical
                                                :order     :parallel
                                                :values    'functions))
-   (functions    *> :evaluation nil)
+   (functions    *> :evaluation :compound)
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t)))
 
@@ -331,7 +331,7 @@ NIL."))
                                                :scope     :lexical
                                                :order     :recursive
                                                :values    'functions))
-   (functions    *> :evaluation nil)
+   (functions    *> :evaluation :compound)
    (declarations *> :evaluation nil)
    (forms        *> :evaluation t)))
 
