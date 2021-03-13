@@ -209,6 +209,12 @@ NIL."))
   ((name   ? :evaluation nil)
    (lambda ? :evaluation :compound)))
 
+;;; This handles the `lambda' macro by accepting a `lambda-expression'
+;;; and wrapping it in an AST node of kind `:lambda'.
+(define-syntax (lambda)
+    (<- lambda (lambda-expression))
+  ((lambda 1 :evaluation :compound)))
+
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 ;;;
 ;;; Lexically scoped bindings of values declarations.
