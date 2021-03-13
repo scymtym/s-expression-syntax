@@ -405,6 +405,17 @@ NIL."))
     form is exited (either due to normal completion or a non-local
     exit such as THROW)."))
 
+;;; `destructuring-bind'
+
+(define-special-operator destructuring-bind
+    (list* (<- lambda-list        ((destructuring-lambda-list! destructuring-lambda-list)))
+           (<- expression         ((form! forms)))
+           (<- (declaration form) ((body forms))))
+  ((lambda-list 1  :evaluation :compound)
+   (expression  1  :evaluation t)
+   (declaration *>)
+   (form        *> :evaluation t)))
+
 ;;; Special operators for multiple values
 
 (define-special-operator multiple-value-bind

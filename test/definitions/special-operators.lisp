@@ -596,6 +596,30 @@
                                           :cleanup         ((3) (4)))
                                          :source #5#)))
 
+;;; `destructuring-bind'
+
+(define-syntax-test (destructuring-bind)
+  '((destructuring-bind) syn:invalid-syntax-error)
+  '((destructuring-bind #2=1)
+    syn:invalid-syntax-error #2# "must be a destructuring lambda list")
+  '((destructuring-bind ())
+    syn:invalid-syntax-error)
+
+  '(#4=(destructuring-bind #5=(#6=a) #7=b)
+    (:destructuring-bind
+     ((:lambda-list . 1) (((:destructuring-lambda-list
+                            (:required (((:required-parameter
+                                          ((:name . 1) (((:variable-name
+                                                          ()
+                                                          :name #6# :source #6#)
+                                                         :evaluation nil)))
+                                          :source #6#)
+                                         :evaluation :compound)))
+                            :source #5#)
+                           :evaluation :compound))
+      (:expression . 1)  ((b :evaluation t)))
+     :source #4#)))
+
 ;;; Special operators for multiple values
 
 (define-syntax-test (multiple-value-call)
