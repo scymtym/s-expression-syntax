@@ -7,9 +7,12 @@
 (cl:in-package #:s-expression-syntax)
 
 (defmacro define-syntax (name-and-options syntax components &rest options)
-  (destructuring-bind (name &key grammar arguments) (a:ensure-list name-and-options)
-    (let ((kind            (a:make-keyword name))
-          (documentation   (second (find :documentation options :key #'first)))
+  (destructuring-bind (name &key (grammar (parser.packrat.grammar:name
+                                           parser.packrat::*grammar*))
+                                 arguments
+                                 (kind    (a:make-keyword name)))
+      (a:ensure-list name-and-options)
+    (let ((documentation   (second (find :documentation options :key #'first)))
           (component-forms '())
           (relations       '()))
       (map nil (lambda (component)
@@ -29,22 +32,19 @@
                                 ((1 ?) `(,relation . 1))
                                 (t     relation))
                              ,(ecase cardinality
-                                (*  `(nreverse ,name))
-                                (*> name)
-                                (?  (if nil ; (not evaluation)
-                                        `(when ,name
-                                           (bp:node* (:uninterpreted :expression (eg::%naturalize ,name)
-                                                                     :source     ,name)))
-                                        name))
-                                (1  (if nil ; (not evaluation)
-                                        `(bp:node* (:uninterpreted :expression (eg::%naturalize ,name)
-                                                                   :source     ,name))
-                                        name))))
+                                (*     `(nreverse ,name))
+                                (*>    name)
+                                ((1 ?) name))
+                             :evaluation ',(case cardinality
+                                             ((1 ?) evaluation)
+                                             (t     (a:make-circular-list
+                                                     1 :initial-element evaluation))))
                            relations))))
            components)
       (a:with-unique-names (source)
         `(progn
-           (parser.packrat:defrule (,name :grammar ,(or grammar 'special-operators)) (,@(map 'list #'first arguments))
+           (parser.packrat:defrule (,name :grammar ,grammar)
+               (,@(map 'list #'first arguments))
                (value (,source) ,syntax)
              (bp:node* (,kind :source ,source)
                ,@(nreverse relations)))
@@ -53,8 +53,7 @@
                           :rule       ,(if arguments
                                            `'(,name ,@arguments)
                                            `',name)
-                          ,@(when grammar
-                              `(:grammar ',grammar))
+                          :grammar    ',grammar
                           ,@(when documentation
                               `(:documentation ,documentation))))))))
 
