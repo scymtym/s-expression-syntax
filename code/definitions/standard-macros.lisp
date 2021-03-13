@@ -197,10 +197,10 @@
                         (<<- option-values)))))
   ((name              1)
    (superclasses      *>)
-   (slots             *)
+   (slots             *  :evaluation :compound)
    ;; Standard options
    (default-initargs  *)
-   (default-initforms * :evaluation t)
+   (default-initforms *  :evaluation t)
    (metaclass         ?)
    (documentation     ?)
    ;; Non-standard options
@@ -233,10 +233,13 @@
    (type          ?)
    (documentation ?)))
 
-(defrule condition-report ()
-    (or (guard (typep 'string))
-        ((function-name/symbol names))
-        (lambda-expression)))
+(define-syntax condition-report
+    (or (<- string   (guard (typep 'string)))
+        (<- function ((function-name/symbol names)))
+        (<- lambda   (lambda-expression)))
+  ((string   ?)
+   (function ?)
+   (lambda   ? :evaluation :compound)))
 
 (defrule condition-report! ()
   (must (condition-report)
@@ -259,7 +262,7 @@
    (default-initargs  *)
    (default-initforms *  :evaluation t)
    (documentation     ?)
-   (report            ?  :evaluation :depends))) ; TODO report is not quite evaluated
+   (report            ?  :evaluation :compound)))
 
 ;;; `deftype'
 
