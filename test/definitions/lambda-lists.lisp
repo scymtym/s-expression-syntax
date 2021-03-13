@@ -53,6 +53,18 @@
     '((&aux (foo (declare)))
       :fatal (declare) "declare is not allowed here")
 
+    '(#1=(&optional #2=a #3=b)
+      t nil (:ordinary-lambda-list
+             (:optional (((:optional-parameter
+                           ((:name . 1) (((:variable-name () :name b :source #2#))))
+                           :source #2#)
+                          :evalution :compound)
+                         ((:optional-parameter
+                           ((:name . 1) (((:variable-name () :name b :source #3#))))
+                           :source #3#)
+                          :evaluation :compound)))
+             :source #1#))
+
     '(#4=(&aux #5=a)
       t nil (:ordinary-lambda-list
              (:aux (((:aux-parameter

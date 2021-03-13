@@ -41,7 +41,7 @@
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
-   (lambda-list   1)
+   (lambda-list   1  :evaluation :compound)
    (documentation ?)
    (declarations  *>)
    (forms         *> :evaluation t)))
@@ -53,7 +53,7 @@
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list))) ; TODO macro lambda list
            (<- (documentation declarations forms) ((docstring-body forms))))
   ((name          1)
-   (lambda-list   1)
+   (lambda-list   1  :evaluation :compound)
    (documentation ?)
    (declarations  *>)
    (forms         *> :evaluation t)))
@@ -255,11 +255,11 @@
                  (eg:option :report           (<- report (condition-report!))))))
   ((name              1)
    (parent-types      *>)
-   (slots             *)
+   (slots             *  :evaluation :compound)
    (default-initargs  *)
-   (default-initforms * :evaluation t)
+   (default-initforms *  :evaluation t)
    (documentation     ?)
-   (report            ? :evaluation :depends))) ; TODO report is not quite evaluated
+   (report            ?  :evaluation :depends))) ; TODO report is not quite evaluated
 
 ;;; `deftype'
 
@@ -285,7 +285,7 @@
                  (<- (documentation declarations forms) ((docstring-body forms))))
           "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
   ((qualifiers    *)
-   (lambda-list   1)
+   (lambda-list   1  :evaluation :compound)
    (documentation ?)
    (declarations  *>)
    (forms         *> :evaluation t)))
@@ -316,7 +316,7 @@
                  (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
                         (<<- option-values)))))
   ((name                         1)
-   (lambda-list                  1)
+   (lambda-list                  1 :evaluation :compound)
    ;; Standard options
    (generic-function-class       ?)
    (argument-precedence-order    ?)
@@ -325,7 +325,7 @@
    (method-class                 ?)
    (declarations                 *)
    (documentation                ?)
-   (methods                      *)
+   (methods                      * :evaluation :compound)
    ;; Other options
    (option-names                 *)
    (option-values                *)))

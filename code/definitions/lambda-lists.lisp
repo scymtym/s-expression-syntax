@@ -287,8 +287,7 @@
              (%destructuring-lambda-list seen)))
   ((whole             ?)
    (env               ?)
-   (required          * :evaluation nil ; :compound
-                      )
+   (required          * :evaluation :compound)
    (optional          * :evaluation :compound)
    (rest              ? :evaluation :compound)
    (keyword           * :evaluation :compound)
