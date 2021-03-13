@@ -36,7 +36,7 @@ NIL."))
 ;;; Special operators `block', `return-from', `return', `tagbody' and `go'
 
 (defrule block-name ()
-    (guard name symbolp)
+    (guard name (typep 'symbol))
   name)
 
 (defrule block-name! ()
