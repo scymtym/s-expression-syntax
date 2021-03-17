@@ -419,21 +419,20 @@
 
 ;;; `handler-{bind,case}' and  `restart-{bind,case}'
 
-(defrule handler-binding ()
-  (list (<- type    ((type-specifier! type-specifiers)))
-        (<- handler ((form! forms)))))
+(define-syntax handler-binding
+    (list (<- type ((type-specifier! type-specifiers)))
+          (<- form ((form! forms))))
+  ((type 1)
+   (form 1 :evaluation t)))
 
 (defrule handler-binding! ()
   (must (handler-binding) "must be of the form (TYPE HANDLER-FORM)"))
 
 (define-macro handler-bind
-    (list* (list (* (<<- (types handler-forms) (handler-binding!))))
+    (list* (list (* (<<- bindings (handler-binding!))))
            (<- forms (forms)))
-  (;; Handler bindings
-   (types         *)
-   (handler-forms *  :evaluation t)
-   ;; Body forms
-   (forms         *> :evaluation t)))
+  ((bindings *  :evaluation :compound)
+   (forms    *> :evaluation t)))
 
 (defrule handler-clause ()
     (list* (<- type ((type-specifier! type-specifiers)))
