@@ -13,6 +13,16 @@
 
 (parser.packrat:in-grammar meta-grammar)
 
+;;;
+
+(parser.packrat:defrule loop-keyword (context)
+  (:compose (:transform
+                (list 'loop-keyword (* (<<- names (guard (typep 'string)))))
+              `(structure 'symbol (symbol-name ,(if (a:length= names 1)
+                                                    (first names)
+                                                    `(or ,@names)))))
+            (base::expression context)))
+
 ;;; Once
 ;;;
 ;;; Make sure an expression (or one expression in a group of
@@ -91,7 +101,9 @@
    (base::expression context)))
 
 (parser.packrat:defrule base::expression (context)
-  (or (once context)
+  (or (loop-keyword context)
+
+      (once context)
 
       (option context)  (option* context)
       (poption context) (poption* context)
