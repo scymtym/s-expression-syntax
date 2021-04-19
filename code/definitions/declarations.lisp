@@ -25,19 +25,27 @@
                 (* (<<- arguments (bound-declaration-reference!))))
 
           (list (<- kind 'special)
-                (* (<<- arguments (variable-name!))))
+                (* (<<- arguments ((variable-name! names)))))
 
-          (list (<- kind (or 'type 'ftype))
-                (must (<<- arguments (type-specifier!)) "must be a type specifier")
-                (* (<<- arguments (variable-name!))))
+          (list (<- kind 'type)
+                (<<- arguments ((type-specifier! type-specifiers)))
+                (* (<<- arguments ((variable-name! names)))))
+
+          (list (<- kind 'ftype)
+                (<<- arguments ((function-type-specifier! type-specifiers)))
+                (* (<<- arguments ((function-name! names)))))
+
+          (list (<- kind (or 'inline 'notinline))
+                (* (<<- arguments ((function-name! names)))))
 
           (list (<- kind 'optimize)
                 (* (<<- arguments (optimization-specification!))))
 
-          (list* (must (guard kind symbolp) "declaration kind must be a symbol")
+          (list* (must (guard kind (typep 'symbol)) "declaration kind must be a symbol")
                  (<- arguments (declaration-arguments)))))
-  (bp:node* (:declaration :kind kind :source source)
-    (* :argument (nreverse arguments))))
+  (let ((kind (eg::%naturalize kind)))
+    (bp:node* (:declaration :kind kind :source source)
+      (* :argument (nreverse arguments)))))
 
 (defrule declaration! ()
     (must (declaration) "must be a declaration"))
