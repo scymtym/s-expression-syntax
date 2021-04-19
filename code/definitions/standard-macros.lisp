@@ -74,14 +74,17 @@
    (type      ?)))
 
 (defrule structure-constructor (other-constructors)
-    (eg:option* :constructor
-                (? (or 'nil ; NAME remains `nil'
-                       (seq (<- name ((function-name/symbol! names)))
-                            (? (<- lambda-list ((ordinary-lambda-list! lambda-lists)))))))) ; TODO boa-lambda-list
+    (value (source)
+      (eg:option* :constructor
+                  (? (or 'nil   ; NAME remains `nil'
+                         (seq (<- name ((function-name/symbol! names)))
+                              (? (<- lambda-list ((ordinary-lambda-list! lambda-lists))))))))) ; TODO boa-lambda-list
   (let ((names (list* name (map 'list #'first other-constructors))))
     (when (and (not (= (length names) 1)) (member nil names))
       (:fatal "(:constructor nil) and named constructors are mutually exclusive")))
-  (list name lambda-list))
+  (bp:node* (:structure-constuctor :source source)
+    (1    :name        name)
+    (bp:? :lambda-list lambda-list :evaluation :compound)))
 
 (macrolet ((define-function-option (name option &optional (symbol? t))
              `(defrule ,name ()
@@ -131,11 +134,11 @@
           (? (<- documentation ((documentation-string forms))))
           (* (<<- slots (slot-description))))
   ((name          1)
-   (constructors  *>)
+   (constructors  *> :evaluation :compound)
    (include       ?)
    (include-slots *>)
    (documentation ?)
-   (slots         *)))
+   (slots         *  :evaluation :compound)))
 
 ;;; `defclass' and `define-condition' including slots
 
@@ -158,7 +161,7 @@
                      (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
                      (eg:poption  :allocation    (<- allocation    (allocation-type!)))
-                     (eg:poption* :initarg       (<<- initargs     (must (guard symbolp)
+                     (eg:poption* :initarg       (<<- initargs     (must (guard (typep 'symbol))
                                                                          "initarg must be a symbol")))
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
@@ -186,7 +189,7 @@
           (* (or ;; Standard options have their respective syntax.
                  (eg:option :default-initargs
                             (* (and :any
-                               (must (seq (<<- default-initargs  (guard symbolp))
+                               (must (seq (<<- default-initargs  (guard (typep 'symbol)))
                                           (<<- default-initforms ((form! forms))))
                                      "default initarg must be a symbol followed by an expression"))))
                  (eg:option :metaclass     (must (<- metaclass ((class-name names)))
@@ -217,7 +220,7 @@
                      (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
                      (eg:poption  :allocation    (<- allocation    (must (allocation-type))))
-                     (eg:poption* :initarg       (<<- initargs     (must (guard symbolp)
+                     (eg:poption* :initarg       (<<- initargs     (must (guard (typep 'symbol))
                                                                          "initarg must be a symbol")))
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
@@ -251,7 +254,7 @@
           (list (* (<<- slots (condition-slot-specifier))))
           (* (or (eg:option :default-initargs
                             (* (and :any
-                                    (must (seq (<<- default-initargs  (guard symbolp))
+                                    (must (seq (<<- default-initargs  (guard (typep 'symbol)))
                                                (<<- default-initforms ((form! forms))))
                                           "default initarg must be a symbol followed by an expression"))))
                  (eg:option :documentation    (<- documentation ((documentation-string! forms))))
@@ -307,7 +310,7 @@
                                 (:fatal (format nil "~S must be the set of required parameters ~S"
                                                 names required)))
                               (nreverse names)))))
-                 (eg:option  :method-combination        (<- method-combination (must (guard symbolp)
+                 (eg:option  :method-combination        (<- method-combination (must (guard (typep 'symbol))
                                                                                      "method combination name must be a symbol"))
                              (* (<<- method-combination-arguments)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
@@ -316,7 +319,7 @@
                  (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
                  (<<- methods (method-description))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
+                 (list* (<<- option-names (must (guard (typep 'symbol)) "option name must be a symbol"))
                         (<<- option-values)))))
   ((name                         1)
    (lambda-list                  1 :evaluation :compound)
@@ -499,10 +502,9 @@
                                                (<- report-lambda      (lambda-expression))))
                   (eg:poption :test        (or (<- test-name          ((function-name/symbol forms)))
                                                (<- test-lambda        (lambda-expression))))))
-           (:transform
-            (<- (declarations forms) ((body forms)))
-            (when (not (or name report-string report-name report-lambda))
-              (:fatal "for an unnamed restart, the :REPORT option must be supplied"))))
+           (:transform (<- (declarations forms) ((body forms)))
+             (when (not (or name report-string report-name report-lambda))
+               (:fatal "for an unnamed restart, the :REPORT option must be supplied"))))
   ((name               1)
    (lambda-list        1)
    (interactive-name   ?)
