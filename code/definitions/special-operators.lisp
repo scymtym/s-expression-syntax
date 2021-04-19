@@ -362,7 +362,7 @@ NIL."))
                         "must be a variable name followed by an expression"))))
   ((names       * :evaluation nil       ; :type symbol :access :write
                 )
-   (value-forms *))
+   (value-forms * :evaluation t))
   (:documentation
    "SETQ {var form}*
 
