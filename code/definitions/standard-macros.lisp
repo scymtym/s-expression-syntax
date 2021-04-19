@@ -520,3 +520,61 @@
           (* (<<- clauses (restart-clause))))
   ((form    1 :evaluation t)
    (clauses * :evaluation :compound)))
+
+;;; `[ec]case' and `cond'
+
+(define-syntax case-normal-clause
+    (list (or (list (* (<<- keys))) (<<- keys))
+          (* (<<- forms ((form! forms)))))
+  ((keys  *)
+   (forms * :evaluation t)))
+
+(define-syntax case-otherwise-clause
+    (list (or 'otherwise 't) (* (<<- forms ((form! forms)))))
+  ((forms * :evaluation t)))
+
+(define-macro case
+    (list (<- keyform ((form! forms)))
+          (* (guard ; HACK guard forces the value context
+              (<<- clauses
+                   (or (eg:once (case-otherwise-clause)
+                                :flag otherwise? :name "otherwise clause")
+                       (:transform (<- clause (case-normal-clause))
+                         (when otherwise?
+                           (:fatal "normal clause cannot follow otherwise clause"))
+                         clause)
+                       (:transform :any
+                         (:fatal "must be a clause of one of the forms (KEY FORM*), (otherwise FORM*) or (t FORM*)"))))
+              (typep 't))))
+  ((keyform 1 :evaluation t)
+   (clauses * :evaluation :compound)))
+
+(define-macro ccase
+    (list (<- keyform ((form! forms)))
+          (* (guard ; HACK
+              (<<- clauses (must (case-normal-clause)
+                                 "must be a clause of the form (KEY FORM*)"))
+              (typep 't))))
+  ((keyform 1 :evaluation t)
+   (clauses * :evaluation :compound)))
+
+(define-macro ecase
+    (list (<- keyform ((form! forms)))
+          (* (guard ; HACK
+              (<<- clauses (must (case-normal-clause)
+                                 "must be a clause of the form (KEY FORM*)"))
+              (typep 't))))
+  ((keyform 1 :evaluation t)
+   (clauses * :evaluation :compound)))
+
+(define-syntax cond-clause
+    (list* (<- test-form ((form! forms))) (<- forms ((forms forms))))
+  ((test-form 1  :evaluation t)
+   (forms     *> :evaluation t)))
+
+(defrule cond-clause! ()
+  (must (cond-clause) "must be a clause of the form (TEST-FORM FORM*)"))
+
+(define-macro cond
+    (list (* (<<- clauses (cond-clause!))))
+  ((clauses * :evaluation :compound)))
