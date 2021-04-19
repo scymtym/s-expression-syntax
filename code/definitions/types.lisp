@@ -13,11 +13,6 @@
 
 ;;; General type specifier syntax
 
-#+TODO-maybe (parser:defrule compound-type-specifier ()
-                 (list (guard symbolp) (* :any))
-               (bp:node* (:compound-type-specifier :head )
-                 (* :argument )))
-
 (defrule compound-type-specifier ()
     (value (source)
       (list (<- name ((class-name names)))
@@ -27,18 +22,17 @@
     (1 :name     name)
     (* :argument (nreverse arguments))))
 
-(defrule type-specifier ()
-    (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
-         (must (not 'values) "the symbol VALUES is not a valid type specifier")
-         (or (guard (typep 'symbol)) ; TODO control whether * is allowed
-             (compound-type-specifier)
-             ; (list (guard (typep 'symbol)) (* :any))
-             )))
+(defrule atomic-type-specifier ()
+    (value (source)
+      (guard name (typep 'symbol))) ; TODO control whether * is allowed, use class-name or type-name from names grammar
+  (bp:node* (:atomic-type-specifier :source source)
+    (1 :name (bp:node* (:type-name :name name :source source)))))
 
-(defrule type-specifier! ()
-    (must (type-specifier) "must be a type specifier"))
+;;; Well-known compound specifiers
 
-;;; `values' type specifier
+(defrule wildcard-type-specifer ()
+    (value (source) '*)
+  (bp:node* (:wildcard-type-specifier :source source)))
 
 ;; TODO The symbol * may not be among the value-types.
 (defrule values-type-specifier ()
@@ -52,3 +46,30 @@
           (? (seq '&rest (<- rest (type-specifier!))))
           (? (<- allow-other-keys? '&allow-other-keys)))
   (list required optional rest allow-other-keys?))
+
+(defrule function-type-specifier ()
+    (value (source)
+      (or 'function
+          (list 'function
+                (? (<- arguments '()))
+                (? (<- values (or (wildcard-type-specifer)
+                                  (values-type-specifier)))))))
+  (bp:node* (:function-type-specifier :source source)
+    (1 :values values)))
+
+(defrule function-type-specifier! ()
+  (must (function-type-specifier) "must be a function type specifier"))
+
+;;;
+
+(defrule type-specifier ()
+  (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
+       (must (not 'values) "the symbol VALUES is not a valid type specifier")
+       (or (atomic-type-specifier)
+           (function-type-specifier)
+           (compound-type-specifier)
+           ;; (list (guard (typep 'symbol)) (* :any))
+           )))
+
+(defrule type-specifier! ()
+    (must (type-specifier) "must be a type specifier"))
