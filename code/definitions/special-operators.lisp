@@ -273,7 +273,7 @@ NIL."))
 
 (define-special-operator locally
     (list* (<- (declarations forms) ((body forms))))
-  ((declarations *> :evaluation t)
+  ((declarations *> :evaluation nil)
    (forms        *> :evaluation t))
   (:documentation
    "LOCALLY declaration* form*
