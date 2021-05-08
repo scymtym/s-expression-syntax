@@ -12,12 +12,7 @@
 
 (define-special-operator progn
     (list* (<- form ((forms forms))))
-  ((form *> :evaluation t))
-  (:documentation
-   "PROGN form*
-
-    Evaluates each FORM in order, returning the values of the last
-    form. With no forms, returns NIL."))
+  ((form *> :evaluation t)))
 
 (define-special-operator if
     (list (<- test ((form! forms)))
@@ -25,13 +20,7 @@
           (? (<- else ((form! forms)))))
   ((test 1 :evaluation t)
    (then 1 :evaluation t)
-   (else ? :evaluation t))
-  (:documentation
-   "IF test then [else]
-
-If TEST evaluates to true, evaluate THEN and return its values,
-otherwise evaluate ELSE and return its values. ELSE defaults to
-NIL."))
+   (else ? :evaluation t)))
 
 ;;; Special operators `block', `return-from', `return', `tagbody' and `go'
 
@@ -48,24 +37,14 @@ NIL."))
                                         :namespace 'block
                                         :scope     :lexical
                                         :values    nil))
-   (forms *> :evaluation t))
-  (:documentation
-   "BLOCK name form*
-
-    Evaluate the FORMS as a PROGN. Within the lexical scope of the
-    body, RETURN-FROM can be used to exit the form."))
+   (forms *> :evaluation t)))
 
 (define-special-operator return-from
     (list (<- name (block-name!)) (? (<- value ((form! forms)))))
   ((name  1 :evaluation (make-instance 'reference-semantics
                                        :namespace 'block))
    (value ? :evaluation t)) ; TODO value-form? result?
-  (:documentation
-   "RETURN-FROM block-name value-form
-
-    Evaluate the VALUE-FORM, returning its values from the lexically
-    enclosing block BLOCK-NAME. This is constrained to be used only
-    within the dynamic extent of the block."))
+  )
 
 (define-special-operator return
     (list (? (<- value ((form! forms)))))
@@ -113,34 +92,11 @@ NIL."))
                                                :scope     :lexical
                                                :order     :parallel
                                                :values    nil)
-   (segments * :evaluation t))
-  (:documentation
-   "TAGBODY {tag | statement}*
-
-    Define tags for use with GO. The STATEMENTS are evaluated in
-    order, skipping TAGS, and NIL is returned. If a statement contains
-    a GO to a defined TAG within the lexical scope of the form, then
-    control is transferred to the next statement following that tag. A
-    TAG must be an integer or a symbol. A STATEMENT must be a
-    list. Other objects are illegal within the body.")
-  #+no (:unparser
-        ;; Temporarily prepend a NIL tag for ease of implementation.
-        (rest (mapcan (lambda (tag segment)
-                        `(,tag ,@(if (typep segment '(cons (eql progn)))
-                                     (rest segment)
-                                     (list segment))))
-                      (list* nil (component :tags))
-                      (component :segments)))))
+   (segments * :evaluation t)))
 
 (define-special-operator go
     (list (<- tag (tag)))
-  ((tag 1 :evaluation nil))
-  (:documentation
-   "GO tag
-
-    Transfer control to the named TAG in the lexically enclosing
-    TAGBODY. This is constrained to be used only within the dynamic
-    extent of the TAGBODY."))
+  ((tag 1 :evaluation nil)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
@@ -164,34 +120,16 @@ NIL."))
                 "must be a list of situations")
           (* (<<- forms ((form! forms)))))
   ((situations * :evaluation nil)
-   (forms      * :evaluation t))
-  (:documentation
-   "EVAL-WHEN (situation*) form*
-
-    Evaluate the FORMS in the specified SITUATIONS (any of
-    :COMPILE-TOPLEVEL, :LOAD-TOPLEVEL, or :EXECUTE, or (deprecated)
-    COMPILE, LOAD, or EVAL)."))
+   (forms      * :evaluation t)))
 
 (define-special-operator load-time-value
     (list (<- form ((form! forms))) (? (guard read-only-p (typep 'boolean))))
   ((form        1 :evaluation t)
-   (read-only-p ? :evaluation nil))
-  (:documentation
-   "LOAD-TIME-VALUE form [read-only-p]
-
-    Arrange for FORM to be evaluated at load-time and use the value
-    produced as if it were a constant.
-
-    If READ-ONLY-P is non-NIL, then the resultant object is guaranteed
-    to never be modified, so it can be put in read-only storage."))
+   (read-only-p ? :evaluation nil)))
 
 (define-special-operator quote
     (list material)
-  ((material 1 :evaluation nil))
-  (:documentation
-   "QUOTE material
-
-    Return MATERIAL without evaluating it."))
+  ((material 1 :evaluation nil)))
 
 (define-special-operator (lambda-expression :operator lambda)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
@@ -228,13 +166,7 @@ NIL."))
                                                :values    'values))
    (expansions   *> :evaluation nil)
    (declarations *> :evaluation nil)
-   (forms        *> :evaluation t))
-  (:documentation
-   "SYMBOL-MACROLET ({(name expansion)}*) decl* form*
-
-    Define the NAMES as symbol macros with the given
-    EXPANSIONS. Within the body, references to a NAME will effectively
-    be replaced with the EXPANSION."))
+   (forms        *> :evaluation t)))
 
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
     (list* (<- (names values) (value-bindings!))
@@ -246,13 +178,7 @@ NIL."))
                                                :values    'values))
    (values       *> :evaluation t)
    (declarations *> :evaluation nil)
-   (forms        *> :evaluation t))
-  (:documentation
-   "LET ({(var [value]) | var}*) declaration* form*
-
-    During evaluation of the FORMS, bind the VARS to the result of
-    evaluating the VALUE forms. The variables are bound in parallel
-    after all of the VALUES forms have been evaluated."))
+   (forms        *> :evaluation t)))
 
 (define-special-operator let*
     (list* (<- (names values) (value-bindings!))
@@ -264,23 +190,12 @@ NIL."))
                                                :values    'values))
    (values       *> :evaluation t)
    (declarations *> :evaluation nil)
-   (forms        *> :evaluation t))
-  (:documentation
-   "LET* ({(var [value]) | var}*) declaration* form*
-
-    Similar to LET, but the variables are bound sequentially, allowing
-    each VALUE form to reference any of the previous VARS."))
+   (forms        *> :evaluation t)))
 
 (define-special-operator locally
     (list* (<- (declarations forms) ((body forms))))
   ((declarations *> :evaluation nil)
-   (forms        *> :evaluation t))
-  (:documentation
-   "LOCALLY declaration* form*
-
-    Sequentially evaluate the FORMS in a lexical environment where the
-    DECLARATIONS have effect. If LOCALLY is a top level form, then the
-    FORMS are also processed as top level forms."))
+   (forms        *> :evaluation t)))
 
 (define-special-operator progv
     (list* (<- symbols ((form! forms))) (<- values ((form! forms)))
@@ -291,16 +206,7 @@ NIL."))
                                                :values    'values))
    (values       1  :evaluation t)
    (declarations 1  :evaluation nil)
-   (forms        *> :evaluation t))
-  (:documentation
-   "PROGV symbols values form*
-
-    Evaluate SYMBOLS producing a list of symbols and VALUES producing
-    a list of values, then dynamically bind the symbols to the values
-    while evaluating FORMS. Excess values produced by VALUES are
-    discarded, excess symbols produced SYMBOLS are made unbound. All
-    bindings \(including making variables unbound) are undone on exit
-    from the PROGV form."))
+   (forms        *> :evaluation t)))
 
 ;;; Special operators `macrolet', `flet' and `labels'
 ;;;
@@ -362,54 +268,24 @@ NIL."))
                         "must be a variable name followed by an expression"))))
   ((names       * :evaluation nil       ; :type symbol :access :write
                 )
-   (value-forms * :evaluation t))
-  (:documentation
-   "SETQ {var form}*
-
-    Assign the value of each FORM to the variable name by the
-    preceding VAR.")
-  #+no (:unparser
-   (nconc (mapcan #'list (component :names) (component :value-forms)))))
+   (value-forms * :evaluation t)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
 
 (define-special-operator throw
     (list (<- tag-form ((form! forms))) (<- result-form ((form! forms))))
   ((tag-form    1 :evaluation t)
-   (result-form 1 :evaluation t))
-  (:documentation
-   "THROW tag result-form
-
-    Do a non-local exit, return the values of RESULT-FORM from the
-    CATCH whose tag is EQ to TAG."))
+   (result-form 1 :evaluation t)))
 
 (define-special-operator catch
     (list* (<- tag-form ((form! forms))) (<- forms ((forms forms))))
-  ((tag-form  1  :evaluation t #+no (make-instance 'binding-semantics
-                                           :namespace 'tag
-                                           :scope     'lexical
-                                           :values    nil))
-   (forms     *> :evaluation t))
-  (:documentation
-   "CATCH tag form*
-
-    Evaluate TAG and instantiate it as a catcher while the body forms
-    are evaluated in an implicit PROGN. If a THROW is done to TAG
-    within the dynamic scope of the body, then control will be
-    transferred to the end of the body and the thrown values will be
-    returned."))
+  ((tag-form 1  :evaluation t)
+   (forms    *> :evaluation t)))
 
 (define-special-operator unwind-protect
     (list* (<- protected ((form! forms))) (<- cleanup ((forms forms))))
   ((protected 1  :evaluation t)
-   (cleanup   *> :evaluation t))
-  (:documentation
-   "UNWIND-PROTECT protected cleanup*
-
-    Evaluate the form PROTECTED, returning its values. The CLEANUP
-    forms are evaluated whenever the dynamic scope of the PROTECTED
-    form is exited (either due to normal completion or a non-local
-    exit such as THROW)."))
+   (cleanup   *> :evaluation t)))
 
 ;;; `destructuring-bind'
 
@@ -437,20 +313,9 @@ NIL."))
 (define-special-operator multiple-value-call
     (list* (<- function-form ((form! forms))) (<- arguments ((forms forms))))
   ((function-form 1  :evaluation t)
-   (arguments     *> :evaluation t))
-  (:documentation
-   "MULTIPLE-VALUE-CALL function-form values-form*
-
-    Call FUNCTION-FORM, passing all the values of each VALUES-FORM as
-    arguments, values from the first VALUES-FORM making up the first
-    argument, etc."))
+   (arguments     *> :evaluation t)))
 
 (define-special-operator multiple-value-prog1
     (list* (<- values-form ((form! forms))) (<- forms ((forms forms))))
   ((values-form 1  :evaluation t)
-   (forms       *> :evaluation t))
-  (:documentation
-   "MULTIPLE-VALUE-PROG1 values-form form*
-
-    Evaluate VALUES-FORM and then the FORMS, but return all the values
-    of VALUES-FORM."))
+   (forms       *> :evaluation t)))
