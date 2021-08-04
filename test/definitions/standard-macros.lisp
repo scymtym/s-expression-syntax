@@ -260,6 +260,7 @@
     '((foo :initform (declare))                   :fatal 1          "declare is not allowed here")
     '((foo :type 1)                               :fatal 1          "must be a type specifier")
     '((foo :documentation 1)                      :fatal 1          "must be a documentation string")
+    '((foo 1)                                     :fatal 1          "option name must be a symbol")
     ;; Repeated options
     '((foo :allocation :class :allocation :class) :fatal :class     ":ALLOCATION option must not be repeated")
     '((foo :initform 1 :initform 1)               :fatal 1          ":INITFORM option must not be repeated")

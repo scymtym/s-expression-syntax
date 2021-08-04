@@ -167,7 +167,7 @@
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
-                     (seq (<<- option-name (guard symbolp))
+                     (seq (<<- option-name  (and :any (must (guard (typep 'symbol)) "option name must be a symbol")))
                           (<<- option-value)))))
         (<- name ((slot-name! names))))
   ((name          1)
@@ -198,7 +198,7 @@
                                                  "metaclass must be a class name"))
                  (eg:option :documentation (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-name (must (guard symbolp) "option name must be a symbol"))
+                 (list* (<<- option-name (must (guard (typep 'symbol)) "option name must be a symbol"))
                         (<<- option-value)))))
   ((name             1)
    (superclass       *>)
