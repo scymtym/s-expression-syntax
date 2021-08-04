@@ -19,7 +19,7 @@
     (list (* (<<- arguments)))
   arguments #+later (bp:node* (:declaration-arguments :arguments arguments)))
 
-(defrule declaration ()
+(defrule declaration () ; TODO rename to declaration-specifier
     (value (source)
       (or (list (<- kind (or 'ignore 'ignorable 'dynamic-extent))
                 (* (<<- arguments (bound-declaration-reference!))))
@@ -41,7 +41,10 @@
           (list (<- kind 'optimize)
                 (* (<<- arguments (optimization-specification!))))
 
-          (list* (must (guard kind (typep 'symbol)) "declaration kind must be a symbol")
+          (list (<- kind 'declaration)
+                (* (<<- arguments ((declaration-identifier! names)))))
+
+          (list* (<- kind ((declaration-identifier! names)))
                  (<- arguments (declaration-arguments)))))
   (let ((kind (eg::%naturalize kind)))
     (bp:node* (:declaration :kind kind :source source)

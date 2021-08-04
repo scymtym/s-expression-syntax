@@ -81,6 +81,16 @@
 (defrule slot-name! ()
   (must (slot-name) "slot name must be a symbol that is a valid variable name"))
 
+;;; Declaration identifier
+
+(defrule declaration-identifier ()
+    (value (source)
+      (guard name (typep 'symbol)))
+  (bp:node* (:declaration-identifier :name (eg::%naturalize name) :source source)))
+
+(defrule declaration-identifier! ()
+  (must (declaration-identifier) "declaration identifier must be a symbol"))
+
 ;;; A symbol that is the keyword of a keyword parameter
 ;;;
 ;;; Doesn't fit here super well, but is used in multiple other
@@ -96,7 +106,7 @@
 
 ;;; References
 
-(defrule function-reference ()
+(defrule function-reference () ; TODO does this make sense
     (list 'function (<- name (function-name!)))
   name)
 
