@@ -29,6 +29,54 @@
 
   + Feature expressions
 
+* STARTED Concepts
+
+  Explaining things in more detail requires a little bit of
+  terminology:
+
+  + Expression :: A data structure which /conceptually/
+       consists of atoms and conses (possibly meant for evaluation in
+       which case the expression is a /form/). In contrast to the
+       usual definition, expressions processed by this library may be
+       represented as arbitrary objects which are interpreted as atoms
+       and conses according to rules defined by the client using the
+       library. That said, processing expressions using the usual
+       interpretation of atoms and conses is of course supported.
+
+  + Syntax Description :: An object which describes the syntax of one
+       kind of /expression/. For example, there is a syntax
+       description for the special operator ~cl:let~ which describes
+       (the infinite set) of well-formed ~let~ /expressions/. Besides
+       recognizing well-formed /expressions/ of a certain kind, a
+       /syntax description/ also contains descriptions of the /parts/
+       that can appear within well-formed /expressions/ of that
+       kind. For example, for ~cl:let~, the /parts/ are variable names,
+       initial value forms, declarations and body forms.
+
+       More precisely, a /syntax description/ consists of a name, a
+       list of /parts/ and a parser which consumes /expressions/
+       conforming to the described syntax and produces a parse result.
+
+  + Part :: An object which describes a sub-structure of
+       the syntax described by a particular /syntax description/. For
+       example, the /syntax description/ for ~cl:let~ has a /part/ for
+       declaration /expressions/ contained in ~let~ /expressions/.
+
+       More precisely, a /part/ consists of a name, a cardinality,
+       which is either one, zero-or-one, one-or-more or zero-or-more,
+       and an evaluation which is roughly "evaluated", "not evaluated"
+       or "composed of evaluated and non-evaluated /parts/".
+
+       For example, ~cl:defun~ has the following /parts/
+
+       | Name                 | Cardinality  | Evaluation                                      |
+       |----------------------+--------------+-------------------------------------------------|
+       | name                 | one          | not evaluated                                   |
+       | lambda-list          | one          | composed of evaluated and non-evaluated /parts/ |
+       | documentation string | zero-or-one  | not evaluated                                   |
+       | declaration          | zero-or-more | not evaluated                                   |
+       | body forms           | zero-or-more | evaluated                                       |
+
 * STARTED Tutorial
 
   #+BEGIN_SRC lisp :exports both :results output
