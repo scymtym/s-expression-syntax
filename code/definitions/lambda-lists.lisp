@@ -77,16 +77,8 @@
 (defrule rest-parameter (seen)
     (unique-variable-name! seen))
 
-(defrule parameter-keyword ()
-    (value (source)
-      (guard keyword (typep 'symbol)))
-  (bp:node* (:keyword :name (eg::%naturalize keyword) :source source)))
-
-(defrule parameter-keyword! ()
-  (must (parameter-keyword) "must be a symbol"))
-
 (define-syntax (keyword-parameter :arguments ((seen nil)))
-    (or (list (or (list (<- keyword (parameter-keyword!))
+    (or (list (or (list (<- keyword ((parameter-keyword! names)))
                         (<- name (unique-variable-name! seen)))
                   (<- name (unique-variable-name! seen)))
               (? (seq (<- default ((form! forms)))

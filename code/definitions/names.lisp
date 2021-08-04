@@ -81,6 +81,19 @@
 (defrule slot-name! ()
   (must (slot-name) "slot name must be a symbol that is a valid variable name"))
 
+;;; A symbol that is the keyword of a keyword parameter
+;;;
+;;; Doesn't fit here super well, but is used in multiple other
+;;; grammars.
+
+(defrule parameter-keyword ()
+    (value (source)
+      (guard keyword (typep 'symbol)))
+  (bp:node* (:keyword :name (eg::%naturalize keyword) :source source)))
+
+(defrule parameter-keyword! ()
+  (must (parameter-keyword) "must be a symbol"))
+
 ;;; References
 
 (defrule function-reference ()
