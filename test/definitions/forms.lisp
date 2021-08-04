@@ -18,44 +18,53 @@
     '((1 2)                t      nil (() (1 2)))
     ;; Invalid declarations
     '(((declare 1))        :fatal nil "must be a declaration")
-    '(((declare ()))       :fatal nil "declaration kind must be a symbol")
+    '(((declare ()))       :fatal nil "must be a declaration")
+    '(((declare (1)))      :fatal nil "declaration identifier must be a symbol")
     '(((declare (type 1))) :fatal nil "must be a type specifier")
     ;; Valid declarations
     '(((declare #7=(ignore #8=a)))
       t nil (((:declaration
-               (:argument (((:variable-name () :name a :source #8#))))
+               ((:argument . *) (((:variable-name () :name a :source #8#))))
                :kind ignore :source #7#))
              ()))
-    '(((declare #9=(type bit)))
-      t nil (((:declaration (:argument ((bit))) :kind type :source #9#))
-             ()))
-    '(((declare #10=(type bit #11=a)))
+    '(((declare #9=(type #10=bit)))
       t nil (((:declaration
-               (:argument ((bit)
-                           ((:variable-name () :name a :source #11#))))
-               :kind type :source #10#))
+               ((:argument . *) (((:atomic-type-specifier
+                                   ((:name . 1) (((:type-name () :name bit :source #10#))))
+                                   :source #10#))))
+               :kind type :source #9#))
              ()))
-    '(((declare #12=(type bit #13=a #14=b)))
+    '(((declare #11=(type #12=bit #13=a)))
       t nil (((:declaration
-               (:argument ((bit)
-                           ((:variable-name () :name a :source #13#))
-                           ((:variable-name () :name b :source #14#))))
-               :kind type :source #12#))
+               ((:argument . *) (((:atomic-type-specifier
+                                   ((:name . 1) (((:type-name () :name bit :source #12#))))
+                                   :source #12#))
+                                 ((:variable-name () :name a :source #13#))))
+               :kind type :source #11#))
+             ()))
+    '(((declare #14=(type #15=bit #16=a #17=b)))
+      t nil (((:declaration
+               ((:argument . *) (((:atomic-type-specifier
+                                   ((:name . 1) (((:type-name () :name bit :source #15#))))
+                                   :source #15#))
+                                 ((:variable-name () :name a :source #16#))
+                                 ((:variable-name () :name b :source #17#))))
+               :kind type :source #14#))
              ()))
     ;; Multiple declarations
-    '(((declare #15=(ignore #16=a)) (declare #17=(ignore #18=b)))
+    '(((declare #18=(ignore #19=a)) (declare #20=(ignore #21=b)))
       t nil (((:declaration
-               (:argument (((:variable-name () :name a :source #16#))))
-               :kind ignore :source #15#)
+               ((:argument . *) (((:variable-name () :name a :source #19#))))
+               :kind ignore :source #18#)
               (:declaration
-               (:argument (((:variable-name () :name b :source #18#))))
-               :kind ignore :source #17#))
+               ((:argument . *) (((:variable-name () :name b :source #21#))))
+               :kind ignore :source #20#))
              ()))
     ;; Declarations and forms
-    '(((declare #19=(ignore #20=a)) 3 4)
+    '(((declare #22=(ignore #23=a)) 3 4)
       t nil (((:declaration
-               (:argument (((:variable-name () :name a :source #20#))))
-               :kind ignore :source #19#))
+               ((:argument . *) (((:variable-name () :name a :source #23#))))
+               :kind ignore :source #22#))
              (3 4)))))
 
 (test docstring-body
@@ -70,19 +79,19 @@
     '(#3=((declare #4=(ignore #5=a)))
       t #3# (nil
              ((:declaration
-               (:argument (((:variable-name () :name a :source #5#))))
+               ((:argument . *) (((:variable-name () :name a :source #5#))))
                :kind ignore :source #4#))
              ()))
     '(#6=((declare #7=(ignore #8=a)) "foo")
       t #6# (nil
              ((:declaration
-               (:argument (((:variable-name () :name a :source #8#))))
+               ((:argument . *) (((:variable-name () :name a :source #8#))))
                :kind ignore :source #7#))
              ("foo")))
     '(#9=("foo" (declare #10=(ignore #11=a)))
       t nil ("foo"
              ((:declaration
-               (:argument (((:variable-name () :name a :source #11#))))
+               ((:argument . *) (((:variable-name () :name a :source #11#))))
                :kind ignore :source #10#))
                                              ()))
     ;; Forms and docstrings

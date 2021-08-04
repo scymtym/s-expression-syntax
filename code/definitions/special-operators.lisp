@@ -32,12 +32,12 @@
     (must (block-name) "block name must be a symbol"))
 
 (define-special-operator block
-    (list* (<- name (block-name!)) (<- forms ((forms forms))))
-  ((name  1  :evaluation (make-instance 'binding-semantics
-                                        :namespace 'block
-                                        :scope     :lexical
-                                        :values    nil))
-   (forms *> :evaluation t)))
+    (list* (<- name (block-name!)) (<- form ((forms forms))))
+  ((name 1  :evaluation (make-instance 'binding-semantics
+                                       :namespace 'block
+                                       :scope     :lexical
+                                       :values    nil))
+   (form *> :evaluation t)))
 
 (define-special-operator return-from
     (list (<- name (block-name!)) (? (<- value ((form! forms)))))
@@ -74,10 +74,10 @@
 ;;; TODO make a rule for parsing segments
 (define-special-operator tagbody
     (list (* (seq (* (<<- forms (and (not (tag)) ((form! forms)))))
-                  (* (<<- tags 'foo)) ; HACK to bind tags
-                  (or (<<- segments
+                  (* (<<- tag 'foo)) ; HACK to bind tags
+                  (or (<<- segment
                            (:transform
-                              (<<- tags (new-tag! tags))
+                              (<<- tag (new-tag! tag))
                             (prog1
                                 (nreverse forms)
                               (print forms *trace-output*)
@@ -85,14 +85,14 @@
                       (:transform
                          (seq)
                        (unless forms (:fail))
-                       (push (nreverse forms) segments)
+                       (push (nreverse forms) segment)
                        (setf forms '()))))))
-  ((tags     * :evaluation nil) #+later (make-instance 'binding-semantics
+  ((tag     * :evaluation nil) #+later (make-instance 'binding-semantics
                                                :namespace 'tag
                                                :scope     :lexical
                                                :order     :parallel
                                                :values    nil)
-   (segments * :evaluation t)))
+   (segment * :evaluation t)))
 
 (define-special-operator go
     (list (<- tag (tag)))
@@ -116,11 +116,11 @@
                                         +eval-when-situations+)))
 
 (define-special-operator eval-when
-    (list (must (list (* (<<- situations (eval-when-situation!))))
+    (list (must (list (* (<<- situation (eval-when-situation!))))
                 "must be a list of situations")
-          (* (<<- forms ((form! forms)))))
-  ((situations * :evaluation nil)
-   (forms      * :evaluation t)))
+          (* (<<- form ((form! forms)))))
+  ((situation * :evaluation nil)
+   (form      * :evaluation t)))
 
 (define-special-operator load-time-value
     (list (<- form ((form! forms))) (? (guard read-only-p (typep 'boolean))))
@@ -158,100 +158,97 @@
 ;;; Lexically scoped bindings of values declarations.
 
 (define-special-operator symbol-macrolet
-    (list* (<- (names expansions) (symbol-macro-bindings))
-           (<- (declarations forms) ((body forms))))
-  ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace :symbol-macro
-                                               :scope     :lexical
-                                               :values    'values))
-   (expansions   *> :evaluation nil)
-   (declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+    (list* (<- (name expansion) (symbol-macro-bindings))
+           (<- (declaration form) ((body forms))))
+  ((name        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace :symbol-macro
+                                              :scope     :lexical
+                                              :values    'values))
+   (expansion   *> :evaluation nil)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
-    (list* (<- (names values) (value-bindings!))
-           (<- (declarations forms) ((body forms))))
-  ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace 'variable
-                                               :scope     :lexical
-                                               :order     :parallel
-                                               :values    'values))
-   (values       *> :evaluation t)
-   (declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+    (list* (<- (name value) (value-bindings!))
+           (<- (declaration form) ((body forms))))
+  ((name        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :order     :parallel
+                                              :values    'values))
+   (value       *> :evaluation t)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 (define-special-operator let*
-    (list* (<- (names values) (value-bindings!))
-           (<- (declarations forms) ((body forms))))
-  ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace 'variable
-                                               :scope     :lexical
-                                               :order     :sequential
-                                               :values    'values))
-   (values       *> :evaluation t)
-   (declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+    (list* (<- (name value) (value-bindings!))
+           (<- (declaration form) ((body forms))))
+  ((name        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :order     :sequential
+                                              :values    'values))
+   (value       *> :evaluation t)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 (define-special-operator locally
-    (list* (<- (declarations forms) ((body forms))))
-  ((declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+    (list* (<- (declaration form) ((body forms))))
+  ((declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 (define-special-operator progv
     (list* (<- symbols ((form! forms))) (<- values ((form! forms)))
-           (<- (declarations forms) ((body forms))))
-  ((symbols      1  :evaluation (make-instance 'binding-semantics
-                                               :namespace 'variable
-                                               :scope     :dynamic
-                                               :values    'values))
-   (values       1  :evaluation t)
-   (declarations 1  :evaluation nil)
-   (forms        *> :evaluation t)))
+           (<- (declaration form) ((body forms))))
+  ((symbols     1  :evaluation t)
+   (values      1  :evaluation t)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 ;;; Special operators `macrolet', `flet' and `labels'
 ;;;
 ;;; Lexically scope bindings of function-ish things.
 
 (define-special-operator macrolet
-    (list* (<- (names functions) (macro-function-bindings))
-           (<- (declarations forms) ((body forms))))
-  ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace 'function
-                                               :scope     :lexical
-                                               :values    'functions))
-   (functions    *> :evaluation :compound)
-   (declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+    (list* (<- (name function) (macro-function-bindings))
+           (<- (declaration form) ((body forms))))
+  ((name        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace 'function
+                                              :scope     :lexical
+                                              :values    'functions))
+   (function    *> :evaluation :compound)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 (define-special-operator flet
-    (list* (<- (names functions) (function-bindings))
-           (<- (declarations forms) ((body forms))))
-  ((names        *> :evaluation (make-instance 'binding-semantics
-                                               :namespace 'function
-                                               :scope     :lexical
-                                               :order     :parallel
-                                               :values    'functions))
-   (functions    *> :evaluation :compound)
-   (declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+    (list* (<- (name function) (function-bindings))
+           (<- (declaration form) ((body forms))))
+  ((name        *> :evaluation (make-instance 'binding-semantics
+                                              :namespace 'function
+                                              :scope     :lexical
+                                              :order     :parallel
+                                              :values    'functions))
+   (function    *> :evaluation :compound)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 (define-special-operator labels
-    (list* (<- (names functions) (function-bindings))
-           (<- (declarations forms) ((body forms))))
-  ((names        *> :evaluation (make-instance 'binding-semantics
+    (list* (<- (name function) (function-bindings))
+           (<- (declaration form) ((body forms))))
+  ((name        *> :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
                                                :scope     :lexical
                                                :order     :recursive
                                                :values    'functions))
-   (functions    *> :evaluation :compound)
-   (declarations *> :evaluation nil)
-   (forms        *> :evaluation t)))
+   (function    *> :evaluation :compound)
+   (declaration *> :evaluation nil)
+   (form        *> :evaluation t)))
 
 ;;; Special operators `declaim' and `the'
 
 (define-special-operator declaim
-    (list (* (<<- declarations (declaration!)))) ; TODO only free declarations
-  ((declarations *> :evaluation nil)))
+    (list (* (<<- declaration (declaration!)))) ; TODO only free declarations
+  ((declaration *> :evaluation nil)))
 
 (define-special-operator the
     (list (<- type ((type-specifier! type-specifiers)))
@@ -263,12 +260,12 @@
 
 (define-special-operator setq
     (list (* (and :any
-                  (must (seq (<<- names       (variable-name))
-                             (<<- value-forms ((form! forms))))
+                  (must (seq (<<- name       (variable-name))
+                             (<<- value-form ((form! forms))))
                         "must be a variable name followed by an expression"))))
-  ((names       * :evaluation nil       ; :type symbol :access :write
+  ((name       * :evaluation nil       ; :type symbol :access :write
                 )
-   (value-forms * :evaluation t)))
+   (value-form * :evaluation t)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
 
@@ -278,9 +275,9 @@
    (result-form 1 :evaluation t)))
 
 (define-special-operator catch
-    (list* (<- tag-form ((form! forms))) (<- forms ((forms forms))))
+    (list* (<- tag-form ((form! forms))) (<- form ((forms forms))))
   ((tag-form 1  :evaluation t)
-   (forms    *> :evaluation t)))
+   (form     *> :evaluation t)))
 
 (define-special-operator unwind-protect
     (list* (<- protected ((form! forms))) (<- cleanup ((forms forms))))
@@ -311,11 +308,11 @@
    (forms        *> :evaluation t)))
 
 (define-special-operator multiple-value-call
-    (list* (<- function-form ((form! forms))) (<- arguments ((forms forms))))
+    (list* (<- function-form ((form! forms))) (<- argument ((forms forms))))
   ((function-form 1  :evaluation t)
-   (arguments     *> :evaluation t)))
+   (argument      *> :evaluation t)))
 
 (define-special-operator multiple-value-prog1
-    (list* (<- values-form ((form! forms))) (<- forms ((forms forms))))
+    (list* (<- values-form ((form! forms))) (<- form ((forms forms))))
   ((values-form 1  :evaluation t)
-   (forms       *> :evaluation t)))
+   (form        *> :evaluation t)))

@@ -26,9 +26,9 @@
          (bar 1)
          "bla")
     (:defconstant
-     ((:name . 1)          (((:variable-name () :name foo :source #6#)))
-      (:initial-value . 1) (((bar 1)))
-      :documentation       (("bla")))
+     ((:name          . 1) (((:variable-name () :name foo :source #6#)))
+      (:initial-value . 1) (((bar 1) :evaluation t))
+      (:documentation . 1) (("bla")))
      :source #5#)))
 
 (define-macro-test (defvar)
@@ -45,9 +45,9 @@
          (bar 1)
          "bla")
     (:defvar
-     ((:name . 1)    (((:variable-name () :name foo :source #8#)))
-      :initial-value (((bar 1)))
-      :documentation (("bla")))
+     ((:name          . 1) (((:variable-name () :name foo :source #8#)))
+      (:initial-value . 1) (((bar 1) :evaluation t))
+      (:documentation . 1) (("bla")))
      :source #7#)))
 
 (define-macro-test (defparameter)
@@ -61,9 +61,9 @@
          (bar 1)
          "bla")
     (:defparameter
-     ((:name . 1)          (((:variable-name () :name foo :source #7#)))
-      (:initial-value . 1) (((bar 1)))
-      :documentation       (("bla")))
+     ((:name          . 1) (((:variable-name () :name foo :source #7#)))
+      (:initial-value . 1) (((bar 1) :evaluation t))
+      (:documentation . 1) (("bla")))
      :source #6#)))
 
 (define-macro-test (defun)
@@ -72,7 +72,7 @@
   '((defun foo 1)
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
   '((defun foo (x #3=x))
-    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+    syn:invalid-syntax-error #3# "the variable name X occurs more than once")
   #+TODO '((defun foo ((a b)))
            syn:invalid-syntax-error) ; this should fail but doesn't because of the way grammars use each other
   '((defun foo () (declare 1))
@@ -80,29 +80,36 @@
   ;; Valid syntax
   '(#6=(defun #7=foo #8=(#9=bar #10=baz)
          "bla"
-         (declare #11=(type integer #12=bar #13=baz))
+         (declare #11=(type #12=integer #13=bar #14=baz))
          (+ 1 2))
     (:defun
-     ((:name . 1)        (((:function-name () :name foo :source #7#)))
-      (:lambda-list . 1) (((:ordinary-lambda-list
-                            (:required (((:required-parameter
-                                          ((:name . 1) (((:variable-name
-                                                          ()
-                                                          :name bar :source #9#))))
-                                          :source #9#))
-                                        ((:required-parameter
-                                          ((:name . 1) (((:variable-name
-                                                          ()
-                                                          :name baz :source #10#))))
-                                          :source #10#))))
-                            :source #8#)))
-      :documentation     (("bla"))
-      :declarations      (((:declaration
-                            (:argument ((integer)
-                                        ((:variable-name () :name bar :source #12#))
-                                        ((:variable-name () :name baz :source #13#))))
-                            :kind type :source #11#)))
-      :forms             (((+ 1 2))))
+     ((:name          . 1) (((:function-name () :name foo :source #7#)))
+      (:lambda-list   . 1) (((:ordinary-lambda-list
+                              ((:required . *) (((:required-parameter
+                                                  ((:name . 1) (((:variable-name
+                                                                  ()
+                                                                  :name bar :source #9#)
+                                                                 :evaluation nil)))
+                                                  :source #9#))
+                                                ((:required-parameter
+                                                  ((:name . 1) (((:variable-name
+                                                                  ()
+                                                                  :name baz :source #10#)
+                                                                 :evaluation nil)))
+                                                  :source #10#))))
+                              :source #8#)
+                             :evaluation :compound))
+      (:documentation . 1)     (("bla"))
+      (:declaration   . *) (((:declaration
+                              ((:argument . *) (((:atomic-type-specifier
+                                                  ((:name . 1) (((:type-name
+                                                                  ()
+                                                                  :name integer :source #12#))))
+                                                  :source #12#))
+                                                ((:variable-name () :name bar :source #13#))
+                                                ((:variable-name () :name baz :source #14#))))
+                              :kind type :source #11#)))
+      (:form          . *) (((+ 1 2) :evaluation t)))
      :source #6#)))
 
 (define-macro-test (defmacro)
@@ -111,31 +118,36 @@
   '((defmacro foo 1)
     syn:invalid-syntax-error 1 "must be a destructuring lambda list")
   '((defmacro foo (x (y #4=x)))
-    syn:invalid-syntax-error #4# "must be a lambda list variable name")
+    syn:invalid-syntax-error #4# "the variable name X occurs more than once")
   ;; Valid syntax
   `(#5=(defmacro #6=foo #7=(#8=a #9=b)
          "bla"
          (declare #10=(ignore #11=a))
          (list 'cons b b))
     (:defmacro
-     ((:name . 1)        (((:function-name () :name foo :source #6#)))
-      (:lambda-list . 1) (((:destructuring-lambda-list
-                            (:required (((:required-parameter
-                                          ((:name . 1) (((:variable-name
-                                                          ()
-                                                          :name a :source #8#))))
-                                          :source #8#))
-                                        ((:required-parameter
-                                          ((:name . 1) (((:variable-name
-                                                          ()
-                                                          :name b :source #9#))))
-                                          :source #9#))))
-                            :source #7#)))
-      :documentation     (("bla"))
-      :declarations      (((:declaration
-                            (:argument (((:variable-name () :name a :source #11#))))
-                            :kind ignore :source #10#)))
-      :forms             (((list 'cons b b))))
+     ((:name          . 1) (((:function-name () :name foo :source #6#)))
+      (:lambda-list   . 1) (((:destructuring-lambda-list
+                              ((:required . *) (((:required-parameter
+                                                  ((:name . 1) (((:variable-name
+                                                                  ()
+                                                                  :name a :source #8#)
+                                                                 :evaluation nil)))
+                                                  :source #8#)
+                                                 :evaluation :compound)
+                                                ((:required-parameter
+                                                  ((:name . 1) (((:variable-name
+                                                                  ()
+                                                                  :name b :source #9#)
+                                                                 :evaluation nil)))
+                                                  :source #9#)
+                                                 :evaluation :compound)))
+                              :source #7#)
+                             :evaluation :compound))
+      (:documentation . 1) (("bla"))
+      (:declaration   . *) (((:declaration
+                              ((:argument . *) (((:variable-name () :name a :source #11#))))
+                              :kind ignore :source #10#)))
+      (:form          . *) (((list 'cons b b) :evaluation t)))
      :source #5#)))
 
 ;;; `defstruct' including slots
@@ -157,12 +169,14 @@
     (:slot-description
      ((:name . 1) (((:variable-name () :name foo :source #6#))))
      :source #6#))
-  '(#7=(#8=foo 1 :type bit :read-only t)
+  '(#7=(#8=foo 1 :type #9=bit :read-only t)
     (:slot-description
-     ((:name . 1) (((:variable-name () :name foo :source #8#)))
-      :initform   ((1))
-      :read-only  ((t))
-      :type       ((bit)))
+     ((:name      . 1) (((:variable-name () :name foo :source #8#)))
+      (:initform  . 1) ((1 :evaluation t))
+      (:read-only . 1) ((t))
+      (:type      . 1) (((:atomic-type-specifier
+                          ((:name . 1) (((:type-name () :name bit :source #9#))))
+                          :source #9#))))
      :source #7#)))
 
 (define-macro-test (defstruct)
@@ -173,7 +187,7 @@
   '((defstruct (foo (:constructor foo #3=1)))
     syn:invalid-syntax-error #3# "must be an ordinary lambda list")
   '((defstruct (foo (:constructor foo (x #4=x))))
-    syn:invalid-syntax-error #4# "must be a lambda list variable name")
+    syn:invalid-syntax-error #4# "the variable name X occurs more than once")
   '((defstruct (foo (:constructor nil) #5=(:constructor bar)))
     syn:invalid-syntax-error #5# "(:constructor nil) and named constructors are mutually exclusive")
   '((defstruct (foo (:constructor . #6=(foo () 1))))
@@ -194,32 +208,39 @@
     (:defstruct
      ((:name . 1) (((:type-name () :name foo :source #13#))))
      :source #12#))
-  '(#14=(defstruct (#15=foo (:constructor nil)))
+  '(#14=(defstruct (#15=foo #24=(:constructor nil)))
     (:defstruct
-     ((:name . 1)   (((:type-name () :name foo :source #15#)))
-      :constructors (((nil nil))))
+     ((:name        . 1) (((:type-name () :name foo :source #15#)))
+      (:constructor . *) (((:structure-constructor () :source #24#)
+                           :evaluation :compound)))
      :source #14#))
-  '(#16=(defstruct (#17=foo (:constructor #18=foo #19=(#20=a #21=b))))
+  '(#16=(defstruct (#17=foo #25=(:constructor #18=foo #19=(#20=a #21=b))))
     (:defstruct
-     ((:name . 1)   (((:type-name () :name foo :source #17#)))
-      :constructors ((((:function-name () :name foo :source #18#)
-                       (:ordinary-lambda-list
-                        (:required (((:required-parameter
-                                      ((:name . 1) (((:variable-name
-                                                      ()
-                                                      :name a :source #20#))))
-                                      :source #20#))
-                                    ((:required-parameter
-                                      ((:name . 1) (((:variable-name
-                                                      ()
-                                                      :name b :source #21#))))
-                                      :source #21#))))
-                        :source #19#)))))
+     ((:name        . 1) (((:type-name () :name foo :source #17#)))
+      (:constructor . *) (((:structure-constructor
+                            ((:name        . 1) (((:function-name () :name foo :source #18#)))
+                             (:lambda-list . 1) (((:ordinary-lambda-list
+                                                   ((:required . *) (((:required-parameter
+                                                                       ((:name . 1) (((:variable-name
+                                                                                       ()
+                                                                                       :name a :source #20#)
+                                                                                      :evaluation nil)))
+                                                                       :source #20#))
+                                                                     ((:required-parameter
+                                                                       ((:name . 1) (((:variable-name
+                                                                                       ()
+                                                                                       :name b :source #21#)
+                                                                                      :evaluation nil)))
+                                                                       :source #21#))))
+                                                   :source #19#)
+                                                  :evaluation :compound)))
+                            :source #25#)
+                           :evaluation :compound)))
      :source #16#))
   '(#22=(defstruct #23=foo "doc")
     (:defstruct
-     ((:name . 1)    (((:type-name () :name foo :source #23#)))
-      :documentation (("doc")))
+     ((:name          . 1) (((:type-name () :name foo :source #23#)))
+      (:documentation . 1) (("doc")))
      :source #22#)))
 
 ;;; `defclass' including slots
@@ -247,11 +268,11 @@
     ;; Valid syntax
     '(#15=(#16=foo :initform (+ 1) :custom-option :foo :reader #17=bar)
       t t (:slot-specifier
-           ((:name . 1)    (((:variable-name () :name foo :source #16#)))
-            :readers       (((:function-name () :name bar :source #17#)))
-            :initform      (((+ 1)))
-            :option-names  ((:custom-option))
-            :option-values ((:foo)))
+           ((:name         . 1) (((:variable-name () :name foo :source #16#)))
+            (:reader       . *) (((:function-name () :name bar :source #17#)))
+            (:initform     . 1) (((+ 1) :evaluation t))
+            (:option-name  . *) ((:custom-option))
+            (:option-value . *) ((:foo)))
            :source #15#))))
 
 (define-macro-test (defclass)
@@ -293,22 +314,23 @@
           :bar 1)
          (:my-class-option 1))
     (:defclass
-     ((:name . 1)        (((:type-name () :name foo :source #15#)))
-      :superclasses      (((:type-name () :name bar :source #16#))
-                          ((:type-name () :name baz :source #17#)))
-      :slots             (((:slot-specifier
-                            ((:name . 1)    (((:variable-name () :name foo :source #19#)))
-                             :readers       (((:function-name () :name bar :source #20#)))
-                             :initform      (((+ 1)))
-                             :option-names  ((:custom-option))
-                             :option-values ((:foo)))
-                            :source #18#)))
-      :default-initargs  ((:bar))
-      :default-initforms ((1))
-      :metaclass         (((:type-name () :name foo :source #21#)))
-      :documentation     (("foo"))
-      :option-names      ((:my-class-option))
-      :option-values     (((1))))
+     ((:name             . 1) (((:type-name () :name foo :source #15#)))
+      (:superclass       . *) (((:type-name () :name bar :source #16#))
+                               ((:type-name () :name baz :source #17#)))
+      (:slot             . *) (((:slot-specifier
+                                 ((:name         . 1) (((:variable-name () :name foo :source #19#)))
+                                  (:reader       . *) (((:function-name () :name bar :source #20#)))
+                                  (:initform     . 1) (((+ 1) :evaluation t))
+                                  (:option-name  . *) ((:custom-option))
+                                  (:option-value . *) ((:foo)))
+                                 :source #18#)
+                                :evaluation :compound))
+      (:default-initarg  . *) ((:bar))
+      (:default-initform . *) ((1 :evaluation t))
+      (:metaclass        . 1) (((:type-name () :name foo :source #21#)))
+      (:documentation    . 1)     (("foo"))
+      (:option-name      . *)      ((:my-class-option))
+      (:option-value     . *)     (((1))))
      :source #14#)))
 
 (define-macro-test (deftype)
@@ -317,7 +339,7 @@
   '((deftype foo)   syn:invalid-syntax-error)
   '((deftype foo 1) syn:invalid-syntax-error 1 "must be a DEFTYPE lambda list")
   '((deftype foo (x #5=x))
-    syn:invalid-syntax-error #5# "must be a lambda list variable name")
+    syn:invalid-syntax-error #5# "the variable name X occurs more than once")
   ;; Valid syntax
   '(#6=(deftype #7=foo #8=(#9=a &key #10=b)
          "bla bli"
@@ -325,27 +347,31 @@
          (declare #13=(ignore #14=b))
          (list a b))
     (:deftype
-     ((:name . 1)        (((:type-name () :name foo :source #7#)))
-      (:lambda-list . 1) (((:destructuring-lambda-list
-                            (:required (((:required-parameter
-                                          ((:name . 1) (((:variable-name
-                                                          ()
-                                                          :name a :source #9#))))
-                                          :source #9#)))
-                             :keyword  (((:keyword-parameter
-                                          (:name (((:variable-name
-                                                    ()
-                                                    :name b :source #10#))))
-                                          :source #10#))))
-                            :source #8#)))
-      :documentation     (("bla bli"))
-      :declarations      (((:declaration
-                            (:argument (((:variable-name () :name a :source #12#))))
-                            :kind ignore :source #11#))
-                          ((:declaration
-                            (:argument (((:variable-name () :name b :source #14#))))
-                            :kind ignore :source #13#)))
-      :forms             (((list a b))))
+     ((:name          . 1) (((:type-name () :name foo :source #7#)))
+      (:lambda-list   . 1) (((:deftype-lambda-list
+                              ((:required . *) (((:required-parameter
+                                                  ((:name . 1) (((:variable-name
+                                                                  ()
+                                                                  :name a :source #9#)
+                                                                 :evaluation nil)))
+                                                  :source #9#)
+                                                 :evaluation :compound))
+                               (:keyword  . *) (((:keyword-parameter
+                                                  ((:name . 1) (((:variable-name
+                                                                  ()
+                                                                  :name b :source #10#))))
+                                                  :source #10#)
+                                                 :evaluation :compound)))
+                              :source #8#)
+                             :evaluation :compound))
+      (:documentation . 1) (("bla bli"))
+      (:declaration   . *) (((:declaration
+                              ((:argument . *) (((:variable-name () :name a :source #12#))))
+                              :kind ignore :source #11#))
+                            ((:declaration
+                              ((:argument . *) (((:variable-name () :name b :source #14#))))
+                              :kind ignore :source #13#)))
+      (:form          . *) (((list a b) :evaluation t)))
      :source #6#)))
 
 (define-macro-test (defgeneric)
@@ -354,7 +380,7 @@
   #+TODO '((defgeneric foo #2=(&key (a 1)))
            syn:invalid-syntax-error #2# "must be a generic function lambda list")
   '((defgeneric foo (x #3=x))
-    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+    syn:invalid-syntax-error #3# "the variable name X occurs more than once")
   '((defgeneric foo ()
       (:generic-function-class))
     syn:invalid-syntax-error nil ":GENERIC-FUNCTION-CLASS option accepts one value")
@@ -366,7 +392,7 @@
     syn:invalid-syntax-error #6# "must be a class name")
   '((defgeneric foo ()
       (:argument-precedence-order #7=1))
-    syn:invalid-syntax-error #7# "must be a lambda list variable name")
+    syn:invalid-syntax-error #7# "variable name must be a symbol")
   '((defgeneric foo ()
       (:method-combination #8=1))
     syn:invalid-syntax-error #8# "method combination name must be a symbol")
@@ -394,59 +420,72 @@
          (:documentation "foo")
          (:generic-function-class #19=clazz))
     (:defgeneric
-     ((:name . 1)                (((:function-name () :name foo :source #15#)))
-      (:lambda-list . 1)         (((:generic-function-lambda-list
-                                    (:required (((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name a :source #17#))))
-                                                  :source #17#))
-                                                ((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name b :source #18#))))
-                                                  :source #18#))))
-                                    :source #16#)))
-      :generic-function-class    (((:type-name () :name clazz :source #19#)))
-      :documentation             (("foo")))
+     ((:name                   . 1) (((:function-name () :name foo :source #15#)))
+      (:lambda-list            . 1) (((:generic-function-lambda-list
+                                       ((:required . *) (((:required-parameter
+                                                           ((:name . 1) (((:variable-name
+                                                                           ()
+                                                                           :name a :source #17#)
+                                                                          :evaluation nil)))
+                                                           :source #17#))
+                                                         ((:required-parameter
+                                                           ((:name . 1) (((:variable-name
+                                                                           ()
+                                                                           :name b :source #18#)
+                                                                          :evaluation nil)))
+                                                           :source #18#))))
+                                       :source #16#)
+                                      :evaluation :compound))
+      (:generic-function-class . 1) (((:type-name () :name clazz :source #19#)))
+      (:documentation          . 1) (("foo")))
      :source #14#))
   '(#20=(defgeneric #21=foo #22=(#23=a #24=b)
-          (:argument-precedence-order b a))
+          (:argument-precedence-order #32=b #33=a))
     (:defgeneric
-     ((:name . 1)                (((:function-name () :name foo :source #21#)))
-      (:lambda-list . 1)         (((:generic-function-lambda-list
-                                    (:required (((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name a :source #21#))))
-                                                  :source #21#))
-                                                ((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name b :source #22#))))
-                                                  :source #22#))))
-                                    :source #20#)))
-      :argument-precedence-order (((b a))))
-     :source #18#))
+     ((:name                      . 1) (((:function-name () :name foo :source #21#)))
+      (:lambda-list               . 1) (((:generic-function-lambda-list
+                                          ((:required . *) (((:required-parameter
+                                                              ((:name . 1) (((:variable-name
+                                                                              ()
+                                                                              :name a :source #23#)
+                                                                             :evaluation nil)))
+                                                              :source #23#))
+                                                            ((:required-parameter
+                                                              ((:name . 1) (((:variable-name
+                                                                              ()
+                                                                              :name b :source #24#)
+                                                                             :evaluation nil)))
+                                                              :source #24#))))
+                                          :source #22#)
+                                         :evaluation :compound))
+      (:argument-precedence-order . 1) ((((:variable-name () :name b :source #32#)
+                                          (:variable-name () :name a :source #33#)))))
+     :source #20#))
   '(#25=(defgeneric #26=foo #27=(#28=a)
           #29=(:method :custom 1 "foo" #30=(#31=a)))
     (:defgeneric
-     (:name        (((:function-name () :name foo :source #26#)))
-      :lambda-list (((:generic-function-lambda-list
-                      (:required (((:required-parameter
-                                    (:name ((a)))
-                                    :source #28#))))
-                      :source #27#)))
-      :methods     (((:method-description
-                      (:qualifiers  ((:custom) (1) ("foo"))
-                       :lambda-list (((:specialized-lambda-list
-                                       (:required (((:specialized-parameter
-                                                     (:name (((:required-parameter
-                                                               (:name ((a)))
-                                                               :source #31#))))
-                                                     :source #31#))))
-                                       :source #30#))))
-                      :source #29#))))
+     ((:name        . 1) (((:function-name () :name foo :source #26#)))
+      (:lambda-list . 1) (((:generic-function-lambda-list
+                            ((:required . *) (((:required-parameter
+                                                ((:name . 1) (((:variable-name
+                                                                ()
+                                                                :name a :source #28#)
+                                                               :evaluation nil)))
+                                                :source #28#))))
+                            :source #27#)
+                           :evaluation :compound))
+      (:method      . *) (((:method-description
+                            ((:qualifier   . *) ((:custom) (1) ("foo"))
+                             (:lambda-list . 1) (((:specialized-lambda-list
+                                                   ((:required . *) (((:specialized-parameter
+                                                                       ((:name . 1) (((:variable-name
+                                                                                       ()
+                                                                                       :name a :source #31#))))
+                                                                       :source #31#))))
+                                                   :source #30#)
+                                                  :evaluation :compound)))
+                            :source #29#)
+                           :evaluation :compound)))
      :source #25#)))
 
 (define-macro-test (defmethod)
@@ -455,9 +494,9 @@
   #+TODO '((defmethod foo)
            syn:invalid-syntax-error nil "must be a specialized lambda list")
   '((defmethod foo (1))
-    syn:invalid-syntax-error 1 "must be a lambda list variable name")
+    syn:invalid-syntax-error 1 "variable name must be a symbol")
   '((defmethod foo (x #4=x))
-    syn:invalid-syntax-error #4# "must be a lambda list variable name")
+    syn:invalid-syntax-error #4# "the variable name X occurs more than once")
   '((defmethod foo ((x 1)))
     syn:invalid-syntax-error 1 "must be a class name")
   '((defmethod foo (#6=(x t 1)))
@@ -465,43 +504,43 @@
   ;; Valid syntax
   '(#7=(defmethod #8=foo #9=())
     (:defmethod
-     ((:name . 1)        (((:function-name () :name foo :source #8#)))
+     ((:name        . 1) (((:function-name () :name foo :source #8#)))
       (:lambda-list . 1) (((:specialized-lambda-list () :source #9#))))
      :source #7#))
   '(#10=(defmethod #11=foo :around #12=())
     (:defmethod
-     ((:name . 1)        (((:function-name () :name foo :source #9#)))
-      :qualifiers        ((:around))
-      (:lambda-list . 1) (((:specialized-lambda-list () :source #10#))))
-     :source #7#))
+     ((:name        . 1) (((:function-name () :name foo :source #11#)))
+      (:qualifier   . *) ((:around))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #12#))))
+     :source #10#))
   '(#13=(defmethod #14=foo :custom 1 "foo" #15=())
     (:defmethod
-     (:name        (((:function-name () :name foo :source #14#)))
-      :qualifiers  ((:custom) (1) ("foo"))
-      :lambda-list (((:specialized-lambda-list () :source #15#))))
+     ((:name        . 1) (((:function-name () :name foo :source #14#)))
+      (:qualifier   . *) ((:custom) (1) ("foo"))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #15#))))
      :source #13#))
   '(#16=(defmethod #17=foo #18=(#19=(#20=x #21=t)))
     (:defmethod
-     ((:name . 1)        (((:function-name () :name foo :source #17#)))
+     ((:name        . 1) (((:function-name () :name foo :source #17#)))
       (:lambda-list . 1) (((:specialized-lambda-list
-                            (:required (((:specialized-parameter
-                                          (:name        (((:variable-name
-                                                           ()
-                                                           :name x :source #20#)))
-                                           :specializer (((:type-name
-                                                           ()
-                                                           :name t :source #21#))))
-                                          :source #19#))))
+                            ((:required . *) (((:specialized-parameter
+                                                ((:name        . 1) (((:variable-name
+                                                                       ()
+                                                                       :name x :source #20#)))
+                                                 (:specializer . 1) (((:type-name
+                                                                       ()
+                                                                       :name t :source #21#))))
+                                            :source #19#))))
                             :source #18#))))
      :source #16#))
   '(#22=(defmethod #23=foo #24=()
           "foo" (declare #25=(ignore)) 1)
     (:defmethod
-     ((:name . 1)        (((:function-name () :name foo :source #23#)))
-      (:lambda-list . 1) (((:specialized-lambda-list () :source #24#)))
-      :documentation     (("foo"))
-      :declarations      (((:declaration () :kind ignore :source #25#)))
-      :forms             ((1)))
+     ((:name          . 1) (((:function-name () :name foo :source #23#)))
+      (:lambda-list   . 1) (((:specialized-lambda-list () :source #24#)))
+      (:documentation . 1) (("foo"))
+      (:declaration   . *) (((:declaration () :kind ignore :source #25#)))
+      (:form          . *) ((1 :evaluation t)))
       :source #22#)))
 
 (define-macro-test (defpackage)
@@ -528,58 +567,50 @@
          #12=(:import-from #13=:foo #14=#\c #15=:bar)
          #16=(:shadowing-import-from #17=:foo2 #18="BAZ2" #19=:bar2))
     (:defpackage
-     ((:name . 1)            (((:string-designator
-                                ()
-                                :string "FOO" :source #9#)))
-      :documentation         (("bla"))
-      :use                   (((:string-designator
-                                ()
-                                :string "BAR" :source #10#))
-                              ((:string-designator
-                                ()
-                                :string "bar" :source #11#)))
-      :shadowing-import-from (((:import-from
-                                ((:package . 1) (((:string-designator
-                                                   ()
-                                                   :string "FOO2" :source #17#)))
-                                 :names         (((:string-designator
-                                                   ()
-                                                   :string "BAZ2" :source #18#))
-                                                 ((:string-designator
-                                                   ()
-                                                   :string "BAR2" :source #19#))))
-                                :source #16#)))
-      :import-from           (((:import-from
-                                ((:package . 1) (((:string-designator
-                                                   ()
-                                                   :string "FOO" :source #13#)))
-                                 :names         (((:string-designator
-                                                   ()
-                                                   :string "c" :source #14#))
-                                                 ((:string-designator
-                                                   ()
-                                                   :string "BAR" :source #15#))))
-                                :source #12#)))
-      :size                  ((1)))
+     ((:name                  . 1) (((:string-designator
+                                      ()
+                                      :string "FOO" :source #9#)))
+      (:documentation         . 1) (("bla"))
+      (:use                   . *) (((:string-designator
+                                      ()
+                                      :string "BAR" :source #10#))
+                                    ((:string-designator
+                                      ()
+                                      :string "bar" :source #11#)))
+      (:shadowing-import-from . *) (((:import-from
+                                      ((:package . 1) (((:string-designator
+                                                         ()
+                                                         :string "FOO2" :source #17#)))
+                                       (:name    . *) (((:string-designator
+                                                         ()
+                                                         :string "BAZ2" :source #18#))
+                                                       ((:string-designator
+                                                         ()
+                                                         :string "BAR2" :source #19#))))
+                                      :source #16#)))
+      (:import-from           . *) (((:import-from
+                                      ((:package . 1) (((:string-designator
+                                                         ()
+                                                         :string "FOO" :source #13#)))
+                                       (:name    . *) (((:string-designator
+                                                         ()
+                                                         :string "c" :source #14#))
+                                                       ((:string-designator
+                                                         ()
+                                                         :string "BAR" :source #15#))))
+                                      :source #12#)))
+      (:size                  . 1) ((1)))
      :source #8#))
 
   '(#20=(defpackage #21=foo
           (:nicknames #22="f" #23=:fo)
           (:export #24="bar" #25=:baz))
     (:defpackage
-     ((:name . 1)(((:string-designator () :string "FOO" :source #21#)))
-      :nicknames (((:string-designator
-                    ()
-                    :string "f" :source #22#))
-                  ((:string-designator
-                    ()
-                    :string "FO" :source #23#)))
-      :export    (((:string-designator
-                    ()
-                    :string "bar" :source #24#))
-                  ((:string-designator
-                    ()
-                    :string "BAZ" :source #25#))))
+     ((:name     . 1) (((:string-designator () :string "FOO" :source #21#)))
+      (:nickname . *) (((:string-designator () :string "f" :source #22#))
+                       ((:string-designator () :string "FO" :source #23#)))
+      (:export   . *) (((:string-designator () :string "bar" :source #24#))
+                       ((:string-designator () :string "BAZ" :source #25#))))
      :source #20#)))
 
 (define-macro-test (in-package)
@@ -606,12 +637,19 @@
   '((handler-bind ((#3=1 (lambda (x)))))
     syn:invalid-syntax-error #3# "must be a type specifier")
   ;; Valid syntax
-  '(#4=(handler-bind ((foo (lambda (x) (bar))))
+  '(#4=(handler-bind (#5=(#6=foo (lambda (x) (bar))))
          (baz))
     (:handler-bind
-     (:types         ((foo))
-      :handler-forms (((lambda (x) (bar))))
-      :forms         (((baz))))
+     ((:binding . *) (((:handler-binding
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name
+                                                        ()
+                                                        :name foo :source #6#))))
+                                        :source #6#)))
+                         (:form . 1) (((lambda (x) (bar)) :evaluation t)))
+                        :source #5#)
+                       :evaluation :compound))
+      (:form    . *) (((baz) :evaluation t)))
      :source #4#)))
 
 (define-macro-test (handler-case)
@@ -620,36 +658,43 @@
   '((handler-case nil (foo #2=1))
     syn:invalid-syntax-error #2# "must be a lambda list with zero or one required parameter")
   '((handler-case nil (foo (#3=1)))
-    syn:invalid-syntax-error #3# "must be a lambda list variable name")
+    syn:invalid-syntax-error #3# "variable name must be a symbol")
   ;; Repeated option
   '((handler-case nil (:no-error ()) #4=(:no-error ()))
     syn:invalid-syntax-error #4# "NO-ERROR must not be repeated")
   ;; Valid syntax
   '(#5=(handler-case (foo)
-         (bar (#6=x) (baz))
-         (:no-error #7=(#8=y #9=z) (fez)))
+         (#6=bar (#7=x) (baz))
+         (:no-error #8=(#9=y #10=z) (fez)))
     (:handler-case
-     ((:form . 1)           (((foo)))
-      :types                ((bar))
-      :variables            (((:required-parameter
-                               ((:name . 1) (((:variable-name
-                                               ()
-                                               :name x :source #6#))))
-                               :source #6#)))
-      :forms                ((((baz))))
-      :no-error-lambda-list (((:ordinary-lambda-list
-                               (:required (((:required-parameter
-                                             ((:name . 1) (((:variable-name
-                                                             ()
-                                                             :name y :source #8#))))
-                                             :source #8#))
-                                           ((:required-parameter
-                                             ((:name . 1) (((:variable-name
-                                                             ()
-                                                             :name z :source #9#))))
-                                             :source #9#))))
-                               :source #7#)))
-      :no-error-forms       (((fez))))
+     ((:form                 . 1) (((foo) :evaluation t))
+      (:type                 . *) (((:atomic-type-specifier
+                                     ((:name . 1) (((:type-name
+                                                     ()
+                                                     :name bar :source #6#))))
+                                     :source #6#)))
+      (:variable             . *) (((:required-parameter
+                                     ((:name . 1) (((:variable-name
+                                                     ()
+                                                     :name x :source #7#))))
+                                     :source #7#)
+                                    :evaluation :binding))
+      (:handler-form         . *) ((((baz)) :evaluation t))
+      (:no-error-lambda-list . 1) (((:ordinary-lambda-list
+                                     ((:required . *) (((:required-parameter
+                                                         ((:name . 1) (((:variable-name
+                                                                         ()
+                                                                         :name y :source #9#)
+                                                                        :evaluation nil)))
+                                                         :source #9#))
+                                                       ((:required-parameter
+                                                         ((:name . 1) (((:variable-name
+                                                                         ()
+                                                                         :name z :source #10#)
+                                                                        :evaluation nil)))
+                                                         :source #10#))))
+                                     :source #8#)))
+      (:no-error-form        . *) (((fez) :evaluation t)))
      :source #5#)))
 
 (define-macro-test (restart-bind)
@@ -663,13 +708,16 @@
     syn:invalid-syntax-error #4# ":TEST-FUNCTION option must not be repeated")
   ;; Valid syntax
   '(#5=(restart-bind () 1)
-    (:restart-bind (:forms ((1))) :source #5#))
-  '(#6=(restart-bind ((#7=foo bar :report-function baz)) 1)
+    (:restart-bind ((:form . *) ((1 :evaluation t))) :source #5#))
+  '(#6=(restart-bind (#7=(#8=foo #9=bar :report-function #10=baz)) 1)
     (:restart-bind
-     (:names            (((:variable-name () :naem foo :source #7#)))
-      :functions        ((bar))
-      :report-functions ((baz))
-      :forms            ((1)))
+     ((:binding . *) (((:restart-binding
+                        ((:name            . 1) (((:variable-name () :name foo :source #8#)))
+                         (:function        . 1) ((bar :evaluation t))
+                         (:report-function . 1) ((baz :evaluation t)))
+                        :source #7#)
+                       :evaluation :compound))
+      (:form    . *) ((1 :evaluation t)))
      :source #6#)))
 
 (define-macro-test (restart-case)
@@ -685,14 +733,24 @@
     syn:invalid-syntax-error nil "for an unnamed restart, the :REPORT option must be supplied")
   ;; Valid syntax
   '(#5=(restart-case 1)
-    (:restart-case (:form ((1))) :source #5#))
-  '(#6=(restart-case 1 (#7=foo #8=(x) :report "bar" :test baz))
+    (:restart-case ((:form . 1) ((1 :evaluation t))) :source #5#))
+  '(#6=(restart-case 1 #7=(#8=foo #9=(#10=x) :report "bar" :test #11=baz))
     (:restart-case
-     (:form         ((1))
-      :names        (((:variable-name () :name foo :source #7#)))
-      :lambda-lists (((:ordinary-lambda-list
-                       (:required ((x)))
-                       :source #8#)))
-      :reports      (("bar"))
-      :tests        ((baz)))
+     ((:form   . 1) ((1 :evaluation t))
+      (:clause . *) (((:restart-clause
+                       ((:name        . 1) (((:variable-name () :name foo :source #8#)))
+                        (:lambda-list . 1) (((:ordinary-lambda-list
+                                              ((:required . *) (((:required-parameter
+                                                                  ((:name . 1) (((:variable-name
+                                                                                  ()
+                                                                                  :name x :source #10#)
+                                                                                 :evaluation nil)))
+                                                                  :source #10#))))
+                                              :source #9#)))
+                        (:report-string . 1) (("bar"))
+                        (:test-name     . 1) (((:function-name
+                                                ()
+                                                :name baz :source #11#))))
+                       :source #7#)
+                      :evaluation :compound)))
      :source #6#)))

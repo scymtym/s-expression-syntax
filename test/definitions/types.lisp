@@ -13,14 +13,30 @@
   "Smoke test for the `type-specifier' rule."
 
   (rule-test-cases ((syn::type-specifier syn::type-specifiers))
-    `(1                  nil    nil      nil)
-    `((1)                nil    nil      nil)
-    `(values             :fatal values   "the symbol VALUES is not a valid type specifier")
-    `((values)           :fatal (values) "VALUES type is invalid in this context")
-
-    '(bit                t   nil bit)
-    '((vector t)         t   nil (vector t))
-    '((unsigned-byte 32) t nil (unsigned-byte 32))))
+    `(1                        nil    nil      nil)
+    `((1)                      nil    nil      nil)
+    `(values                   :fatal values   "the symbol VALUES is not a valid type specifier")
+    `((values)                 :fatal (values) "VALUES type is invalid in this context")
+    ;; Valid
+    '(#1=bit                   t      nil (:atomic-type-specifier
+                                           ((:name . 1) (((:type-name () :name bit :source #1#))))
+                                           :source #1#))
+    '(#2=(#3=vector #4=t)      t      nil (:compound-type-specifier
+                                           ((:name     . 1) (((:type-name
+                                                               ()
+                                                               :name vector :source #3#)))
+                                            (:argument . *) (((:atomic-type-specifier
+                                                               ((:name . 1) (((:type-name
+                                                                               ()
+                                                                               :name t :source #4#))))
+                                                               :source #4#))))
+                                           :source #2#))
+    '(#5=(#6=unsigned-byte 32) t      nil (:compound-type-specifier
+                                           ((:name     . 1) (((:type-name
+                                                               ()
+                                                               :name unsigned-byte :source #6#)))
+                                            (:argument . *) ((32)))
+                                           :source #5#))))
 
 (test values-type-specifier
   "Smoke test for the `values-type-specifier' rule."
@@ -28,9 +44,20 @@
   (rule-test-cases ((syn::values-type-specifier syn::type-specifiers))
     '(1                          nil nil nil)
     '(bit                        nil nil nil)
-
-    '((values)                   t nil (() () nil nil))
-    '((values bit)               t nil ((bit) () nil nil))
-    '((values &optional bit)     t nil (() (bit) nil nil))
-    '((values &rest bit)         t nil (() () bit nil))
-    '((values &allow-other-keys) t nil (() () nil &allow-other-keys))))
+    ;; Valid
+    '((values)                   t   nil   (() () nil nil))
+    '((values #1=bit)            t   nil   (((:atomic-type-specifier
+                                              ((:name . 1) (((:type-name () :name bit :source #1#))))
+                                              :source #1#))
+                                            () nil nil))
+    '((values &optional #2=bit)  t   nil   (()
+                                            ((:atomic-type-specifier
+                                              ((:name . 1) (((:type-name () :name bit :source #2#))))
+                                              :source #2#))
+                                            nil nil))
+    '((values &rest #3=bit)      t   nil   (() ()
+                                            (:atomic-type-specifier
+                                             ((:name . 1) (((:type-name () :name bit :source #3#))))
+                                             :source #3#)
+                                            nil))
+    '((values &allow-other-keys) t   nil   (() () nil &allow-other-keys))))

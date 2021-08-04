@@ -30,15 +30,17 @@
                      (push `(,cardinality*
                              ,(case cardinality
                                 ((1 ?) `(,relation . 1))
-                                (t     relation))
+                                ((* *>)`(,relation . *))
+                                (t     `(,relation . ,cardinality)))
                              ,(ecase cardinality
                                 (*     `(nreverse ,name))
                                 (*>    name)
                                 ((1 ?) name))
-                             :evaluation ',(case cardinality
-                                             ((1 ?) evaluation)
-                                             (t     (a:make-circular-list
-                                                     1 :initial-element evaluation))))
+                             ,@(unless (null evaluation)
+                                 `(:evaluation ',(case cardinality
+                                                   ((1 ?) evaluation)
+                                                   (t     (a:make-circular-list
+                                                           1 :initial-element evaluation))))))
                            relations))))
            components)
       (a:with-unique-names (source)

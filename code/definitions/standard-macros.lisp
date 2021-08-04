@@ -39,24 +39,24 @@
 (define-macro defun
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
-   (declarations  *>)
-   (forms         *> :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
 
 ;;; `defmacro'
 
 (define-macro defmacro
     (list* (<- name ((function-name/symbol! names)))
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list))) ; TODO macro lambda list
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
-   (declarations  *>)
-   (forms         *> :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
 
 ;;; `defstruct' including slots
 
@@ -79,12 +79,14 @@
                   (? (or 'nil   ; NAME remains `nil'
                          (seq (<- name ((function-name/symbol! names)))
                               (? (<- lambda-list ((ordinary-lambda-list! lambda-lists))))))))) ; TODO boa-lambda-list
-  (let ((names (list* name (map 'list #'first other-constructors))))
+  (let ((names (list* name (map 'list (lambda (constructor)
+                                        (bp:node-relation* '(:name . 1) constructor))
+                                other-constructors))))
     (when (and (not (= (length names) 1)) (member nil names))
       (:fatal "(:constructor nil) and named constructors are mutually exclusive")))
-  (bp:node* (:structure-constuctor :source source)
-    (1    :name        name)
-    (bp:? :lambda-list lambda-list :evaluation :compound)))
+  (bp:node* (:structure-constructor :source source)
+    (1    (:name        . 1) name)
+    (bp:? (:lambda-list . 1) lambda-list :evaluation :compound)))
 
 (macrolet ((define-function-option (name option &optional (symbol? t))
              `(defrule ,name ()
@@ -129,16 +131,16 @@
     (list name constructors include include-slots))
 
 (define-macro defstruct
-    (list (<- (name constructors include include-slots)
+    (list (<- (name constructor include include-slot)
               (structure-name))
           (? (<- documentation ((documentation-string forms))))
-          (* (<<- slots (slot-description))))
+          (* (<<- slot (slot-description))))
   ((name          1)
-   (constructors  *> :evaluation :compound)
+   (constructor   *> :evaluation :compound)
    (include       ?)
-   (include-slots *>)
+   (include-slot  *>)
    (documentation ?)
-   (slots         *  :evaluation :compound)))
+   (slot          *  :evaluation :compound)))
 
 ;;; `defclass' and `define-condition' including slots
 
@@ -152,85 +154,85 @@
   (nreverse superclasses))
 
 (define-syntax slot-specifier
-    (or (and (not (list* :any)) (<- name ((slot-name! names))))
-        (list (must (<- name ((slot-name! names))) "slot must have a name")
-              (* (or (eg:poption* :reader        (<<- readers      (must ((function-name/symbol names))
+    (or (list (must (<- name ((slot-name! names))) "slot must have a name")
+              (* (or (eg:poption* :reader        (<<- reader       (must ((function-name/symbol names))
                                                                          "reader must be a symbol function name")))
-                     (eg:poption* :writer        (<<- writers      (must ((function-name names))
+                     (eg:poption* :writer        (<<- writer       (must ((function-name names))
                                                                          "writer must be an extended function name")))
-                     (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
+                     (eg:poption* :accessor      (<<- accessor     (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
                      (eg:poption  :allocation    (<- allocation    (allocation-type!)))
-                     (eg:poption* :initarg       (<<- initargs     (must (guard (typep 'symbol))
+                     (eg:poption* :initarg       (<<- initarg      (must (guard (typep 'symbol))
                                                                          "initarg must be a symbol")))
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
-                     (seq (<<- option-names  (guard symbolp))
-                          (<<- option-values))))))
+                     (seq (<<- option-name (guard symbolp))
+                          (<<- option-value)))))
+        (<- name ((slot-name! names))))
   ((name          1)
    ;; Options
-   (initargs      *)
-   (readers       *)
-   (writers       *)
-   (accessors     *)
+   (initarg       *)
+   (reader        *)
+   (writer        *)
+   (accessor      *)
    (allocation    ?)
    (initform      ? :evaluation t)
    (type          ?)
    (documentation ?)
    ;; Non-standard options
-   (option-names  *)
-   (option-values *)))
+   (option-name   *)
+   (option-value  *)))
 
 (define-macro defclass
     (list (<- name ((class-name! names)))
-          (<- superclasses (superclasses))
-          (list (* (<<- slots (slot-specifier))))
+          (<- superclass (superclasses))
+          (list (* (<<- slot (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
                  (eg:option :default-initargs
                             (* (and :any
-                               (must (seq (<<- default-initargs  (guard (typep 'symbol)))
-                                          (<<- default-initforms ((form! forms))))
+                               (must (seq (<<- default-initarg  (guard (typep 'symbol)))
+                                          (<<- default-initform ((form! forms))))
                                      "default initarg must be a symbol followed by an expression"))))
                  (eg:option :metaclass     (must (<- metaclass ((class-name names)))
                                                  "metaclass must be a class name"))
                  (eg:option :documentation (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-names (must (guard symbolp) "option name must be a symbol"))
-                        (<<- option-values)))))
-  ((name              1)
-   (superclasses      *>)
-   (slots             *  :evaluation :compound)
+                 (list* (<<- option-name (must (guard symbolp) "option name must be a symbol"))
+                        (<<- option-value)))))
+  ((name             1)
+   (superclass       *>)
+   (slot             *  :evaluation :compound)
    ;; Standard options
-   (default-initargs  *)
-   (default-initforms *  :evaluation t)
-   (metaclass         ?)
-   (documentation     ?)
+   (default-initarg  *)
+   (default-initform *  :evaluation t)
+   (metaclass        ?)
+   (documentation    ?)
    ;; Non-standard options
-   (option-names      *)
-   (option-values     *)))
+   (option-name      *)
+   (option-value     *)))
 
 (define-syntax condition-slot-specifier
     (or (and (not (list* :any)) (<- name ((slot-name! names))))
         (list (must (<- name ((slot-name! names))) "slot must have a name")
-              (* (or (eg:poption* :reader        (<<- readers      (must ((function-name/symbol names))
+              (* (or (eg:poption* :reader        (<<- reader       (must ((function-name/symbol names))
                                                                          "reader must be a symbol function name")))
-                     (eg:poption* :writer        (<<- writers      (must ((function-name names))
+                     (eg:poption* :writer        (<<- writer       (must ((function-name names))
                                                                          "writer must be an extended function name")))
-                     (eg:poption* :accessor      (<<- accessors    (must ((function-name/symbol names))
+                     (eg:poption* :accessor      (<<- accessor     (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
                      (eg:poption  :allocation    (<- allocation    (must (allocation-type))))
-                     (eg:poption* :initarg       (<<- initargs     (must (guard (typep 'symbol))
+                     (eg:poption* :initarg       (<<- initarg      (must (guard (typep 'symbol))
                                                                          "initarg must be a symbol")))
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))))))
   ((name          1)
    ;; Options
-   (initargs      *)
-   (readers       *)
-   (writers       *)
-   (accessors     *)
+   (initarg       *)
+   (reader        *)
+   (writer        *)
+   (accessor      *)
    (allocation    ?)
    (initform      ? :evaluation t)
    (type          ?)
@@ -250,34 +252,34 @@
 
 (define-macro define-condition
     (list (<- name ((class-name! names)))
-          (<- parent-types (superclasses))
-          (list (* (<<- slots (condition-slot-specifier))))
+          (<- parent-type (superclasses))
+          (list (* (<<- slot (condition-slot-specifier))))
           (* (or (eg:option :default-initargs
                             (* (and :any
-                                    (must (seq (<<- default-initargs  (guard (typep 'symbol)))
-                                               (<<- default-initforms ((form! forms))))
+                                    (must (seq (<<- default-initarg  (guard (typep 'symbol)))
+                                               (<<- default-initform ((form! forms))))
                                           "default initarg must be a symbol followed by an expression"))))
                  (eg:option :documentation    (<- documentation ((documentation-string! forms))))
                  (eg:option :report           (<- report (condition-report!))))))
-  ((name              1)
-   (parent-types      *>)
-   (slots             *  :evaluation :compound)
-   (default-initargs  *)
-   (default-initforms *  :evaluation t)
-   (documentation     ?)
-   (report            ?  :evaluation :compound)))
+  ((name             1)
+   (parent-type      *>)
+   (slot             *  :evaluation :compound)
+   (default-initarg  *)
+   (default-initform *  :evaluation t)
+   (documentation    ?)
+   (report           ?  :evaluation :compound)))
 
 ;;; `deftype'
 
 (define-macro deftype
     (list* (<- name ((class-name! names)))
            (<- lambda-list ((deftype-lambda-list! deftype-lambda-list)))
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
-   (lambda-list   1)
+   (lambda-list   1  :evaluation :compound)
    (documentation ?)
-   (declarations  *>)
-   (forms         *> :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
 
 ;;; `defgeneric'
 
@@ -286,15 +288,25 @@
 
 (define-syntax method-description
     (must (list* :method
-                 (* (<<- qualifiers (qualifier)))
+                 (* (<<- qualifier (qualifier)))
                  (<- lambda-list ((specialized-lambda-list! lambda-lists)))
-                 (<- (documentation declarations forms) ((docstring-body forms))))
+                 (<- (documentation declaration form) ((docstring-body forms))))
           "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
-  ((qualifiers    *)
+  ((qualifier     *)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
-   (declarations  *>)
-   (forms         *> :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
+
+(defun verify-precedence-order (precedence-order lambda-list)
+  (let ((required-names (map 'list (lambda (parameter)
+                                     (let ((name (bp:node-relation* :name parameter)))
+                                       (getf (bp:node-initargs* name) :name)))
+                             (bp:node-relation* :required lambda-list)))
+        (order-names    (map 'list (lambda (name)
+                                     (getf (bp:node-initargs* name) :name))
+                             precedence-order)))
+    (a:set-equal order-names required-names :test #'eg::%eql)))
 
 (define-macro defgeneric
     (list (<- name ((function-name! names)))
@@ -304,51 +316,55 @@
                  (and (eg:option :argument-precedence-order (* (<<- names ((lambda-list-variable-name! lambda-lists)))))
                       (<- argument-precedence-order
                           (:transform :any
-                            (let ((required (map 'list (a:curry #'bp:node-relation* :name)
-                                                 (bp:node-relation* :required lambda-list))))
-                              (unless (a:set-equal names required :test #'eg::%eql)
-                                (:fatal (format nil "~S must be the set of required parameters ~S"
-                                                names required)))
-                              (nreverse names)))))
+                            ;; Collect names of required parameters in
+                            ;; LAMBDA-LIST and ensure that all names
+                            ;; following :ARGUMENT-PRECEDENCE-ORDER
+                            ;; occur in that set of names.
+                            (multiple-value-bind (compatiblep required-names order-names)
+                                (verify-precedence-order names lambda-list)
+                              (unless compatiblep
+                                (:fatal (format nil "~S must match the set of required parameters ~S"
+                                                order-names required-names))))
+                            (nreverse names))))
                  (eg:option  :method-combination        (<- method-combination (must (guard (typep 'symbol))
                                                                                      "method combination name must be a symbol"))
-                             (* (<<- method-combination-arguments)))
+                             (* (<<- method-combination-argument)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
                  (eg:option* declare                    (and (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
                                                              (<<- declarations ((declaration! declarations)))))
                  (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
-                 (<<- methods (method-description))
+                 (<<- method (method-description))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-names (must (guard (typep 'symbol)) "option name must be a symbol"))
-                        (<<- option-values)))))
-  ((name                         1)
-   (lambda-list                  1 :evaluation :compound)
+                 (list* (<<- option-name (must (guard (typep 'symbol)) "option name must be a symbol"))
+                        (<<- option-value)))))
+  ((name                        1)
+   (lambda-list                 1 :evaluation :compound)
    ;; Standard options
-   (generic-function-class       ?)
-   (argument-precedence-order    ?)
-   (method-combination           ?)
-   (method-combination-arguments *)
-   (method-class                 ?)
-   (declarations                 *)
-   (documentation                ?)
-   (methods                      * :evaluation :compound)
+   (generic-function-class      ?)
+   (argument-precedence-order   ?)
+   (method-combination          ?)
+   (method-combination-argument *)
+   (method-class                ?)
+   (declarations                *)
+   (documentation               ?)
+   (method                      * :evaluation :compound)
    ;; Other options
-   (option-names                 *)
-   (option-values                *)))
+   (option-name                 *)
+   (option-value                *)))
 
 ;;; `defmethod'
 
 (define-macro defmethod
     (list* (<- name ((function-name! names)))
-           (* (<<- qualifiers (qualifier)))
+           (* (<<- qualifier (qualifier)))
            (<- lambda-list ((specialized-lambda-list! lambda-lists)))
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
-   (qualifiers    *)
+   (qualifier     *)
    (lambda-list   1)
    (documentation ?)
-   (declarations  *>)
-   (forms         *> :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
 
 ;;; `defpackage' and `in-package'
 
@@ -378,15 +394,15 @@
 (define-syntax import-from
     (list* (or :import-from :shadowing-import-from)
            (must (list (<- package (package-designator!))
-                       (* (<<- names (and :any (string-designator!)))))
+                       (* (<<- name (and :any (string-designator!)))))
                  "import from options accept a package designator followed by string designators"))
   ((package 1)
-   (names   *)))
+   (name    *)))
 
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
           ;; TODO (* (and :any (must (or …) "unknown options"))
-          (* (or (eg:option* :nicknames     (* (<<- nicknames (and :any (string-designator!)))))
+          (* (or (eg:option* :nicknames     (* (<<- nickname (and :any (string-designator!)))))
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
                  (eg:option* :use           (* (<<- use (package-designator!))))
                  (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
@@ -402,7 +418,7 @@
                  (list* (must (not :any) "unknown option") :any)
                  (and :any (must (guard (not :any) atom) "option must be a list")))))
   ((name                           1)
-   (nicknames                      *)
+   (nickname                       *)
    (documentation                  ?)
    (use                            *) ; TODO cannot distinguish empty option, i.e. (:use), from absent
    (shadow                         *)
@@ -432,10 +448,10 @@
   (must (handler-binding) "must be of the form (TYPE HANDLER-FORM)"))
 
 (define-macro handler-bind
-    (list* (list (* (<<- bindings (handler-binding!))))
-           (<- forms (forms)))
-  ((bindings *  :evaluation :compound)
-   (forms    *> :evaluation t)))
+    (list* (list (* (<<- binding (handler-binding!))))
+           (<- form (forms)))
+  ((binding *  :evaluation :compound)
+   (form    *> :evaluation t)))
 
 (defrule handler-clause ()
     (list* (<- type ((type-specifier! type-specifiers)))
@@ -449,24 +465,24 @@
           (* (or (list* (eg:once :no-error)
                         (<- no-error-lambda-list
                             ((ordinary-lambda-list! lambda-lists)))
-                        (<- (no-error-declarations no-error-forms)
+                        (<- (no-error-declaration no-error-form)
                             ((body forms))))
-                 (<<- (types variables declarations forms)
+                 (<<- (type variable declaration handler-form)
                       (handler-clause)))))
   (;; Body form
-   (form                  1 :evaluation t)
+   (form                 1  :evaluation t)
    ;; Handler clauses
-   (types                 *)
-   (variables             * :evaluation (make-instance 'binding-semantics
+   (type                 *)
+   (variable             *  :evaluation (make-instance 'binding-semantics
                                                        :namespace 'variable
                                                        :scope     :lexical
                                                        :values    nil))
-   (declarations          *)
-   (forms                 * :evaluation t)
+   (declaration          *)
+   (handler-form         *> :evaluation t)
    ;; No-error clause
-   (no-error-lambda-list  ?)
-   (no-error-declarations *)
-   (no-error-forms        * :evaluation t)))
+   (no-error-lambda-list ?)
+   (no-error-declaration *)
+   (no-error-form        *  :evaluation t)))
 
 (define-syntax restart-binding
     (list (or 'nil (<- name     ((variable-name! names))))
@@ -487,10 +503,10 @@
   (must (restart-binding) "must be of the form (NAME FUNCTION [OPTIONS])"))
 
 (define-macro restart-bind
-    (list* (list (* (<<- bindings (restart-binding!))))
-           (<- forms ((forms forms))))
-  ((bindings * :evaluation :compound)
-   (forms    * :evaluation t)))
+    (list* (list (* (<<- binding (restart-binding!))))
+           (<- form ((forms forms))))
+  ((binding * :evaluation :compound)
+   (form    * :evaluation t)))
 
 (define-syntax restart-clause
     (list* (or 'nil (<- name ((variable-name! names))))
@@ -519,9 +535,9 @@
 
 (define-macro restart-case
     (list (<- form ((form forms)))
-          (* (<<- clauses (restart-clause))))
-  ((form    1 :evaluation t)
-   (clauses * :evaluation :compound)))
+          (* (<<- clause (restart-clause))))
+  ((form   1 :evaluation t)
+   (clause * :evaluation :compound)))
 
 ;;; `[ec]case' and `cond'
 

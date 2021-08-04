@@ -19,14 +19,14 @@
             (* (<<- arguments (or (type-specifier)
                                   :any)))))
   (bp:node* (:compound-type-specifier :source source)
-    (1 :name     name)
-    (* :argument (nreverse arguments))))
+    (1 (:name     . 1) name)
+    (* (:argument . *) (nreverse arguments))))
 
 (defrule atomic-type-specifier ()
     (value (source)
       (guard name (typep 'symbol))) ; TODO control whether * is allowed, use class-name or type-name from names grammar
   (bp:node* (:atomic-type-specifier :source source)
-    (1 :name (bp:node* (:type-name :name name :source source)))))
+    (1 (:name . 1) (bp:node* (:type-name :name name :source source)))))
 
 ;;; Well-known compound specifiers
 

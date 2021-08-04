@@ -35,12 +35,12 @@
 (define-syntax local-function
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1 :evaluation :compound)
    (documentation ?)
-   (declarations  *)
-   (forms         * :evaluation t)))
+   (declaration   *)
+   (form          * :evaluation t)))
 
 (defrule local-function-binding ()
     (<- function (local-function))
@@ -59,12 +59,12 @@
 (define-syntax local-macro-function
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
-           (<- (documentation declarations forms) ((docstring-body forms))))
+           (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1 :evaluation :compound)
    (documentation ?)
-   (declarations  *)
-   (forms         *)))
+   (declaration   *)
+   (form          * :evaluation t)))
 
 (defrule local-macro-function-binding ()
     (<- function (local-macro-function))

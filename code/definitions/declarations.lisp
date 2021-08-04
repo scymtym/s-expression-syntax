@@ -45,7 +45,7 @@
                  (<- arguments (declaration-arguments)))))
   (let ((kind (eg::%naturalize kind)))
     (bp:node* (:declaration :kind kind :source source)
-      (* :argument (nreverse arguments)))))
+      (* (:argument . *) (nreverse arguments)))))
 
 (defrule declaration! ()
     (must (declaration) "must be a declaration"))

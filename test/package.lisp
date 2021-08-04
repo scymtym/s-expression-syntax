@@ -44,6 +44,18 @@
     `(mapc (curry #'%rule-test-case ',grammar ',rule (list ,@arguments))
            (list ,@cases))))
 
+(defun ast-equal (left right)
+  (labels ((rec (left right)
+             (typecase left
+               (cons                         (and (consp right)
+                                                  (rec (car left) (car right))
+                                                  (rec (cdr left) (cdr right))))
+               (vector                       (and (= (length left) (length right))
+                                                  (every #'rec left right)))
+               ((member :binding :reference) t)
+               (t                            (eql left right)))))
+    (rec left right)))
+
 (defun %syntax-test-case (syntax case)
   (destructuring-bind (input expected
                        &optional expected-value expected-message)
@@ -73,7 +85,7 @@
                       got ~S.~@:>"
                      input expected-message message))))))
         (t
-         (is (equal expected (do-it))))))))
+         (is (ast-equal expected (do-it))))))))
 
 (defmacro syntax-test-cases ((syntax-name) &body cases)
   `(let ((syntax (syn:find-syntax ',syntax-name)))

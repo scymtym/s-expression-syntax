@@ -20,7 +20,7 @@
     (list (cst:cst-from-expression 1) nil t nil)
 
     (let ((cst (cst:cst-from-expression 'a)))
-      (list cst t t cst))
+      (list cst t t `(:function-name () :name a :source ,cst)))
 
     (list (cst:cst-from-expression '(setf 1))
           :fatal t "second element of SETF function name must be a symbol")))
@@ -42,11 +42,41 @@
                                   (cst:cst-from-expression '&optional) d
                                   (cst:cst-from-expression '&rest) r
                                   (cst:cst-from-expression '&key) e)))
-      (list cst t t `(((,a ,specializer) (,b nil) (,c nil))
-                      ((,d nil nil))
-                      ,r
-                      (((keyword ,e) ,e nil nil)) nil
-                      ())))
+      (list cst t t `(:specialized-lambda-list
+                      ((:required . *)  (((:specialized-parameter
+                                           ((:name        . 1) (((:variable-name
+                                                                  ()
+                                                                  :name a :source ,a)))
+                                            (:specializer . 1) (((:type-name
+                                                                  ()
+                                                                  :name integer :source ,specializer))))
+                                           :source ,parameter))
+                                         ((:specialized-parameter
+                                           ((:name . 1) (((:variable-name
+                                                           ()
+                                                           :name b :source ,b))))
+                                           :source ,b))
+                                         ((:specialized-parameter
+                                           ((:name . 1) (((:variable-name
+                                                           ()
+                                                           :name c :source ,c))))
+                                           :source ,c)))
+                       (:optional . *)  (((:optional-parameter
+                                           ((:name . 1) (((:variable-name
+                                                           ()
+                                                           :name d :source ,d))))
+                                           :source ,d)
+                                          :evaluation :compound))
+                       (:rest     . 1)  (((:variable-name
+                                           ()
+                                           :name r :source ,r)))
+                       (:keyword  . *)  (((:keyword-parameter
+                                           ((:name . 1) (((:variable-name
+                                                           ()
+                                                           :name e :source ,e))))
+                                           :source ,e)
+                                          :evaluation :compound)))
+                      :source ,cst)))
 
     (list (cst:cst-from-expression `((a 1 2) b c &optional d &rest r &key e))
           :fatal t "must be a class name")))
