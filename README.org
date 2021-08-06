@@ -13,7 +13,8 @@
 * STARTED Introduction
 
   The ~s-expression-syntax~ library provides declarative rules for
-  parsing the various bits of Common Lisp's s-expression syntax:
+  parsing the various kinds of s-expression syntax used in Common
+  Lisp:
 
   + Special operators
 
@@ -116,7 +117,93 @@
 
   #+end_example
 
-* TODO Dictionary
+* STARTED Dictionary
+
+  #+BEGIN_SRC lisp :results none :exports none :session "doc"
+    #.(progn
+        #1=(ql:quickload '(:s-expression-syntax :alexandria :split-sequence))
+        '#1#)
+    (defun doc (symbol kind)
+      (let* ((lambda-list (sb-introspect:function-lambda-list symbol))
+             (string      (documentation symbol kind))
+             (lines       (split-sequence:split-sequence #\Newline string))
+             (trimmed     (mapcar (alexandria:curry #'string-left-trim '(#\Space)) lines)))
+        (format nil "~(~A~) ~<~{~A~^ ~}~:@>~2%~{~A~^~%~}"
+                symbol (list lambda-list) trimmed)))
+  #+END_SRC
+
+** STARTED Syntax Description Protocol
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:find-syntax 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   find-syntax NAME &KEY IF-DOES-NOT-EXIST
+
+   Return the syntax description named NAME, if any.
+
+   IF-DOES-NOT-EXIST controls the behavior in case a syntax description
+   named NAME does not exist. The following values are allowed:
+
+   #'ERROR
+
+   Signal an error if a syntax description named NAME does not exist.
+
+   OBJECT
+
+   Return OBJECT if a syntax description named NAME does not exist.
+   #+end_example
+
+** STARTED Parser Protocol
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax::classify 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   classify CLIENT EXPRESSION
+
+   Classify EXPRESSION, possibly according to specialized behavior of CLIENT.
+
+   Return a syntax description object that roughly reflects the kind of
+   EXPRESSION. Note that a precise classification would have to take into
+   account aspects beyond the syntax, such as the environment, to, for
+   example, distinguish function and macro application or variable
+   references and symbol macro applications. It should always be possible
+   to find an appropriate syntax description:
+
+   + If EXPRESSION is a special form, this function returns the syntax
+   description for the corresponding special operator.
+
+   + If EXPRESSION is an application of a standard macro, this function
+   returns the syntax description for that macro.
+
+   + If EXPRESSION a list not covered by the above cases, this function
+   returns the syntax description for a generic (that is, function or
+   macro) application. Note that this case also covers invalid
+   applications such as (1 2 3).
+
+   + If EXPRESSION is a symbol but not a keyword, this function returns a
+   syntax description for a variable reference.
+
+   + If EXPRESSION is any object that is not covered by the above cases,
+   this function returns a syntax description for a self-evaluating
+   object.
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:parse 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   : parse CLIENT SYNTAX EXPRESSION
+   :
+   : Parse EXPRESSION according to SYNTAX, possibly specialized behavior of CLIENT.
+   :
+   : TODO
 
 # Local Variables:
 # eval: (require 'ob-lisp)
