@@ -31,25 +31,26 @@
    #:syntax-not-found-error
    #:name
 
-   #:component-not-found
+   #:part-not-found
    #:syntax
    #:name
 
    #:invalid-syntax-error
    #:syntax
-   #:value) ; TODO collides with symbol from grammar.base
+   #:value ; TODO collides with symbol from grammar.base
+   #:message)
 
-  ;; Component protocol
+  ;; Name protocol
+
+  ;; Part protocol
   (:export
-   #:name
    #:cardinality
    #:evaluation)
 
   ;; Syntax protocol
   (:export
-   #:parse
-
-   #:find-component)
+   #:parts
+   #:find-part)
 
   ;; Syntax lookup protocol
   (:export
@@ -58,6 +59,11 @@
 
    #:find-syntax                    ; also `setf'
    #:ensure-syntax)
+
+  ;; Parse protocol
+  (:export
+   #:classify
+   #:parse)
 
   ;; Macros
   (:export

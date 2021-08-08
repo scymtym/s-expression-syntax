@@ -127,7 +127,7 @@
                        sub-expression (getf relation-args :evaluation))))
        (loop :for relation    :in (architecture.builder-protocol:node-relations builder node)
              :for part-name   = (find-symbol (symbol-name (first relation)) (find-package "S-EXPRESSION-SYNTAX"))
-             :for part        = (s-expression-syntax:find-component part-name syntax)
+             :for part        = (s-expression-syntax:find-part part-name syntax)
              :for cardinality = (s-expression-syntax:cardinality part)
              :for (sub-expression evaluation)
                 = (multiple-value-list (architecture.builder-protocol:node-relation

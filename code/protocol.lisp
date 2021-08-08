@@ -6,7 +6,83 @@
 
 (cl:in-package #:s-expression-syntax)
 
+;;; Name protocol
+
+;;; in conditions.lisp
+#+(or)(defgeneric name (thing)
+        (:documentation
+         "Return the name of THING.
+
+If THING is syntax description that describes a standard special
+operator, macro, class or type, the returned name is the symbol in the
+COMMON-LISP package which names the special operator, macro, class or
+type.
+
+If THING is a part, the name is a symbol which uniquely identifies the
+part within the containing syntax description."))
+
+;;; Part protocol
+
+(defgeneric cardinality (part)
+  (:documentation
+   "Return cardinality of sub-expression(s) described by PART.
+
+The following values may be returned
+
+? The described sub-expression occurs zero or one times in the
+  containing expression.
+
+1 The described sub-expression occurs exactly once in the containing
+  expression.
+
+* The described sub-expression occurs zero or more times in the
+  containing expression."))
+
+(defgeneric evaluation (part)
+  (:documentation
+   "Return evaluation semantics of sub-expressions described by PART."))
+
 ;;; Syntax description protocol
+
+(defgeneric parts (container)
+  (:documentation
+   "Return a sequence of parts belonging to CONTAINER.
+
+"))
+
+(defgeneric find-part (naem container &key if-does-not-exist))
+
+;;; Default behavior
+
+(defmethod find-part ((name t) (container symbol) &key if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+  (find-part name (find-syntax container)))
+
+(defmethod find-part :around ((name t) (container t) &key if-does-not-exist) ; TODO should be outermost call only
+  (or (call-next-method)
+      (typecase if-does-not-exist
+        (function
+         (funcall if-does-not-exist (make-condition 'part-not-found-error
+                                                    :syntax container
+                                                    :name   name)))
+        (t
+         if-does-not-exist))))
+
+;;; Backwards compatibility
+
+(defun components (container)
+  (parts container))
+
+(defun find-component (name container
+                       &key (if-does-not-exist nil if-does-not-exist-p))
+  (apply #'find-part name container (when if-does-not-exist-p
+                                      (list :if-does-not-exist if-does-not-exist))))
+
+#+sbcl
+(declaim (sb-ext:deprecated :early ("s-expression-syntax" "0.1")
+                            (function components) (function find-component)))
+
+;;; Syntax description repository protocol
 
 (defgeneric find-syntax (name &key if-does-not-exist)
   (:documentation
@@ -27,28 +103,6 @@ OBJECT
 
 (defgeneric ensure-syntax (name class &rest initargs))
 
-(defgeneric name (thing)
-  (:documentation
-   "Return the name of THING.
-
-If THING is syntax description that describes a standard special
-operator, macro, class or type, the returned name is the symbol in the
-COMMON-LISP package which names the special operator, macro, class or
-type.
-
-If THING is a part, the name is a symbol which uniquely identifies the
-part within the containing syntax description."))
-
-(defgeneric parts (container)
-  (:documentation
-   "Return a sequence of parts belonging to CONTAINER.
-
-"))
-
-(defgeneric components (container))
-
-(defgeneric find-component (name container &key if-does-not-exist))
-
 ;;; Default behavior
 
 (defmethod find-syntax :around ((name t) &key (if-does-not-exist #'error))
@@ -57,20 +111,6 @@ part within the containing syntax description."))
         (function
          (funcall if-does-not-exist (make-condition 'syntax-not-found-error
                                                     :name name)))
-        (t
-         if-does-not-exist))))
-
-(defmethod find-component ((name t) (container symbol) &key if-does-not-exist)
-  (declare (ignore if-does-not-exist))
-  (find-component name (find-syntax container)))
-
-(defmethod find-component :around ((name t) (container t) &key if-does-not-exist) ; TODO should be outermost call only
-  (or (call-next-method)
-      (typecase if-does-not-exist
-        (function
-         (funcall if-does-not-exist (make-condition 'component-not-found-error
-                                                    :syntax container
-                                                    :name   name)))
         (t
          if-does-not-exist))))
 
