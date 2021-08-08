@@ -20,27 +20,103 @@
   "Smoke test for the `function-type-specifier' rule."
 
   (rule-test-cases ((syn::function-type-specifier syn::type-specifiers))
-    '(1                       nil nil nil)
-
-    '(#3=(function #4=* #5=*) t #3# (:function-type-specifier
-                                     ((:parameters . 1) (((:wildcard-type-specifier () :source #4#)))
-                                      (:values     . 1) (((:wildcard-type-specifier () :source #5#))))
-                                     :source #3#))))
+    ;; Invalid syntax
+    '(1 nil nil nil)
+    '((function #20=1)
+      :fatal #20# "must be of the form (REQUIRED* [&optional OPTIONAL*] [&rest REST] [&key KEY* [&allow-other-keys]])")
+    '((function #1=(&rest))
+      :fatal #1# "type specifier must follow &REST")
+    ;; Valid syntax
+    '(#2=function
+      t #2# (:function-type-specifier () :source #2#))
+    '(#3=(function #4=* #5=*)
+      t #3# (:function-type-specifier
+             ((:parameters . 1) (((:wildcard-type-specifier () :source #4#)))
+              (:values     . 1) (((:wildcard-type-specifier () :source #5#))))
+             :source #3#))
+    '(#6=(function #7=(#8=bit #9=t))
+      t #6# (:function-type-specifier
+             ((:parameters . 1) (((:parameter-type-specifier
+                                   ((:required . *) (((:atomic-type-specifier
+                                                       ((:name . 1) (((:type-name
+                                                                       ()
+                                                                       :name bit :source #8#))))
+                                                       :source #8#))
+                                                     ((:atomic-type-specifier
+                                                       ((:name . 1) (((:type-name
+                                                                       ()
+                                                                       :name t :source #9#))))
+                                                       :source #9#))))
+                                    :source #7#))))
+              :source #6#))
+    '(#10=(function #11=(&optional #12=bit #13=t))
+      t #10# (:function-type-specifier
+              ((:parameters . 1) (((:parameter-type-specifier
+                                    ((:optional . *) (((:atomic-type-specifier
+                                                        ((:name . 1) (((:type-name
+                                                                        ()
+                                                                        :name bit :source #12#))))
+                                                        :source #12#))
+                                                      ((:atomic-type-specifier
+                                                        ((:name . 1) (((:type-name
+                                                                        ()
+                                                                        :name t :source #13#))))
+                                                        :source #13#))))
+                                    :source #11#))))
+              :source #10#))
+    '(#14=(function #15=(&rest #16=bit &key #17=(#18=a #19=t)))
+      t #10# (:function-type-specifier
+              ((:parameters . 1) (((:parameter-type-specifier
+                                    ((:rest    . 1) (((:atomic-type-specifier
+                                                       ((:name . 1) (((:type-name
+                                                                       ()
+                                                                       :name bit :source #16#))))
+                                                       :source #16#)))
+                                     (:keyword . *) (((:keyword-parameter-type-specifier
+                                                       ((:keyword . 1) (((:keyword
+                                                                          ()
+                                                                          :name a :source #18#)))
+                                                        (:type    . 1) (((:atomic-type-specifier
+                                                                          ((:name . 1) (((:type-name
+                                                                                          ()
+                                                                                          :name t :source #19#))))
+                                                                          :source #19#))))
+                                                       :source #17#))))
+                                    :source #15#))))
+              :source #14#))))
 
 (test values-type-specifier
   "Smoke test for the `values-type-specifier' rule."
 
   (rule-test-cases ((syn::values-type-specifier syn::type-specifiers))
-    '(1                            nil nil nil)
-    '(bit                          nil nil nil)
-    '((values &allow-other-keys)   nil nil nil)
-    ;; Valid
+    ;; Invalid syntax
+    '(1   nil nil nil)
+    '(bit nil nil nil)
+    '((values #8=*)
+      :fatal #8# "the type specifier * is not allowed within a VALUES type specifier")
+    '((values &optional #9=*)
+      :fatal #9# "the type specifier * is not allowed within a VALUES type specifier")
+    '((values &allow-other-keys)
+      :fatal nil "must be of the form (values REQUIRED* [&optional OPTIONAL*] [&rest REST])")
+    '((values &rest)
+      :fatal nil "type specifier must follow &REST")
+    '((values &rest bit bit)
+      :fatal nil "must be of the form (values REQUIRED* [&optional OPTIONAL*] [&rest REST])")
+    ;; Valid syntax
     '(#1=(values)                  t   nil (:values-type-specifier () :source #1#))
     '(#2=(values #3=bit)           t   nil (:values-type-specifier
                                             ((:required . *) (((:atomic-type-specifier
                                                                 ((:name . 1) (((:type-name () :name bit :source #3#))))
                                                                 :source #3#))))
                                             :source #2#))
+    '(#10=(values #11=bit #12=t)   t   nil (:values-type-specifier
+                                            ((:required . *) (((:atomic-type-specifier
+                                                                ((:name . 1) (((:type-name () :name bit :source #11#))))
+                                                                :source #11#))
+                                                              ((:atomic-type-specifier
+                                                                ((:name . 1) (((:type-name () :name t :source #12#))))
+                                                                :source #12#))))
+                                            :source #10#))
     '(#4=(values &optional #5=bit) t   nil (:values-type-specifier
                                             ((:optional . *) (((:atomic-type-specifier
                                                                 ((:name . 1) (((:type-name () :name bit :source #5#))))

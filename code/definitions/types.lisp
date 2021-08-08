@@ -40,8 +40,8 @@
       (list (<- keyword ((parameter-keyword! names)))
             (<- type    (type-specifier!))))
   (bp:node* (:keyword-parameter-type-specifier :source source)
-    (1 :keyword keyword)
-    (1 :type    type)))
+    (1 (:keyword . 1) keyword)
+    (1 (:type    . 1) type)))
 
 (defrule parameter-type-specifier ()
     (value (source)
@@ -49,27 +49,35 @@
                                   (not (or '&optional '&rest '&key '&allow-other-keys))
                                   (type-specifier!))))
             (? (seq '&optional (* (<<- optional (type-specifier!)))))
-            (? (seq '&rest     (<- rest (type-specifier!))))
+            (? (seq '&rest     (must (<- rest (type-specifier!))
+                                     "type specifier must follow &REST")))
             (? (seq '&key      (* (<<- keyword (keyword-parameter-type-specifier)))))))
   (bp:node* (:parameter-type-specifier :source source)
-    (*    :required (nreverse required))
-    (bp:? :rest     rest)
-    (*    :keyword  keyword)))
+    (*    (:required . *) (nreverse required))
+    (*    (:optional . *) (nreverse optional))
+    (bp:? (:rest     . 1) rest)
+    (*    (:keyword  . *) keyword)))
 
-;; TODO The symbol * may not be among the value-types.
+(defrule parameter-type-specifier! ()
+  (must (parameter-type-specifier)
+        "must be of the form (REQUIRED* [&optional OPTIONAL*] [&rest REST] [&key KEY* [&allow-other-keys]])"))
+
 (defrule values-type-specifier ()
     (value (source)
-      (list 'values
-            (* (<<- required (and :any
-                                  (not (or '&optional '&rest '&allow-other-keys))
-                                  (type-specifier!))))
-            (? (seq '&optional (* (<<- optional (and :any
-                                                     (not (or '&rest '&allow-other-keys))
-                                                     (type-specifier!))))))
-            (? (seq '&rest (<- rest (type-specifier!))))))
+      (list* 'values
+            (must
+             (list (* (<<- required (and :any
+                                         (not (or '&optional '&rest '&allow-other-keys))
+                                         (type-specifier/not-*! 'values))))
+                   (? (seq '&optional (* (<<- optional (and :any
+                                                            (not (or '&rest '&allow-other-keys))
+                                                            (type-specifier/not-*! 'values))))))
+                   (? (seq '&rest (must (<- rest (type-specifier/not-*! 'values))
+                                        "type specifier must follow &REST"))))
+             "must be of the form (values REQUIRED* [&optional OPTIONAL*] [&rest REST])")))
   (bp:node* (:values-type-specifier :source source)
-    (*    (:required . *) required)
-    (*    (:optional . *) optional)
+    (*    (:required . *) (nreverse required))
+    (*    (:optional . *) (nreverse optional))
     (bp:? (:rest     . 1) rest)))
 
 (defrule function-type-specifier ()
@@ -77,12 +85,12 @@
       (or 'function
           (list 'function
                 (? (<- parameters (or (wildcard-type-specifer)
-                                      (parameter-type-specifier))))
+                                      (parameter-type-specifier!))))
                 (? (<- values     (or (wildcard-type-specifer)
                                       (values-type-specifier)))))))
   (bp:node* (:function-type-specifier :source source)
-    (1 (:parameters . 1) parameters)
-    (1 (:values     . 1) values)))
+    (bp:? (:parameters . 1) parameters)
+    (bp:? (:values     . 1) values)))
 
 (defrule function-type-specifier! ()
   (must (function-type-specifier) "must be a function type specifier"))
@@ -99,4 +107,10 @@
            )))
 
 (defrule type-specifier! ()
-    (must (type-specifier) "must be a type specifier"))
+  (must (type-specifier) "must be a type specifier"))
+
+(defrule type-specifier/not-*! (context)
+  (or (:transform '* (:fatal (format nil "the type specifier * is not ~
+                                          allowed within a ~A type specifier"
+                                     context )))
+      (type-specifier!)))
