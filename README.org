@@ -26,9 +26,11 @@
 
   + Standard macros
 
-    + ~cl:loop~
+    + +~cl:loop~+ (work in progress)
 
   + Feature expressions
+
+  + +Format control strings+ (work in progress)
 
 * STARTED Concepts
 
@@ -78,210 +80,589 @@
        | declaration          | zero-or-more | not evaluated                                   |
        | body forms           | zero-or-more | evaluated                                       |
 
+  + Result Tree :: A tree that is result of parsing an
+       input /expression/. Each node in the tree corresponds to a
+       /sub-expression/ of the input /expression/ (multiple nodes may
+       corresponding to the same /sub-expression/). A node is
+       characterized by its /kind/, its /initargs/ and its /relations/
+       to other nodes.
+
+       The result tree could possibly be called an Abstract Syntax
+       Tree (AST), but we avoid that term because the result directly
+       reflects the structure of the input /expression/.
+
+       We may call a /result tree/ a /partial result tree/ if it
+       contains unparsed /sub-expressions/ of the input /expression/
+       in some of its leaf nodes.
+
 * STARTED Tutorial
 
-  The most common use of this library probably is turning a given
-  /expression/ into an AST. This process happens in multiple steps
-
-  1. Determine an appropriate /syntax description/ for parsing the
-     /expression/. For example, the /expression/ ~(locally (declare …) 1
-     (+ a b) 3)~ must be parsed using the /syntax description/ for the
-     special operator ~cl:locally~.
-
-  2. Apply the obtained /syntax description/ in conjunction with a parse
-     result builder to obtain a partial (see 3.) AST for the
-     /expression/.
-
-  3. Optionally parse evaluated sub-expressions recursively. In the
-     above example ~(declare …)~ is a sub-expression that is not
-     evaluated while ~1~, ~(+ a b)~ and ~3~ are sub-expressions that
-     are evaluated. The latter are not automatically parsed and thus
-     must be recursively processed in the way described here in order
-     to obtain a fully parsed AST. A complete AST can generally only
-     be produced by consulting an environment as well as interleaving
-     parsing with macroexpansion and is therefore out of scope for
-     this library.
-
-  The following code performs steps 1. and 2. and prints the resulting
-  (partially parsed) AST in a human-readable form. Note how the ~list~
-  builder of the [[https://github.com/scymtym/architecture.builder-protocol][architecture.builder-protocol system]] is passed in the
-  ~parse~ call and later used to destructure the AST node ~node~ by
-  calling the functions ~node-relations~ and ~node-relation~.
-
-  #+NAME: simple-parse
-  #+BEGIN_SRC lisp :exports both :results output
-    (let* ((expression '(defun foo (a &optional (b 2))
-                          (declare (type integer a))
-                          (declare (type integer b))
-                          (format t "~S" a)
-                          (list a b)))
-           (syntax     (s-expression-syntax:find-syntax 'defun))
-           ;; Alternatively, determine the appropriate syntax description
-           ;; for EXPRESSION automatically:
-           ;; (syntax     (s-expression-syntax::classify t expression))
-           (builder    'list)
-           (node       (s-expression-syntax:parse builder syntax expression)))
-      (flet ((describe-sub-expression (sub-expression relation-args)
-               (format t "~2@T-> ~S~%~
-                          ~2@T   evaluation: ~S~%"
-                       sub-expression (getf relation-args :evaluation))))
-       (loop :for relation    :in (architecture.builder-protocol:node-relations builder node)
-             :for part-name   = (find-symbol (symbol-name (first relation)) (find-package "S-EXPRESSION-SYNTAX"))
-             :for part        = (s-expression-syntax:find-part part-name syntax)
-             :for cardinality = (s-expression-syntax:cardinality part)
-             :for (sub-expression evaluation)
-                = (multiple-value-list (architecture.builder-protocol:node-relation
-                                        builder relation node))
-             :do  (format t "~A (~A)~%" part-name cardinality)
-                  (ecase (s-expression-syntax:cardinality part)
-                    ((1) (describe-sub-expression sub-expression evaluation))
-                    ((*) (map 'nil #'describe-sub-expression sub-expression evaluation))))))
+  #+BEGIN_SRC lisp :results none :exports none :session "doc"
+    #.(progn
+        #1=(ql:quickload '(:s-expression-syntax
+                           :architecture.builder-protocol.print-tree))
+        '#1#)
   #+END_SRC
 
-  Evaluating the code results in the following output which
-  illustrates the four /parts/ of the ~defun~ /expression/: name,
-  lambda-list, declaration and form. The latter two have a cardinality
-  of ~*~, so multiple child nodes may be related to the parent node
-  through the relation in question. In this example, both relations
-  contain two child nodes: two declarations and two body forms.
+  This tutorial explains the most important aspects of using this
+  library in three parts:
 
-  #+RESULTS: simple-parse
-  #+begin_example
-  NAME (1)
-    -> (:FUNCTION-NAME NIL :NAME FOO :SOURCE FOO)
-       evaluation: NIL
-  LAMBDA-LIST (1)
-    -> (:ORDINARY-LAMBDA-LIST
-        ((:REQUIRED . *)
-         (((:REQUIRED-PARAMETER
-            ((:NAME . 1)
-             (((:VARIABLE-NAME NIL :NAME A :SOURCE A) :EVALUATION NIL)))
-            :SOURCE A)))
-         (:OPTIONAL . *)
-         (((:OPTIONAL-PARAMETER
-            ((:NAME . 1) (((:VARIABLE-NAME NIL :NAME B :SOURCE B)))
-             (:DEFAULT . 1) ((2 :EVALUATION T)))
-            :SOURCE (B 2))
-           :EVALUATION :COMPOUND)))
-        :SOURCE (A &OPTIONAL (B 2)))
-       evaluation: :COMPOUND
-  DECLARATION (*)
-    -> (:DECLARATION
-        ((:ARGUMENT . *)
-         (((:ATOMIC-TYPE-SPECIFIER
-            ((:NAME . 1) (((:TYPE-NAME NIL :NAME INTEGER :SOURCE INTEGER))))
-            :SOURCE INTEGER))
-          ((:VARIABLE-NAME NIL :NAME A :SOURCE A))))
-        :KIND TYPE :SOURCE (TYPE INTEGER A))
-       evaluation: NIL
-    -> (:DECLARATION
-        ((:ARGUMENT . *)
-         (((:ATOMIC-TYPE-SPECIFIER
-            ((:NAME . 1) (((:TYPE-NAME NIL :NAME INTEGER :SOURCE INTEGER))))
-            :SOURCE INTEGER))
-          ((:VARIABLE-NAME NIL :NAME B :SOURCE B))))
-        :KIND TYPE :SOURCE (TYPE INTEGER B))
-       evaluation: NIL
-  FORM (*)
-    -> (FORMAT T "~S" A)
-       evaluation: T
-    -> (LIST A B)
-       evaluation: T
-  #+end_example
+  + The first section describes how to invoke the parser on a given
+    /expression/.
 
-  We can also focus on the overall tree structure and print the
-  (partially parsed) AST as a tree. The following code again uses the
-  =architecture.builder-protocol= system to destructure the AST, this
-  time as part of a generic tree printer.
+  + The second section describes how to construct possibly using a
+    customized /result tree/ representation.
 
-  #+NAME: tree-parse
-  #+BEGIN_SRC lisp :exports both :results output
-    (let* ((expression '(defun foo (a &optional (b 2))
-                          (declare (type integer a))
-                          (declare (type integer b))
-                          (format t "~S" a)
-                          (list a b)))
-           (syntax     (s-expression-syntax::classify t expression))
-           (builder    'list)
-           (node       (s-expression-syntax:parse builder syntax expression)))
-      (let ((*print-case* :downcase))
-        (architecture.builder-protocol.print-tree:serialize
-         builder node *standard-output*
-         :printers (list (cons (lambda (node)
-                                 (not (typep node '(cons keyword))))
-                               (lambda (depth node stream)
-                                 (declare (ignore depth))
-                                 (format stream "[UNPARSED ~A]"  node stream)))))))
+  + The final section explains how to parse /expressions/ that are
+    presented in a client-specific way.
+
+  As a running example, we will use the following /expression/
+
+  #+BEGIN_SRC lisp :results silent :exports both
+    (defvar *expression*
+      '(defun foo (a &optional (b 2))
+         (declare (type integer a))
+         (declare (type (integer 0 10) b))
+         (if nil (list a b) "hi")))
   #+END_SRC
 
-  Note the unparsed leafs indicated by the ~UNPARSED~ labels.
+  which illustrates several aspects of Common Lisp syntax at once:
 
-  #+RESULTS: tree-parse
-  #+begin_example
-  defun
-  │ source: (defun foo (a &optional (b 2))
-  │           (declare (type integer a))
-  │           (declare (type integer b))
-  │           (format t "~S" a)
-  │           (list a b))
-  ├─name: function-name
-  │   name: foo
-  │   source: foo
-  ├─lambda-list: ordinary-lambda-list
-  │ │ source: (a &optional (b 2))
-  │ ├─required: required-parameter
-  │ │ │ source: a
-  │ │ └─name: variable-name
-  │ │     name: a
-  │ │     source: a
-  │ └─optional: optional-parameter
-  │   │ source: (b 2)
-  │   ├─name: variable-name
-  │   │   name: b
-  │   │   source: b
-  │   └─default: [UNPARSED 2]
-  ├─declaration: declaration
-  │ │ kind: type
-  │ │ source: (type integer a)
-  │ ├─argument: atomic-type-specifier
-  │ │ │ source: integer
-  │ │ └─name: type-name
-  │ │     name: integer
-  │ │     source: integer
-  │ └─argument: variable-name
-  │     name: a
-  │     source: a
-  ├─declaration: declaration
-  │ │ kind: type
-  │ │ source: (type integer b)
-  │ ├─argument: atomic-type-specifier
-  │ │ │ source: integer
-  │ │ └─name: type-name
-  │ │     name: integer
-  │ │     source: integer
-  │ └─argument: variable-name
-  │     name: b
-  │     source: b
-  ├─form: [UNPARSED (format t ~S a)]
-  └─form: [UNPARSED (list a b)]
-  #+end_example
+  + The ~defun~ standard macro
 
-* STARTED Dictionary
+  + An ordinary lambda list
+
+  + The ~type~ declaration
+
+  + The ~integer~ type specifier
+
+  + The ~if~ special operator
+
+** STARTED Invoking the Parser
+
+   The most common use of this library probably is turning a given
+   /expression/ into a /result tree/. This process happens in multiple
+   steps
+
+   1. Determine an appropriate /syntax description/ for parsing the
+      /expression/. For example, the /expression/ ~(locally (declare …) 1
+      (+ a b) 3)~ must be parsed using the /syntax description/ for the
+      special operator ~cl:locally~.
+
+   2. Apply the obtained /syntax description/ in conjunction with a
+      parse result builder to obtain a partial (see 3.) result tree
+      for the /expression/.
+
+   3. Optionally parse evaluated /sub-expressions/ recursively. In the
+      above example ~(declare …)~ is a /sub-expression/ that is not
+      evaluated while ~1~, ~(+ a b)~ and ~3~ are /sub-expressions/
+      that are evaluated. The latter are not automatically parsed and
+      thus must be recursively processed in the way described here in
+      order to obtain a fully parsed /result tree/. A fully parsed
+      /result tree/ can generally only be produced by consulting an
+      environment as well as interleaving parsing with macroexpansion
+      and is therefore out of scope for this library.
+
+   The following code performs steps 1. and 2. and prints the
+   resulting (partially parsed) /result tree/ in a human-readable
+   form. Note how the ~list~ builder of the
+   [[https://github.com/scymtym/architecture.builder-protocol][architecture.builder-protocol system]] is passed in the ~parse~ call
+   and later used to destructure the result tree node ~node~ by
+   calling the functions ~node-relations~ and ~node-relation~.
+
+   #+NAME: simple-parse
+   #+BEGIN_SRC lisp :exports both :results output
+     (let* ((syntax     (s-expression-syntax:find-syntax 'defun))
+            ;; Alternatively, determine the appropriate syntax description
+            ;; for EXPRESSION automatically:
+            ;; (syntax     (s-expression-syntax::classify t expression))
+            (builder    'list)
+            (node       (s-expression-syntax:parse builder syntax *expression*)))
+       (flet ((describe-sub-expression (sub-expression relation-args)
+                (format t "~2@T-> ~S~%~
+                           ~2@T   evaluation: ~S~%"
+                        sub-expression (getf relation-args :evaluation))))
+        (loop :for relation    :in (architecture.builder-protocol:node-relations builder node)
+              :for part-name   = (find-symbol (symbol-name (first relation)) (find-package "S-EXPRESSION-SYNTAX"))
+              :for part        = (s-expression-syntax:find-part part-name syntax)
+              :for cardinality = (s-expression-syntax:cardinality part)
+              :for (sub-expression evaluation)
+                 = (multiple-value-list (architecture.builder-protocol:node-relation
+                                         builder relation node))
+              :do  (format t "~A (~A)~%" part-name cardinality)
+                   (ecase (s-expression-syntax:cardinality part)
+                     ((1) (describe-sub-expression sub-expression evaluation))
+                     ((*) (map 'nil #'describe-sub-expression sub-expression evaluation))))))
+   #+END_SRC
+
+   Evaluating the code results in the following output which
+   illustrates the four /parts/ of the ~defun~ /expression/: name,
+   lambda-list, declaration and form. The latter two have a cardinality
+   of ~*~, so multiple child nodes may be related to the parent node
+   through the relation in question. In this example, both relations
+   contain two child nodes: two declarations and two body forms.
+
+   #+RESULTS: simple-parse
+   #+begin_example
+   NAME (1)
+     -> (:FUNCTION-NAME NIL :NAME FOO :SOURCE FOO)
+        evaluation: NIL
+   LAMBDA-LIST (1)
+     -> (:ORDINARY-LAMBDA-LIST
+         ((:REQUIRED . *)
+          (((:REQUIRED-PARAMETER
+             ((:NAME . 1)
+              (((:VARIABLE-NAME NIL :NAME A :SOURCE A) :EVALUATION NIL)))
+             :SOURCE A)))
+          (:OPTIONAL . *)
+          (((:OPTIONAL-PARAMETER
+             ((:NAME . 1) (((:VARIABLE-NAME NIL :NAME B :SOURCE B)))
+              (:DEFAULT . 1) ((2 :EVALUATION T)))
+             :SOURCE (B 2))
+            :EVALUATION :COMPOUND)))
+         :SOURCE (A &OPTIONAL (B 2)))
+        evaluation: :COMPOUND
+   DECLARATION (*)
+     -> (:DECLARATION
+         ((:ARGUMENT . *)
+          (((:ATOMIC-TYPE-SPECIFIER
+             ((:NAME . 1) (((:TYPE-NAME NIL :NAME INTEGER :SOURCE INTEGER))))
+             :SOURCE INTEGER))
+           ((:VARIABLE-NAME NIL :NAME A :SOURCE A))))
+         :KIND TYPE :SOURCE (TYPE INTEGER A))
+        evaluation: NIL
+     -> (:DECLARATION
+         ((:ARGUMENT . *)
+          (((:ATOMIC-TYPE-SPECIFIER
+             ((:NAME . 1) (((:TYPE-NAME NIL :NAME INTEGER :SOURCE INTEGER))))
+             :SOURCE INTEGER))
+           ((:VARIABLE-NAME NIL :NAME B :SOURCE B))))
+         :KIND TYPE :SOURCE (TYPE INTEGER B))
+        evaluation: NIL
+   FORM (*)
+     -> (FORMAT T "~S" A)
+        evaluation: T
+     -> (LIST A B)
+        evaluation: T
+   #+end_example
+
+   We can also focus on the overall tree structure and print the
+   /partial result tree/ as an actual tree. The following code again
+   uses the =architecture.builder-protocol= system to destructure the
+   /result tree/, this time as part of a generic tree printer.
+
+   #+NAME: tree-parse
+   #+BEGIN_SRC lisp :exports both :results output
+     (let* ((syntax  (s-expression-syntax::classify t *expression*))
+            (builder 'list)
+            (node    (s-expression-syntax:parse builder syntax *expression*)))
+       (let ((*print-case* :downcase))
+         (architecture.builder-protocol.print-tree:serialize
+          builder node *standard-output*
+          :printers (list (cons (lambda (node)
+                                  (not (typep node '(cons keyword))))
+                                (lambda (depth node stream)
+                                  (declare (ignore depth))
+                                  (format stream "[UNPARSED ~S]"  node stream)))))))
+   #+END_SRC
+
+   Note the unparsed leaf nodes indicated by the ~UNPARSED~ labels.
+
+   #+RESULTS: tree-parse
+   #+begin_example
+   defun
+   │ source: (defun foo (a &optional (b 2))
+   │           (declare (type integer a))
+   │           (declare (type (integer 0 10) b))
+   │           (if nil
+   │               (list a b)
+   │               "hi"))
+   ├─name: function-name
+   │   name: foo
+   │   source: foo
+   ├─lambda-list: ordinary-lambda-list
+   │ │ source: (a &optional (b 2))
+   │ ├─required: required-parameter
+   │ │ │ source: a
+   │ │ └─name: variable-name
+   │ │     name: a
+   │ │     source: a
+   │ └─optional: optional-parameter
+   │   │ source: (b 2)
+   │   ├─name: variable-name
+   │   │   name: b
+   │   │   source: b
+   │   └─default: [UNPARSED 2]
+   ├─declaration: declaration
+   │ │ kind: type
+   │ │ source: (type integer a)
+   │ ├─argument: atomic-type-specifier
+   │ │ │ source: integer
+   │ │ └─name: type-name
+   │ │     name: integer
+   │ │     source: integer
+   │ └─argument: variable-name
+   │     name: a
+   │     source: a
+   ├─declaration: declaration
+   │ │ kind: type
+   │ │ source: (type (integer 0 10) b)
+   │ ├─argument: compound-type-specifier
+   │ │ │ source: (integer 0 10)
+   │ │ ├─name: type-name
+   │ │ │   name: integer
+   │ │ │   source: integer
+   │ │ ├─argument: [UNPARSED 0]
+   │ │ └─argument: [UNPARSED 10]
+   │ └─argument: variable-name
+   │     name: b
+   │     source: b
+   └─form: [UNPARSED (if nil
+                         (list a b)
+                         "hi")]
+   #+end_example
+
+** STARTED A detailed Look at Recursive Parsing and Parse Results
+
+   As a final way of looking at the structure of parse results,
+   consider the following code which is intended to be evaluated in
+   the [[https://common-lisp.net/project/mcclim][McCLIM Listener]] or a similar context. Now, this example is
+   longer and more complicated than the previous ones, but on the
+   bright side, we will get a graphical representation of parse
+   results as well as a concrete illustration of the difference
+   between parsed and unparsed /sub-expressions/. Remember that the
+   previous examples only parsed the outermost /expression/.
+
+   The strange color choices in the following code are intended to
+   ensure that everything is equally readable on light and dark
+   backgrounds.
+
+   #+BEGIN_SRC lisp :results silent :exports both
+     (defun parsed-p (node)
+       (typep node '(cons keyword))) ; hack for recognizing (un)parsed expressions
+
+     ;;; We parse a given expression and format it as a tree. As you can
+     ;;; see, we need three helper functions: 1) draw a given node 2)
+     ;;; compute the children of a given node 3) draw a relation as an edge
+     ;;; between a parent node and a child node.
+     (defun format-result-tree (expression stream &key recursive)
+       (clim:with-room-for-graphics (stream :first-quadrant nil)
+         (let* ((builder      'list)
+                (tree         (s-expression-syntax:parse builder t expression))
+                (*print-case* :downcase))
+           (clim:format-graph-from-root
+            (list nil tree :compound nil) ; (RELATION NODE EVALUATION HIGHLIGHTP)
+            (node-printer builder) (child-generator builder recursive)
+            :arc-drawer #'draw-relation-edge
+            :graph-type :directed-graph :merge-duplicates t :orientation :vertical
+            :stream stream))))
+
+     (defun node-printer (builder)
+       ;; This prints a single result node either as a node kind with a
+       ;; tablular display of its initargs if the node is parsed or as a
+       ;; "raw" expression if the node is not parsed. Due to the way the
+       ;; CLIM graph formatter works, the node is represented as a list
+       ;; (RELATION NODE EVALUATION HIGHLIGHT) but this function only
+       ;; considers the NODE.
+       (lambda (node* stream)
+         (destructuring-bind (relation node evaluation highlightp) node*
+           (declare (ignore relation))
+           (clim:surrounding-output-with-border
+               (stream :shape          :rectangle
+                       :ink            clim:+gray50+
+                       :line-thickness 2
+                       :line-dashes    (case evaluation
+                                         ((t)   nil)
+                                         ((nil) '(8 8))
+                                         (t     '(2 2)))
+                       :background     (if highlightp
+                                           clim:+beige+
+                                           clim:+white+))
+             (if (parsed-p node)
+                 ;; This is a proper result tree node, get its kind and initargs.
+                 (let ((kind     (architecture.builder-protocol:node-kind
+                                  builder node))
+                       (initargs (architecture.builder-protocol:node-initargs
+                                  builder node)))
+                   (clim:with-drawing-options (stream :text-face :bold)
+                     (princ kind stream))
+                   (unless (null initargs)
+                     (terpri stream)
+                     (clim:indenting-output (stream '(1 :character))
+                       (clim:with-drawing-options (stream :text-size :small)
+                         (clim:formatting-table (stream)
+                           (loop :for (key value) :on initargs :by #'cddr
+                                 :do (clim:formatting-row (stream)
+                                       (clim:formatting-cell (stream :align-y :top)
+                                         (princ key stream))
+                                       (clim:formatting-cell (stream)
+                                         (clim:with-drawing-options (stream :ink         clim:+steel-blue+
+                                                                            :text-family :fix)
+                                           (prin1 value stream))))))))))
+                 ;; NODE is an unparsed part of the original EXPRESSION.
+                 (clim:with-drawing-options (stream :ink         clim:+forest-green+
+                                                    :text-family :fix
+                                                    :text-size   :small)
+                   (prin1 node stream)))))))
+
+     (defun child-generator (builder recursive)
+       ;; Compute the children of a given node by iterating through all
+       ;; relations of that node and collecting all nodes at the "other
+       ;; end" of those relations. In order to allow the relation edge
+       ;; drawer to label edges with the relation name, we collect children
+       ;; in the form (RELATION CHILD EVALUATION HIGHLIGHT).
+       (lambda (node*)
+         (destructuring-bind (relation node evaluation highlightp) node*
+           (declare (ignore relation evaluation highlightp))
+           (if (parsed-p node)
+               (loop :for relation* :in (architecture.builder-protocol:node-relations
+                                         builder node)
+                     :for (relation . cardinality) = relation*
+                     :for (node-or-nodes relation-arg-or-args)
+                        = (multiple-value-list
+                           (architecture.builder-protocol:node-relation
+                            builder relation* node))
+                     :for (nodes relation-args)
+                        = (ecase cardinality
+                            (1 (list (list node-or-nodes) (list relation-arg-or-args)))
+                            (* (list node-or-nodes (or relation-arg-or-args
+                                                       (make-list (length node-or-nodes))))))
+                     :append (mapcar (lambda (node args)
+                                       (list relation
+                                             (if (and recursive (eq (getf args :evaluation) t))
+                                                 (s-expression-syntax:parse builder t node)
+                                                 node)
+                                             (getf args :evaluation)
+                                             (and recursive (eq (getf args :evaluation) t))))
+                                     nodes relation-args))
+               '()))))
+
+     (defun draw-relation-edge (stream from-node to-node x1 y1 x2 y2)
+       (declare (ignore from-node))
+       (destructuring-bind (relation node evaluation highlightp)
+           (clim:graph-node-object to-node)
+         (declare (ignore node evaluation highlightp))
+         (clim:draw-arrow* stream x1 y1 x2 y2
+                           :ink clim:+dark-orange+ :head-filled t)
+         (clim:draw-text* stream (string-downcase relation)
+                          (/ (+ x1 x2) 2) (/ (+ y1 y2) 2)
+                          :align-x (if (< x2 x1) :right :left)
+                          :ink clim:+dark-orange+ :text-size :smaller)))
+
+   #+END_SRC
+
+   After this preparation we can apply the above graph formatting code
+   to our running example which we repeat here for convenience:
+
+   # Export is disabled since :results value code does not work
+   #+BEGIN_SRC lisp :results value verbatim :exports none
+     *expression*
+   #+END_SRC
+
+   #+begin_src lisp
+    (defun foo (a &optional (b 2))
+      (declare (type integer a))
+      (declare (type (integer 0 10) b))
+      (if nil
+          (list a b)
+          "hi"))
+   #+end_src
+
+   First, like in the previous examples, we only parse the outermost
+   /expression/ and format the result tree:
+
+   #+BEGIN_SRC lisp :results output file :exports both
+     (princ
+      (enough-namestring
+       (mcclim-raster-image:with-output-to-raster-image-file (stream "images/result-tree-one-step.png")
+         (format-result-tree *expression* stream :recursive nil))))
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:images/result-tree-one-step.png]]
+
+   Nodes with solid borders are evaluated, nodes with sparsely dashed
+   borders are not evaluated and nodes with densely dashed borders
+   have evaluated as well as unevaluated children. Note again how the
+   green leaf nodes represent unparsed /sub-expressions/.
+
+   We now repeat the process but this time with recursive parsing of
+   /sub-expressions/:
+
+   #+BEGIN_SRC lisp :results output file :exports both
+     (princ
+      (enough-namestring
+       (mcclim-raster-image:with-output-to-raster-image-file (stream "images/result-tree-recursive.png")
+         (format-result-tree *expression* stream :recursive t))))
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:images/result-tree-recursive.png]]
+
+   The highlighted notes have turned from unparsed /sub-expressions/ to
+   parsed result nodes compared to the previous example.
+
+** TODO Constructing Parse Results
+
+** TODO Parsing Customized S-Expression Representations
+
+* STARTED External Protocols
 
   #+BEGIN_SRC lisp :results none :exports none :session "doc"
     #.(progn
         #1=(ql:quickload '(:s-expression-syntax :alexandria :split-sequence))
         '#1#)
     (defun doc (symbol kind)
-      (let* ((lambda-list (sb-introspect:function-lambda-list symbol))
-             (string      (documentation symbol kind))
-             (lines       (split-sequence:split-sequence #\Newline string))
-             (trimmed     (mapcar (alexandria:curry #'string-left-trim '(#\Space)) lines)))
-        (format nil "~(~A~) ~<~{~A~^ ~}~:@>~2%~{~A~^~%~}"
-                symbol (list lambda-list) trimmed)))
+      (let* ((string  (documentation symbol kind))
+             (lines   (split-sequence:split-sequence #\Newline string))
+             (trimmed (mapcar (alexandria:curry #'string-left-trim '(#\Space)) lines)))
+       (case kind
+         (function
+          (let ((kind        (class-name (class-of (fdefinition symbol))))
+                (lambda-list (sb-introspect:function-lambda-list symbol)))
+            (format nil "[~(~A~)] ~(~A~) ~<~{~A~^ ~}~:@>~2%~{~A~^~%~}"
+                    kind symbol (list lambda-list) trimmed)))
+         (t
+          (let* ((class (find-class symbol))
+                 (kind  (class-name (class-of class)))
+                 (cpl   (remove-if-not
+                         (lambda (name) (eq (symbol-package name)
+                                            (find-package '#:common-lisp)))
+                         (map 'list #'class-name
+                              (rest (sb-mop:class-precedence-list class))))))
+            (format nil "[~(~A~)] ~(~A~)~%Precedence List: ~{~(~A~)~^, ~}~2%~{~A~^~%~}"
+                    kind symbol cpl trimmed))))))
   #+END_SRC
 
+** STARTED Part Protocol
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:name 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   name THING
+
+   Return the name of THING.
+
+   If THING is syntax description [...]
+
+   If THING is a part, the name is a symbol which uniquely identifies the
+   part within the containing syntax description.
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:cardinality 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   cardinality PART
+
+   Return cardinality of sub-expression(s) described by PART.
+
+   The following values may be returned
+
+   ? The described sub-expression occurs zero or one times in the
+   containing expression.
+
+   1 The described sub-expression occurs exactly once in the containing
+   expression.
+
+   * The described sub-expression occurs zero or more times in the
+   containing expression.
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:evaluation 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   evaluation PART
+
+   Return evaluation semantics of sub-expressions described by PART.
+   #+end_example
+
 ** STARTED Syntax Description Protocol
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:part-not-found-error 'type)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   part-not-found-error
+   Precedence List: error, serious-condition, condition, t
+
+   This error is signaled if a specified part cannot be found in a given
+   syntax description.
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:name 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   name THING
+
+   Return the name of THING.
+
+   If THING is syntax description that describes a standard special
+   operator, macro, class or type, the returned name is the symbol in the
+   COMMON-LISP package which names the special operator, macro, class or
+   type.
+
+   If THING is a part [...]
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:parts 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   parts CONTAINER
+
+   Return a sequence of parts belonging to CONTAINER.
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:find-part 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   find-part NAME CONTAINER &KEY IF-DOES-NOT-EXIST
+
+   Return the part of CONTAINER named NAME.
+
+   IF-DOES-NOT-EXIST controls the behavior in case a part named NAME does
+   not exist in CONTAINER.
+
+   If the value of IF-DOES-NOT-EXIST is a function, that function is
+   called with a single argument, a condition of type
+   `part-not-found-error'.
+
+   If the value of IF-DOES-NOT-EXIST is not a function, that value is
+   returned in place of the missing part.
+   #+end_example
+
+** STARTED Syntax Description Repository Protocol
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:syntax-not-found-error 'type)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   syntax-not-found-error
+   Precedence List: error, serious-condition, condition, t
+
+   This error is signaled if a specified syntax cannot be found.
+   #+end_example
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
      (doc 's-expression-syntax:find-syntax 'function)
@@ -305,7 +686,19 @@
    Return OBJECT if a syntax description named NAME does not exist.
    #+end_example
 
-** STARTED Parser Protocol
+** STARTED Parse Protocol
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:invalid-syntax-error 'type)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   [condition-class] invalid-syntax-error
+   Precedence List: error, serious-condition, condition, t
+
+   NIL
+   #+end_example
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
      (doc 's-expression-syntax::classify 'function)
@@ -348,11 +741,13 @@
    #+END_SRC
 
    #+RESULTS:
-   : parse CLIENT SYNTAX EXPRESSION
-   :
-   : Parse EXPRESSION according to SYNTAX, possibly specialized behavior of CLIENT.
-   :
-   : TODO
+   #+begin_example
+   parse CLIENT SYNTAX EXPRESSION
+
+   Parse EXPRESSION according to SYNTAX, possibly specialized behavior of CLIENT.
+
+   TODO
+   #+end_example
 
 # Local Variables:
 # eval: (require 'ob-lisp)
