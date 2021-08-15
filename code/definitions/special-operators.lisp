@@ -169,26 +169,16 @@
    (form        *> :evaluation t)))
 
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
-    (list* (<- (name value) (value-bindings!))
+    (list* (<- bindings (value-bindings!))
            (<- (declaration form) ((body forms))))
-  ((name        *> :evaluation (make-instance 'binding-semantics
-                                              :namespace 'variable
-                                              :scope     :lexical
-                                              :order     :parallel
-                                              :values    'values))
-   (value       *> :evaluation t)
+  ((bindings    *> :evaluation :compound) ; :order     :parallel
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
 (define-special-operator let*
-    (list* (<- (name value) (value-bindings!))
+    (list* (<- bindings (value-bindings!)) ; :order     :sequential
            (<- (declaration form) ((body forms))))
-  ((name        *> :evaluation (make-instance 'binding-semantics
-                                              :namespace 'variable
-                                              :scope     :lexical
-                                              :order     :sequential
-                                              :values    'values))
-   (value       *> :evaluation t)
+  ((bindings    *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
@@ -210,25 +200,17 @@
 ;;; Lexically scope bindings of function-ish things.
 
 (define-special-operator macrolet
-    (list* (<- (name function) (macro-function-bindings))
+    (list* (<- binding (macro-function-bindings))
            (<- (declaration form) ((body forms))))
-  ((name        *> :evaluation (make-instance 'binding-semantics
-                                              :namespace 'function
-                                              :scope     :lexical
-                                              :values    'functions))
+  ((name        *> :evaluation )
    (function    *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
 (define-special-operator flet
-    (list* (<- (name function) (function-bindings))
+    (list* (<- binding (function-bindings))
            (<- (declaration form) ((body forms))))
-  ((name        *> :evaluation (make-instance 'binding-semantics
-                                              :namespace 'function
-                                              :scope     :lexical
-                                              :order     :parallel
-                                              :values    'functions))
-   (function    *> :evaluation :compound)
+  ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 

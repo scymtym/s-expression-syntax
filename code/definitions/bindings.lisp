@@ -10,84 +10,88 @@
 
 ;;; Value bindings
 
-(defrule value-binding ()
-    (value (source)
-      (or (:transform
-             (or (<- name ((variable-name names))) ; TODO repeated variable names
-                 (list (<- name ((variable-name! names)))))
-           (setf value nil))
-          (list (<- name ((variable-name! names)))
-                (<- value ((form! forms))))))
-  (list name value))
+(define-syntax value-binding
+    (or (:transform
+         (or (<- name ((variable-name names))) ; TODO repeated variable names
+             (list (<- name ((variable-name! names)))))
+         (setf value nil))
+        (list (<- name ((variable-name! names)))
+              (<- value ((form! forms)))))
+  (name  1 :evaluation (make-instance 'binding-semantics
+                                      :namespace 'variable
+                                      :scope     :lexical
+                                      :order     :parallel
+                                      :values    'values))
+  (value ? :evaluation t))
 
 (defrule value-binding! ()
   (must (value-binding) "must be a binding of the form NAME, (NAME) or (NAME FORM)"))
 
 (defrule value-bindings ()
-    (list (* (<<- (names values) (value-binding!))))
-  (list (nreverse names) (nreverse values)))
+    (list (* (<<- bindings (value-binding!))))
+  (nreverse bindings))
 
 (defrule value-bindings! ()
   (must (value-bindings) "must be a list of bindings"))
 
 ;;; Function bindings
 
-(define-syntax local-function
+(define-syntax local-function-binding
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
-  ((name          1)
+  ((name          1 :evaluation (make-instance 'binding-semantics
+                                               :namespace 'function
+                                               :scope     :lexical
+                                               :order     :parallel
+                                               :values    'functions))
    (lambda-list   1 :evaluation :compound)
    (documentation ?)
    (declaration   *)
    (form          * :evaluation t)))
-
-(defrule local-function-binding ()
-    (<- function (local-function))
-  (list (bp:node-relation* :name function) function))
 
 (defrule local-function-binding! ()
     (must (local-function-binding)
           "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)"))
 
 (defrule function-bindings ()
-    (list (* (<<- (names functions) (local-function-binding!))))
-  (list (nreverse names) (nreverse functions)))
+    (list (* (<<- bindings (local-function-binding!))))
+  (nreverse bindings))
 
 ;;; Macro function bindings
 
-(define-syntax local-macro-function
+(define-syntax local-macro-function-binding
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
            (<- (documentation declaration form) ((docstring-body forms))))
-  ((name          1)
+  ((name          1 :evaluation (make-instance 'binding-semantics
+                                               :namespace 'function
+                                               :scope     :lexical
+                                               :values    'functions))
    (lambda-list   1 :evaluation :compound)
    (documentation ?)
    (declaration   *)
    (form          * :evaluation t)))
-
-(defrule local-macro-function-binding ()
-    (<- function (local-macro-function))
-  (list (bp:node-relation* :name function) function))
 
 (defrule local-macro-function-binding! ()
     (must (local-macro-function-binding)
           "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)"))
 
 (defrule macro-function-bindings ()
-    (list (* (<<- (names functions) (local-macro-function-binding!))))
-  (list (nreverse names) (nreverse functions)))
+    (list (* (<<- bindings (local-macro-function-binding!))))
+  (nreverse bindings))
 
 ;;; Symbol-macro bindings
 
-(defrule symbol-macro-binding ()
+(define-syntax symbol-macro-binding ()
     (list (<- name ((variable-name! names)))
           (<- form ((form! forms))))
-  (list name form))
+  ((name 1)
+   (form * :evaluation t)))
 
 (defrule symbol-macro-binding! ()
   (must (symbol-macro-binding) "must be a binding of the form (NAME FORM)"))
 
 (defrule symbol-macro-bindings ()
-    (list (* (<<- (names forms) (symbol-macro-binding!))))
-  (list (nreverse names) (nreverse forms)))
+    (list (* (<<- bindings (symbol-macro-binding!))))
+  (nreverse bindings))
