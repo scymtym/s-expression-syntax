@@ -36,7 +36,7 @@
             (parser.packrat:parse `(,rule ,@arguments) input :grammar grammar))
         (declare (ignore position))
         (is (eq expected-success? success?))
-        (is (equal expected-value value))))))
+        (is (ast-equal expected-value value))))))
 
 (defmacro rule-test-cases (((rule grammar) &rest arguments) &body cases)
   (let ((arguments (map 'list (lambda (argument) `(lambda () ,argument))

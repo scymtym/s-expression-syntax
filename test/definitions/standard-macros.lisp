@@ -665,37 +665,44 @@
     syn:invalid-syntax-error #4# "NO-ERROR must not be repeated")
   ;; Valid syntax
   '(#5=(handler-case (foo)
-         (#6=bar (#7=x) (baz))
-         (:no-error #8=(#9=y #10=z) (fez)))
+         #6=(#7=bar (#8=x) (baz))
+         #9=(:no-error #10=(#11=y #12=z) (fez)))
     (:handler-case
-     ((:form                 . 1) (((foo) :evaluation t))
-      (:type                 . *) (((:atomic-type-specifier
-                                     ((:name . 1) (((:type-name
-                                                     ()
-                                                     :name bar :source #6#))))
-                                     :source #6#)))
-      (:variable             . *) (((:required-parameter
-                                     ((:name . 1) (((:variable-name
-                                                     ()
-                                                     :name x :source #7#))))
-                                     :source #7#)
-                                    :evaluation :binding))
-      (:handler-form         . *) ((((baz)) :evaluation t))
-      (:no-error-lambda-list . 1) (((:ordinary-lambda-list
-                                     ((:required . *) (((:required-parameter
-                                                         ((:name . 1) (((:variable-name
-                                                                         ()
-                                                                         :name y :source #9#)
-                                                                        :evaluation nil)))
-                                                         :source #9#))
-                                                       ((:required-parameter
-                                                         ((:name . 1) (((:variable-name
-                                                                         ()
-                                                                         :name z :source #10#)
-                                                                        :evaluation nil)))
-                                                         :source #10#))))
-                                     :source #8#)))
-      (:no-error-form        . *) (((fez) :evaluation t)))
+     ((:form   . 1)          (((foo) :evaluation t))
+      (:clause . *)          (((:handler-clause
+                                ((:type     . 1) (((:atomic-type-specifier
+                                                    ((:name . 1) (((:type-name
+                                                                    ()
+                                                                    :name bar :source #7#))))
+                                                    :source #7#)))
+                                 (:variable . 1) (((:required-parameter
+                                                    ((:name . 1) (((:variable-name
+                                                                    ()
+                                                                    :name x :source #8#))))
+                                                    :source #8#)
+                                                   :evaluation :binding))
+                                 (:form     . *) (((baz) :evaluation t)))
+                                :source #6#)
+                               :evaluation :compound))
+      (:no-error-clause . 1) (((:no-error-clause
+                                ((:lambda-list . 1) (((:ordinary-lambda-list
+                                                       ((:required . *) (((:required-parameter
+                                                                           ((:name . 1) (((:variable-name
+                                                                                           ()
+                                                                                           :name y :source #11#)
+                                                                                          :evaluation nil)))
+                                                                           :source #11#))
+                                                                         ((:required-parameter
+                                                                           ((:name . 1) (((:variable-name
+                                                                                           ()
+                                                                                           :name z :source #12#)
+                                                                                          :evaluation nil)))
+                                                                           :source #12#))))
+                                                       :source #10#)
+                                                      :evaluation :compound))
+                                 (:form        . *) (((fez) :evaluation t)))
+                                :source #9#)
+                               :evaluation :compound)))
      :source #5#)))
 
 (define-macro-test (restart-bind)

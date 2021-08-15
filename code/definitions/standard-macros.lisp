@@ -453,36 +453,35 @@
   ((binding *  :evaluation :compound)
    (form    *> :evaluation t)))
 
-(defrule handler-clause ()
+(define-syntax handler-clause
     (list* (<- type ((type-specifier! type-specifiers)))
-           (must (list (? (<- variable ((required-parameter! lambda-lists) 'nil))))
+           (must (list (? (<- variable ((required-parameter! lambda-lists) '()))))
                  "must be a lambda list with zero or one required parameter")
-           (<- (declarations forms) ((body forms))))
-  (list type variable declarations forms))
+           (<- (declaration form) ((body forms))))
+  ((type        1)
+   (variable    ?  :evaluation (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :values    nil))
+   (declaration *>)
+   (form        *> :evaluation t)))
+
+(define-syntax no-error-clause
+    (list* :no-error
+           (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
+           (<- (declaration form) ((body forms))))
+  ((lambda-list 1  :evaluation :compound)
+   (declaration *>)
+   (form        *> :evaluation t)))
 
 (define-macro handler-case
     (list (<- form ((form! forms)))
-          (* (or (list* (eg:once :no-error)
-                        (<- no-error-lambda-list
-                            ((ordinary-lambda-list! lambda-lists)))
-                        (<- (no-error-declaration no-error-form)
-                            ((body forms))))
-                 (<<- (type variable declaration handler-form)
-                      (handler-clause)))))
-  (;; Body form
-   (form                 1  :evaluation t)
-   ;; Handler clauses
-   (type                 *)
-   (variable             *  :evaluation (make-instance 'binding-semantics
-                                                       :namespace 'variable
-                                                       :scope     :lexical
-                                                       :values    nil))
-   (declaration          *)
-   (handler-form         *> :evaluation t)
-   ;; No-error clause
-   (no-error-lambda-list ?)
-   (no-error-declaration *)
-   (no-error-form        *  :evaluation t)))
+          (* (or (and (list* (eg:once :no-error) :any)
+                      (<- no-error-clause (no-error-clause)))
+                 (<<- clause (handler-clause)))))
+  ((form            1 :evaluation t)
+   (clause          * :evaluation :compound)
+   (no-error-clause ? :evaluation :compound)))
 
 (define-syntax restart-binding
     (list (or 'nil (<- name     ((variable-name! names))))
