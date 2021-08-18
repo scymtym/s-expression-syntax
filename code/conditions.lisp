@@ -1,19 +1,24 @@
 ;;;; conditions.lisp --- Conditions signaled by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:s-expression-syntax)
 
-;;;
+;;; Should be defined in protocol.lisp, but is needed here
+(defgeneric name (thing))
+
+;;; Conditions related to syntax descriptions
 
 (define-condition syntax-not-found-error (error)
   ((%name :initarg :name
           :reader  name))
   (:report
    (lambda (condition stream)
-     (format stream "~@<No syntax named ~S.~@:>" (name condition)))))
+     (format stream "~@<No syntax named ~S.~@:>" (name condition))))
+  (:documentation
+   "This error is signaled if a specified syntax cannot be found."))
 
 (define-condition component-not-found-error (error)
   ((%syntax :initarg :syntax
@@ -23,7 +28,10 @@
   (:report
    (lambda (condition stream)
      (format stream "~@<No component named ~S in syntax ~A.~@:>"
-             (name condition) (syntax condition)))))
+             (name condition) (syntax condition))))
+  (:documentation
+   "This error is signaled if a specified component cannot be found in a
+given syntax description."))
 
 ;;;
 

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,24 +31,27 @@
    #:syntax-not-found-error
    #:name
 
-   #:component-not-found
+   #:component-not-found-error
    #:syntax
    #:name
 
    #:invalid-syntax-error
    #:syntax
-   #:value) ; TODO collides with symbol from grammar.base
+   #:value ; TODO collides with symbol from grammar.base
+   #:message)
 
-  ;; Component protocol
+  ;; Name protocol
   (:export
-   #:name
+   #:name)
+
+  ;; Component protocol (extends name protocol)
+  (:export
    #:cardinality
    #:evaluation)
 
-  ;; Syntax protocol
+  ;; Syntax description protocol (extends name protocol)
   (:export
-   #:parse
-
+   #:components
    #:find-component)
 
   ;; Syntax lookup protocol
@@ -58,6 +61,11 @@
 
    #:find-syntax                    ; also `setf'
    #:ensure-syntax)
+
+  ;; Parse protocol
+  (:export
+   #:classify
+   #:parse)
 
   ;; Macros
   (:export
