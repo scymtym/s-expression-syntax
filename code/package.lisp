@@ -31,7 +31,7 @@
    #:syntax-not-found-error
    #:name
 
-   #:component-not-found-error
+   #:part-not-found-error
    #:syntax
    #:name
 
@@ -44,15 +44,15 @@
   (:export
    #:name)
 
-  ;; Component protocol (extends name protocol)
+  ;; Part protocol (extends name protocol)
   (:export
    #:cardinality
    #:evaluation)
 
   ;; Syntax description protocol (extends name protocol)
   (:export
-   #:components
-   #:find-component)
+   #:parts
+   #:find-part)
 
   ;; Syntax lookup protocol
   (:export

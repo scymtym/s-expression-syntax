@@ -67,13 +67,13 @@
           (funcall rule context form))))))
 
 (defmethod parse ((client t) (syntax parser-mixin) (form t))
-  (multiple-value-bind (success? components value)
+  (multiple-value-bind (success? result value)
       (bp:with-builder (client)
         (funcall (%parser syntax) form))
     (if (eq success? t)
-        components
+        result
         (error 'invalid-syntax-error :syntax  syntax
-                                     :value   components
+                                     :value   result
                                      :message (or (if (stringp value) value "invalid expression"))))))
 
 ;;; `special-operator'
@@ -82,25 +82,31 @@
                             documentation-mixin
                             parser-mixin
                             print-items:print-items-mixin)
-  ((%components :initarg :components
-                :reader  components)))
+  ((%parts :initarg :parts
+           :type    list
+           :reader  parts))
+  (:default-initargs
+   :parts (a:required-argument :parts)))
 
-(defmethod find-component ((name t) (container special-operator)
-                           &key if-does-not-exist)
+(defmethod find-part ((name t) (container special-operator)
+                      &key if-does-not-exist)
   (declare (ignore if-does-not-exist))
-  (find name (components container) :key #'name :test #'eq))
+  (find name (parts container) :key #'name :test #'eq))
 
-;;; `component'
+;;; `part'
 
-(defclass component (named-mixin
+(defclass part (named-mixin
                      print-items:print-items-mixin)
   ((%cardinality :initarg :cardinality
                  :type    (member 1 bp:? *)
                  :reader  cardinality)
    (%evaluation :initarg  :evaluation   ; TODO change this to semantic
-                :reader   evaluation)))
+                :reader   evaluation))
+  (:default-initargs
+   :cardinality (a:required-argument :cardinality)
+   :evaluation  (a:required-argument :evaluation)))
 
-(defmethod print-items:print-items append ((object component))
+(defmethod print-items:print-items append ((object part))
   (let ((semantics (a:when-let ((semantics (evaluation object)))
                      (print-items:print-items semantics))))
     `((:name        ,(name object)        "~A")

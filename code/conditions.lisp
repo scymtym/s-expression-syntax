@@ -20,18 +20,18 @@
   (:documentation
    "This error is signaled if a specified syntax cannot be found."))
 
-(define-condition component-not-found-error (error)
+(define-condition part-not-found-error (error)
   ((%syntax :initarg :syntax
             :reader  syntax)
    (%name   :initarg :name
             :reader  name))
   (:report
    (lambda (condition stream)
-     (format stream "~@<No component named ~S in syntax ~A.~@:>"
+     (format stream "~@<No part named ~S in syntax ~A.~@:>"
              (name condition) (syntax condition))))
   (:documentation
-   "This error is signaled if a specified component cannot be found in a
-given syntax description."))
+   "This error is signaled if a specified part cannot be found in a given
+syntax description."))
 
 ;;;
 

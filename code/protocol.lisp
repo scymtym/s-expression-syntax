@@ -18,14 +18,14 @@ operator, macro, class or type, the returned name is the symbol in the
 COMMON-LISP package which names the special operator, macro, class or
 type.
 
-If THING is a component, the name is a symbol which uniquely identifies the
-component within the containing syntax description.")
+If THING is a part, the name is a symbol which uniquely identifies the
+part within the containing syntax description.")
 
-;;; Component protocol
+;;; Part protocol
 
-(defgeneric cardinality (component)
+(defgeneric cardinality (part)
   (:documentation
-   "Return cardinality of sub-expression(s) described by COMPONENT.
+   "Return cardinality of sub-expression(s) described by PART.
 
 The following values may be returned
 
@@ -38,47 +38,61 @@ The following values may be returned
 * The described sub-expression occurs zero or more times in the
   containing expression."))
 
-(defgeneric evaluation (component)
+(defgeneric evaluation (part)
   (:documentation
-   "Return evaluation semantics of sub-expressions described by COMPONENT."))
+   "Return evaluation semantics of sub-expressions described by PART."))
 
 ;;; Syntax description protocol
 
-(defgeneric components (container)
+(defgeneric parts (container)
   (:documentation
-   "Return a sequence of components belonging to CONTAINER.
+   "Return a sequence of parts belonging to CONTAINER.
 
 "))
 
-(defgeneric find-component (name container &key if-does-not-exist)
+(defgeneric find-part (name container &key if-does-not-exist)
   (:documentation
-   "Return the component of CONTAINER named NAME.
+   "Return the part of CONTAINER named NAME.
 
-IF-DOES-NOT-EXIST controls the behavior in case a component named NAME
-does not exist in CONTAINER.
+IF-DOES-NOT-EXIST controls the behavior in case a part named NAME does
+not exist in CONTAINER.
 
 If the value of IF-DOES-NOT-EXIST is a function, that function is
 called with a single argument, a condition of type
-`component-not-found-error'.
+`part-not-found-error'.
 
 If the value of IF-DOES-NOT-EXIST is not a function, that value is
-returned in place of the missing component."))
+returned in place of the missing part."))
 
 ;;; Default behavior
 
-(defmethod find-component ((name t) (container symbol) &key if-does-not-exist)
+(defmethod find-part ((name t) (container symbol) &key if-does-not-exist)
   (declare (ignore if-does-not-exist))
-  (find-component name (find-syntax container)))
+  (find-part name (find-syntax container)))
 
-(defmethod find-component :around ((name t) (container t) &key if-does-not-exist) ; TODO should be outermost call only
+(defmethod find-part :around ((name t) (container t) &key if-does-not-exist) ; TODO should be outermost call only
   (or (call-next-method)
       (typecase if-does-not-exist
         (function
-         (funcall if-does-not-exist (make-condition 'component-not-found-error
+         (funcall if-does-not-exist (make-condition 'part-not-found-error
                                                     :syntax container
                                                     :name   name)))
         (t
          if-does-not-exist))))
+
+;;; Backwards compatibility
+
+(defun components (container)
+  (parts container))
+
+(defun find-component (name container
+                       &key (if-does-not-exist nil if-does-not-exist-p))
+  (apply #'find-part name container (when if-does-not-exist-p
+                                      (list :if-does-not-exist if-does-not-exist))))
+
+#+sbcl
+(declaim (sb-ext:deprecated :early ("s-expression-syntax" "0.1")
+                            (function components) (function find-component)))
 
 ;;; Syntax description repository protocol
 
