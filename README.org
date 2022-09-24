@@ -118,7 +118,7 @@
            (syntax     (s-expression-syntax:find-syntax 'defun))
            ;; Alternatively, determine the appropriate syntax description
            ;; for EXPRESSION automatically:
-           ;; (syntax     (s-expression-syntax::classify t expression))
+           ;; (syntax     (s-expression-syntax:classify t expression))
            (builder    'list)
            (node       (s-expression-syntax:parse builder syntax expression)))
       (flet ((describe-sub-expression (sub-expression relation-args)
@@ -201,7 +201,7 @@
                           (declare (type integer b))
                           (format t "~S" a)
                           (list a b)))
-           (syntax     (s-expression-syntax::classify t expression))
+           (syntax     (s-expression-syntax:classify t expression))
            (builder    'list)
            (node       (s-expression-syntax:parse builder syntax expression)))
       (let ((*print-case* :downcase))
@@ -308,7 +308,7 @@
 ** STARTED Parser Protocol
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
-     (doc 's-expression-syntax::classify 'function)
+     (doc 's-expression-syntax:classify 'function)
    #+END_SRC
 
    #+RESULTS:
