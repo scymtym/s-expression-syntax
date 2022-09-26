@@ -1,0 +1,500 @@
+% @c -*- Coding: utf-8; Mode: Texinfo -*-
+
+\input texinfo
+
+@documentencoding UTF-8
+@documentlanguage en
+
+@syncodeindex vr fn
+@syncodeindex tp fn
+
+@paragraphindent 0
+
+@setfilename s-expression-syntax
+@settitle S-Expression Syntax User's Manual
+
+@set SEXPRESSIONSYNTAXVERSION 0.10
+
+@copying
+Copyright @copyright{} 2022 Jan Moringen.
+@end copying
+
+@dircategory Common Lisp
+@direntry
+* S-Expression Syntax User's Manual: (s-expression-syntax). Common Lisp S-expression parser.
+@end direntry
+
+@titlepage
+@title S-Expression Syntax User's Manual
+
+@vskip 0pt plus 1filll
+@insertcopying
+
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top @sp 5
+@center S-Expression Syntax User's Manual
+@insertcopying
+@end ifnottex
+
+@c @include macros.texi
+@macro library{}
+s-expression syntax
+@end macro
+
+@alias concept = emph
+@alias cl = code
+
+@menu
+* Introduction::
+* Concepts::
+* Tutorial::
+* Dictionary::
+* Concept index::
+* Function and macro and variable and type index::
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+The @library{} library provides declarative rules for parsing the
+various kinds of s-expression syntax used in Common Lisp:
+
+@itemize
+@item
+Special operators
+
+@item
+Lambda lists
+
+@item
+Declarations
+
+@item
+Type specifiers
+
+@item
+Standard macros
+
+@itemize
+@item
+@code{cl:loop} (work in progress)
+@end itemize
+
+@item
+Feature expressions
+
+@item
+Format control strings (work in progress)
+@end itemize
+
+Note that this library is not a code walker but it could be used to
+implement a code walker.
+
+@node Concepts
+@chapter Concepts
+
+Explaining things in more detail requires a little bit of
+terminology:
+
+@table @asis
+@cindex Expression
+@item Expression
+
+A data structure which @emph{conceptually} consists of atoms and conses
+(possibly meant for evaluation in which case the expression is a
+@emph{form}). In contrast to the usual definition, expressions processed
+by this library may be represented as arbitrary objects which are
+interpreted as atoms and conses according to rules defined by the client
+using the library. That said, processing expressions using the usual
+interpretation of atoms and conses is of course supported.
+
+@cindex Syntax Description
+@item Syntax Description
+
+An object which describes the syntax of one kind of
+@concept{expression}. For example, there is a syntax description for the
+special operator @cl{cl:let} which describes (the infinite set) of
+well-formed @cl{let} @concept{expressions}. Besides recognizing
+well-formed @concept{expressions} of a certain kind, a @concept{syntax
+description} also contains descriptions of the @concept{parts} that can
+appear within well-formed @concept{expressions} of that kind. For
+example, for @cl{cl:let}, the @emph{parts} are variable names, initial
+value forms, declarations and body forms.
+
+More precisely, a @concept{syntax description} consists of a name, a
+list of @emph{parts} and a parser which consumes @emph{expressions}
+conforming to the described syntax and produces a parse result.
+
+@cindex Part
+@item Part
+
+An object which describes a sub-structure of the syntax described by a
+particular @emph{syntax description}. For example, the @concept{syntax
+description} for @cl{cl:let} has a @concept{part} for declaration
+@concept{expressions} contained in @cl{let} @concept{expressions}.
+
+More precisely, a @concept{part} consists of a name, a cardinality,
+which is either @emph{one}, @emph{zero-or-one}, @emph{one-or-more} or
+@emph{zero-or-more}, and an evaluation which is roughly "evaluated",
+"not evaluated" or "composed of evaluated and non-evaluated
+@concept{parts}".
+
+For example, @cl{cl:defun} has the following @concept{parts}
+
+@multitable @columnfractions .25 .2 .55
+@headitem
+Name                 @tab Cardinality  @tab Evaluation
+@item
+name                 @tab one          @tab not evaluated
+@item
+lambda-list          @tab one          @tab composed of evaluated and non-evaluated @concept{parts}
+@item
+documentation string @tab zero-or-one  @tab not evaluated
+@item
+declaration          @tab zero-or-more @tab not evaluated
+@item
+body forms           @tab zero-or-more @tab evaluated
+@end multitable
+
+@cindex Result Tree
+@cindex Partial Result Tree
+@item Result Tree
+
+A tree that is result of parsing an input @concept{expression}. Each
+node in the tree corresponds to a @concept{sub-expression} of the input
+@concept{expression} (multiple nodes may correspond to the same
+@concept{sub-expression}). A node is characterized by its
+@concept{kind}, its @concept{initargs} and its @concept{relations} to
+other nodes.
+
+The result tree could possibly be called an Abstract Syntax Tree (AST),
+but we avoid that term because the result directly reflects the
+structure of the input @concept{expression}.
+
+We may call a @concept{result tree} a @concept{partial result tree} if
+it contains unparsed @concept{sub-expressions} of the input
+@concept{expression} in some of its leaf nodes.
+@end table
+
+@node Tutorial
+@chapter Tutorial
+
+This tutorial explains the most important aspects of using this library
+in three parts:
+
+@enumerate
+@item
+The first section describes how to invoke the parser on a given
+@concept{expression}.
+
+@item
+The second section describes how to construct a, possibly customized,
+@concept{result tree} representation.
+
+@item
+The final section explains how to parse @concept{expressions} that are
+represented in a client-specific way.
+@end enumerate
+
+As a running example, we will use the following @concept{expression}
+
+@lisp
+(defvar *expression*
+  '(defun foo (a &optional (b 2))
+     (declare (type integer a))
+     (declare (type (integer 0 10) b))
+     (if a (list a b) "hi")))
+@end lisp
+
+which illustrates several aspects of Common Lisp syntax at once:
+
+@itemize
+@item
+The @cl{defun} standard macro
+
+@item
+An ordinary lambda list
+
+@item
+The @cl{type} declaration
+
+@item
+The @cl{integer} type specifier
+
+@item
+The @cl{if} special operator
+@end itemize
+
+@menu
+* Invoking the Parser::
+* A detailed Look at Recursive Parsing and Parse Results::
+@end menu
+
+@node Invoking the Parser
+@section Invoking the Parser
+
+The most common use of this library probably is turning a given
+@concept{expression} into a @concept{result tree}. This process happens
+in multiple steps
+
+@enumerate
+@item
+Determine an appropriate @concept{syntax description} for parsing the
+@concept{expression}. For example, the @concept{expression}
+@cl{(locally (declare …) 1 (+ a b) 3)} must be parsed using the
+@concept{syntax description} for the special operator @cl{cl:locally}.
+
+@item
+Apply the obtained @concept{syntax description} in conjunction with a
+parse result builder to obtain a partial (see 3.) AST for the
+@concept{expression}.
+
+@item
+Optionally parse evaluated @concept{sub-expressions} recursively. In the
+above example @cl{(declare …)} is a @concept{sub-expression} that is not
+evaluated while @cl{1}, @cl{(+ a b)} and @cl{3} are
+@concept{sub-expressions} that are evaluated. The latter are not
+automatically parsed and thus must be recursively processed in the way
+described here in order to obtain a fully parsed @concept{result
+tree}. A complete @concept{result tree} can generally only be produced
+by consulting an environment as well as interleaving parsing with
+macroexpansion and is therefore out of scope for this library.
+@end enumerate
+
+The following code performs steps 1. and 2. and prints the resulting
+@concept{partial result tree} in a human-readable form. Note how the
+@cl{list} builder of the
+[[https://github.com/scymtym/architecture.builder-protocol][architecture.builder-protocol
+system]] is passed in the @cl{parse} call and later used to destructure
+the @concept{result tree} node @cl{node} by calling the functions
+@cl{node-relations} and @cl{node-relation}.
+
+@lisp
+(let* ((syntax     (s-expression-syntax:find-syntax 'defun))
+       ;; Alternatively, determine the appropriate syntax description
+       ;; for EXPRESSION automatically:
+       ;; (syntax     (s-expression-syntax:classify t expression))
+       (builder    'list)
+       (node       (s-expression-syntax:parse builder syntax *expression*)))
+  (flet ((describe-sub-expression (sub-expression relation-args)
+           (format t "~2@@T-> ~S~%~
+                      ~2@@T   evaluation: ~S~%"
+                   sub-expression (getf relation-args :evaluation))))
+   (loop :for relation    :in (architecture.builder-protocol:node-relations builder node)
+         :for part-name   = (find-symbol (symbol-name (first relation)) (find-package "S-EXPRESSION-SYNTAX"))
+         :for part        = (s-expression-syntax:find-part part-name syntax)
+         :for cardinality = (s-expression-syntax:cardinality part)
+         :for (sub-expression evaluation)
+            = (multiple-value-list (architecture.builder-protocol:node-relation
+                                    builder relation node))
+         :do  (format t "~A (~A)~%" part-name cardinality)
+              (ecase (s-expression-syntax:cardinality part)
+                ((1) (describe-sub-expression sub-expression evaluation))
+                ((*) (map 'nil #'describe-sub-expression sub-expression evaluation))))))
+@end lisp
+
+Evaluating the code results in the following output which illustrates
+the four @concept{parts} of the @cl{defun} @concept{expression}: name,
+lambda-list, declaration and form. The latter two have a cardinality of
+@cl{*}, so multiple child nodes may be related to the parent node
+through the relation in question. In this example, both relations
+contain two child nodes: two declarations and two body forms.
+
+@example
+NAME (1)
+  -> (:FUNCTION-NAME NIL :NAME FOO :SOURCE FOO)
+     evaluation: NIL
+LAMBDA-LIST (1)
+  -> (:ORDINARY-LAMBDA-LIST
+      ((:REQUIRED . *)
+       (((:REQUIRED-PARAMETER
+          ((:NAME . 1)
+           (((:VARIABLE-NAME NIL :NAME A :SOURCE A) :EVALUATION NIL)))
+          :SOURCE A)))
+       (:OPTIONAL . *)
+       (((:OPTIONAL-PARAMETER
+          ((:NAME . 1) (((:VARIABLE-NAME NIL :NAME B :SOURCE B)))
+           (:DEFAULT . 1) ((2 :EVALUATION T)))
+          :SOURCE (B 2))
+         :EVALUATION :COMPOUND)))
+      :SOURCE (A &OPTIONAL (B 2)))
+     evaluation: :COMPOUND
+DECLARATION (*)
+  -> (:DECLARATION
+      ((:ARGUMENT . *)
+       (((:ATOMIC-TYPE-SPECIFIER
+          ((:NAME . 1) (((:TYPE-NAME NIL :NAME INTEGER :SOURCE INTEGER))))
+          :SOURCE INTEGER))
+        ((:VARIABLE-NAME NIL :NAME A :SOURCE A))))
+      :KIND TYPE :SOURCE (TYPE INTEGER A))
+     evaluation: NIL
+  -> (:DECLARATION
+      ((:ARGUMENT . *)
+       (((:ATOMIC-TYPE-SPECIFIER
+          ((:NAME . 1) (((:TYPE-NAME NIL :NAME INTEGER :SOURCE INTEGER))))
+          :SOURCE INTEGER))
+        ((:VARIABLE-NAME NIL :NAME B :SOURCE B))))
+      :KIND TYPE :SOURCE (TYPE INTEGER B))
+     evaluation: NIL
+FORM (*)
+  -> (FORMAT T "~S" A)
+     evaluation: T
+  -> (LIST A B)
+     evaluation: T
+@end example
+
+We can also focus on the overall tree structure and print the
+@concept{partial result tree} as a tree. The following code again uses
+the =architecture.builder-protocol= system to destructure the
+@concept{result tree}, this time as part of a generic tree printer.
+
+@lisp
+(let* ((syntax     (s-expression-syntax:classify t *expression*))
+       (builder    'list)
+       (node       (s-expression-syntax:parse builder syntax *expression*)))
+  (let ((*print-case* :downcase))
+    (architecture.builder-protocol.print-tree:serialize
+     builder node *standard-output*
+     :printers (list (cons (lambda (node)
+                             (not (typep node '(cons keyword))))
+                           (lambda (depth node stream)
+                             (declare (ignore depth))
+                             (format stream "[UNPARSED ~A]"  node stream)))))))
+@end lisp
+
+Note the unparsed leaf nodes indicated by the @samp{@strong{UNPARSED}}
+labels.
+
+@example
+defun
+│ source: (defun foo (a &optional (b 2))
+│           (declare (type integer a))
+│           (declare (type integer b))
+│           (format t "~S" a)
+│           (list a b))
+├─name: function-name
+│   name: foo
+│   source: foo
+├─lambda-list: ordinary-lambda-list
+│ │ source: (a &optional (b 2))
+│ ├─required: required-parameter
+│ │ │ source: a
+│ │ └─name: variable-name
+│ │     name: a
+│ │     source: a
+│ └─optional: optional-parameter
+│   │ source: (b 2)
+│   ├─name: variable-name
+│   │   name: b
+│   │   source: b
+│   └─default: [@strong{UNPARSED} 2]
+├─declaration: declaration
+│ │ kind: type
+│ │ source: (type integer a)
+│ ├─argument: atomic-type-specifier
+│ │ │ source: integer
+│ │ └─name: type-name
+│ │     name: integer
+│ │     source: integer
+│ └─argument: variable-name
+│     name: a
+│     source: a
+├─declaration: declaration
+│ │ kind: type
+│ │ source: (type integer b)
+│ ├─argument: atomic-type-specifier
+│ │ │ source: integer
+│ │ └─name: type-name
+│ │     name: integer
+│ │     source: integer
+│ └─argument: variable-name
+│     name: b
+│     source: b
+├─form: [@strong{UNPARSED} (format t ~S a)]
+└─form: [@strong{UNPARSED} (list a b)]
+@end example
+
+@node A detailed Look at Recursive Parsing and Parse Results
+@section A detailed Look at Recursive Parsing and Parse Results
+
+As a final way of looking at the structure of parse results, consider
+the following code which is intended to be evaluated in the
+[[https://common-lisp.net/project/mcclim][McCLIM Listener]] or a similar
+context. Now, this example is longer and more complicated than the
+previous ones, but on the bright side, we will get a graphical
+representation of parse results as well as a concrete illustration of
+the difference between parsed and unparsed
+@concept{sub-expressions}. Remember that the previous examples only
+parsed the outermost @concept{expression}.
+
+The strange color choices in the following code are intended to ensure
+that everything is equally readable on light and dark backgrounds.
+
+@lisp
+TODO
+@end lisp
+
+After this preparation we can apply the above graph formatting code to
+our running example which we repeat here for convenience:
+
+@lisp
+TODO
+@end lisp
+
+First, like in the previous examples, we only parse the outermost
+@concept{expression} and format the @concept{result tree}:
+
+TODO
+
+Nodes with solid borders are evaluated, nodes with sparsely dashed
+borders are not evaluated and nodes with densely dashed borders have
+evaluated as well as unevaluated children. Note again how the green leaf
+nodes represent unparsed @concept{sub-expressions}.
+
+We now repeat the process but this time with recursive parsing of
+@concept{sub-expressions}:
+
+TODO
+
+The highlighted notes have turned from unparsed
+@concept{sub-expressions} to parsed result nodes compared to the
+previous example.
+
+@node Dictionary
+@chapter Dictionary
+
+@menu
+* Part Protocol::
+* Syntax Description Protocol::
+* Syntax Description Repository Protocol::
+* Parsing Protocol::
+@end menu
+
+@node Part Protocol
+@section Part Protocol
+
+@node Syntax Description Protocol
+@section Syntax Description Protocol
+
+@node Syntax Description Repository Protocol
+@section Syntax Description Repository Protocol
+
+@node Parsing Protocol
+@section Parsing Protocol
+
+@node Concept index
+@unnumbered Concept index
+
+@printindex cp
+
+@node Function and macro and variable and type index
+@unnumbered Function and macro and variable and type index
+
+@printindex fn
+
+@bye
