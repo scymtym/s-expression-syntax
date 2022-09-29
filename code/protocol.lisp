@@ -159,9 +159,37 @@ find an appropriate syntax description:
 
 (defgeneric parse (client syntax expression)
   (:documentation
-   "Parse EXPRESSION according to SYNTAX, possibly specialized behavior of CLIENT.
+   "Parse EXPRESSION according to SYNTAX, possibly specialized to CLIENT.
 
-TODO"))
+SYNTAX is a designator for a syntax description:
+
++ If SYNTAX is `t', `classify' is applied to CLIENT and EXPRESSION to
+  obtain an appropriate syntax description object.
+
++ If SYNTAX is any other symbol, `find-syntax' is called to obtain the
+  syntax description named by SYNTAX. An error is signaled if SYNTAX
+  does not name a syntax description.
+
++ Otherwise SYNTAX must be a syntax description object.
+
+EXPRESSION is either one of the kinds of expressions that make up
+Common Lisp programs (such as forms, type specifiers and declarations)
+or a particular non-standard representation of such expressions which
+is specific to CLIENT. For example, a client may choose to represent
+every sub-expression contained in an expression as a standard object
+in order to store additional information. If CLIENT employs such a
+non-standard representation, the protocol named by symbols exported
+from the `s-expression-syntax.expression-grammar' package has to be
+implemented by defining appropriate methods.
+
+If EXPRESSION does not conform to the syntax described by SYNTAX, an
+error of type `invalid-syntax-error' is signaled.
+
+If EXPRESSION does conform to the syntax described by SYNTAX, a parse
+result that associates the parts of SYNTAX with sub-expressions of
+EXPRESSION is returned. The type and structure of the return value
+depends on CLIENT as the parse result is constructed using the builder
+protocol with CLIENT as the builder."))
 
 ;;; Default behavior
 
