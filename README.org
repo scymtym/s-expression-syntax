@@ -7,7 +7,8 @@
 #+SEQ_TODO: TODO STARTED | DONE
 
 #+BEGIN_SRC lisp :exports both :results silent
-  (ql:quickload :s-expression-syntax)
+  (ql:quickload '("s-expression-syntax"
+                  "architecture.builder-protocol.print-tree"))
 #+END_SRC
 
 * STARTED Introduction
@@ -205,7 +206,7 @@
            (builder    'list)
            (node       (s-expression-syntax:parse builder syntax expression)))
       (let ((*print-case* :downcase))
-        (architecture.builder-protocol.print-tree:serialize
+        (architecture.builder-protocol.print-tree:print-tree
          builder node *standard-output*
          :printers (list (cons (lambda (node)
                                  (not (typep node '(cons keyword))))
