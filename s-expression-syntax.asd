@@ -5,7 +5,9 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     (:read-file-form "version-string.sexp")
-  :depends-on  ((:version "parser.packrat"                         "0.1")
+  :depends-on  ((:version "utilities.print-items"                  "0.3")
+
+                (:version "parser.packrat"                         "0.1")
 
                 (:version "architecture.builder-protocol"          "0.10")
 

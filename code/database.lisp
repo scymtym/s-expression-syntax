@@ -1,6 +1,6 @@
 ;;;; database.lisp --- TODO.
 ;;;;
-;;;; Copyright (C) 2018, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -16,7 +16,7 @@
                 :name 'named-mixin)))
 
 (defmethod print-items:print-items append ((object named-mixin))
-  `((:name ,(name object) "~A")))
+  `((:name "~A" ,(name object))))
 
 ;;; `documentation-mixin'
 
@@ -109,10 +109,10 @@
 (defmethod print-items:print-items append ((object part))
   (let ((semantics (a:when-let ((semantics (evaluation object)))
                      (print-items:print-items semantics))))
-    `((:name        ,(name object)        "~A")
-      (:cardinality ,(cardinality object) " ~A" ((:after :name)))
+    `((:name                         "~A"  ,(name object))
+      ((:cardinality (:after :name)) " ~A" ,(cardinality object))
       ,@(when semantics
-          `((:semantics ,semantics " ~/print-items:format-print-items/" ((:after :cardinality))))))))
+          `(((:semantics (:after :cardinality)) " ~/print-items:format-print-items/" ,semantics))))))
 
 ;;;
 

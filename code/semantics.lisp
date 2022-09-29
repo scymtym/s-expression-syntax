@@ -1,6 +1,6 @@
 ;;;; semantics.lisp --- Semantics supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2020 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,7 +13,7 @@
    :namespace (a:required-argument :namespace)))
 
 (defmethod print-items:print-items append ((object namespace-mixin))
-  `((:namespace ,(namespace object) "~A")))
+  `((:namespace "~A" ,(namespace object))))
 
 (defclass binding-semantics (namespace-mixin
                              print-items:print-items-mixin)
