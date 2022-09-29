@@ -64,6 +64,7 @@
   :components ((:module     "test"
                 :serial     t
                 :components ((:file       "package")
+                             (:file       "protocol")
                              (:file       "classify")))
 
                (:module     "definitions"
