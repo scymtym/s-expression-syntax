@@ -322,26 +322,26 @@
    EXPRESSION. Note that a precise classification would have to take into
    account aspects beyond the syntax, such as the environment, to, for
    example, distinguish function and macro application or variable
-   references and symbol macro applications. It should always be possible
-   to find an appropriate syntax description:
+   references and symbol macro applications. It is always possible to
+   find an appropriate syntax description:
 
    + If EXPRESSION is a special form, this function returns the syntax
-   description for the corresponding special operator.
+     description for the corresponding special operator.
 
    + If EXPRESSION is an application of a standard macro, this function
-   returns the syntax description for that macro.
+     returns the syntax description for that macro.
 
    + If EXPRESSION a list not covered by the above cases, this function
-   returns the syntax description for a generic (that is, function or
-   macro) application. Note that this case also covers invalid
-   applications such as (1 2 3).
+     returns the syntax description for a generic (that is, function or
+     macro) application. Note that this case also covers invalid
+     applications such as (1 2 3).
 
    + If EXPRESSION is a symbol but not a keyword, this function returns a
-   syntax description for a variable reference.
+     syntax description for a variable reference.
 
    + If EXPRESSION is any object that is not covered by the above cases,
-   this function returns a syntax description for a self-evaluating
-   object.
+     this function returns a syntax description for a self-evaluating
+     object.
    #+end_example
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"

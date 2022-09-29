@@ -136,8 +136,8 @@ Return a syntax description object that roughly reflects the kind of
 EXPRESSION. Note that a precise classification would have to take into
 account aspects beyond the syntax, such as the environment, to, for
 example, distinguish function and macro application or variable
-references and symbol macro applications. It should always be possible
-to find an appropriate syntax description:
+references and symbol macro applications. It is always possible to
+find an appropriate syntax description:
 
 + If EXPRESSION is a special form, this function returns the syntax
   description for the corresponding special operator.
