@@ -47,24 +47,24 @@ syntax description."))
 ;;; Conditions related to parsing s-expression syntax
 
 (define-condition invalid-syntax-error (error)
-  ((%syntax  :initarg  :syntax
-             :reader   syntax)
-   (%value   :initarg  :value
-             :reader   value)
-   (%message :initarg  :message
-             :reader   message
-             :initform nil))
+  ((%syntax     :initarg  :syntax
+                :reader   syntax)
+   (%expression :initarg  :expression
+                :reader   expression)
+   (%message    :initarg  :message
+                :reader   message
+                :initform nil))
   (:default-initargs
-   :syntax  (missing-required-initarg 'invalid-syntax-error :syntax)
-   :value   (missing-required-initarg 'invalid-syntax-error :value))
+   :syntax     (missing-required-initarg 'invalid-syntax-error :syntax)
+   :expression (missing-required-initarg 'invalid-syntax-error :expression))
   (:report
    (lambda (condition stream)
      (format stream "~@<Invalid ~A syntax at ~S~@[: ~A~].~@:>"
              (name (syntax condition))
-             (value condition)
+             (expression condition)
              (message condition)))))
 
-(defun invalid-syntax-error (syntax value message)
-  (error 'invalid-syntax-error :syntax  syntax
-                               :value   value
-                               :message message))
+(defun invalid-syntax-error (syntax expression message)
+  (error 'invalid-syntax-error :syntax     syntax
+                               :expression expression
+                               :message    message))

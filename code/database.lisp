@@ -65,10 +65,10 @@
                         grammar expression form)))
           (funcall rule context form))))))
 
-(defmethod parse ((client t) (syntax parser-mixin) (form t))
+(defmethod parse ((client t) (syntax parser-mixin) (expression t))
   (multiple-value-bind (success? result value)
       (bp:with-builder (client)
-        (funcall (%parser syntax) form))
+        (funcall (%parser syntax) expression))
     (if (eq success? t)
         result
         (invalid-syntax-error

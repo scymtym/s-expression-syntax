@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the s-expression-syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018, 2019, 2020, 2021, 2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -73,13 +73,13 @@
            (syn:invalid-syntax-error (condition)
              (is (eq syntax (syn:syntax condition)))
              (when expected-value
-               (let ((value (syn::value condition)))
+               (let ((value (syn:expression condition)))
                  (is (eql expected-value value)
                      "~@<For input form ~S, expected value ~S, but got ~
                       ~S.~@:>"
                      input expected-value value)))
              (when expected-message
-               (let ((message (syn::message condition)))
+               (let ((message (syn:message condition)))
                  (is (string= expected-message message)
                      "~@<For input form ~S, expected message ~S, but ~
                       got ~S.~@:>"

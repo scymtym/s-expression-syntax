@@ -37,7 +37,7 @@
 
    #:invalid-syntax-error
    #:syntax
-   #:value ; TODO collides with symbol from grammar.base
+   #:expression
    #:message)
 
   ;; Name protocol
