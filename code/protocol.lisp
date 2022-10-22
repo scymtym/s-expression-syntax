@@ -111,9 +111,30 @@ OBJECT
 
   Return OBJECT if a syntax description named NAME does not exist."))
 
-(defgeneric (setf find-syntax) (new-value name &key if-does-not-exist))
+(defgeneric (setf find-syntax) (new-value name &key if-does-not-exist)
+  (:documentation
+   "Set the syntax description associated with NAME to NEW-VALUE.
 
-(defgeneric ensure-syntax (name class &rest initargs))
+An existing association for NAME, if any, is replaced.
+
+IF-DOES-NOT-EXISTS is accepted for parity with FIND-SYNTAX but
+ignored."))
+
+(defgeneric ensure-syntax (name class &rest initargs)
+  (:documentation
+   "Associate NAME with a syntax description based on CLASS and INITARGS.
+
+Return the new or updated syntax description object associated with
+NAME.
+
+If the database of syntax descriptions already contains a syntax
+description for NAME, the existing syntax description object is
+reinitialized with INITARGS.
+
+If the database of syntax descriptions does not contain a syntax
+description for NAME, a new association is created by making an
+instance of CLASS, initializing it with INITARGS and registering the
+new object for NAME."))
 
 ;;; Default behavior
 

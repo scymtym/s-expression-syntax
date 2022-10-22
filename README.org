@@ -306,6 +306,45 @@
    Return OBJECT if a syntax description named NAME does not exist.
    #+end_example
 
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc '(setf s-expression-syntax:find-syntax) 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   (setf find-syntax) NEW-VALUE NAME &KEY IF-DOES-NOT-EXIST
+
+   Set the syntax description associated with NAME to NEW-VALUE.
+
+   An existing association for NAME, if any, is replaced.
+
+   IF-DOES-NOT-EXISTS is accepted for parity with FIND-SYNTAX but
+   ignored.
+   #+end_example
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 's-expression-syntax:ensure-syntax 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   ensure-syntax NAME CLASS &REST INITARGS
+
+   Associate NAME with a syntax description based on CLASS and INITARGS.
+
+   Return the new or updated syntax description object associated with
+   NAME.
+
+   If the database of syntax descriptions already contains a syntax
+   description for NAME, the existing syntax description object is
+   reinitialized with INITARGS.
+
+   If the database of syntax descriptions does not contain a syntax
+   description for NAME, a new association is created by making an
+   instance of CLASS, initializing it with INITARGS and registering the
+   new object for NAME.
+   #+end_example
+
 ** STARTED Parser Protocol
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
