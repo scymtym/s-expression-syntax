@@ -10,7 +10,7 @@
   ((%namespace :initarg  :namespace
                :reader   namespace))
   (:default-initargs
-   :namespace (a:required-argument :namespace)))
+   :namespace (missing-required-initarg 'namespace-mixin :namespace)))
 
 (defmethod print-items:print-items append ((object namespace-mixin))
   `((:namespace "~A" ,(namespace object))))
@@ -26,8 +26,8 @@
    (%values :initarg  :values
             :reader   values*))
   (:default-initargs
-   :scope  (a:required-argument :scope)
-   :values (a:required-argument :values)))
+   :scope  (missing-required-initarg 'binding-semantics :scope)
+   :values (missing-required-initarg 'binding-semantics :values)))
 
 (defclass reference-semantics (namespace-mixin)
   ())

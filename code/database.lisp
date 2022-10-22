@@ -12,8 +12,7 @@
   ((%name :initarg  :name
           :reader   name))
   (:default-initargs
-   :name (error "Missing required initarg ~S for class ~S"
-                :name 'named-mixin)))
+   :name (missing-required-initarg 'named-mixin :name)))
 
 (defmethod print-items:print-items append ((object named-mixin))
   `((:name "~A" ,(name object))))
@@ -86,7 +85,7 @@
            :type    list
            :reader  parts))
   (:default-initargs
-   :parts (a:required-argument :parts)))
+   :parts (missing-required-initarg 'special-operator :parts)))
 
 (defmethod find-part ((name t) (container special-operator)
                       &key if-does-not-exist)
@@ -103,8 +102,8 @@
    (%evaluation :initarg  :evaluation   ; TODO change this to semantic
                 :reader   evaluation))
   (:default-initargs
-   :cardinality (a:required-argument :cardinality)
-   :evaluation  (a:required-argument :evaluation)))
+   :cardinality (missing-required-initarg 'part :cardinality)
+   :evaluation  (missing-required-initarg 'part :evaluation)))
 
 (defmethod print-items:print-items append ((object part))
   (let ((semantics (a:when-let ((semantics (evaluation object)))

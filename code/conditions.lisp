@@ -6,6 +6,12 @@
 
 (cl:in-package #:s-expression-syntax)
 
+;;; Utility for required initargs
+
+(defun missing-required-initarg (class-name initarg)
+  (error "~@<The required initarg ~S for class ~S has not been supplied.~@:>"
+         initarg class-name))
+
 ;;; Should be defined in protocol.lisp, but is needed here
 (defgeneric name (thing))
 
@@ -14,6 +20,8 @@
 (define-condition syntax-not-found-error (error)
   ((%name :initarg :name
           :reader  name))
+  (:default-initargs
+   :name (missing-required-initarg 'syntax-not-found-error :name))
   (:report
    (lambda (condition stream)
      (format stream "~@<No syntax named ~S.~@:>" (name condition))))
@@ -25,6 +33,9 @@
             :reader  syntax)
    (%name   :initarg :name
             :reader  name))
+  (:default-initargs
+   :syntax (missing-required-initarg 'part-not-found-error :syntax)
+   :name   (missing-required-initarg 'part-not-found-error :name))
   (:report
    (lambda (condition stream)
      (format stream "~@<No part named ~S in syntax ~A.~@:>"
@@ -33,7 +44,7 @@
    "This error is signaled if a specified part cannot be found in a given
 syntax description."))
 
-;;;
+;;; Conditions related to parsing s-expression syntax
 
 (define-condition invalid-syntax-error (error)
   ((%syntax  :initarg  :syntax
@@ -43,6 +54,9 @@ syntax description."))
    (%message :initarg  :message
              :reader   message
              :initform nil))
+  (:default-initargs
+   :syntax  (missing-required-initarg 'invalid-syntax-error :syntax)
+   :value   (missing-required-initarg 'invalid-syntax-error :value))
   (:report
    (lambda (condition stream)
      (format stream "~@<Invalid ~A syntax at ~S~@[: ~A~].~@:>"
