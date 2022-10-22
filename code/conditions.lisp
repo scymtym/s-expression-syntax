@@ -63,3 +63,8 @@ syntax description."))
              (name (syntax condition))
              (value condition)
              (message condition)))))
+
+(defun invalid-syntax-error (syntax value message)
+  (error 'invalid-syntax-error :syntax  syntax
+                               :value   value
+                               :message message))

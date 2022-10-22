@@ -71,9 +71,8 @@
         (funcall (%parser syntax) form))
     (if (eq success? t)
         result
-        (error 'invalid-syntax-error :syntax  syntax
-                                     :value   result
-                                     :message (or (if (stringp value) value "invalid expression"))))))
+        (invalid-syntax-error
+         syntax result (if (stringp value) value "invalid expression")))))
 
 ;;; `special-operator'
 
