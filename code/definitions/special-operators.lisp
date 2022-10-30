@@ -272,7 +272,8 @@
 (define-special-operator multiple-value-bind
     (list* (must (list (* (<<- name ((variable-name! names)))))
                  "must be a list of variable names") ; TODO unique variable name
-           (<- values-form ((form! forms)))
+           (must (<- values-form ((form! forms)))
+                 "a value form must follow the list of variable names")
            (<- (declaration form) ((body forms))))
   ((name        *) ; TODO binding semantics
    (values-form 1  :evaluation t)

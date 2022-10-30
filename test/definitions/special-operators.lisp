@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Tests for special operator rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -760,6 +760,26 @@
      :source #4#)))
 
 ;;; Special operators for multiple values
+
+(define-syntax-test (multiple-value-bind)
+  '((multiple-value-bind) syn:invalid-syntax-error)
+  '((multiple-value-bind #1=1)
+    syn:invalid-syntax-error #1# "must be a list of variable names")
+  '((multiple-value-bind ())
+    syn:invalid-syntax-error nil "a value form must follow the list of variable names")
+
+  '(#2=(multiple-value-bind () 1)
+    (:multiple-value-bind
+          ((:values-form . 1) ((1 :evaluation t)))
+        :source #2#))
+  '(#3=(multiple-value-bind (#4=a #5=b) 1 2 3)
+    (:multiple-value-bind
+     ((:name        . *) (((:variable-name () :name a :source #4#))
+                          ((:variable-name () :name b :source #5#)))
+      (:values-form . 1) ((1 :evaluation t))
+      (:form        . *) ((2 :evaluation t)
+                          (3 :evaluation t)))
+     :source #3#)))
 
 (define-syntax-test (multiple-value-call)
   '((multiple-value-call) syn:invalid-syntax-error)
