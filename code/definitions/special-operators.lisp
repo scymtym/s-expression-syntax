@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Standard special operators supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -270,14 +270,14 @@
 ;;; Special operators for multiple values
 
 (define-special-operator multiple-value-bind
-    (list* (must (list (* (<<- names ((variable-name! names)))))
+    (list* (must (list (* (<<- name ((variable-name! names)))))
                  "must be a list of variable names") ; TODO unique variable name
            (<- values-form ((form! forms)))
-           (<- (declarations forms) ((body forms))))
-  ((names        *) ; TODO binding semantics
-   (values-form  1  :evaluation t)
-   (declarations *>)
-   (forms        *> :evaluation t)))
+           (<- (declaration form) ((body forms))))
+  ((name        *) ; TODO binding semantics
+   (values-form 1  :evaluation t)
+   (declaration *>)
+   (form        *> :evaluation t)))
 
 (define-special-operator multiple-value-call
     (list* (<- function-form ((form! forms))) (<- argument ((forms forms))))
