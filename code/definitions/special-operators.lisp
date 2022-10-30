@@ -275,7 +275,11 @@
            (must (<- values-form ((form! forms)))
                  "a value form must follow the list of variable names")
            (<- (declaration form) ((body forms))))
-  ((name        *) ; TODO binding semantics
+  ((name        *  :evaluation (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :order     :parallel
+                                              :values    'values))
    (values-form 1  :evaluation t)
    (declaration *>)
    (form        *> :evaluation t)))

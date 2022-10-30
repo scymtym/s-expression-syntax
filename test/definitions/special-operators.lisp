@@ -774,8 +774,10 @@
         :source #2#))
   '(#3=(multiple-value-bind (#4=a #5=b) 1 2 3)
     (:multiple-value-bind
-     ((:name        . *) (((:variable-name () :name a :source #4#))
-                          ((:variable-name () :name b :source #5#)))
+     ((:name        . *) (((:variable-name () :name a :source #4#)
+                           :evaluation :binding)
+                          ((:variable-name () :name b :source #5#)
+                           :evaluation :binding))
       (:values-form . 1) ((1 :evaluation t))
       (:form        . *) ((2 :evaluation t)
                           (3 :evaluation t)))
