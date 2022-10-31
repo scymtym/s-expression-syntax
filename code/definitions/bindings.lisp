@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Rules for binding constructs.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -21,7 +21,7 @@
                                        :namespace 'variable
                                        :scope     :lexical
                                        :order     :parallel
-                                       :values    'values))
+                                       :values    'value))
    (value ? :evaluation t)))
 
 (defrule value-binding! ()
