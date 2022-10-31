@@ -1,6 +1,6 @@
 ;;;; forms.lisp --- Rules for parsing forms and bodies.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -57,7 +57,7 @@
     ;; If the first form in the body is a string, it is a
     ;; documentation string. Exception: if the body consists of only
     ;; one form, the form is not a documentation string.
-    (or (list (<- body (:transform (guard form stringp)
+    (or (list (<- body (:transform (and (guard stringp) (<- form (form)))
                          (list () (list form)))))
         (list* (<- docstring (documentation-string)) (<- body (body)))
         (<- body (body)))
