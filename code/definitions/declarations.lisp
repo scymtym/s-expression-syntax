@@ -1,6 +1,6 @@
 ;;;; declarations.lisp --- Rules for parsing declarations.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -60,9 +60,13 @@
          "must be a variable name or function name"))
 
 (defrule optimization-specification ()
-  (or (optimization-quality)
-      (list (optimization-quality!)
-            (optimization-level!))))
+    (value (source)
+      (or (<- quality (optimization-quality))
+          (list (<- quality (optimization-quality!))
+                (<- value   (optimization-value!)))))
+  (bp:node* (:optimization-specification :quality quality
+                                         :value   value
+                                         :source  source)))
 
 (defrule optimization-specification! ()
   (must (optimization-specification)
@@ -74,8 +78,8 @@
 (defrule optimization-quality! ()
   (must (optimization-quality) "must be an optimization quality name"))
 
-(defrule optimization-level ()
+(defrule optimization-value ()
   (or 0 1 2 3))
 
-(defrule optimization-level! ()
-  (must (optimization-level) "must be an optimization level, i.e. 0, 1, 2 or 3"))
+(defrule optimization-value! ()
+  (must (optimization-value) "must be an optimization value, that is 0, 1, 2 or 3"))

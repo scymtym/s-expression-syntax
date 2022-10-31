@@ -24,18 +24,25 @@
              :kind type :source #1#))
     ;; `optimize' declaration
     '((optimize 1)         :fatal nil "must be a quality name or a list (QUALITY {0,1,2,3})")
-    '((optimize (speed 5)) :fatal nil "must be an optimization level, i.e. 0, 1, 2 or 3")
-    '(#4=(optimize speed debug)
+    '((optimize (speed 5)) :fatal nil "must be an optimization value, that is 0, 1, 2 or 3")
+    '(#4=(optimize #5=speed #6=debug)
       t #4# (:declaration
-             ((:argument . *) ((speed) (debug)))
+             ((:argument . *) (((:optimization-specification
+                                 ()
+                                 :quality #5# :value nil :source #5#))
+                               ((:optimization-specification
+                                 ()
+                                 :quality #6# :value nil :source #6#))))
              :kind optimize :source #4#))
-    '(#5=(optimize (speed 1))
+    '(#7=(optimize #8=(#9=speed #10=1))
       t #5# (:declaration
-             ((:argument . *) (((speed 1))))
-             :kind optimize :source #5#))
+             ((:argument . *) (((:optimization-specification
+                                 ()
+                                 :quality #9# :value #10# :source #8#))))
+             :kind optimize :source #7#))
     ;; `ignore' declaration
-    '(#6=(ignore #7=a (function #8=b))
-      t #6# (:declaration
-             ((:argument . *) (((:variable-name () :name a :source #7#))
-                               ((:function-name () :name b :source #8#))))
-             :kind ignore :source #6#))))
+    '(#11=(ignore #12=a (function #13=b))
+      t #11# (:declaration
+             ((:argument . *) (((:variable-name () :name a :source #12#))
+                               ((:function-name () :name b :source #13#))))
+             :kind ignore :source #11#))))
