@@ -37,10 +37,11 @@
                                 (*>    name)
                                 ((1 ?) name))
                              ,@(unless (null evaluation)
-                                 `(:evaluation ',(case cardinality
-                                                   ((1 ?) evaluation)
-                                                   (t     (a:make-circular-list
-                                                           1 :initial-element evaluation))))))
+                                 `(:evaluation ,(case cardinality
+                                                  ((1 ?) `',evaluation)
+                                                  (t     `(load-time-value
+                                                           (a:make-circular-list
+                                                            1 :initial-element ,evaluation)))))))
                            relations))))
            parts)
       (a:with-unique-names (source)
