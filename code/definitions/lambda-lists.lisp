@@ -135,8 +135,7 @@
           (? (<- aux                         (aux-section seen))))
   (list required optional rest keyword allow-other-keys? aux))
 
-;; TODO :grammar can default to *grammar*
-(define-syntax (ordinary-lambda-list :grammar lambda-lists)
+(define-syntax ordinary-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required optional rest keyword allow-other-keys? aux)
              (%ordinary-lambda-list seen)))
@@ -159,7 +158,7 @@
           (? (<- (keyword allow-other-keys?) (keyword-section seen)))) ; TODO disallow defaults
   (list required optional rest keyword allow-other-keys?))
 
-(define-syntax (generic-function-lambda-list :grammar lambda-lists)
+(define-syntax generic-function-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required optional rest keyword allow-other-keys?)
              (%generic-function-lambda-list seen)))
@@ -199,7 +198,7 @@
           (? (<-  aux                         (aux-section seen))))
   (list (nreverse required) optional rest keyword allow-other-keys? aux))
 
-(define-syntax (specialized-lambda-list :grammar lambda-lists)
+(define-syntax specialized-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required optional rest keyword allow-other-keys? aux)
              (%specialized-lambda-list seen)))
@@ -287,7 +286,7 @@
                      (? (<- env                     #1#)))))
   (list whole env required optional rest key allow-other-keys? aux cdr))
 
-(define-syntax (destructuring-lambda-list :grammar destructuring-lambda-list)
+(define-syntax destructuring-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (whole env required optional rest keyword allow-other-keys? aux cdr)
              (%destructuring-lambda-list seen)))
@@ -318,7 +317,7 @@
 
 (parser:in-grammar deftype-lambda-list)
 
-(define-syntax (deftype-lambda-list :grammar deftype-lambda-list)
+(define-syntax deftype-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (whole env required optional rest keyword allow-other-keys? aux cdr)
              ((%destructuring-lambda-list destructuring-lambda-list) seen)))
