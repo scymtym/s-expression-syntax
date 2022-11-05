@@ -86,41 +86,71 @@
                         :source (return 1))))
 
 (define-syntax-test (tagbody)
-  '((tagbody nil nil) syn:invalid-syntax-error)
+  '((tagbody nil nil)
+    syn:invalid-syntax-error nil "the tag NIL occurs more than once")
+  '((tagbody 1 nil 1)
+    syn:invalid-syntax-error 1 "the tag 1 occurs more than once")
 
-  '(#1=(tagbody 0 1 "bla" "bli" 2 (list 1) (list 3))
+  '(#1=(tagbody)
+    (:tagbody () :source #1#))
+  '(#2=(tagbody #3=nil)
     (:tagbody
-     ((:tag     . *) ((0) (1) (2))
-      (:segment . *) ((("bla" "bli") :evaluation t)
-                      (((list 1) (list 3)) :evaluation t)))
-     :source #1#))
-  '(#2=(tagbody (1+ a) (1+ b) :foo)
-    (:tagbody
-     ((:tag     . *) ((:foo))
-      (:segment . *) ((((1+ a) (1+ b)) :evaluation t)))
+     ((:segment . *) (((:tagbody-segment
+                        ((:label . 1) (((:tag () :name nil :source #3#))))
+                        :source #3#)
+                       :evaluation :compound)))
      :source #2#))
-
-  #+TODO (check-roundtrip-cases 'tagbody
-                         '(tagbody)
-                         '(tagbody nil)
-                         '(tagbody nil :foo)
-                         '(tagbody nil :foo :bar)
-                         '(tagbody nil (1+ a))
-                         '(tagbody nil :foo (1+ a))
-                         '(tagbody nil (1+ a) :foo)
-                         '(tagbody (1+ a))
-                         '(tagbody (1+ a) (1+ b))
-                         '(tagbody (1+ a) (1+ b) (1+ c))
-                         '(tagbody :foo (1+ a) (1+ b))
-                         '(tagbody (1+ a) :foo (1+ b))
-                         '(tagbody (1+ a) (1+ b) :foo)))
+  '(#4=(tagbody #5=(progn))
+    (:tagbody
+     ((:segment . *) (((:tagbody-segment
+                        ((:statement . *) (((progn)
+                                            :evaluation t)))
+                        :source #5#)
+                       :evaluation :compound)))
+     :source #4#))
+  '(#6=(tagbody #7=0 #8=1 #9="foo" #10="bar" #11=a #12=(list 1) #13=(list 3))
+    (:tagbody
+     ((:segment . *) (((:tagbody-segment
+                        ((:label . 1) (((:tag () :name 0 :source #7#))))
+                        :source #7#)
+                       :evaluation :compound)
+                      ((:tagbody-segment
+                        ((:label     . 1) (((:tag () :name 1 :source #8#)))
+                         (:statement . *) ((#9# :evaluation t)
+                                           (#10# :evaluation t)))
+                        :source #8#)
+                       :evaluation :compound)
+                      ((:tagbody-segment
+                        ((:label     . 1) (((:tag () :name a :source #11#)))
+                         (:statement . *) ((#12# :evaluation t)
+                                           (#13# :evaluation t)))
+                        :source #11#)
+                       :evaluation :compound)))
+     :source #6#))
+  '(#14=(tagbody #15=(1+ a) #16=(1+ b) #17=:foo)
+    (:tagbody
+     ((:segment . *) (((:tagbody-segment
+                        ((:statement . *) ((#15# :evaluation t)
+                                           (#16# :evaluation t)))
+                        :source #15#)
+                       :evaluation :compound)
+                      ((:tagbody-segment
+                        ((:label . 1) (((:tag () :name :foo :source #17#))))
+                        :source #17#)
+                       :evaluation :compound)))
+     :source #14#)))
 
 (define-syntax-test (go)
-  '((go)       syn:invalid-syntax-error)
-  '((go 1 2)   syn:invalid-syntax-error)
-  '((go (foo)) syn:invalid-syntax-error)
+  '((go)
+    syn:invalid-syntax-error nil "must be a single tag")
+  '((go . #1=(1 2))
+    syn:invalid-syntax-error #1# "must be a single tag")
+  '((go #2=(foo))
+    syn:invalid-syntax-error #2# "tag must be a symbol or an integer")
 
-  '(#1=(go 1)  (:go ((:tag . 1) ((1))) :source #1#)))
+  '(#3=(go #4=1)  (:go
+                   ((:tag . 1) (((:tag () :name 1 :source #4#))))
+                   :source #3#)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 

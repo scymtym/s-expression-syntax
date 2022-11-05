@@ -52,50 +52,48 @@
 
 ;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
 ;;; valid tag will be treated as a form.
+(defrule integer-or-symbol ()
+    (or (guard (typep 'integer)) (guard (typep 'symbol))))
+
 (defrule tag ()
-  (guard name (typep '(or symbol integer))))
+    (value (source)
+      (<- name (integer-or-symbol)))
+  (let ((name (eg::%naturalize name)))
+    (bp:node* (:tag :name name :source source))))
 
-(defrule new-tag (seen)
-    (<- name (tag))
-  (if (position name seen :test #'eq)
-      (:fail)
-      name)
-  #+no (cond ((not seen)
-         name)
-        ((not (gethash name seen))
-         (setf (gethash name seen) t)
-         name)
-        (t
-         nil)))
+(defrule tag! ()
+    (must (tag) "tag must be a symbol or an integer"))
 
-(defrule new-tag! (seen)
-  (must (new-tag seen) "must be a unique tag name"))
+(defrule unique-tag! (seen)
+    (<- tag (tag!))
+  (let ((name (getf (bp:node-initargs* tag) :name)))
+    (cond ((not seen))
+          ((not (nth-value 1 (gethash name seen)))
+           (setf (gethash name seen) t))
+          (t
+           (:fatal (format nil "the tag ~S occurs more than once" name)))))
+  tag)
 
-;;; TODO make a rule for parsing segments
+(defrule (tagbody-segment :environment (make-instance 'eg::expression-environment)) (seen first?)
+    (value (source)
+      (seq (<- label (or (and (:transform :any (unless first? (:fail)))
+                              (or (and (integer-or-symbol) (unique-tag! seen))
+                                  (seq)))
+                         (unique-tag! seen)))
+           (* (<<- statements (and (not (integer-or-symbol))
+                                   ((form! forms)))))))
+  (bp:node* (:tagbody-segment :source source)
+    (bp:? (:label     . 1) label)
+    (*    (:statement . *) (nreverse statements) :evaluation (a:circular-list t))))
+
 (define-special-operator tagbody
-    (list (* (seq (* (<<- forms (and (not (tag)) ((form! forms)))))
-                  (* (<<- tag 'foo)) ; HACK to bind tags
-                  (or (<<- segment
-                           (:transform
-                              (<<- tag (new-tag! tag))
-                            (prog1
-                                (nreverse forms)
-                              (print forms *trace-output*)
-                              (setf forms '()))))
-                      (:transform
-                         (seq)
-                       (unless forms (:fail))
-                       (push (nreverse forms) segment)
-                       (setf forms '()))))))
-  ((tag     * :evaluation nil) #+later (make-instance 'binding-semantics
-                                               :namespace 'tag
-                                               :scope     :lexical
-                                               :order     :parallel
-                                               :values    nil)
-   (segment * :evaluation t)))
+    (list (? (and (<- seen (:transform :any (make-hash-table)))
+                  (<<- segment (tagbody-segment seen 't))))
+          (* (<<- segment (tagbody-segment seen 'nil))))
+  ((segment * :evaluation :compound)))
 
 (define-special-operator go
-    (list (<- tag (tag)))
+    (list* (must (list (<- tag (tag!))) "must be a single tag"))
   ((tag 1 :evaluation nil)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
