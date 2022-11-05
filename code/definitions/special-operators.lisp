@@ -40,15 +40,14 @@
    (form *> :evaluation t)))
 
 (define-special-operator return-from
-    (list (<- name (block-name!)) (? (<- value ((form! forms)))))
-  ((name  1 :evaluation (make-instance 'reference-semantics
+    (list (<- name (block-name!)) (? (<- result ((form! forms)))))
+  ((name   1 :evaluation (make-instance 'reference-semantics
                                        :namespace 'block))
-   (value ? :evaluation t)) ; TODO value-form? result?
-  )
+   (result ? :evaluation t)))
 
 (define-special-operator return
-    (list (? (<- value ((form! forms)))))
-  ((value ? :evaluation t))) ; TODO result
+    (list (? (<- result ((form! forms)))))
+  ((result ? :evaluation t)))
 
 ;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
 ;;; valid tag will be treated as a form.

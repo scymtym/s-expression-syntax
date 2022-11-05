@@ -65,8 +65,8 @@
                            ((:name . 1) ((foo :evaluation :reference)))
                            :source (return-from foo)))
   '((return-from foo 1)   (:return-from
-                           ((:name  . 1) ((foo :evaluation :reference))
-                            (:value . 1) ((1 :evaluation t)))
+                           ((:name   . 1) ((foo :evaluation :reference))
+                            (:result . 1) ((1 :evaluation t)))
                            :source (return-from foo 1)))
 
   #+TODO (apply #'unparse-return-from-special-operator
@@ -82,7 +82,7 @@
                         ()
                         :source (return)))
   '((return 1)         (:return
-                        ((:value . 1) ((1 :evaluation t)))
+                        ((:result . 1) ((1 :evaluation t)))
                         :source (return 1))))
 
 (define-syntax-test (tagbody)
