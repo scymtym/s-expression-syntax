@@ -1,6 +1,6 @@
 ;;;; client.lisp --- Tests for the client class of the concrete-syntax-tree module.
 ;;;;
-;;;; Copyright (C) 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2020, 2021, 2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -27,9 +27,7 @@
 
 (test lambda-lists.smoke
   "Smoke test for using the `cst-client' with lambda list."
-
-  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists)
-                    (make-hash-table :test #'eq))
+  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists))
     (let* ((a           (cst:cst-from-expression 'a))
            (specializer (cst:cst-from-expression 'integer))
            (parameter   (cst:list a specializer))
