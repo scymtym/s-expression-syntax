@@ -484,7 +484,7 @@
    (no-error-clause ? :evaluation :compound)))
 
 (define-syntax restart-binding
-    (list (or 'nil (<- name     ((variable-name! names))))
+    (list (or 'nil (<- name ((variable-name! names))))
           (<- function ((form! forms)))
           (* (or (eg:poption :interactive-function
                              (<- interactive-function ((form! forms))))

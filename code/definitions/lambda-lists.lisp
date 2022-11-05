@@ -1,6 +1,6 @@
 ;;;; lambda-lists.lisp --- Rules for parsing different kinds of lambda lists.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -211,7 +211,7 @@
    (aux               *> :evaluation :compound)))
 
 (defrule specialized-lambda-list! ()
-  (must (specialized-lambda-list )
+  (must (specialized-lambda-list)
         "must be a specialized lambda list"))
 
 ;;; 3.4.4 Macro Lambda Lists

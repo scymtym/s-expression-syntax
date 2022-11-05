@@ -1,6 +1,6 @@
 ;;;; types.lisp --- Rules for parsing type specifiers.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -112,5 +112,5 @@
 (defrule type-specifier/not-*! (context)
   (or (:transform '* (:fatal (format nil "the type specifier * is not ~
                                           allowed within a ~A type specifier"
-                                     context )))
+                                     context)))
       (type-specifier!)))

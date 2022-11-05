@@ -49,16 +49,17 @@
 
 (defun compile-parser (rule grammar)
   (destructuring-bind (rule &rest arguments) (a:ensure-list rule)
-    (let* ((grammar    (parser.packrat.grammar:find-grammar (or grammar
-                                                                'special-operators)))
-           (expression (make-instance 'parser.packrat.grammar.base:rule-invocation-expression
-                                      :rule rule
-                                      :arguments (map 'list (lambda (a)
-                                                              (make-instance 'parser.packrat.grammar.base:constant-expression
-                                                                             :value (second a)))
-                                                      arguments)))
-           (rule       (compile nil (parser.packrat.compiler:compile-rule
-                                     grammar rule '() expression))))
+    (let* ((grammar              (parser.packrat.grammar:find-grammar
+                                  (or grammar 'special-operators)))
+           (argument-expressions (mapcar (lambda (argument)
+                                           (make-instance 'parser.packrat.grammar.base:constant-expression
+                                                          :value (second argument)))
+                                         arguments))
+           (expression           (make-instance 'parser.packrat.grammar.base:rule-invocation-expression
+                                                :rule      rule
+                                                :arguments argument-expressions))
+           (rule                 (compile nil (parser.packrat.compiler:compile-rule
+                                               grammar rule '() expression))))
       (declare (type function rule))
       (lambda (form)
         (let ((context (parser.packrat.grammar::make-context

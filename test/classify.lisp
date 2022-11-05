@@ -1,6 +1,6 @@
 ;;;; classify.lisp --- Tests for the form classifier.
 ;;;;
-;;;; Copyright (C) 2021 Jan Moringen
+;;;; Copyright (C) 2021, 2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,6 @@
 
 (test classify.smoke
   "Smoke test for the `classify' function."
-
   (mapc (lambda (input-and-expected)
           (destructuring-bind (input expected) input-and-expected
             (let ((expected-syntax (syn:find-syntax expected))

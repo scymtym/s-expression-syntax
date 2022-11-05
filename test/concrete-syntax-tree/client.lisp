@@ -15,7 +15,6 @@
 
 (test names.smoke
   "Smoke test for using the `cst-client' with names."
-
   (rule-test-cases ((syn::function-name syn::names))
     (list (cst:cst-from-expression 1) nil t nil)
 

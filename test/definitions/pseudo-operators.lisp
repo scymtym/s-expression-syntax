@@ -1,6 +1,6 @@
 ;;;; pseudo--operators.lisp --- Tests for pseudo operator rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,35 +25,35 @@
     syn:invalid-syntax-error 1 "must be a symbol naming a function or a lambda expression")
   '(((lambda 1) 1)
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
-  '(((lambda (x #3=x)) 1)
-    syn:invalid-syntax-error #3# "the variable name X occurs more than once")
+  '(((lambda (x #1=x)) 1)
+    syn:invalid-syntax-error #1# "the variable name X occurs more than once")
   ;; Valid syntax
-  '(#4=(#5=foo)
+  '(#2=(#3=foo)
     (:application
-     ((:function-name . 1) (((:function-name () :name foo :source #5#))))
-     :source #4#))
-  '(#6=(#7=foo 1)
+     ((:function-name . 1) (((:function-name () :name foo :source #3#))))
+     :source #2#))
+  '(#4=(#5=foo 1)
     (:application
-     ((:function-name . 1) (((:function-name () :name foo :source #7#)))
+     ((:function-name . 1) (((:function-name () :name foo :source #5#)))
       (:argument      . *) ((1 :evaluation t)))
-     :source #6#))
-  '(#8=(#9=(lambda #10=(#11=x) x) 1)
+     :source #4#))
+  '(#6=(#7=(lambda #8=(#9=x) x) 1)
     (:application
      ((:function . 1) (((:lambda-expression
                          ((:lambda-list . 1) (((:ordinary-lambda-list
                                                 ((:required . *) (((:required-parameter
                                                                     ((:name . 1) (((:variable-name
                                                                                     ()
-                                                                                    :name x :source #11#)
+                                                                                    :name x :source #9#)
                                                                                    :evaluation nil)))
-                                                                    :source #11#))))
-                                                :source #10#)
+                                                                    :source #9#))))
+                                                :source #8#)
                                                :evaluation :compound))
                           (:form        . *) ((x :evaluation t)))
-                         :source #9#)
+                         :source #7#)
                         :evaluation :parsed))
       (:argument . *) ((1 :evaluation t)))
-     :source #8#)))
+     :source #6#)))
 
 ;;; Pseudo-operator "self evaluating"
 

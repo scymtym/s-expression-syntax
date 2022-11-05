@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Tests for binding rules.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2022 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,7 +11,6 @@
 
 (test value-bindings
   "Smoke test for the `value-bindings' rule."
-
   (rule-test-cases ((syn::value-bindings syn::special-operators))
     '((1)       :fatal 1       "must be a binding of the form NAME, (NAME) or (NAME FORM)")
     '(((1))     :fatal 1       "variable name must be a symbol")
@@ -33,7 +32,6 @@
 
 (test function-bindings
   "Smoke test for the `function-bindings' rule."
-
   (rule-test-cases ((syn::function-bindings syn::special-operators))
     '((#1=1)     :fatal #1# "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
     '(((#2=1))   :fatal #2# "must be a function name")
@@ -41,40 +39,39 @@
     '(((a #4=1)) :fatal #4# "must be an ordinary lambda list")
     ;; Valid
     '(()         t      nil ())
-    '((#6=(#7=a #8=()))
-      t #6# ((:local-function-binding
-              ((:name        . 1) (((:function-name () :name a :source #7#)
+    '((#5=(#6=a #7=()))
+      t #5# ((:local-function-binding
+              ((:name        . 1) (((:function-name () :name a :source #6#)
                                     :evaluation :binding))
                (:lambda-list . 1) (((:ordinary-lambda-list
                                      ()
-                                     :source #8#)
+                                     :source #7#)
                                     :evaluation :compound)))
-              :source #6#)))
-    '((#10=(#11=a #12=() 1))
-      t #10# ((:local-function-binding
-               ((:name        . 1) (((:function-name () :name a :source #11#)
+              :source #5#)))
+    '((#8=(#9=a #10=() 1))
+      t #8# ((:local-function-binding
+               ((:name        . 1) (((:function-name () :name a :source #9#)
                                      :evaluation :binding))
                 (:lambda-list . 1) (((:ordinary-lambda-list
                                       ()
-                                      :source #12#)
+                                      :source #10#)
                                      :evaluation :compound))
                 (:form        . *) ((1 :evaluation t)))
-               :source #10#)))
-    '((#14=(#15=a #16=() "" 1))
-      t #12# ((:local-function-binding
-               ((:name          . 1) (((:function-name () :name a :source #15#)
+               :source #8#)))
+    '((#11=(#12=a #13=() "" 1))
+      t #10# ((:local-function-binding
+               ((:name          . 1) (((:function-name () :name a :source #12#)
                                        :evaluation :binding))
                 (:lambda-list   . 1) (((:ordinary-lambda-list
                                         ()
-                                        :source #16#)
+                                        :source #13#)
                                        :evaluation :compound))
                 (:documentation . 1) ((""))
                 (:form          . *) ((1 :evaluation t)))
-               :source #14#)))))
+               :source #11#)))))
 
 (test macro-function-bindings
   "Smoke test for the `macro-function-bindings' rule."
-
   (rule-test-cases ((syn::macro-function-bindings syn::special-operators))
     '((#1=1)     :fatal #1# "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)")
     '(((#2=1))   :fatal #2# "must be a function name")
@@ -82,61 +79,60 @@
     '(((a #4=1)) :fatal #4# "must be a destructuring lambda list")
     ;; Valid
     '(() t nil ())
-    '((#6=(#7=a #8=()))
+    '((#5=(#6=a #7=()))
       t nil ((:local-macro-function-binding
-              ((:name        . 1) (((:function-name () :name a :source #7#)
+              ((:name        . 1) (((:function-name () :name a :source #6#)
                                     :evaluation :binding))
                (:lambda-list . 1) (((:destructuring-lambda-list
                                      ()
-                                     :source #8#)
+                                     :source #7#)
                                     :evaluation :compound)))
-              :source #6#)))
-    '((#10=(#11=a #12=(&whole #13=w #14=(#15=a #16=b))))
+              :source #5#)))
+    '((#8=(#9=a #10=(&whole #11=w #12=(#13=a #14=b))))
       t nil ((:local-macro-function-binding
-              ((:name        . 1) (((:function-name () :name a :source #11#)
+              ((:name        . 1) (((:function-name () :name a :source #9#)
                                     :evaluation :binding))
                (:lambda-list . 1) (((:destructuring-lambda-list
-                                     ((:whole    . 1) (((:variable-name () :name w :source #13#)))
+                                     ((:whole    . 1) (((:variable-name () :name w :source #11#)))
                                       (:required . *) (((:required-parameter
                                                          ((:name . 1) (((:pattern
                                                                          ((:required . *) (((:required-parameter
-                                                                                             ((:name . 1) (((:variable-name () :name a :source #15#)
+                                                                                             ((:name . 1) (((:variable-name () :name a :source #13#)
                                                                                             :evaluation nil)))
-                                                                         :source #15#)
+                                                                         :source #13#)
                                                                         :evaluation :compound)
                                                                        ((:required-parameter
-                                                                         ((:name . 1) (((:variable-name () :name b :source #16#)
+                                                                         ((:name . 1) (((:variable-name () :name b :source #14#)
                                                                                         :evaluation nil)))
-                                                                         :source #16#)
-                                                                        :evaluation :compound)))
                                                                          :source #14#)
                                                                         :evaluation :compound)))
-                                                         :source #14#)
+                                                                         :source #12#)
+                                                                        :evaluation :compound)))
+                                                         :source #12#)
                                                         :evaluation :compound)))
-                                     :source #12#)
+                                     :source #10#)
                                     :evaluation :compound)))
-              :source #10#)))
-    '((#18=(#19=a #20=() #21=1))
+              :source #8#)))
+    '((#15=(#16=a #17=() #18=1))
       t nil ((:local-macro-function-binding
-              ((:name        . 1) (((:function-name () :name a :source #19#)
+              ((:name        . 1) (((:function-name () :name a :source #16#)
                                     :evaluation :binding))
-               (:lambda-list . 1) (((:destructuring-lambda-list () :source #20#)
+               (:lambda-list . 1) (((:destructuring-lambda-list () :source #17#)
                                     :evaluation :compound))
                (:form        . *) ((1 :evaluation t)))
-              :source #18#)))
-    '((#23=(#24=a #25=() "" 1))
+              :source #15#)))
+    '((#19=(#20=a #21=() "" 1))
       t nil ((:local-macro-function-binding
-              ((:name          . 1) (((:function-name () :name a :source #24#)
+              ((:name          . 1) (((:function-name () :name a :source #20#)
                                       :evaluation :binding))
-               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #25#)
+               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #21#)
                                       :evaluation :compound))
                (:documentation . 1) ((""))
                (:form          . *) ((1 :evaluation t)))
-              :source #23#)))))
+              :source #19#)))))
 
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."
-
   (rule-test-cases ((syn::symbol-macro-bindings syn::special-operators))
     '((#1=1)       :fatal #1# "must be a binding of the form (NAME FORM)")
     '(((#2=1))     :fatal #2# "variable name must be a symbol")
