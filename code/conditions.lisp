@@ -46,17 +46,18 @@ syntax description."))
 
 ;;; Conditions related to parsing s-expression syntax
 
-(define-condition invalid-syntax-error (error)
+(define-condition s-expression-syntax-condition (condition)
   ((%syntax     :initarg  :syntax
                 :reader   syntax)
    (%expression :initarg  :expression
-                :reader   expression)
-   (%message    :initarg  :message
-                :reader   message
-                :initform nil))
+                :reader   expression))
   (:default-initargs
-   :syntax     (missing-required-initarg 'invalid-syntax-error :syntax)
-   :expression (missing-required-initarg 'invalid-syntax-error :expression))
+   :syntax     (missing-required-initarg 's-expression-syntax-condition :syntax)
+   :expression (missing-required-initarg 's-expression-syntax-condition :expression)))
+
+(define-condition s-expression-syntax-error (error
+                                             s-expression-syntax-condition)
+  ()
   (:report
    (lambda (condition stream)
      (format stream "~@<Invalid ~A syntax at ~S~@[: ~A~].~@:>"
@@ -64,7 +65,19 @@ syntax description."))
              (expression condition)
              (message condition)))))
 
-(defun invalid-syntax-error (syntax expression message)
+(define-condition invalid-syntax-error (s-expression-syntax-error)
+  ((%message :initarg  :message
+             :reader   message
+             :initform nil)))
+
+(defun invalid-syntax-error (syntax expression &optional message)
   (error 'invalid-syntax-error :syntax     syntax
                                :expression expression
                                :message    message))
+
+;;; Specific conditions
+
+(define-condition invalid-block-name-error (invalid-syntax-error)
+  ((%message :allocation :class
+             :reader     message
+             :initform   "block name must be a symbol")))

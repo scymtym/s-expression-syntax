@@ -70,10 +70,15 @@
   (multiple-value-bind (success? result value)
       (bp:with-builder (client)
         (funcall (%parser syntax) expression))
-    (if (eq success? t)
-        result
-        (invalid-syntax-error
-         syntax result (if (stringp value) value "invalid expression")))))
+    (cond ((eq success? t)
+           result)
+          ((stringp value)
+           (invalid-syntax-error syntax result value))
+          ((symbolp value)
+           (error value :syntax     syntax
+                        :expression result))
+          (t
+           (invalid-syntax-error syntax result)))))
 
 ;;; `special-operator'
 

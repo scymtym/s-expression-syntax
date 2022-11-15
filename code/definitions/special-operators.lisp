@@ -29,7 +29,7 @@
   name)
 
 (defrule block-name! ()
-    (must (block-name) "block name must be a symbol"))
+    (must (block-name) 'invalid-block-name-error))
 
 (define-special-operator block
     (list* (<- name (block-name!)) (<- form ((forms forms))))
