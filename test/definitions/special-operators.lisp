@@ -768,7 +768,7 @@
   '((destructuring-bind ())
     syn:invalid-syntax-error)
 
-  '(#2=(destructuring-bind #3=(#4=a) #5=b)
+  '(#2=(destructuring-bind #3=(#4=a) b)
     (:destructuring-bind
      ((:lambda-list . 1) (((:destructuring-lambda-list
                             ((:required . *) (((:required-parameter

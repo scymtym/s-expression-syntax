@@ -716,7 +716,7 @@
   ;; Valid syntax
   '(#4=(restart-bind () 1)
     (:restart-bind ((:form . *) ((1 :evaluation t))) :source #4#))
-  '(#5=(restart-bind (#6=(#7=foo #8=bar :report-function #9=baz)) 1)
+  '(#5=(restart-bind (#6=(#7=foo bar :report-function baz)) 1)
     (:restart-bind
      ((:binding . *) (((:restart-binding
                         ((:name            . 1) (((:variable-name () :name foo :source #7#)))
@@ -730,34 +730,34 @@
 (define-macro-test (restart-case)
   '((restart-case #1=(declare))
     syn:invalid-syntax-error #1# "declare is not allowed here")
-  '((restart-case 1 #2=1)
+  '((restart-case 1 1)
     syn:invalid-syntax-error)
-  '((restart-case 1 (#3=1))
-    syn:invalid-syntax-error #3# "variable name must be a symbol")
-  '((restart-case 1 (foo #4=1))
-    syn:invalid-syntax-error #4# "must be an ordinary lambda list")
+  '((restart-case 1 (#2=1))
+    syn:invalid-syntax-error #2# "variable name must be a symbol")
+  '((restart-case 1 (foo #3=1))
+    syn:invalid-syntax-error #3# "must be an ordinary lambda list")
   '((restart-case 1 (nil ()))
     syn:invalid-syntax-error nil "for an unnamed restart, the :REPORT option must be supplied")
   ;; Valid syntax
-  '(#5=(restart-case 1)
-    (:restart-case ((:form . 1) ((1 :evaluation t))) :source #5#))
-  '(#6=(restart-case 1 #7=(#8=foo #9=(#10=x) :report "bar" :test #11=baz))
+  '(#4=(restart-case 1)
+    (:restart-case ((:form . 1) ((1 :evaluation t))) :source #4#))
+  '(#5=(restart-case 1 #6=(#7=foo #8=(#9=x) :report "bar" :test #10=baz))
     (:restart-case
      ((:form   . 1) ((1 :evaluation t))
       (:clause . *) (((:restart-clause
-                       ((:name        . 1) (((:variable-name () :name foo :source #8#)))
+                       ((:name        . 1) (((:variable-name () :name foo :source #7#)))
                         (:lambda-list . 1) (((:ordinary-lambda-list
                                               ((:required . *) (((:required-parameter
                                                                   ((:name . 1) (((:variable-name
                                                                                   ()
-                                                                                  :name x :source #10#)
+                                                                                  :name x :source #9#)
                                                                                  :evaluation nil)))
-                                                                  :source #10#))))
-                                              :source #9#)))
+                                                                  :source #9#))))
+                                              :source #8#)))
                         (:report-string . 1) (("bar"))
                         (:test-name     . 1) (((:function-name
                                                 ()
-                                                :name baz :source #11#))))
-                       :source #7#)
+                                                :name baz :source #10#))))
+                       :source #6#)
                       :evaluation :compound)))
-     :source #6#)))
+     :source #5#)))

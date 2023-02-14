@@ -113,7 +113,7 @@
                                      :source #10#)
                                     :evaluation :compound)))
               :source #8#)))
-    '((#15=(#16=a #17=() #18=1))
+    '((#15=(#16=a #17=() 1))
       t nil ((:local-macro-function-binding
               ((:name        . 1) (((:function-name () :name a :source #16#)
                                     :evaluation :binding))
@@ -121,15 +121,15 @@
                                     :evaluation :compound))
                (:form        . *) ((1 :evaluation t)))
               :source #15#)))
-    '((#19=(#20=a #21=() "" 1))
+    '((#18=(#19=a #20=() "" 1))
       t nil ((:local-macro-function-binding
-              ((:name          . 1) (((:function-name () :name a :source #20#)
+              ((:name          . 1) (((:function-name () :name a :source #19#)
                                       :evaluation :binding))
-               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #21#)
+               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #20#)
                                       :evaluation :compound))
                (:documentation . 1) ((""))
                (:form          . *) ((1 :evaluation t)))
-              :source #19#)))))
+              :source #18#)))))
 
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."

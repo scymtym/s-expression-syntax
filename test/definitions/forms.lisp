@@ -86,11 +86,11 @@
                ((:argument . *) (((:variable-name () :name a :source #6#))))
                :kind ignore :source #5#))
              ("foo")))
-    '(#7=("foo" (declare #8=(ignore #9=a)))
+    '(("foo" (declare #7=(ignore #8=a)))
       t nil ("foo"
              ((:declaration
-               ((:argument . *) (((:variable-name () :name a :source #9#))))
-               :kind ignore :source #8#))
+               ((:argument . *) (((:variable-name () :name a :source #8#))))
+               :kind ignore :source #7#))
                                              ()))
     ;; Forms and docstrings
     '((1)                             t nil (nil   ()  (1)))
