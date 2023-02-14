@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the s-expression-syntax system.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021, 2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -91,3 +91,9 @@
   `(let ((syntax (syn:find-syntax ',syntax-name)))
      (mapc (curry #'%syntax-test-case syntax)
            (list ,@cases))))
+
+(defmacro define-syntax-test ((syntax-name) &body cases)
+  `(test ,syntax-name
+     ,(format nil "Test for the `~(~A~)' special operator syntax."
+              syntax-name)
+     (syntax-test-cases (,syntax-name) ,@cases)))

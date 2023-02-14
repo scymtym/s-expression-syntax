@@ -1,12 +1,12 @@
 ;;;; pseudo--operators.lisp --- Tests for pseudo operator rules.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:s-expression-syntax.test)
 
-(def-suite* :s-expression-syntax.special-operators
+(def-suite* :s-expression-syntax.pseudo-operators
   :in :s-expression-syntax)
 
 ;;; Pseudo-operator variable reference

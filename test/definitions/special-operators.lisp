@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Tests for special operator rules.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,12 +8,6 @@
 
 (def-suite* :s-expression-syntax.special-operators
   :in :s-expression-syntax)
-
-(defmacro define-syntax-test ((syntax-name) &body cases)
-  `(test ,syntax-name
-     ,(format nil "Test for the `~(~A~)' special operator syntax."
-              syntax-name)
-     (syntax-test-cases (,syntax-name) ,@cases)))
 
 ;;; Special operators for control
 

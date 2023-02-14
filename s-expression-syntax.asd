@@ -80,6 +80,7 @@
                              (:file       "lambda-lists")
 
                              (:file       "bindings")
+                             (:file       "pseudo-operators")
                              (:file       "special-operators")
                              (:file       "standard-macros"))))
 
