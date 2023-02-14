@@ -51,7 +51,7 @@
                                                :evaluation :compound))
                           (:form        . *) ((x :evaluation t)))
                          :source #7#)
-                        :evaluation :parsed))
+                        :evaluation :compound))
       (:argument . *) ((1 :evaluation t)))
      :source #6#)))
 

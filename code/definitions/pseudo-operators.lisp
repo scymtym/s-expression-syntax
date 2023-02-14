@@ -1,6 +1,6 @@
 ;;;; pseudo-operators.lisp --- Syntax elements that are not special forms or macros.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -40,7 +40,7 @@
                     "must be a symbol naming a function or a lambda expression"))
           (* (<<- argument ((form! forms)))))
   ((function-name ?)
-   (function      ? :evaluation :parsed)
+   (function      ? :evaluation :compound)
    (argument      * :evaluation t)))
 
 ;;; Pseudo-operator "self evaluating"
