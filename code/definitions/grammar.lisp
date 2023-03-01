@@ -1,6 +1,6 @@
-;;;; grammar.lisp --- Grammar for special operator and standard macros.
+;;;; grammar.lisp --- Grammar for special operators and standard macros.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

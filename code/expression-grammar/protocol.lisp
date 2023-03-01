@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol provided by the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -41,7 +41,10 @@
 
 (defgeneric eql* (client left right))
 
-;;; verbatim client
+;;; `verbatim-client'
+;;;
+;;; This client class implements the TODO protocol by treating every
+;;; object as an atom.
 
 (defclass verbatim-client ()
   ())

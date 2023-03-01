@@ -1,6 +1,6 @@
 ;;;; lambda-lists.lisp --- Rules for parsing different kinds of lambda lists.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -75,7 +75,7 @@
    (supplied ?)))
 
 (defrule rest-parameter (seen)
-    (unique-variable-name! seen))
+  (unique-variable-name! seen))
 
 (define-syntax (keyword-parameter :arguments ((seen nil)))
     (or (list (or (list (<- keyword ((parameter-keyword! names)))
@@ -98,7 +98,7 @@
    (value ? :evaluation t)))
 
 (defrule aux-parameter! (seen)
-    (must (aux-parameter seen) "must be an aux parameter"))
+  (must (aux-parameter seen) "must be an aux parameter"))
 
 ;;; Reusable sections of lambda lists
 
@@ -175,8 +175,8 @@
 ;;; 3.4.3 Specialized Lambda Lists
 
 (defrule specializer ()
-    (or (list* 'eql (must (list :any) "must be a single object")) ; TODO evaluated
-        ((class-name! names))))
+  (or (list* 'eql (must (list :any) "must be a single object")) ; TODO evaluated
+      ((class-name! names))))
 
 (defrule specialized-parameter (seen)
     (value (source)
@@ -224,8 +224,8 @@
 (parser:in-grammar destructuring-lambda-list)
 
 (defrule unique-variable-name (seen) ; TODO maybe not all unique-variable-names?
-    (or (and (guard (typep 'list)) (pattern seen))
-        ((unique-variable-name lambda-lists) seen)))
+  (or (and (guard (typep 'list)) (pattern seen))
+      ((unique-variable-name lambda-lists) seen)))
 
 (defrule unique-variable-name! (seen) ; TODO maybe not all unique-variable-names?
   (or (and (guard (typep 'list)) (pattern seen))

@@ -1,6 +1,6 @@
-;;;; database.lisp --- TODO.
+;;;; database.lisp --- Storage and lookup of syntax descriptions.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -95,7 +95,7 @@
 ;;; `part'
 
 (defclass part (named-mixin
-                     print-items:print-items-mixin)
+                print-items:print-items-mixin)
   ((%cardinality :initarg :cardinality
                  :type    (member 1 bp:? *)
                  :reader  cardinality)
@@ -113,7 +113,7 @@
       ,@(when semantics
           `(((:semantics (:after :cardinality)) " ~/print-items:format-print-items/" ,semantics))))))
 
-;;;
+;;; Database of named syntax definitions
 
 (defvar *syntaxes* (make-hash-table :test #'eq))
 
@@ -125,6 +125,7 @@
 
 (defmethod find-syntax ((name t) &key if-does-not-exist)
   (declare (ignore if-does-not-exist))
+  ;; Error signaling is handled in an `:around' method.
   (gethash name *syntaxes*))
 
 (defmethod (setf find-syntax) ((new-value t) (name t) &key if-does-not-exist)
@@ -135,5 +136,4 @@
   (let ((initargs (list* :name name initargs)))
     (a:if-let ((existing (find-syntax name :if-does-not-exist nil)))
       (apply #'reinitialize-instance existing initargs)
-      (setf (find-syntax name) (apply #'make-instance class
-                                      initargs)))))
+      (setf (find-syntax name) (apply #'make-instance class initargs)))))

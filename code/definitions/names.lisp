@@ -71,7 +71,7 @@
 (defrule function-name! ()
   (must (function-name) "must be a function name"))
 
-(defrule class-name ()           ; TODO call this type name?
+(defrule class-name () ; TODO call this type name?
     (value (source)
       (and (guard (typep 'symbol)) (not 'nil) symbol))
   (bp:node* (:type-name :name (eg::%naturalize symbol) :source source)))

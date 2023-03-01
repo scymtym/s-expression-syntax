@@ -1,6 +1,6 @@
 ;;;; forms.lisp --- Rules for parsing forms and bodies.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,10 +15,10 @@
 ;;; Documentation strings
 
 (defrule documentation-string ()
-    (guard stringp))
+  (guard stringp))
 
 (defrule documentation-string! ()
-    (must (documentation-string) "must be a documentation string"))
+  (must (documentation-string) "must be a documentation string"))
 
 ;;; Forms
 
@@ -27,25 +27,23 @@
   (nreverse declarations))
 
 (defrule form ()
-    ;; (cl:declare …) must not appear where a form is required.
-    ;; CL:DECLAIM warns in SBCL
-    (and (must (not (list* 'declare :any)) "declare is not allowed here")
-         :any))
+  ;; (cl:declare …) must not appear where a form is required.
+  ;; CL:DECLAIM warns in SBCL
+  (and (must (not (list* 'declare :any)) "declare is not allowed here")
+       :any))
 
 (defrule form! () ; TODO use this where appropriate
-    (must (form) "must be a form"))
+  (must (form) "must be a form"))
 
 (defrule compound-form ()
-    (and (list* :any :any) (form)))
+  (and (list* :any :any) (form)))
 
 (defrule compound-form! ()
-    (must (compound-form) "must be a compound form"))
+  (must (compound-form) "must be a compound form"))
 
 (defrule forms ()
     (list (* (<<- forms (form))))
   (nreverse forms))
-
-;; TODO do we need forms! ?
 
 (defrule body ()
     (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))

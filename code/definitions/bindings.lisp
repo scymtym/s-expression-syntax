@@ -51,8 +51,8 @@
    (form          * :evaluation t)))
 
 (defrule local-function-binding! ()
-    (must (local-function-binding)
-          "must be of the form (NAME LAMBDA-LIST DECLARATION* FORM*)"))
+  (must (local-function-binding)
+        "must be of the form (NAME LAMBDA-LIST DECLARATION* FORM*)"))
 
 (defrule function-bindings ()
     (list (* (<<- bindings (local-function-binding!))))
