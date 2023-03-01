@@ -26,17 +26,36 @@
 
 ;;; Utilities
 
+(defun check-parse-result-value-and-position
+    (input expected-value value
+     &optional (expected-position nil expected-position-p)
+               position)
+  (is (ast-equal expected-value value)
+      "~@<For input expression ~S, expected value ~S but got ~S.~@:>"
+      input expected-value value)
+  (when expected-position-p
+    (let ((expected-position (if (eq expected-position :input)
+                                 input
+                                 expected-position)))
+      (is (eq expected-position position)
+          "~@<For input expression ~S, expected position ~S but got ~S.~@:>"
+          input expected-position position))))
+
 (defun %rule-test-case (grammar rule arguments case)
   (destructuring-bind
       (input expected-success? expected-position expected-value) case
-    (declare (ignore expected-position))
     (let ((arguments (map 'list #'funcall arguments)))
       (multiple-value-bind (success? position value)
           (architecture.builder-protocol:with-builder ('list)
             (parser.packrat:parse `(,rule ,@arguments) input :grammar grammar))
-        (declare (ignore position))
-        (is (eq expected-success? success?))
-        (is (ast-equal expected-value value))))))
+        (is (eq expected-success? success?)
+            "~@<For input expression ~S, expected success ~S at position ~S ~
+             but got success ~S at position ~S~@:>"
+            input expected-success? expected-position success? position)
+        (apply #'check-parse-result-value-and-position
+               input expected-value value
+               (unless (eq expected-success? t)
+                 (list expected-position position)))))))
 
 (defmacro rule-test-cases (((rule grammar) &rest arguments) &body cases)
   (let ((arguments (map 'list (lambda (argument) `(lambda () ,argument))
@@ -57,35 +76,33 @@
     (rec left right)))
 
 (defun %syntax-test-case (syntax case)
-  (destructuring-bind (input expected
-                       &optional expected-value expected-message)
+  (destructuring-bind (input expected &optional (expected-value :input)
+                                                expected-message)
       case
     (flet ((do-it ()
              (syn:parse 'list syntax input)))
       (case expected
         (syn:invalid-syntax-error
          (signals (syn:invalid-syntax-error
-                   "~@<For input form ~S, the ~S parser did not signal ~
-                   an error.~@:>"
+                   "~@<For input expression ~S, the ~S parser did not signal ~
+                    an error.~@:>"
                    input (syn:name syntax) expected)
            (do-it))
          (handler-case (do-it)
            (syn:invalid-syntax-error (condition)
              (is (eq syntax (syn:syntax condition)))
-             (when expected-value
-               (let ((value (syn:expression condition)))
-                 (is (eql expected-value value)
-                     "~@<For input form ~S, expected value ~S, but got ~
-                      ~S.~@:>"
-                     input expected-value value)))
+             (let ((value (syn:expression condition)))
+               (check-parse-result-value-and-position
+                input nil nil expected-value value))
              (when expected-message
                (let ((message (syn:message condition)))
                  (is (string= expected-message message)
-                     "~@<For input form ~S, expected message ~S, but ~
+                     "~@<For input expression ~S, expected message ~S, but ~
                       got ~S.~@:>"
                      input expected-message message))))))
         (t
-         (is (ast-equal expected (do-it))))))))
+         (check-parse-result-value-and-position
+          input expected (do-it)))))))
 
 (defmacro syntax-test-cases ((syntax-name) &body cases)
   `(let ((syntax (syn:find-syntax ',syntax-name)))

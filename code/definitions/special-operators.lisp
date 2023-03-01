@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Standard special operators supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -155,7 +155,7 @@
 ;;; Lexically scoped bindings of values declarations.
 
 (define-special-operator symbol-macrolet
-    (list* (<- binding (symbol-macro-bindings))
+    (list* (<- binding (symbol-macro-bindings!))
            (<- (declaration form) ((body forms))))
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
@@ -193,21 +193,21 @@
 ;;; Lexically scope bindings of function-ish things.
 
 (define-special-operator macrolet
-    (list* (<- binding (macro-function-bindings))
+    (list* (<- binding (macro-function-bindings!))
            (<- (declaration form) ((body forms))))
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
 (define-special-operator flet
-    (list* (<- binding (function-bindings))
+    (list* (<- binding (function-bindings!))
            (<- (declaration form) ((body forms))))
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
 (define-special-operator labels
-    (list* (<- binding (function-bindings))
+    (list* (<- binding (function-bindings!))
            (<- (declaration form) ((body forms))))
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
@@ -229,9 +229,9 @@
 
 (define-special-operator setq
     (list (* (and :any
-                  (must (seq (<<- name       (variable-name))
+                  (must (seq (<<- name       (variable-name!))
                              (<<- value-form ((form! forms))))
-                        "must be a variable name followed by an expression"))))
+                        "must be a variable name followed by a form"))))
   ((name       * :evaluation nil       ; :type symbol :access :write
                 )
    (value-form * :evaluation t)))

@@ -1,6 +1,6 @@
 ;;;; client.lisp --- Tests for the client class of the concrete-syntax-tree module.
 ;;;;
-;;;; Copyright (C) 2020, 2021, 2022 Jan Moringen
+;;;; Copyright (C) 2020-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -16,13 +16,14 @@
 (test names.smoke
   "Smoke test for using the `cst-client' with names."
   (rule-test-cases ((syn::function-name syn::names))
-    (list (cst:cst-from-expression 1) nil t nil)
+    (list (cst:cst-from-expression 1) nil :input nil)
 
     (let ((cst (cst:cst-from-expression 'a)))
-      (list cst t t `(:function-name () :name a :source ,cst)))
+      (list cst t :input `(:function-name () :name a :source ,cst)))
 
-    (list (cst:cst-from-expression '(setf 1))
-          :fatal t "second element of SETF function name must be a symbol")))
+    (let* ((cst    (cst:cst-from-expression '(setf 1)))
+           (second (cst:second cst)))
+      (list cst :fatal second "second element of SETF function name must be a symbol"))))
 
 (test lambda-lists.smoke
   "Smoke test for using the `cst-client' with lambda list."
@@ -39,41 +40,46 @@
                                   (cst:cst-from-expression '&optional) d
                                   (cst:cst-from-expression '&rest) r
                                   (cst:cst-from-expression '&key) e)))
-      (list cst t t `(:specialized-lambda-list
-                      ((:required . *)  (((:specialized-parameter
-                                           ((:name        . 1) (((:variable-name
-                                                                  ()
-                                                                  :name a :source ,a)))
-                                            (:specializer . 1) (((:type-name
-                                                                  ()
-                                                                  :name integer :source ,specializer))))
-                                           :source ,parameter))
-                                         ((:specialized-parameter
-                                           ((:name . 1) (((:variable-name
-                                                           ()
-                                                           :name b :source ,b))))
-                                           :source ,b))
-                                         ((:specialized-parameter
-                                           ((:name . 1) (((:variable-name
-                                                           ()
-                                                           :name c :source ,c))))
-                                           :source ,c)))
-                       (:optional . *)  (((:optional-parameter
-                                           ((:name . 1) (((:variable-name
-                                                           ()
-                                                           :name d :source ,d))))
-                                           :source ,d)
-                                          :evaluation :compound))
-                       (:rest     . 1)  (((:variable-name
-                                           ()
-                                           :name r :source ,r)))
-                       (:keyword  . *)  (((:keyword-parameter
-                                           ((:name . 1) (((:variable-name
-                                                           ()
-                                                           :name e :source ,e))))
-                                           :source ,e)
-                                          :evaluation :compound)))
-                      :source ,cst)))
+      (list
+       cst t :input
+       `(:specialized-lambda-list
+         ((:required . *)  (((:specialized-parameter
+                              ((:name        . 1) (((:variable-name
+                                                     ()
+                                                     :name a :source ,a)))
+                                                  (:specializer . 1) (((:type-name
+                                                                        ()
+                                                                        :name integer :source ,specializer))))
+                              :source ,parameter))
+                            ((:specialized-parameter
+                              ((:name . 1) (((:variable-name
+                                              ()
+                                              :name b :source ,b))))
+                              :source ,b))
+                            ((:specialized-parameter
+                              ((:name . 1) (((:variable-name
+                                              ()
+                                              :name c :source ,c))))
+                              :source ,c)))
+          (:optional . *)  (((:optional-parameter
+                              ((:name . 1) (((:variable-name
+                                              ()
+                                              :name d :source ,d))))
+                              :source ,d)
+                             :evaluation :compound))
+          (:rest     . 1)  (((:variable-name
+                              ()
+                              :name r :source ,r)))
+          (:keyword  . *)  (((:keyword-parameter
+                              ((:name . 1) (((:variable-name
+                                              ()
+                                              :name e :source ,e))))
+                              :source ,e)
+                             :evaluation :compound)))
+         :source ,cst)))
 
-    (list (cst:cst-from-expression `((a 1 2) b c &optional d &rest r &key e))
-          :fatal t "must be a class name")))
+    (let* ((cst         (cst:cst-from-expression
+                         `((a 1 2) b c &optional d &rest r &key e)))
+           (first       (cst:first cst))
+           (specializer (cst:second first)))
+     (list cst :fatal specializer "must be a class name"))))

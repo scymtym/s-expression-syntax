@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Rules for binding constructs.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -52,11 +52,14 @@
 
 (defrule local-function-binding! ()
     (must (local-function-binding)
-          "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)"))
+          "must be of the form (NAME LAMBDA-LIST DECLARATION* FORM*)"))
 
 (defrule function-bindings ()
     (list (* (<<- bindings (local-function-binding!))))
   (nreverse bindings))
+
+(defrule function-bindings! ()
+  (must (function-bindings) "must be a list of function bindings"))
 
 ;;; Macro function bindings
 
@@ -75,11 +78,14 @@
 
 (defrule local-macro-function-binding! ()
     (must (local-macro-function-binding)
-          "must be of the form (NAME LAMBDA-LIST [DECLARATIONS] FORMS*)"))
+          "must be of the form (NAME LAMBDA-LIST DECLARATION* FORM*)"))
 
 (defrule macro-function-bindings ()
     (list (* (<<- bindings (local-macro-function-binding!))))
   (nreverse bindings))
+
+(defrule macro-function-bindings! ()
+  (must (macro-function-bindings) "must be a list of macro bindings"))
 
 ;;; Symbol-macro bindings
 
@@ -97,3 +103,6 @@
 (defrule symbol-macro-bindings ()
     (list (* (<<- bindings (symbol-macro-binding!))))
   (nreverse bindings))
+
+(defrule symbol-macro-bindings! ()
+  (must (symbol-macro-bindings) "must be a list of symbol macro bindings"))

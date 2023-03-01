@@ -1,6 +1,6 @@
 ;;;; standard-macros.lisp ---  Syntax of various Common Lisp standard macros.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -448,7 +448,8 @@
   (must (handler-binding) "must be of the form (TYPE HANDLER-FORM)"))
 
 (define-macro handler-bind
-    (list* (list (* (<<- binding (handler-binding!))))
+    (list* (must (list (* (<<- binding (handler-binding!))))
+                 "must be a list of handler bindings")
            (<- form (forms)))
   ((binding *  :evaluation :compound)
    (form    *> :evaluation t)))
@@ -478,7 +479,9 @@
     (list (<- form ((form! forms)))
           (* (or (and (list* (eg:once :no-error) :any)
                       (<- no-error-clause (no-error-clause)))
-                 (<<- clause (handler-clause)))))
+                 (<<- clause (handler-clause))))
+          (must (not :any)
+                "must be a list of handler clauses"))
   ((form            1 :evaluation t)
    (clause          * :evaluation :compound)
    (no-error-clause ? :evaluation :compound)))
@@ -502,7 +505,8 @@
   (must (restart-binding) "must be of the form (NAME FUNCTION [OPTIONS])"))
 
 (define-macro restart-bind
-    (list* (list (* (<<- binding (restart-binding!))))
+    (list* (must (list (* (<<- binding (restart-binding!))))
+                 "must be a list of restart bindings")
            (<- form ((forms forms))))
   ((binding * :evaluation :compound)
    (form    * :evaluation t)))
@@ -534,7 +538,9 @@
 
 (define-macro restart-case
     (list (<- form ((form forms)))
-          (* (<<- clause (restart-clause))))
+          (* (<<- clause (restart-clause)))
+          (must (not :any)
+                "must be a list of restart clauses"))
   ((form   1 :evaluation t)
    (clause * :evaluation :compound)))
 

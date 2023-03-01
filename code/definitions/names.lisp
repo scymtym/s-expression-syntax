@@ -51,7 +51,7 @@
   (bp:node* (:function-name :name (eg::%naturalize symbol) :source source)))
 
 (defrule function-name/symbol! ()
-  (must (function-name/symbol) "function name must be symbol"))
+  (must (function-name/symbol) "function name must be a symbol"))
 
 (defrule function-name/setf ()
     (value (source)
