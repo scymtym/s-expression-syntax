@@ -22,17 +22,10 @@
    (then 1 :evaluation t)
    (else ? :evaluation t)))
 
-;;; Special operators `block', `return-from', `return', `tagbody' and `go'
-
-(defrule block-name ()
-    (guard name (typep 'symbol))
-  name)
-
-(defrule block-name! ()
-    (must (block-name) "block name must be a symbol"))
+;;; Special operators `block', `return-from', `return'
 
 (define-special-operator block
-    (list* (<- name (block-name!)) (<- form ((forms forms))))
+    (list* (<- name ((block-name! names))) (<- form ((forms forms))))
   ((name 1  :evaluation (make-instance 'binding-semantics
                                        :namespace 'block
                                        :scope     :lexical
@@ -40,7 +33,7 @@
    (form *> :evaluation t)))
 
 (define-special-operator return-from
-    (list (<- name (block-name!)) (? (<- result ((form! forms)))))
+    (list (<- name ((block-name! names))) (? (<- result ((form! forms)))))
   ((name   1 :evaluation (make-instance 'reference-semantics
                                        :namespace 'block))
    (result ? :evaluation t)))
@@ -49,37 +42,15 @@
     (list (? (<- result ((form! forms)))))
   ((result ? :evaluation t)))
 
-;;; Note: we don't have `tag!' or `new-tag!' anything that is not a
-;;; valid tag will be treated as a form.
-(defrule integer-or-symbol ()
-    (or (guard (typep 'integer)) (guard (typep 'symbol))))
-
-(defrule tag ()
-    (value (source)
-      (<- name (integer-or-symbol)))
-  (let ((name (eg::%naturalize name)))
-    (bp:node* (:tag :name name :source source))))
-
-(defrule tag! ()
-    (must (tag) "tag must be a symbol or an integer"))
-
-(defrule unique-tag! (seen)
-    (<- tag (tag!))
-  (let ((name (getf (bp:node-initargs* tag) :name)))
-    (cond ((not seen))
-          ((not (nth-value 1 (gethash name seen)))
-           (setf (gethash name seen) t))
-          (t
-           (:fatal (format nil "the tag ~S occurs more than once" name)))))
-  tag)
+;;; Special operators `tagbody' and `go'
 
 (defrule (tagbody-segment :environment (make-instance 'eg::expression-environment)) (seen first?)
     (value (source)
       (seq (<- label (or (and (:transform :any (unless first? (:fail)))
-                              (or (and (integer-or-symbol) (unique-tag! seen))
+                              (or (and ((integer-or-symbol names)) ((unique-tag! names) seen))
                                   (seq)))
-                         (unique-tag! seen)))
-           (* (<<- statements (and (not (integer-or-symbol))
+                         ((unique-tag! names) seen)))
+           (* (<<- statements (and (not ((integer-or-symbol names)))
                                    ((form! forms)))))))
   (bp:node* (:tagbody-segment :source source)
     (bp:? (:label     . 1) label)
@@ -92,7 +63,7 @@
   ((segment * :evaluation :compound)))
 
 (define-special-operator go
-    (list* (must (list (<- tag (tag!))) "must be a single tag"))
+    (list* (must (list (<- tag ((tag! names)))) "must be a single tag"))
   ((tag 1 :evaluation nil)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'

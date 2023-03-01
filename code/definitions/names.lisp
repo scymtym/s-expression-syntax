@@ -11,6 +11,8 @@
 
 (parser:in-grammar names)
 
+;;; Variable names
+
 (defun constant? (name)
   (eq (sb-cltl2:variable-information name) :constant))
 
@@ -40,6 +42,8 @@
        (must (not (guard (typep 'keyword))) "variable name must not be a keyword")
        (must (not (constant)) "variable name must not designate a constant")
        (variable-name/unchecked)))
+
+;;; Function names
 
 (defrule function-name/symbol/raw ()
   (and (guard (typep 'symbol))
@@ -91,6 +95,39 @@
 (defrule declaration-identifier! ()
   (must (declaration-identifier) "declaration identifier must be a symbol"))
 
+;;; Block names
+
+(defrule block-name ()
+    (guard name (typep 'symbol))
+  name)
+
+(defrule block-name! ()
+  (must (block-name) "block name must be a symbol"))
+
+;;; Tags
+
+(defrule integer-or-symbol ()
+  (or (guard (typep 'integer)) (guard (typep 'symbol))))
+
+(defrule tag ()
+    (value (source)
+      (<- name (integer-or-symbol)))
+  (let ((name (eg::%naturalize name)))
+    (bp:node* (:tag :name name :source source))))
+
+(defrule tag! ()
+  (must (tag) "tag must be a symbol or an integer"))
+
+(defrule unique-tag! (seen)
+    (<- tag (tag!))
+  (let ((name (getf (bp:node-initargs* tag) :name)))
+    (cond ((not seen))
+          ((not (nth-value 1 (gethash name seen)))
+           (setf (gethash name seen) t))
+          (t
+           (:fatal (format nil "the tag ~S occurs more than once" name)))))
+  tag)
+
 ;;; A symbol that is the keyword of a keyword parameter
 ;;;
 ;;; Doesn't fit here super well, but is used in multiple other
@@ -99,7 +136,8 @@
 (defrule parameter-keyword ()
     (value (source)
       (guard keyword (typep 'symbol)))
-  (bp:node* (:keyword :name (eg::%naturalize keyword) :source source)))
+  (let ((name (eg::%naturalize keyword)))
+    (bp:node* (:keyword :name name :source source))))
 
 (defrule parameter-keyword! ()
   (must (parameter-keyword) "must be a symbol"))
