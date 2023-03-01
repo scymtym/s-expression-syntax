@@ -120,7 +120,7 @@
   '((defmacro foo (x (y #1=x)))
     syn:invalid-syntax-error #1# "the variable name X occurs more than once")
   ;; Valid syntax
-  `(#2=(defmacro #3=foo #4=(#5=a #6=b)
+  '(#2=(defmacro #3=foo #4=(#5=a #6=b)
          "bla"
          (declare #7=(ignore #8=a))
          (list 'cons b b))

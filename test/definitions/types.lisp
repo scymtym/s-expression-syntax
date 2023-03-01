@@ -12,8 +12,8 @@
 (test compound-type-specifier
   "Smoke test for the `compound-type-specifier' rule."
   (rule-test-cases ((syn::compound-type-specifier syn::type-specifiers))
-    `(1   nil    nil nil)
-    `((1) :fatal 1   "must be a class name")))
+    '(1   nil    nil nil)
+    '((1) :fatal 1   "must be a class name")))
 
 (test function-type-specifier
   "Smoke test for the `function-type-specifier' rule."
@@ -129,10 +129,10 @@
 (test type-specifier
   "Smoke test for the `type-specifier' rule."
   (rule-test-cases ((syn::type-specifier syn::type-specifiers))
-    `(#1=1        nil    #1# nil)
-    `((#2=1)      :fatal #2# "must be a class name")
-    `(#3=values   :fatal #3# "the symbol VALUES is not a valid type specifier")
-    `(#4=(values) :fatal #4# "VALUES type is invalid in this context")
+    '(#1=1        nil    #1# nil)
+    '((#2=1)      :fatal #2# "must be a class name")
+    '(#3=values   :fatal #3# "the symbol VALUES is not a valid type specifier")
+    '(#4=(values) :fatal #4# "VALUES type is invalid in this context")
     ;; Valid
     '(#5=bit                    t nil (:atomic-type-specifier
                                        ((:name . 1) (((:type-name () :name bit :source #5#))))
