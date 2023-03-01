@@ -6,8 +6,6 @@
 
 (cl:in-package #:s-expression-syntax)
 
-;;; Grammar
-
 (parser:defgrammar special-operators
   (:class eg::expression-grammar)
   (:use names
@@ -16,17 +14,3 @@
         deftype-lambda-list
         type-specifiers
         forms))
-
-;;; Basic rules TODO separate file
-
-(parser:in-grammar special-operators)
-
-(defrule reference ()
-    (guard symbolp)
-  ; (bp:node* (:reference :name name))
-  )
-
-(defrule atom ()
-    (guard atom)
-  ; (bp:node* (:atom :value atom))
-  )
