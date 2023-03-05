@@ -1011,3 +1011,192 @@
                         :source #43#)
                        :evaluation :compound)))
      :source #41#)))
+
+;;; `[ec]typecase'
+
+(define-macro-test (typecase)
+  ;; Invalid syntax
+  '(#1=(typecase)
+    syn:invalid-syntax-error #1#)
+  '((typecase x #2=1)
+    syn:invalid-syntax-error #2#
+    "must be a clause of the form (TYPE FORM*) or (otherwise FORM*)")
+  '((typecase x #3=())
+    syn:invalid-syntax-error #3#
+    "must be a clause of the form (TYPE FORM*) or (otherwise FORM*)")
+  '((typecase x (#4=(otherwise) 1))
+    syn:invalid-syntax-error #4# "CL:OTHERWISE does not name a compound type")
+  '((typecase x (otherwise 1) #5=(otherwise 2))
+    syn:invalid-syntax-error #5#
+    "otherwise clause must not be repeated")
+  '((typecase x (otherwise 1) #6=(:normal 2))
+    syn:invalid-syntax-error #6#
+    "normal clause must not follow otherwise clause")
+  ;; Valid syntax
+  '(#7=(typecase #8=x)
+    (:typecase ((:keyform . 1) ((#8# :evaluation t))) :source #7#))
+  '(#9=(typecase #10=x #11=(#12=y #13=1))
+    (:typecase
+     ((:keyform . 1) ((#10# :evaluation t))
+      (:clause  . *) (((:typecase-normal-clause
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name () :name y :source #12#))))
+                                        :source #12#)))
+                         (:form . *) ((#13# :evaluation t)))
+                        :source #11#)
+                       :evaluation :compound)))
+      :source #9#))
+  '(#14=(typecase #15=x #16=(#17=y #18=1) #19=(#20=z #21=2))
+    (:typecase
+     ((:keyform . 1) ((#15# :evaluation t))
+      (:clause  . *) (((:typecase-normal-clause
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name () :name y :source #17#))))
+                                        :source #17#)))
+                         (:form . *) ((#18# :evaluation t)))
+                        :source #16#)
+                       :evaluation :compound)
+                      ((:typecase-normal-clause
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name () :name z :source #20#))))
+                                        :source #20#)))
+                         (:form . *) ((#21# :evaluation t)))
+                        :source #19#)
+                       :evaluation :compound)))
+      :source #14#))
+  '(#22=(typecase #23=x #24=(#25=(#26=y) #27=1 #28=2))
+    (:typecase
+        ((:keyform . 1) ((#23# :evaluation t))
+         (:clause  . *) (((:typecase-normal-clause
+                           ((:type . 1) (((:compound-type-specifier
+                                           ((:name . 1) (((:type-name () :name y :source #26#))))
+                                           :source #25#)))
+                            (:form . *) ((#27# :evaluation t)
+                                         (#28# :evaluation t)))
+                           :source #24#)
+                          :evaluation :compound)))
+      :source #22#))
+  '(#29=(typecase #30=x #31=(otherwise #32=1))
+    (:typecase
+        ((:keyform . 1) ((#30# :evaluation t))
+         (:clause  . *) (((:typecase-otherwise-clause
+                           ((:form . *) ((#32# :evaluation t)))
+                           :source #31#)
+                          :evaluation :compound)))
+      :source #29#)))
+
+(define-macro-test (ctypecase)
+  ;; Invalid syntax
+  '(#1=(ctypecase)
+    syn:invalid-syntax-error #1#)
+  '((ctypecase #2=1)
+    syn:invalid-syntax-error #2# "must be a place")
+  '((ctypecase x #3=1)
+    syn:invalid-syntax-error #3# "must be a clause of the form (TYPE FORM*)")
+  '((ctypecase x #4=())
+    syn:invalid-syntax-error #4# "must be a clause of the form (TYPE FORM*)")
+  '((ctypecase x (#5=otherwise 1))
+    syn:invalid-syntax-error #5# "CL:OTHERWISE does not name a type")
+  '((ctypecase x (#6=(otherwise) 1))
+    syn:invalid-syntax-error #6# "CL:OTHERWISE does not name a compound type")
+  ;; Valid syntax
+  '(#7=(ctypecase #8=x)
+    (:ctypecase ((:keyplace . 1) ((#8# :evaluation t))) :source #7#))
+  '(#9=(ctypecase #10=x #11=(#12=y #13=1 #14=2))
+    (:ctypecase
+     ((:keyplace . 1) ((#10# :evaluation t))
+      (:clause   . *) (((:typecase-normal-clause
+                         ((:type . 1) (((:atomic-type-specifier
+                                         ((:name . 1) (((:type-name () :name y :source #12#))))
+                                         :source #12#)))
+                          (:form . *) ((#13# :evaluation t)
+                                       (#14# :evaluation t)))
+                         :source #11#)
+                        :evaluation :compound)))
+     :source #9#))
+  '(#15=(ctypecase #16=x #17=(#18=y #19=1) #20=(#21=z #22=2))
+    (:ctypecase
+     ((:keyplace . 1) ((#16# :evaluation t))
+      (:clause   . *) (((:typecase-normal-clause
+                         ((:type . 1) (((:atomic-type-specifier
+                                         ((:name . 1) (((:type-name () :name y :source #18#))))
+                                         :source #18#)))
+                          (:form . *) ((#19# :evaluation t)))
+                         :source #17#)
+                        :evaluation :compound)
+                       ((:typecase-normal-clause
+                         ((:type . 1) (((:atomic-type-specifier
+                                         ((:name . 1) (((:type-name () :name z :source #21#))))
+                                         :source #21#)))
+                          (:form . *) ((#22# :evaluation t)))
+                         :source #20#)
+                        :evaluation :compound)))
+     :source #15#))
+  '(#23=(ctypecase #24=x #25=(#26=(#27=y) #28=1))
+    (:ctypecase
+     ((:keyplace . 1) ((#24# :evaluation t))
+      (:clause   . *) (((:typecase-normal-clause
+                         ((:type . 1) (((:compound-type-specifier
+                                         ((:name . 1) (((:type-name () :name y :source #27#))))
+                                         :source #26#)))
+                          (:form . *) ((#28# :evaluation t)))
+                         :source #25#)
+                        :evaluation :compound)))
+     :source #23#)))
+
+(define-macro-test (etypecase)
+  ;; Invalid syntax
+  '(#1=(etypecase)
+    syn:invalid-syntax-error #1#)
+  '((etypecase x #2=1)
+    syn:invalid-syntax-error #2# "must be a clause of the form (TYPE FORM*)")
+  '((etypecase x #3=())
+    syn:invalid-syntax-error #3# "must be a clause of the form (TYPE FORM*)")
+  '((etypecase x (#4=otherwise 1))
+    syn:invalid-syntax-error #4# "CL:OTHERWISE does not name a type")
+  '((etypecase x (#5=(otherwise) 1))
+    syn:invalid-syntax-error #5# "CL:OTHERWISE does not name a compound type")
+  ;; Valid syntax
+  '(#6=(etypecase #7=x)
+    (:etypecase ((:keyform . 1) ((#7# :evaluation t))) :source #6#))
+  '(#8=(etypecase #9=x #10=(#11=y #12=1 #13=2))
+    (:etypecase
+     ((:keyform . 1) ((#9# :evaluation t))
+      (:clause  . *) (((:typecase-normal-clause
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name () :name y :source #11#))))
+                                        :source #11#)))
+                         (:form . *) ((#12# :evaluation t)
+                                      (#13# :evaluation t)))
+                        :source #10#)
+                       :evaluation :compound)))
+     :source #8#))
+  '(#14=(etypecase #15=x #16=(#17=y #18=1) #19=(#20=z #21=2))
+    (:etypecase
+     ((:keyform . 1) ((#15# :evaluation t))
+      (:clause  . *) (((:typecase-normal-clause
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name () :name y :source #17#))))
+                                        :source #17#)))
+                         (:form . *) ((#18# :evaluation t)))
+                        :source #16#)
+                       :evaluation :compound)
+                      ((:typecase-normal-clause
+                        ((:type . 1) (((:atomic-type-specifier
+                                        ((:name . 1) (((:type-name () :name z :source #20#))))
+                                        :source #20#)))
+                         (:form . *) ((#21# :evaluation t)))
+                        :source #19#)
+                       :evaluation :compound)))
+      :source #14#))
+  '(#22=(etypecase #23=x #24=(#25=(#26=y) #27=1))
+    (:etypecase
+     ((:keyform . 1) ((#23# :evaluation t))
+      (:clause  . *) (((:typecase-normal-clause
+                        ((:type . 1) (((:compound-type-specifier
+                                        ((:name . 1) (((:type-name () :name y :source #26#))))
+                                        :source #25#)))
+                         (:form . *) ((#27# :evaluation t)))
+                        :source #24#)
+                       :evaluation :compound)))
+     :source #22#)))

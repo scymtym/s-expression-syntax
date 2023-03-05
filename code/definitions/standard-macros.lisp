@@ -601,6 +601,59 @@
   ((keyform 1 :evaluation t)
    (clause  * :evaluation :compound)))
 
+;;; `[ec]typecase'
+
+(define-syntax typecase-normal-clause
+    (list (or (guard ; HACK guard forces the value context
+               (or (:transform 'otherwise
+                     (:fatal "CL:OTHERWISE does not name a type"))
+                   (:transform (list* 'otherwise :any)
+                     (:fatal "CL:OTHERWISE does not name a compound type")))
+               (typep 't))
+              (<- type ((type-specifier! type-specifiers))))
+          (* (<<- form ((form! forms)))))
+  ((type 1)
+   (form * :evaluation t)))
+
+(defrule typecase-normal-clause! ()
+  (must (typecase-normal-clause)
+        "must be a clause of the form (TYPE FORM*)"))
+
+(define-syntax typecase-otherwise-clause
+    (list 'otherwise (* (<<- form ((form! forms)))))
+  ((form * :evaluation t)))
+
+(defrule typecase-clauses ()
+    (list (* (guard ; HACK guard forces the value context
+              (<<- clauses
+                   (or (eg:once (typecase-otherwise-clause)
+                                :flag otherwise? :name "otherwise clause")
+                       (:transform (<- clause (typecase-normal-clause))
+                         (when otherwise?
+                           (:fatal "normal clause must not follow otherwise clause"))
+                         clause)
+                       (:transform :any
+                         (:fatal "must be a clause of the form (TYPE FORM*) or (otherwise FORM*)"))))
+              (typep 't))))
+  (nreverse clauses))
+
+(define-macro typecase
+    (list* (<- keyform ((form! forms))) (<- clause (typecase-clauses)))
+  ((keyform 1  :evaluation t)
+   (clause  *> :evaluation :compound)))
+
+(define-macro ctypecase
+    (list (<- keyplace ((place! forms)))
+          (* (<<- clause (typecase-normal-clause!))))
+  ((keyplace 1 :evaluation t)
+   (clause   * :evaluation :compound)))
+
+(define-macro etypecase
+    (list (<- keyform ((form! forms)))
+          (* (<<- clause (typecase-normal-clause!))))
+  ((keyform 1 :evaluation t)
+   (clause  * :evaluation :compound)))
+
 ;;; `cond'
 
 (define-syntax cond-clause
