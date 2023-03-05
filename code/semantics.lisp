@@ -29,5 +29,9 @@
    :scope  (missing-required-initarg 'binding-semantics :scope)
    :values (missing-required-initarg 'binding-semantics :values)))
 
+(defclass assignment-semantics (namespace-mixin
+                                print-items:print-items-mixin)
+  ())
+
 (defclass reference-semantics (namespace-mixin)
   ())

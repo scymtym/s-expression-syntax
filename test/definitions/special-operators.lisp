@@ -750,29 +750,67 @@
                         (:form . 1) ((1 :evaluation t)))
                        :source #1#)))
 
-;;; Special operator `setq'
+;;; Special operators `[p]setq'
 
 (define-syntax-test (setq)
+  ;; Invalid syntax
   '((setq a . #1=())
-    syn:invalid-syntax-error #1#)
-  '((setq a 1 b . #2= ())
+    syn:invalid-syntax-error #1# "must be a variable name followed by a form")
+  '((setq a 1 b . #2=())
     syn:invalid-syntax-error #2# "must be a variable name followed by a form")
   '((setq #3=1 1)
     syn:invalid-syntax-error #3# "variable name must be a symbol")
   '((setq #4=(1+ a) 1)
     syn:invalid-syntax-error #4# "variable name must be a symbol")
+  ;; Valid syntax
+  '(#5=(setq)
+    (:setq () :source #5#))
+  '(#6=(setq #7=a 1)
+    (:setq
+     ((:name       . *) (((:variable-name () :name a :source #7#)
+                          :evaluation (:assignment :namespace variable)))
+      (:value-form . *) ((1 :evaluation t)))
+     :source #6#))
+  '(#8=(setq #9=a 1 #10=b 2)
+    (:setq
+     ((:name       . *) (((:variable-name () :name a :source #9#)
+                          :evaluation (:assignment :namespace variable))
+                         ((:variable-name () :name b :source #10#)
+                          :evaluation (:assignment :namespace variable)))
+      (:value-form . *) ((1 :evaluation t)
+                         (2 :evaluation t)))
+     :source #8#)))
 
-  '(#5=(setq)                (:setq () :source #5#))
-  '(#6=(setq #7=a 1)         (:setq
-                              ((:name       . *) (((:variable-name () :name a :source #7#)))
-                               (:value-form . *) ((1 :evaluation t)))
-                              :source #6#))
-  '(#8=(setq #9=a 1 #10=b 2) (:setq
-                              ((:name       . *) (((:variable-name () :name a :source #9#))
-                                                  ((:variable-name () :name b :source #10#)))
-                               (:value-form . *) ((1 :evaluation t)
-                                                  (2 :evaluation t)))
-                              :source #8#)))
+(define-syntax-test (psetq)
+  ;; Invalid syntax
+  '((psetq a . #1=()) ; TODO not yet reported accurately
+    syn:invalid-syntax-error #1# "must be a variable name followed by a form")
+  '((psetq a 1 b . #2=()) ; TODO not yet reported accurately
+    syn:invalid-syntax-error #2# "must be a variable name followed by a form")
+  '((psetq #3=1 1)
+    syn:invalid-syntax-error #3# "variable name must be a symbol")
+  '((psetq #4=(1+ a) 1)
+    syn:invalid-syntax-error #4# "variable name must be a symbol")
+  '((psetq a 1 #5=a 2)
+    syn:invalid-syntax-error #5# "the variable name A occurs more than once")
+  ;; Valid syntax
+  '(#6=(psetq)
+    (:psetq () :source #6#))
+  '(#7=(psetq #8=a 1)
+    (:psetq
+     ((:name       . *) (((:variable-name () :name a :source #8#)
+                          :evaluation (:assignment :namespace variable)))
+      (:value-form . *) ((1 :evaluation t)))
+     :source #7#))
+  '(#9=(psetq #10=a 1 #11=b 2)
+    (:psetq
+     ((:name       . *) (((:variable-name () :name a :source #10#)
+                          :evaluation (:assignment :namespace variable))
+                         ((:variable-name () :name b :source #11#)
+                          :evaluation (:assignment :namespace variable)))
+      (:value-form . *) ((1 :evaluation t)
+                         (2 :evaluation t)))
+     :source #9#)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
 

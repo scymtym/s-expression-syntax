@@ -196,15 +196,30 @@
   ((type 1 :evaluation nil)
    (form 1 :evaluation t)))
 
-;;; Special operator `setq'
+;;; Special operators `[p]setq'
 
 (define-special-operator setq
     (list (* (and :any
                   (must (seq (<<- name       (variable-name!))
                              (<<- value-form ((form! forms))))
                         "must be a variable name followed by a form"))))
-  ((name       * :evaluation nil       ; :type symbol :access :write
-                )
+  ((name       * :evaluation (make-instance 'assignment-semantics
+                                            :namespace 'variable))
+   (value-form * :evaluation t)))
+
+(defrule unique-assignment-pairs ()
+    (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+         (list (* (and :any
+                       (must (seq (<<- names       ((unique-variable-name! lambda-lists)
+                                                    seen))
+                                  (<<- value-forms ((form! forms))))
+                             "must be a variable name followed by a form")))))
+  (list names value-forms))
+
+(define-special-operator psetq
+    (list* (<- (name value-form) (unique-assignment-pairs)))
+  ((name       * :evaluation (make-instance 'assignment-semantics
+                                            :namespace 'variable))
    (value-form * :evaluation t)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'

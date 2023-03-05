@@ -75,6 +75,10 @@
                 (destructuring-bind (&key namespace) (rest left)
                   (and (typep right 'syn::reference-semantics)
                        (eq (syn::namespace right) namespace))))
+               ((cons (eql :assignment))
+                (destructuring-bind (&key namespace) (rest left)
+                  (and (typep right 'syn::assignment-semantics)
+                       (eq (syn::namespace right) namespace))))
                (cons
                 (and (consp right)
                      (rec (car left) (car right))
