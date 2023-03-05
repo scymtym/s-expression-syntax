@@ -687,7 +687,8 @@
                                                                     ()
                                                                     :name x :source #9#))))
                                                     :source #9#)
-                                                   :evaluation :binding))
+                                                   :evaluation (:binding :namespace variable
+                                                                         :scope     :lexical)))
                                  (:form     . *) (((baz) :evaluation t)))
                                 :source #7#)
                                :evaluation :compound))

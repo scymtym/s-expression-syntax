@@ -41,28 +41,42 @@
   '((block)                     syn:invalid-syntax-error)
   '((block #1=(foo))            syn:invalid-syntax-error #1# "block name must be a symbol")
 
-  '(#2=(block #3=foo #4=1)      (:block
-                                 ((:name . 1) ((#3# :evaluation :binding))
-                                  (:form . *) ((#4# :evaluation t)))
-                                 :source #2#))
-  '(#5=(block #6=foo #7=a #8=b) (:block
-                                 ((:name . 1) ((#6# :evaluation :binding))
-                                  (:form . *) ((#7# :evaluation t)
-                                               (#8# :evaluation t)))
-                                 :source #5#)))
+  '(#2=(block #3=foo #4=1)
+    (:block
+     ((:name . 1) ((#3#
+                    :evaluation (:binding :namespace block
+                                          :scope     :lexical)))
+      (:form . *) ((#4#
+                    :evaluation t)))
+     :source #2#))
+  '(#5=(block #6=foo #7=a #8=b)
+    (:block
+     ((:name . 1) ((#6#
+                    :evaluation (:binding :namespace block
+                                          :scope     :lexical)))
+      (:form . *) ((#7#
+                    :evaluation t)
+                   (#8#
+                    :evaluation t)))
+     :source #5#)))
 
 (define-syntax-test (return-from)
   '((return-from)                syn:invalid-syntax-error)
   '((return-from foo 1 2)        syn:invalid-syntax-error)
   '((return-from #1=(foo))       syn:invalid-syntax-error #1# "block name must be a symbol")
 
-  '(#2=(return-from #3=foo)      (:return-from
-                                  ((:name . 1) ((#3# :evaluation :reference)))
-                                  :source #2#))
-  '(#4=(return-from #5=foo #6=1) (:return-from
-                                  ((:name   . 1) ((#5# :evaluation :reference))
-                                   (:result . 1) ((#6# :evaluation t)))
-                                  :source #4#))
+  '(#2=(return-from #3=foo)
+    (:return-from
+     ((:name . 1) ((#3#
+                    :evaluation (:reference :namespace block))))
+     :source #2#))
+  '(#4=(return-from #5=foo #6=1)
+    (:return-from
+     ((:name   . 1) ((#5#
+                      :evaluation (:reference :namespace block)))
+      (:result . 1) ((#6#
+                      :evaluation t)))
+     :source #4#))
 
   #+TODO (apply #'unparse-return-from-special-operator
                 (parse-return-from-special-operator
@@ -253,13 +267,15 @@
     (:symbol-macrolet
      ((:binding     . *) (((:symbol-macro-binding
                             ((:name      . 1) (((:variable-name () :name a :source #8#)
-                                                :evaluation :binding))
+                                                :evaluation (:binding :namespace variable
+                                                                      :scope    :lexical)))
                              (:expansion . 1) ((1 :evaluation t)))
                             :source #7#)
                            :evaluation :compound)
                           ((:symbol-macro-binding
                             ((:name      . 1) (((:variable-name () :name b :source #10#)
-                                                :evaluation :binding))
+                                                :evaluation (:binding :namespace variable
+                                                                      :scope    :lexical)))
                              (:expansion . 1) ((2 :evaluation t)))
                             :source #9#)
                            :evaluation :compound))
@@ -289,27 +305,31 @@
     (:let
      ((:binding . *) (((:value-binding
                         ((:name . 1) (((:variable-name () :name a :source #6#)
-                                       :evaluation :binding)))
+                                       :evaluation (:binding :namespace variable
+                                                             :scope    :lexical))))
                         :source #6#)
-                       :evaluation :binding)))
+                       :evaluation :compound)))
       :source #5#))
   '(#7=(let (#8=(#9=a 1) #10=b #11=(#12=c 2))
          (declare #13=(type #14=boolean #15=a)) a)
     (:let
      ((:binding . *)     (((:value-binding
                             ((:name  . 1) (((:variable-name () :name a :source #9#)
-                                            :evaluation :binding))
+                                            :evaluation (:binding :namespace variable
+                                                                  :scope    :lexical)))
                              (:value . 1) ((1 :evaluation t)))
                             :source #8#)
                            :evaluation :compound)
                            ((:value-binding
                              ((:name . 1) (((:variable-name () :name b :source #10#)
-                                            :evaluation :binding)))
+                                            :evaluation (:binding :namespace variable
+                                                                  :scope    :lexical))))
                              :source #10#)
                             :evaluation :compound)
                           ((:value-binding
                             ((:name  . 1) (((:variable-name () :name c :source #12#)
-                                            :evaluation :binding))
+                                            :evaluation (:binding :namespace variable
+                                                                  :scope    :lexical)))
                              (:value . 1) ((2 :evaluation t)))
                             :source #11#)
                            :evaluation :compound))
@@ -342,7 +362,8 @@
     (:let*
      ((:binding . *) (((:value-binding
                         ((:name . 1) (((:variable-name () :name a :source #6#)
-                                       :evaluation :binding)))
+                                       :evaluation (:binding :namespace variable
+                                                             :scope    :lexical))))
                         :source #6#)
                        :evaluation :compound)))
       :source #5#))
@@ -352,18 +373,21 @@
     (:let*
      ((:binding     . *) (((:value-binding
                             ((:name  . 1) (((:variable-name () :name a :source #9#)
-                                            :evaluation :binding))
+                                            :evaluation (:binding :namespace variable
+                                                                  :scope    :lexical)))
                              (:value . 1) ((1 :evaluation t)))
                             :source #8#)
                            :evaluation :compound)
                           ((:value-binding
                             ((:name . 1) (((:variable-name () :name b :source #10#)
-                                           :evaluation :binding)))
+                                           :evaluation (:binding :namespace variable
+                                                                 :scope    :lexical))))
                             :source #10#)
                            :evaluation :compound)
                           ((:value-binding
                             ((:name  . 1) (((:variable-name () :name c :source #12#)
-                                            :evaluation :binding))
+                                            :evaluation (:binding :namespace variable
+                                                                  :scope    :lexical)))
                              (:value . 1) ((2 :evaluation t)))
                             :source #11#)
                            :evaluation :compound))
@@ -450,7 +474,8 @@
     (:macrolet
      ((:binding . *) (((:local-macro-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #8#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope    :lexical)))
                          (:lambda-list . 1) (((:destructuring-lambda-list
                                                ()
                                                :source #9#)
@@ -464,7 +489,8 @@
     (:macrolet
      ((:binding . *) (((:local-macro-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #12#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope    :lexical)))
                          (:lambda-list . 1) (((:destructuring-lambda-list
                                                ((:whole    . 1) (((:variable-name
                                                                    ()
@@ -540,7 +566,8 @@
     (:flet
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #8#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list () :source #9#)
                                               :evaluation :compound)))
                         :source #7#)
@@ -550,7 +577,8 @@
     (:flet
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #12#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ((:required . *) (((:required-parameter
                                                                    ((:name . 1) (((:variable-name
@@ -570,7 +598,8 @@
     (:flet
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #18#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
                                                :source #19#)
@@ -592,7 +621,8 @@
     (:flet
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #25#)
-                                               :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
                                                :source #26#)
@@ -620,7 +650,8 @@
     (:labels
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #8#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
                                                :source #9#)
@@ -632,7 +663,8 @@
     (:labels
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #12#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ((:required . *) (((:required-parameter
                                                                    ((:name . 1) (((:variable-name
@@ -652,7 +684,8 @@
     (:labels
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #18#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
                                                :source #19#)
@@ -674,7 +707,8 @@
     (:labels
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #25#)
-                                              :evaluation :binding))
+                                              :evaluation (:binding :namespace function
+                                                                    :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
                                                :source #26#)
@@ -844,9 +878,11 @@
   '(#5=(multiple-value-bind (#6=a #7=b) #8=1 #9=2 #10=3)
     (:multiple-value-bind
      ((:name        . *) (((:variable-name () :name a :source #6#)
-                           :evaluation :binding)
+                           :evaluation (:binding :namespace variable
+                                                 :scope     :lexical))
                           ((:variable-name () :name b :source #7#)
-                           :evaluation :binding))
+                           :evaluation (:binding :namespace variable
+                                                 :scope     :lexical)))
       (:values-form . 1) ((#8#  :evaluation t))
       (:form        . *) ((#9#  :evaluation t)
                           (#10# :evaluation t)))

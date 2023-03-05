@@ -39,7 +39,7 @@
                                 ((1 ?) name))
                              ,@(unless (null evaluation)
                                  `(:evaluation ,(case cardinality
-                                                  ((1 ?) `',evaluation)
+                                                  ((1 ?) evaluation)
                                                   (t     `(load-time-value
                                                            (a:make-circular-list
                                                             1 :initial-element ,evaluation)))))))

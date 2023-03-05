@@ -92,7 +92,7 @@
 (define-syntax symbol-macro-binding
     (list (<- name ((variable-name! names))) (<- expansion ((form! forms))))
   ((name      1 :evaluation (make-instance 'binding-semantics
-                                           :namespace 'value
+                                           :namespace 'variable
                                            :scope     :lexical
                                            :values    'expansion))
    (expansion 1 :evaluation t)))

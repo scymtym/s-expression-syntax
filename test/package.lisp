@@ -66,13 +66,24 @@
 (defun ast-equal (left right)
   (labels ((rec (left right)
              (typecase left
-               (cons                         (and (consp right)
-                                                  (rec (car left) (car right))
-                                                  (rec (cdr left) (cdr right))))
-               (vector                       (and (= (length left) (length right))
-                                                  (every #'rec left right)))
-               ((member :binding :reference) t)
-               (t                            (eql left right)))))
+               ((cons (eql :binding) cons)
+                (destructuring-bind (&key namespace scope) (rest left)
+                  (and (typep right 'syn::binding-semantics)
+                       (eq (syn::namespace right) namespace)
+                       (eq (syn::scope     right) scope))))
+               ((cons (eql :reference) cons)
+                (destructuring-bind (&key namespace) (rest left)
+                  (and (typep right 'syn::reference-semantics)
+                       (eq (syn::namespace right) namespace))))
+               (cons
+                (and (consp right)
+                     (rec (car left) (car right))
+                     (rec (cdr left) (cdr right))))
+               (vector
+                (and (= (length left) (length right))
+                     (every #'rec left right)))
+               (t
+                (eql left right)))))
     (rec left right)))
 
 (defun %syntax-test-case (syntax case)

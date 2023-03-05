@@ -24,12 +24,14 @@
     '(#4=(#5=(#6=a))
       t #4# ((:value-binding
               ((:name . 1) (((:variable-name () :name a :source #6#)
-                             :evaluation :binding)))
+                             :evaluation (:binding :namespace variable
+                                                   :scope     :lexical))))
               :source #5#)))
     '(#7=(#8=(#9=a 1))
       t #7# ((:value-binding
               ((:name  . 1) (((:variable-name () :name a :source #9#)
-                              :evaluation :binding))
+                              :evaluation (:binding :namespace variable
+                                                    :scope     :lexical)))
                (:value . 1) ((1 :evaluation t)))
               :source #8#)))))
 
@@ -50,7 +52,8 @@
     '((#5=(#6=a #7=()))
       t #5# ((:local-function-binding
               ((:name        . 1) (((:function-name () :name a :source #6#)
-                                    :evaluation :binding))
+                                    :evaluation (:binding :namespace function
+                                                          :scope     :lexical)))
                (:lambda-list . 1) (((:ordinary-lambda-list
                                      ()
                                      :source #7#)
@@ -59,7 +62,8 @@
     '((#8=(#9=a #10=() 1))
       t #8# ((:local-function-binding
                ((:name        . 1) (((:function-name () :name a :source #9#)
-                                     :evaluation :binding))
+                                     :evaluation (:binding :namespace function
+                                                           :scope     :lexical)))
                 (:lambda-list . 1) (((:ordinary-lambda-list
                                       ()
                                       :source #10#)
@@ -69,7 +73,8 @@
     '((#11=(#12=a #13=() "" 1))
       t #10# ((:local-function-binding
                ((:name          . 1) (((:function-name () :name a :source #12#)
-                                       :evaluation :binding))
+                                       :evaluation (:binding :namespace function
+                                                             :scope     :lexical)))
                 (:lambda-list   . 1) (((:ordinary-lambda-list
                                         ()
                                         :source #13#)
@@ -94,7 +99,8 @@
     '((#5=(#6=a #7=()))
       t nil ((:local-macro-function-binding
               ((:name        . 1) (((:function-name () :name a :source #6#)
-                                    :evaluation :binding))
+                                    :evaluation (:binding :namespace function
+                                                          :scope     :lexical)))
                (:lambda-list . 1) (((:destructuring-lambda-list
                                      ()
                                      :source #7#)
@@ -103,7 +109,8 @@
     '((#8=(#9=a #10=(&whole #11=w #12=(#13=a #14=b))))
       t nil ((:local-macro-function-binding
               ((:name        . 1) (((:function-name () :name a :source #9#)
-                                    :evaluation :binding))
+                                    :evaluation (:binding :namespace function
+                                                          :scope     :lexical)))
                (:lambda-list . 1) (((:destructuring-lambda-list
                                      ((:whole    . 1) (((:variable-name () :name w :source #11#)))
                                       (:required . *) (((:required-parameter
@@ -128,7 +135,8 @@
     '((#15=(#16=a #17=() 1))
       t nil ((:local-macro-function-binding
               ((:name        . 1) (((:function-name () :name a :source #16#)
-                                    :evaluation :binding))
+                                    :evaluation (:binding :namespace function
+                                                          :scope     :lexical)))
                (:lambda-list . 1) (((:destructuring-lambda-list () :source #17#)
                                     :evaluation :compound))
                (:form        . *) ((1 :evaluation t)))
@@ -136,7 +144,8 @@
     '((#18=(#19=a #20=() "" 1))
       t nil ((:local-macro-function-binding
               ((:name          . 1) (((:function-name () :name a :source #19#)
-                                      :evaluation :binding))
+                                      :evaluation (:binding :namespace function
+                                                            :scope     :lexical)))
                (:lambda-list   . 1) (((:destructuring-lambda-list () :source #20#)
                                       :evaluation :compound))
                (:documentation . 1) ((""))
@@ -160,6 +169,7 @@
     '((#5=(#6=a 1))
       t nil ((:symbol-macro-binding
               ((:name      . 1) (((:variable-name () :name a :source #6#)
-                                  :evaluation :binding))
+                                  :evaluation (:binding :namespace variable
+                                                        :scope     :lexical)))
                (:expansion . 1) ((1 :evaluation t)))
               :source #5#)))))
