@@ -544,51 +544,64 @@
   ((form   1 :evaluation t)
    (clause * :evaluation :compound)))
 
-;;; `[ec]case' and `cond'
+;;; `[ec]case'
 
-(define-syntax case-normal-clause
-    (list (or (list (* (<<- keys))) (<<- keys))
-          (* (<<- forms ((form! forms)))))
-  ((keys  *)
-   (forms * :evaluation t)))
+(defrule otherwise-key ()
+  (or 'otherwise 't))
+
+(defrule normal-key (allow-otherwise?)
+  (and (or (:transform (otherwise-key)
+             (unless allow-otherwise? (:fail)))
+           (not (otherwise-key)))
+       :any))
+
+(define-syntax (case-normal-clause :arguments ((allow-otherwise? t)))
+    (list (or (list (* (<<- key)))
+              (<<- key (normal-key allow-otherwise?)))
+          (* (<<- form ((form! forms)))))
+  ((key  *)
+   (form * :evaluation t)))
+
+(defrule case-normal-clause! (allow-otherwise?)
+  (must (case-normal-clause allow-otherwise?)
+        "must be a clause of the form (KEY-OR-KEYS FORM*)"))
 
 (define-syntax case-otherwise-clause
-    (list (or 'otherwise 't) (* (<<- forms ((form! forms)))))
-  ((forms * :evaluation t)))
+    (list (otherwise-key) (* (<<- form ((form! forms)))))
+  ((form * :evaluation t)))
 
-(define-macro case
-    (list (<- keyform ((form! forms)))
-          (* (guard ; HACK guard forces the value context
+(defrule case-clauses ()
+    (list (* (guard ; HACK guard forces the value context
               (<<- clauses
                    (or (eg:once (case-otherwise-clause)
                                 :flag otherwise? :name "otherwise clause")
-                       (:transform (<- clause (case-normal-clause))
+                       (:transform (<- clause (case-normal-clause 'nil))
                          (when otherwise?
-                           (:fatal "normal clause cannot follow otherwise clause"))
+                           (:fatal "normal clause must not follow otherwise clause"))
                          clause)
                        (:transform :any
-                         (:fatal "must be a clause of one of the forms (KEY FORM*), (otherwise FORM*) or (t FORM*)"))))
+                         (:fatal "must be a clause of one of the forms (KEY-OR-KEYS FORM*), (otherwise FORM*) or (t FORM*)"))))
               (typep 't))))
-  ((keyform 1 :evaluation t)
-   (clauses * :evaluation :compound)))
+  (nreverse clauses))
+
+(define-macro case
+    (list* (<- keyform ((form! forms))) (<- clause (case-clauses)))
+  ((keyform 1  :evaluation t)
+   (clause  *> :evaluation :compound)))
 
 (define-macro ccase
-    (list (<- keyform ((form! forms)))
-          (* (guard ; HACK
-              (<<- clauses (must (case-normal-clause)
-                                 "must be a clause of the form (KEY FORM*)"))
-              (typep 't))))
-  ((keyform 1 :evaluation t)
-   (clauses * :evaluation :compound)))
+    (list (<- keyplace ((place! forms)))
+          (* (<<- clause (case-normal-clause! 't))))
+  ((keyplace 1 :evaluation t)
+   (clause   * :evaluation :compound)))
 
 (define-macro ecase
     (list (<- keyform ((form! forms)))
-          (* (guard ; HACK
-              (<<- clauses (must (case-normal-clause)
-                                 "must be a clause of the form (KEY FORM*)"))
-              (typep 't))))
+          (* (<<- clause (case-normal-clause! 't))))
   ((keyform 1 :evaluation t)
-   (clauses * :evaluation :compound)))
+   (clause  * :evaluation :compound)))
+
+;;; `cond'
 
 (define-syntax cond-clause
     (list* (<- test-form ((form! forms))) (<- forms ((forms forms))))

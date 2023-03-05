@@ -35,15 +35,22 @@
 (defrule form! () ; TODO use this where appropriate
   (must (form) "must be a form"))
 
+(defrule forms ()
+    (list (* (<<- forms (form))))
+  (nreverse forms))
+
 (defrule compound-form ()
   (and (list* :any :any) (form)))
 
 (defrule compound-form! ()
   (must (compound-form) "must be a compound form"))
 
-(defrule forms ()
-    (list (* (<<- forms (form))))
-  (nreverse forms))
+(defrule place ()
+  (and (or (guard (typep 'cons)) (guard (typep 'symbol)))
+       (form)))
+
+(defrule place! ()
+  (must (place) "must be a place"))
 
 (defrule body ()
     (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))

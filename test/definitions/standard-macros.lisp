@@ -772,3 +772,242 @@
                        :source #7#)
                       :evaluation :compound)))
      :source #6#)))
+
+;;; `[ec]case'
+
+(define-macro-test (case)
+  ;; Invalid syntax
+  '(#1=(case)
+    syn:invalid-syntax-error #1#)
+  '((case x #2=1)
+    syn:invalid-syntax-error #2#
+    "must be a clause of one of the forms (KEY-OR-KEYS FORM*), (otherwise FORM*) or (t FORM*)")
+  '((case x #3=())
+    syn:invalid-syntax-error #3#
+    "must be a clause of one of the forms (KEY-OR-KEYS FORM*), (otherwise FORM*) or (t FORM*)")
+  '((case x (otherwise 1) #4=(otherwise 2))
+    syn:invalid-syntax-error #4# "otherwise clause must not be repeated")
+  '((case x (otherwise 1) #5=(:normal 2))
+    syn:invalid-syntax-error #5#
+    "normal clause must not follow otherwise clause")
+  ;; Valid syntax
+  '(#6=(case #7=x)
+    (:case ((:keyform . 1) ((#7# :evaluation t))) :source #6#))
+  '(#8=(case #9=x #10=(#11=y #12=1))
+    (:case
+     ((:keyform . 1) ((#9# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#11#))
+                         (:form . *) ((#12# :evaluation t)))
+                        :source #10#)
+                       :evaluation :compound)))
+     :source #8#))
+  '(#13=(case #14=x #15=(#16=y #17=1) #18=(#19=z #20=2))
+    (:case
+     ((:keyform . 1) ((#14# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#16#))
+                         (:form . *) ((#17# :evaluation t)))
+                        :source #15#)
+                       :evaluation :compound)
+                      ((:case-normal-clause
+                        ((:key  . *) ((#19#))
+                         (:form . *) ((#20# :evaluation t)))
+                        :source #18#)
+                       :evaluation :compound)))
+     :source #13#))
+  '(#21=(case #22=x #23=((#24=y #25=z) #26=1 #27=2))
+    (:case
+     ((:keyform . 1) ((#22# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#24#) (#25#))
+                         (:form . *) ((#26# :evaluation t)
+                                      (#27# :evaluation t)))
+                        :source #23#)
+                       :evaluation :compound)))
+     :source #21#))
+  '(#28=(case #29=x #30=(otherwise #31=1))
+    (:case
+        ((:keyform . 1) ((#29# :evaluation t))
+         (:clause  . *) (((:case-otherwise-clause
+                           ((:form . *) ((#31# :evaluation t)))
+                           :source #30#)
+                          :evaluation :compound)))
+      :source #28#))
+  '(#32=(case #33=x #34=((#35=otherwise) #36=1))
+    (:case
+     ((:keyform . 1) ((#33# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#35#))
+                         (:form . *) ((#36# :evaluation t)))
+                        :source #34#)
+                       :evaluation :compound)))
+      :source #32#)))
+
+(define-macro-test (ccase)
+  ;; Invalid syntax
+  '(#1=(ccase)
+    syn:invalid-syntax-error #1#)
+  '((ccase #2=1)
+    syn:invalid-syntax-error #2# "must be a place")
+  '((ccase x #3=1)
+    syn:invalid-syntax-error #3#
+    "must be a clause of the form (KEY-OR-KEYS FORM*)")
+  '((ccase x #4=())
+    syn:invalid-syntax-error #4#
+    "must be a clause of the form (KEY-OR-KEYS FORM*)")
+  ;; Valid syntax
+  '(#5=(ccase #6=x)
+    (:ccase ((:keyplace . 1) ((#6# :evaluation t))) :source #5#))
+  '(#7=(ccase #8=x #9=(#10=otherwise #11=1))
+    (:ccase
+     ((:keyplace . 1) ((#8# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#10#))
+                          (:form . *) ((#11# :evaluation t)))
+                         :source #9#)
+                        :evaluation :compound)))
+     :source #7#))
+  '(#12=(ccase #13=x #14=(#15=t #16=1))
+    (:ccase
+     ((:keyplace . 1) ((#13# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#15#))
+                          (:form . *) ((#16# :evaluation t)))
+                         :source #14#)
+                        :evaluation :compound)))
+     :source #12#))
+  '(#17=(ccase #18=x #19=(#20=y #21=1 #22=2))
+    (:ccase
+     ((:keyplace . 1) ((#18# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#20#))
+                          (:form . *) ((#21# :evaluation t)
+                                       (#22# :evaluation t)))
+                         :source #19#)
+                        :evaluation :compound)))
+     :source #17#))
+  '(#23=(ccase #24=x #25=(#26=y #27=1) #28=(#29=z #30=2))
+    (:ccase
+     ((:keyplace . 1) ((#24# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#26#))
+                          (:form . *) ((#27# :evaluation t)))
+                         :source #25#)
+                        :evaluation :compound)
+                       ((:case-normal-clause
+                         ((:key  . *) ((#29#))
+                          (:form . *) ((#30# :evaluation t)))
+                         :source #28#)
+                        :evaluation :compound)))
+     :source #23#))
+  '(#31=(ccase #32=x #33=((#34=y #35=z) #36=1))
+    (:ccase
+     ((:keyplace . 1) ((#32# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#34#) (#35#))
+                          (:form . *) ((#36# :evaluation t)))
+                         :source #33#)
+                        :evaluation :compound)))
+     :source #31#))
+  '(#37=(ccase #38=x #39=((#40=otherwise) #41=1))
+    (:ccase
+     ((:keyplace . 1) ((#38# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#40#))
+                          (:form . *) ((#41# :evaluation t)))
+                         :source #39#)
+                        :evaluation :compound)))
+      :source #37#))
+  '(#42=(ccase #43=x #44=((#45=1 #46=t) #47=2))
+    (:ccase
+     ((:keyplace . 1) ((#43# :evaluation t))
+      (:clause   . *) (((:case-normal-clause
+                         ((:key  . *) ((#45#) (#46#))
+                          (:form . *) ((#47# :evaluation t)))
+                         :source #44#)
+                        :evaluation :compound)))
+      :source #42#)))
+
+(define-macro-test (ecase)
+  ;; Invalid syntax
+  '(#1=(ecase)
+    syn:invalid-syntax-error #1#)
+  '((ecase x #2=1)
+    syn:invalid-syntax-error #2#
+    "must be a clause of the form (KEY-OR-KEYS FORM*)")
+  '((ecase x #3=())
+    syn:invalid-syntax-error #3#
+    "must be a clause of the form (KEY-OR-KEYS FORM*)")
+  ;; Valid syntax
+  '(#4=(ecase #5=x)
+    (:ecase ((:keyform . 1) ((#5# :evaluation t))) :source #4#))
+  '(#6=(ecase #7=x #8=(#9=otherwise #10=1))
+    (:ecase
+     ((:keyform . 1) ((#7# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#9#))
+                         (:form . *) ((#10# :evaluation t)))
+                        :source #8#)
+                       :evaluation :compound)))
+     :source #6#))
+  '(#11=(ecase #12=x #13=(#14=t #15=1))
+    (:ecase
+     ((:keyform . 1) ((#12# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#14#))
+                         (:form . *) ((#15# :evaluation t)))
+                        :source #13#)
+                       :evaluation :compound)))
+     :source #11#))
+  '(#16=(ecase #17=x #18=(#19=y #20=1 #21=2))
+    (:ecase
+     ((:keyform . 1) ((#17# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#19#))
+                         (:form . *) ((#20# :evaluation t)
+                                      (#21# :evaluation t)))
+                        :source #18#)
+                       :evaluation :compound)))
+     :source #16#))
+  '(#22=(ecase #23=x #24=(#25=y #26=1) #27=(#28=z #29=2))
+    (:ecase
+     ((:keyform . 1) ((#23# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#25#))
+                         (:form . *) ((#26# :evaluation t)))
+                        :source #24#)
+                       :evaluation :compound)
+                      ((:case-normal-clause
+                        ((:key  . *) ((#28#))
+                         (:form . *) ((#29# :evaluation t)))
+                        :source #27#)
+                       :evaluation :compound)))
+     :source #22#))
+  '(#30=(ecase #31=x #32=((#33=y #34=z) #35=1))
+    (:ecase
+     ((:keyform . 1) ((#31# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#33#) (#34#))
+                         (:form . *) ((#35# :evaluation t)))
+                        :source #32#)
+                       :evaluation :compound)))
+     :source #30#))
+  '(#36=(ecase #37=x #38=((#39=otherwise) #40=1))
+    (:ecase
+     ((:keyform . 1) ((#37# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#39#))
+                         (:form . *) ((#40# :evaluation t)))
+                        :source #38#)
+                       :evaluation :compound)))
+     :source #36#))
+  '(#41=(ecase #42=x #43=((#44=1 #45=t) #46=2))
+    (:ecase
+     ((:keyform . 1) ((#42# :evaluation t))
+      (:clause  . *) (((:case-normal-clause
+                        ((:key  . *) ((#44#) (#45#))
+                         (:form . *) ((#46# :evaluation t)))
+                        :source #43#)
+                       :evaluation :compound)))
+     :source #41#)))
