@@ -1,6 +1,6 @@
 ;;;; classify.lisp --- Find the correct syntax to parse a given form.
 ;;;;
-;;;; Copyright (C) 2021 Jan Moringen
+;;;; Copyright (C) 2021,2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,7 +19,7 @@
                                 (syntax   (find-syntax operator :if-does-not-exist nil)))
                     syntax)
                   (:fail)))
-            (:transform (list* :any)
+            (:transform (and (not 'nil) (list* :any))
               (load-time-value (find-syntax 'application)))
             (:transform (and (guard (typep 'symbol)) (not (guard (typep 'keyword))))
               (load-time-value (find-syntax 'variable-reference)))

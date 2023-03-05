@@ -1,6 +1,6 @@
 ;;;; classify.lisp --- Tests for the form classifier.
 ;;;;
-;;;; Copyright (C) 2021, 2022 Jan Moringen
+;;;; Copyright (C) 2021,2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,7 +17,9 @@
               (is (eq expected-syntax actual-syntax)
                   "When classifying ~S, expected syntax ~A but got ~A"
                   input expected-syntax actual-syntax))))
-        '((foo     syn::variable-reference)
+        '((nil     syn::variable-reference)
+          (t       syn::variable-reference)
+          (foo     syn::variable-reference)
 
           (:foo    syn::self-evaluating)
           (1       syn::self-evaluating)
