@@ -46,11 +46,20 @@
   (must (compound-form) "must be a compound form"))
 
 (defrule place ()
-  (and (or (guard (typep 'cons)) (guard (typep 'symbol)))
+  (and (or (guard (typep 'cons))
+           (and (guard (typep 'symbol))
+                (not (guard (typep 'keyword)))
+                (not (constant))))
        (form)))
 
 (defrule place! ()
-  (must (place) "must be a place"))
+  (or (place)
+      (:transform (guard (typep 'keyword))
+        (:fatal "place must not be a keyword"))
+      (:transform (constant)
+        (:fatal "place must not be a constant variable"))
+      (:transform :any
+        (:fatal "place must be a cons or a variable name"))))
 
 (defrule body ()
     (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))

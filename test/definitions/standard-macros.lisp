@@ -849,7 +849,7 @@
   '(#1=(ccase)
     syn:invalid-syntax-error #1#)
   '((ccase #2=1)
-    syn:invalid-syntax-error #2# "must be a place")
+    syn:invalid-syntax-error #2# "place must be a cons or a variable name")
   '((ccase x #3=1)
     syn:invalid-syntax-error #3#
     "must be a clause of the form (KEY-OR-KEYS FORM*)")
@@ -1090,7 +1090,7 @@
   '(#1=(ctypecase)
     syn:invalid-syntax-error #1#)
   '((ctypecase #2=1)
-    syn:invalid-syntax-error #2# "must be a place")
+    syn:invalid-syntax-error #2# "place must be a cons or a variable name")
   '((ctypecase x #3=1)
     syn:invalid-syntax-error #3# "must be a clause of the form (TYPE FORM*)")
   '((ctypecase x #4=())

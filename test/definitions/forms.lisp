@@ -8,6 +8,41 @@
 
 (in-suite :s-expression-syntax)
 
+(test place
+  "Smoke test for the `place' rule."
+  (rule-test-cases ((syn::place syn::forms))
+    ;; Invalid syntax
+    '(#1=1
+      nil #1# nil)
+    '(#2=:foo
+      nil #2# nil)
+    '(#3=nil
+      nil #3# nil)
+    '(#4=t
+      nil #4# nil)
+    '(#5=(declare)
+      :fatal #5# "declare is not allowed here")
+    ;; Valid syntax
+    '(#6=foo
+      t #6# #6#)
+    '(#7=(foo 1)
+      t #7# #7#)))
+
+(test place!
+  "Smoke test for the `place!' rule."
+  (rule-test-cases ((syn::place! syn::forms))
+    ;; Invalid syntax
+    '(#1=1
+      :fatal #1# "place must be a cons or a variable name")
+    '(#2=:foo
+      :fatal #2# "place must not be a keyword")
+    '(#3=nil
+      :fatal #3# "place must not be a constant variable")
+    '(#4=t
+      :fatal #4# "place must not be a constant variable")
+    '(#5=(declare)
+      :fatal #5# "declare is not allowed here")))
+
 (test body
   "Smoke test for the `body' rule."
   (rule-test-cases ((syn::body syn::forms))
