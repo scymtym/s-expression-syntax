@@ -60,11 +60,17 @@
 
 ;;; `defstruct' including slots
 
+(defrule slot-read-only ()
+    (value (source) value)
+  (bp:node* (:unparsed :expression value
+                       :context    :slot-read-only
+                       :source     source)))
+
 (define-syntax slot-description
     (or (and (list* :any)
              (must (list (<- name ((variable-name! names)))
                          (? (seq (<- initform ((form! forms)))
-                                 (* (or (eg:poption :read-only (<- read-only))
+                                 (* (or (eg:poption :read-only (<- read-only (slot-read-only)))
                                         (eg:poption :type      (<- type ((type-specifier! type-specifiers)))))))))
                    "must be of the form (NAME [INITFORM] ...)"))
         (<- name ((variable-name! names))))
@@ -162,13 +168,12 @@
                      (eg:poption* :accessor      (<<- accessor     (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
                      (eg:poption  :allocation    (<- allocation    (allocation-type!)))
-                     (eg:poption* :initarg       (<<- initarg      (must (guard (typep 'symbol))
-                                                                         "initarg must be a symbol")))
+                     (eg:poption* :initarg       (<<- initarg      ((initarg-name! names))))
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
-                     (seq (<<- option-name  (and :any (must (guard (typep 'symbol)) "option name must be a symbol")))
-                          (<<- option-value)))))
+                     (seq (<<- option-name  (and :any ((option-name! names))))
+                          (<<- option-value ((unparsed-expression forms) ':non-standard-slot-option))))))
         (<- name ((slot-name! names))))
   ((name          1)
    ;; Options
@@ -191,15 +196,15 @@
           (* (or ;; Standard options have their respective syntax.
                  (eg:option :default-initargs
                             (* (and :any
-                               (must (seq (<<- default-initarg  (guard (typep 'symbol)))
+                               (must (seq (<<- default-initarg  ((initarg-name names)))
                                           (<<- default-initform ((form! forms))))
                                      "default initarg must be a symbol followed by an expression"))))
                  (eg:option :metaclass     (must (<- metaclass ((class-name names)))
                                                  "metaclass must be a class name"))
                  (eg:option :documentation (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-name (must (guard (typep 'symbol)) "option name must be a symbol"))
-                        (<<- option-value)))))
+                 (list* (<<- option-name  ((option-name! names)))
+                        (<<- option-value ((unparsed-expression forms) ':non-standard-defclass-option))))))
   ((name             1)
    (superclass       *>)
    (slot             *  :evaluation :compound)
@@ -284,7 +289,8 @@
 ;;; `defgeneric'
 
 (defrule qualifier ()
-  (not (guard listp)))
+  (and (not (guard listp))
+       ((unparsed-expression forms) :method-qualifier)))
 
 (define-syntax method-description
     (must (list* :method
@@ -336,12 +342,12 @@
                  (<<- method (method-description))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-name (must (guard (typep 'symbol)) "option name must be a symbol"))
-                        (<<- option-value)))))
+                        (<<- option-value ((unparsed-expression forms) ':non-standard-defgeneric-option))))))
   ((name                        1)
    (lambda-list                 1 :evaluation :compound)
    ;; Standard options
    (generic-function-class      ?)
-   (argument-precedence-order   ?)
+   (argument-precedence-order   *>)
    (method-combination          ?)
    (method-combination-argument *)
    (method-class                ?)
@@ -399,6 +405,16 @@
   ((package 1)
    (name    *)))
 
+(defrule package-size ()
+    (value (source)
+      (guard size (typep '(integer 0))))
+  (bp:node* (:unparsed :expression size
+                       :context    :package-size
+                       :source     source)))
+
+(defrule package-size! ()
+  (must (package-size) "package size must be a non-negative integer"))
+
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
           ;; TODO (* (and :any (must (or …) "unknown options"))
@@ -412,8 +428,7 @@
                                                  (import-from)))
                  (eg:option* :export (* (<<- export (string-designator!))))
                  (eg:option* :intern (* (<<- intern (string-designator!))))
-                 (eg:option  :size   (<- size (must (guard (typep '(integer 0)))
-                                                    "must be a non-negative integer")))
+                 (eg:option  :size   (<- size (package-size!)))
                  (non-standard-package-option)
                  (list* (must (not :any) "unknown option") :any)
                  (and :any (must (guard (not :any) atom) "option must be a list")))))
@@ -516,7 +531,9 @@
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (* (or (eg:poption :interactive (or (<- interactive-name   ((function-name/symbol names)))
                                                (<- interactive-lambda (lambda-expression))))
-                  (eg:poption :report      (or (<- report-string      (guard (typep 'string)))
+                  (eg:poption :report      (or (<- report-string      (and (guard (typep 'string))
+                                                                           ((unparsed-expression forms)
+                                                                            ':restart-report-string)))
                                                (<- report-name        ((function-name/symbol names)))
                                                (<- report-lambda      (lambda-expression))))
                   (eg:poption :test        (or (<- test-name          ((function-name/symbol forms)))
@@ -553,10 +570,10 @@
   (and (or (:transform (otherwise-key)
              (unless allow-otherwise? (:fail)))
            (not (otherwise-key)))
-       :any))
+       ((unparsed-expression forms) ':key)))
 
 (define-syntax (case-normal-clause :arguments ((allow-otherwise? t)))
-    (list (or (list (* (<<- key)))
+    (list (or (list (* (<<- key ((unparsed-expression forms) ':key))))
               (<<- key (normal-key allow-otherwise?)))
           (* (<<- form ((form! forms)))))
   ((key  *)

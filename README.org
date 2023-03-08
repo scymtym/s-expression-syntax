@@ -212,7 +212,7 @@
                                  (not (typep node '(cons keyword))))
                                (lambda (depth node stream)
                                  (declare (ignore depth))
-                                 (format stream "[UNPARSED ~A]"  node stream)))))))
+                                 (format stream "[UNPARSED ~A]" node stream)))))))
   #+END_SRC
 
   Note the unparsed leafs indicated by the ~UNPARSED~ labels.

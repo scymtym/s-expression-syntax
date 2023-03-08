@@ -24,9 +24,9 @@
       :fatal #5# "declare is not allowed here")
     ;; Valid syntax
     '(#6=foo
-      t #6# #6#)
+      t #6# (:unparsed () :expression #6# :context :place :source #6#))
     '(#7=(foo 1)
-      t #7# #7#)))
+      t #7# (:unparsed () :expression #7# :context :place :source #7#))))
 
 (test place!
   "Smoke test for the `place!' rule."
@@ -54,8 +54,13 @@
     ;; Empty
     '(() t nil (() ()))
     ;; No declarations
-    '((#5=1)      t nil (() (#5#)))
-    '((#6=1 #7=2) t nil (() (#6# #7#)))
+    '((#5=1)
+      t nil (()
+             ((:unparsed () :expression 1 :context :form :source #5#))))
+    '((#6=1 #7=2)
+      t nil (()
+             ((:unparsed () :expression 1 :context :form :source #6#)
+              (:unparsed () :expression 2 :context :form :source #7#))))
     ;; Valid declarations
     '(((declare #8=(ignore #9=a)))
       t nil (((:declaration
@@ -100,7 +105,8 @@
       t nil (((:declaration
                ((:argument . *) (((:variable-name () :name a :source #24#))))
                :kind ignore :source #23#))
-             (#25# #26#)))))
+             ((:unparsed () :expression 3 :context :form :source #25#)
+              (:unparsed () :expression 4 :context :form :source #26#))))))
 
 (test docstring-body
   "Smoke test for the `docstring-body' rule."
@@ -108,7 +114,8 @@
     ;; Empty
     '(() t nil (nil () ()))
     ;; Only forms
-    '((#1="foo") t nil (nil () (#1#)))
+    '((#1="foo") t nil
+      (nil () ((:unparsed () :expression "foo" :context :form :source #1#))))
     ;; Declarations and docstrings
     '(#2=((declare #3=(ignore #4=a)))
       t #2# (nil
@@ -121,14 +128,20 @@
              ((:declaration
                ((:argument . *) (((:variable-name () :name a :source #7#))))
                :kind ignore :source #6#))
-             (#8#)))
+             ((:unparsed () :expression "foo" :context :form :source #8#))))
     '((#9="foo" (declare #10=(ignore #11=a)))
-      t nil (#9#
+      t nil ((:documentation () :string "foo" :source #9#)
              ((:declaration
                ((:argument . *) (((:variable-name () :name a :source #11#))))
                :kind ignore :source #10#))
              ()))
     ;; Forms and docstrings
-    '((#12=1)           t nil (nil  () (#12#)))
-    '((#13="foo" #14=1) t nil (#13# () (#14#)))
-    '((#15=1 #16="foo") t nil (nil  () (#15# #16#)))))
+    '((#12=1)
+      t nil (nil () ((:unparsed () :expression 1 :context :form :source #12#))))
+    '((#13="foo" #14=1)
+      t nil ((:documentation () :string "foo" :source #13#)
+             ()
+             ((:unparsed () :expression 1 :context :form :source #14#))))
+    '((#15=1 #16="foo")
+      t nil (nil () ((:unparsed () :expression 1     :context :form :source #15#)
+                     (:unparsed () :expression "foo" :context :form :source #16#))))))

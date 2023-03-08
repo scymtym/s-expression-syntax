@@ -49,5 +49,5 @@
 ;;; application or a special form is self-evaluating.
 
 (define-syntax self-evaluating
-    value
+    (<- value ((unparsed-expression forms) :self-evaluating))
   ((value 1)))

@@ -12,94 +12,141 @@
 ;;; Special operators for control
 
 (define-syntax-test (progn)
-  '((progn . 1)    syn:invalid-syntax-error)
-
-  '(#1=(progn)     (:progn () :source #1#))
-  '(#2=(progn 1)   (:progn ((:form . *) ((1 :evaluation t))) :source #2#))
-  '(#3=(progn 1 2) (:progn ((:form . *) ((1 :evaluation t)
-                                         (2 :evaluation t)))
-                           :source #3#)))
+  ;; Invalid syntax
+  '((progn . 1)
+    syn:invalid-syntax-error)
+  ;; Valid syntax
+  '(#1=(progn)
+    (:progn () :source #1#))
+  '(#2=(progn #3=1)
+    (:progn ((:form . *) (((:unparsed
+                            ()
+                            :expression #3# :context :form :source #3#)
+                           :evaluation t)))
+            :source #2#))
+  '(#4=(progn #5=1 #6=2)
+    (:progn ((:form . *) (((:unparsed
+                            ()
+                            :expression #5# :context :form :source #5#)
+                           :evaluation t)
+                          ((:unparsed
+                            ()
+                            :expression #6# :context :form :source #6#)
+                           :evaluation t)))
+            :source #4#)))
 
 (define-syntax-test (if)
-  '((if)                 syn:invalid-syntax-error)
-  '((if foo)             syn:invalid-syntax-error)
-  '((if foo bar baz fez) syn:invalid-syntax-error)
+  ;; Invalid syntax
+  '((if)
+    syn:invalid-syntax-error)
+  '((if foo)
+    syn:invalid-syntax-error)
+  '((if foo bar baz fez)
+    syn:invalid-syntax-error)
+  ;; Valid syntax
+  '((if #1=foo #2=bar)
+    (:if ((:test . 1) (((:unparsed
+                         ()
+                         :expression #1# :context :form :source #1#)
+                        :evaluation t))
+          (:then . 1) (((:unparsed
+                         ()
+                         :expression #2# :context :form :source #2#)
+                        :evaluation t)))
+         :source (if foo bar)))
+  '((if #3=foo #4=bar #5=baz)
+    (:if ((:test . 1) (((:unparsed
+                         ()
+                         :expression #3# :context :form :source #3#)
+                        :evaluation t))
+          (:then . 1) (((:unparsed
+                         ()
+                         :expression #4# :context :form :source #4#)
+                        :evaluation t))
+          (:else . 1) (((:unparsed
+                         ()
+                         :expression #5# :context :form :source #5#)
+                        :evaluation t)))
+         :source (if foo bar baz))))
 
-  '((if foo bar)         (:if
-                          ((:test . 1) ((foo :evaluation t))
-                           (:then . 1) ((bar :evaluation t)))
-                          :source  (if foo bar)))
-  '((if foo bar baz)     (:if
-                          ((:test . 1) ((foo :evaluation t))
-                           (:then . 1) ((bar :evaluation t))
-                           (:else . 1) ((baz :evaluation t)))
-                          :source  (if foo bar baz))))
-
-;;; Special operators `block', `return-from', `return', `tagbody' and `go'
+;;; Special operators `block', `return-from', `return'
 
 (define-syntax-test (block)
-  '((block)                     syn:invalid-syntax-error)
-  '((block #1=(foo))            syn:invalid-syntax-error #1# "block name must be a symbol")
-
+  ;; Invalid syntax
+  '((block)
+    syn:invalid-syntax-error)
+  '((block #1=(foo))
+    syn:invalid-syntax-error #1# "block name must be a symbol")
+  ;; Valid syntax
   '(#2=(block #3=foo #4=1)
     (:block
-     ((:name . 1) ((#3#
+     ((:name . 1) (((:block-name () :name foo :source #3#)
                     :evaluation (:binding :namespace block
                                           :scope     :lexical)))
-      (:form . *) ((#4#
+      (:form . *) (((:unparsed () :expression 1 :context :form :source #4#)
                     :evaluation t)))
-     :source #2#))
+      :source #2#))
   '(#5=(block #6=foo #7=a #8=b)
     (:block
-     ((:name . 1) ((#6#
+     ((:name . 1) (((:block-name () :name foo :source #6#)
                     :evaluation (:binding :namespace block
                                           :scope     :lexical)))
-      (:form . *) ((#7#
+      (:form . *) (((:unparsed
+                     ()
+                     :expression a :context :form :source #7#)
                     :evaluation t)
-                   (#8#
+                   ((:unparsed
+                     ()
+                     :expression b :context :form :source #8#)
                     :evaluation t)))
-     :source #5#)))
+      :source #5#)))
 
 (define-syntax-test (return-from)
-  '((return-from)                syn:invalid-syntax-error)
-  '((return-from foo 1 2)        syn:invalid-syntax-error)
-  '((return-from #1=(foo))       syn:invalid-syntax-error #1# "block name must be a symbol")
-
+  ;; Invalid syntax
+  '((return-from)
+    syn:invalid-syntax-error)
+  '((return-from foo 1 2)
+    syn:invalid-syntax-error)
+  '((return-from #1=(foo))
+    syn:invalid-syntax-error #1# "block name must be a symbol")
+  ;; Valid syntax
   '(#2=(return-from #3=foo)
     (:return-from
-     ((:name . 1) ((#3#
+     ((:name . 1) (((:block-name () :name foo :source #3#)
                     :evaluation (:reference :namespace block))))
-     :source #2#))
+      :source #2#))
   '(#4=(return-from #5=foo #6=1)
     (:return-from
-     ((:name   . 1) ((#5#
+     ((:name   . 1) (((:block-name () :name foo :source #5#)
                       :evaluation (:reference :namespace block)))
-      (:result . 1) ((#6#
+      (:result . 1) (((:unparsed () :expression 1 :context :form :source #6#)
                       :evaluation t)))
-     :source #4#))
-
-  #+TODO (apply #'unparse-return-from-special-operator
-                (parse-return-from-special-operator
-                 (lambda (&rest args) (print args))
-                 '(return-from foo bla))))
+      :source #4#)))
 
 (define-syntax-test (return)
-  '((return #1=(declare)) syn:invalid-syntax-error #1# "declare is not allowed here")
-  '((return 1 2)          syn:invalid-syntax-error)
+  ;; Invalid syntax
+  '((return #1=(declare))
+    syn:invalid-syntax-error #1# "declare is not allowed here")
+  '((return 1 2)
+    syn:invalid-syntax-error)
+  ;; Valid syntax
+  '(#2=(return)
+    (:return () :source #2#))
+  '(#3=(return #4=1)
+    (:return
+      ((:result . 1) (((:unparsed () :expression 1 :context :form :source #4#)
+                       :evaluation t)))
+      :source #3#)))
 
-  '(#2=(return)           (:return
-                           ()
-                           :source #2#))
-  '(#3=(return #4=1)      (:return
-                           ((:result . 1) ((#4# :evaluation t)))
-                           :source #3#)))
+;;; Special operators `tagbody' and `go'
 
 (define-syntax-test (tagbody)
+  ;; Invalid syntax
   '((tagbody nil #1=nil)
     syn:invalid-syntax-error #1# "the tag NIL occurs more than once")
   '((tagbody 1 nil 1)
     syn:invalid-syntax-error 1 "the tag 1 occurs more than once")
-
+  ;; Valid syntax
   '(#2=(tagbody)
     (:tagbody () :source #2#))
   '(#3=(tagbody #4=nil)
@@ -112,7 +159,11 @@
   '(#5=(tagbody #6=(progn))
     (:tagbody
      ((:segment . *) (((:tagbody-segment
-                        ((:statement . *) (((progn)
+                        ((:statement . *) (((:unparsed
+                                             ()
+                                             :expression (progn)
+                                             :context    :form
+                                             :source     #6#)
                                             :evaluation t)))
                         :source #6#)
                        :evaluation :compound)))
@@ -125,22 +176,52 @@
                        :evaluation :compound)
                       ((:tagbody-segment
                         ((:label     . 1) (((:tag () :name 1 :source #9#)))
-                         (:statement . *) ((#10# :evaluation t)
-                                           (#11# :evaluation t)))
+                         (:statement . *) (((:unparsed
+                                             ()
+                                             :expression "foo"
+                                             :context    :form
+                                             :source     #10#)
+                                            :evaluation t)
+                                           ((:unparsed
+                                             ()
+                                             :expression "bar"
+                                             :context    :form
+                                             :source     #11#)
+                                            :evaluation t)))
                         :source #9#)
                        :evaluation :compound)
                       ((:tagbody-segment
                         ((:label     . 1) (((:tag () :name a :source #12#)))
-                         (:statement . *) ((#13# :evaluation t)
-                                           (#14# :evaluation t)))
+                         (:statement . *) (((:unparsed
+                                             ()
+                                             :expression (list 1)
+                                             :context    :form
+                                             :source     #13#)
+                                            :evaluation t)
+                                           ((:unparsed
+                                             ()
+                                             :expression (list 3)
+                                             :context    :form
+                                             :source     #14#)
+                                            :evaluation t)))
                         :source #12#)
                        :evaluation :compound)))
      :source #7#))
   '(#15=(tagbody #16=(1+ a) #17=(1+ b) #18=:foo)
     (:tagbody
      ((:segment . *) (((:tagbody-segment
-                        ((:statement . *) ((#16# :evaluation t)
-                                           (#17# :evaluation t)))
+                        ((:statement . *) (((:unparsed
+                                             ()
+                                             :expression (1+ a)
+                                             :context    :form
+                                             :source     #16#)
+                                            :evaluation t)
+                                           ((:unparsed
+                                             ()
+                                             :expression (1+ b)
+                                             :context    :form
+                                             :source     #17#)
+                                            :evaluation t)))
                         :source #16#)
                        :evaluation :compound)
                       ((:tagbody-segment
@@ -150,33 +231,41 @@
      :source #15#)))
 
 (define-syntax-test (go)
+  ;; Invalid syntax
   '((go)
     syn:invalid-syntax-error nil "must be a single tag")
   '((go . #1=(1 2))
     syn:invalid-syntax-error #1# "must be a single tag")
   '((go #2=(foo))
     syn:invalid-syntax-error #2# "tag must be a symbol or an integer")
-
-  '(#3=(go #4=1)  (:go
-                   ((:tag . 1) (((:tag () :name 1 :source #4#))))
-                   :source #3#)))
+;; Valid syntax
+  '(#3=(go #4=1)
+    (:go
+     ((:tag . 1) (((:tag () :name 1 :source #4#))))
+     :source #3#)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 
 (define-syntax-test (eval-when)
+  ;; Invalid syntax
   '((eval-when . #1=())
     syn:invalid-syntax-error #1#)
   '((eval-when #2=1)
     syn:invalid-syntax-error #2# "must be a list of situations")
   '((eval-when (#3=:foo))
     syn:invalid-syntax-error #3# "must be one of :COMPILE-TOPLEVEL, COMPILE, :LOAD-TOPLEVEL, LOAD, :EXECUTE, EVAL")
-
+;; Valid syntax
   '(#4=(eval-when ())
     (:eval-when () :source #4#))
-  '(#5=(eval-when (:execute))
-    (:eval-when ((:situation . *) ((:execute))) :source #5#))
-  '(#6=(eval-when () a)
-    (:eval-when ((:form . *) ((a :evaluation t))) :source #6#)))
+  '(#5=(eval-when (#6=:execute))
+    (:eval-when
+     ((:situation . *) (((:eval-when-situation () :situation :execute :source #6#))))
+     :source #5#))
+  '(#7=(eval-when () #8=a)
+    (:eval-when
+     ((:form . *) (((:unparsed () :expression a :context :form :source #8#)
+                    :evaluation t)))
+     :source #7#)))
 
 (define-syntax-test (load-time-value)
   ;; Invalid syntax
@@ -186,21 +275,55 @@
     syn:invalid-syntax-error #1# "READ-ONLY-P must be either T or NIL, not a generalized boolean")
   ;; Valid syntax
   '(#2=(load-time-value #3=foo)
-    (:load-time-value ((:form . 1) ((#3# :evaluation t))) :source #2#))
+    (:load-time-value
+     ((:form . 1) (((:unparsed () :expression foo :context :form :source #3#)
+                    :evaluation t)))
+     :source #2#))
   '(#4=(load-time-value #5=foo #6=t)
-    (:load-time-value ((:form        . 1) ((#5# :evaluation t))
-                       (:read-only-p . 1) ((#6#)))
+    (:load-time-value
+     ((:form        . 1) (((:unparsed
+                            ()
+                            :expression foo :context :form :source #5#)
+                           :evaluation t))
+      (:read-only-p . 1) (((:unparsed
+                            ()
+                            :expression t :source #6#))))
      :source #4#)))
 
 (define-syntax-test (quote)
-  '((quote)     syn:invalid-syntax-error)
-  '((quote x y) syn:invalid-syntax-error)
-
-  '(#1=(quote #2=1)     (:quote ((:material . 1) ((#2#)))     :source #1#))
-  '(#3=(quote #4=x)     (:quote ((:material . 1) ((#4#)))     :source #3#))
-  '(#5=(quote #6=quote) (:quote ((:material . 1) ((#6#))) :source #5#)))
+  ;; Invalid syntax
+  '((quote)
+    syn:invalid-syntax-error)
+  '((quote x y)
+    syn:invalid-syntax-error)
+  ;; Valid syntax
+  '(#1=(quote #2=1)
+    (:quote
+     ((:material . 1) (((:unparsed
+                         ()
+                         :expression 1
+                         :context    :quote
+                         :source     #2#))))
+     :source #1#))
+  '(#3=(quote #4=x)
+    (:quote
+     ((:material . 1) (((:unparsed
+                         ()
+                         :expression x
+                         :context    :quote
+                         :source     #4#))))
+     :source #3#))
+  '(#5=(quote #6=quote)
+    (:quote
+     ((:material . 1) (((:unparsed
+                         ()
+                         :expression quote
+                         :context    :quote
+                         :source     #6#))))
+     :source #5#)))
 
 (define-syntax-test (function)
+  ;; Invalid syntax
   '((function)
     syn:invalid-syntax-error nil "must be a function name or lambda expression")
   '((function 1)
@@ -211,7 +334,7 @@
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
   '((function (lambda (x #2=x)))
     syn:invalid-syntax-error #2# "the variable name X occurs more than once")
-
+  ;; valid syntax
   '(#3=(function #4=foo)
     (:function
      ((:name . 1) (((:function-name () :name foo :source #4#))))
@@ -228,7 +351,7 @@
                        :source #8#)
                       :evaluation :compound)))
      :source #7#))
-  '(#10=(function #11=(lambda #12=(#13=a &rest #14=b) (foo)))
+  '(#10=(function #11=(lambda #12=(#13=a &rest #14=b) #15=(foo)))
     (:function
      ((:lambda . 1) (((:lambda-expression
                        ((:lambda-list . 1) (((:ordinary-lambda-list
@@ -243,7 +366,10 @@
                                                                   :name b :source #14#))))
                                               :source #12#)
                                              :evaluation :compound))
-                        (:form        . *) (((foo) :evaluation t)))
+                        (:form        . *) (((:unparsed
+                                              ()
+                                              :expression (foo) :context :form :source #15#)
+                                             :evaluation t)))
                        :source #11#)
                       :evaluation :compound)))
      :source #10#)))
@@ -251,6 +377,7 @@
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 
 (define-syntax-test (symbol-macrolet)
+  ;; Invalid syntax
   '((symbol-macrolet)
     syn:invalid-syntax-error)
   '((symbol-macrolet #1=1)
@@ -261,39 +388,49 @@
     syn:invalid-syntax-error #3# "must be a binding of the form (NAME FORM)")
   '((symbol-macrolet ((#4=:bla 1)))
     syn:invalid-syntax-error #4# "variable name must not be a keyword")
-
+  ;; Valid syntax
   '(#5=(symbol-macrolet ())
     (:symbol-macrolet () :source #5#))
-  '(#6=(symbol-macrolet (#7=(#8=a 1) #9=(#10=b 2))
-         (declare #11=(type #12=bit #13=d))
-         c)
+  '(#6=(symbol-macrolet (#7=(#8=a #9=1) #10=(#11=b #12=2))
+         (declare #13=(type #14=bit #15=d))
+         #16=c)
     (:symbol-macrolet
      ((:binding     . *) (((:symbol-macro-binding
                             ((:name      . 1) (((:variable-name () :name a :source #8#)
                                                 :evaluation (:binding :namespace variable
                                                                       :scope    :lexical)))
-                             (:expansion . 1) ((1 :evaluation t)))
+                             (:expansion . 1) (((:unparsed
+                                                 ()
+                                                 :expression 1 :context :form :source #9#)
+                                                :evaluation t)))
                             :source #7#)
                            :evaluation :compound)
                           ((:symbol-macro-binding
-                            ((:name      . 1) (((:variable-name () :name b :source #10#)
+                            ((:name      . 1) (((:variable-name () :name b :source #11#)
                                                 :evaluation (:binding :namespace variable
                                                                       :scope    :lexical)))
-                             (:expansion . 1) ((2 :evaluation t)))
-                            :source #9#)
+                             (:expansion . 1) (((:unparsed
+                                                 ()
+                                                 :expression 2 :context :form :source #12#)
+                                                :evaluation t)))
+                            :source #10#)
                            :evaluation :compound))
       (:declaration . *) (((:declaration
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()
-                                                                :name bit :source #12#))))
-                                                :source #12#))
-                                              ((:variable-name () :name d :source #13#))))
-                            :kind type :source #11#)))
-      (:form        . *) ((c :evaluation t)))
+                                                                :name bit :source #14#))))
+                                                :source #14#))
+                                              ((:variable-name () :name d :source #15#))))
+                            :kind type :source #13#)))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression c :context :form :source #16#)
+                           :evaluation t)))
      :source #6#)))
 
 (define-syntax-test (let)
+  ;; Invalid syntax
   '((let)
     syn:invalid-syntax-error)
   '((let #1=1)
@@ -302,8 +439,9 @@
     syn:invalid-syntax-error #2# "must be a binding of the form NAME, (NAME) or (NAME FORM)")
   '((let ((#3=1)))
     syn:invalid-syntax-error #3# "variable name must be a symbol")
-
-  '(#4=(let ())     (:let () :source #4#))
+  ;; Valid syntax
+  '(#4=(let ())
+    (:let () :source #4#))
   '(#5=(let (#6=a))
     (:let
      ((:binding . *) (((:value-binding
@@ -313,44 +451,54 @@
                         :source #6#)
                        :evaluation :compound)))
       :source #5#))
-  '(#7=(let (#8=(#9=a 1) #10=b #11=(#12=c 2))
-         (declare #13=(type #14=boolean #15=a)) a)
+  '(#7=(let (#8=(#9=a #10=1) #11=b #12=(#13=c #14=2))
+         (declare #15=(type #16=boolean #17=a)) #18=a)
     (:let
      ((:binding . *)     (((:value-binding
                             ((:name  . 1) (((:variable-name () :name a :source #9#)
                                             :evaluation (:binding :namespace variable
                                                                   :scope    :lexical)))
-                             (:value . 1) ((1 :evaluation t)))
+                             (:value . 1) (((:unparsed
+                                             ()
+                                             :expression 1 :context :form :source #10#)
+                                            :evaluation t)))
                             :source #8#)
                            :evaluation :compound)
                            ((:value-binding
-                             ((:name . 1) (((:variable-name () :name b :source #10#)
+                             ((:name . 1) (((:variable-name () :name b :source #11#)
                                             :evaluation (:binding :namespace variable
                                                                   :scope    :lexical))))
-                             :source #10#)
+                             :source #11#)
                             :evaluation :compound)
                           ((:value-binding
-                            ((:name  . 1) (((:variable-name () :name c :source #12#)
+                            ((:name  . 1) (((:variable-name () :name c :source #13#)
                                             :evaluation (:binding :namespace variable
                                                                   :scope    :lexical)))
-                             (:value . 1) ((2 :evaluation t)))
-                            :source #11#)
+                             (:value . 1) (((:unparsed
+                                             ()
+                                             :expression 2 :context :form :source #14#)
+                                            :evaluation t)))
+                            :source #12#)
                            :evaluation :compound))
       (:declaration . *) (((:declaration
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()
-                                                                :name boolean :source #14#))))
-                                                :source #14#))
-                                           ((:variable-name () :name a :source #15#))))
-                            :kind type :source #13#)))
-      (:form        . *) ((a :evaluation t)))
+                                                                :name boolean :source #16#))))
+                                                :source #16#))
+                                           ((:variable-name () :name a :source #17#))))
+                            :kind type :source #15#)))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression a :context :form :source #18#)
+                           :evaluation t)))
      :source #7#))
 
   #+TODO (is (equal '(syn::names (foo bar) syn::values (1 2) syn::declarations () syn::forms ((list foo bar)))
              (syn:parse nil (syn:find-syntax 'let) '(let ((foo 1) (bar 2)) (list foo bar))))))
 
 (define-syntax-test (let*)
+  ;; Invalid syntax
   '((let*)
     syn:invalid-syntax-error)
   '((let* #1=1)
@@ -359,8 +507,9 @@
     syn:invalid-syntax-error #2# "must be a binding of the form NAME, (NAME) or (NAME FORM)")
   '((let* ((#3=1)))
     syn:invalid-syntax-error #3# "variable name must be a symbol")
-
-  '(#4=(let* ())     (:let* () :source #4#))
+  ;; Valid syntax
+  '(#4=(let* ())
+    (:let* () :source #4#))
   '(#5=(let* (#6=a))
     (:let*
      ((:binding . *) (((:value-binding
@@ -370,42 +519,52 @@
                         :source #6#)
                        :evaluation :compound)))
       :source #5#))
-  '(#7=(let* (#8=(#9=a 1) #10=b #11=(#12=c 2))
-         (declare #13=(type #14=boolean #15=a))
-         a)
+  '(#7=(let* (#8=(#9=a #10=1) #11=b #12=(#13=c #14=2))
+         (declare #15=(type #16=boolean #17=a))
+         #18=a)
     (:let*
      ((:binding     . *) (((:value-binding
                             ((:name  . 1) (((:variable-name () :name a :source #9#)
                                             :evaluation (:binding :namespace variable
                                                                   :scope    :lexical)))
-                             (:value . 1) ((1 :evaluation t)))
+                             (:value . 1) (((:unparsed
+                                             ()
+                                             :expression 1 :context :form :source #10#)
+                                            :evaluation t)))
                             :source #8#)
                            :evaluation :compound)
                           ((:value-binding
-                            ((:name . 1) (((:variable-name () :name b :source #10#)
+                            ((:name . 1) (((:variable-name () :name b :source #11#)
                                            :evaluation (:binding :namespace variable
                                                                  :scope    :lexical))))
-                            :source #10#)
+                            :source #11#)
                            :evaluation :compound)
                           ((:value-binding
-                            ((:name  . 1) (((:variable-name () :name c :source #12#)
+                            ((:name  . 1) (((:variable-name () :name c :source #13#)
                                             :evaluation (:binding :namespace variable
                                                                   :scope    :lexical)))
-                             (:value . 1) ((2 :evaluation t)))
-                            :source #11#)
+                             (:value . 1) (((:unparsed
+                                             ()
+                                             :expression 2 :context :form :source #14#)
+                                            :evaluation t)))
+                            :source #12#)
                            :evaluation :compound))
       (:declaration . *) (((:declaration
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()
-                                                                :name boolean :source #14#))))
-                                                :source #14#))
-                                              ((:variable-name () :name a :source #15#))))
-                            :kind type :source #13#)))
-      (:form        . *) ((a :evaluation t)))
+                                                                :name boolean :source #16#))))
+                                                :source #16#))
+                                              ((:variable-name () :name a :source #17#))))
+                            :kind type :source #15#)))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression a :context :form :source #18#)
+                           :evaluation t)))
      :source #7#)))
 
 (define-syntax-test (locally)
+  ;; Valid syntax
   '(#1=(locally)
     (:locally () :source #1#))
   '(#2=(locally (declare #3=(type #4=bit #5=a)))
@@ -417,49 +576,107 @@
                                               ((:variable-name () :name a :source #5#))))
                             :kind type :source #3#))))
       :source #2#))
-  '(#6=(locally a)
-    (:locally ((:form . *) ((a :evaluation t))) :source #6#))
-  '(#7=(locally (declare #8=(type #9=bit #10=a)) a)
+  '(#6=(locally #7=a)
+    (:locally
+     ((:form . *) (((:unparsed () :expression a :context :form :source #7#)
+                    :evaluation t)))
+     :source #6#))
+  '(#8=(locally (declare #9=(type #10=bit #11=a)) #12=b)
     (:locally
      ((:declaration . *) (((:declaration
                             ((:argument . *) (((:atomic-type-specifier
-                                                ((:name . 1) (((:type-name () :name bit :source #9#))))
-                                                :source #9#))
-                                              ((:variable-name () :name a :source #10#))))
-                            :kind type :source #8#)))
-      (:form        . *) ((a :evaluation t)))
-     :source #7#))
+                                                ((:name . 1) (((:type-name () :name bit :source #10#))))
+                                                :source #10#))
+                                              ((:variable-name () :name a :source #11#))))
+                            :kind type :source #9#)))
+      (:form        . *) (((:unparsed () :expression b :context :form :source #12#)
+                           :evaluation t)))
+     :source #8#))
 
   #+TODO (is (equal '(syn::declarations ((type (integer x)) (type (double-float x))) syn::forms (x))
              (syn:parse nil (syn:find-syntax 'locally) '(locally (declare (type integer x) (type double-float x)) x)))))
 
 (define-syntax-test (progv)
-  '((progv)    syn:invalid-syntax-error)
-  '((progv 1)  syn:invalid-syntax-error)
-  '((progv ()) syn:invalid-syntax-error)
-
-  '(#1=(progv () ())
-    (:progv () :source #1#))
-  '(#2=(progv (a) (b))
+  ;; Invalid syntax
+  '((progv)
+    syn:invalid-syntax-error)
+  '((progv 1)
+    syn:invalid-syntax-error)
+  '((progv ())
+    syn:invalid-syntax-error)
+  ;; Valid syntax
+  '(#1=(progv #2=() #3=())
     (:progv
-     ((:symbols . 1) (((a) :evaluation t))
-      (:values  . 1) (((b) :evaluation t)))
-     :source #2#))
-  '(#3=(progv '(a) '(b))
+     ((:symbols . 1) (((:unparsed
+                        ()
+                        :expression () :context :form :source #2#)
+                       :evaluation t))
+      (:values . 1)  (((:unparsed
+                        ()
+                        :expression () :context :form :source #3#)
+                       :evaluation t)))
+     :source #1#))
+  '(#4=(progv #5=(a) #6=(b))
     (:progv
-     ((:symbols . 1) (('(a) :evaluation t))
-      (:values  . 1) (('(b) :evaluation t)))
-     :source #3#))
-  '(#4=(progv () () 1)
-    (:progv ((:form . *) ((1 :evaluation t))) :source #4#))
-  '(#5=(progv () () 1 2)
+     ((:symbols . 1) (((:unparsed
+                        ()
+                        :expression (a) :context :form :source #5#)
+                       :evaluation t))
+      (:values  . 1) (((:unparsed
+                        ()
+                        :expression (b) :context :form :source #6#)
+                       :evaluation t)))
+     :source #4#))
+  '(#7=(progv #8='(a) #9='(b))
     (:progv
-     ((:form . *) ((1 :evaluation t) (2 :evaluation t)))
-     :source #5#)))
+     ((:symbols . 1) (((:unparsed
+                        ()
+                        :expression '(a) :context :form :source #8#)
+                       :evaluation t))
+      (:values  . 1) (((:unparsed
+                        ()
+                        :expression '(b) :context :form :source #9#)
+                       :evaluation t)))
+     :source #7#))
+  '(#10=(progv #11=() #12=() #13=1)
+    (:progv
+     ((:symbols . 1) (((:unparsed
+                        ()
+                        :expression () :context :form :source #11#)
+                       :evaluation t))
+      (:values . 1)  (((:unparsed
+                        ()
+                        :expression () :context :form :source #12#)
+                       :evaluation t))
+      (:form . *)    (((:unparsed
+                        ()
+                        :expression 1 :context :form :source #13#)
+                       :evaluation t)))
+     :source #10#))
+  '(#14=(progv #15=() #16=() #17=1 #18=2)
+    (:progv
+     ((:symbols . 1) (((:unparsed
+                        ()
+                        :expression () :context :form :source #15#)
+                       :evaluation t))
+      (:values . 1)  (((:unparsed
+                        ()
+                        :expression () :context :form :source #16#)
+                       :evaluation t))
+      (:form . *)    (((:unparsed
+                        ()
+                        :expression 1 :context :form :source #17#)
+                       :evaluation t)
+                      ((:unparsed
+                        ()
+                        :expression 2 :context :form :source #18#)
+                       :evaluation t)))
+     :source #14#)))
 
 ;;; Special operators `macrolet', `flet' and `labels'
 
 (define-syntax-test (macrolet)
+  ;; Invalid syntax
   '((macrolet)
     syn:invalid-syntax-error)
   '((macrolet #1=1)
@@ -488,7 +705,7 @@
      :source #6#))
   '(#10=(macrolet (#11=(#12=f #13=(&whole #14=w #15=(#16=a #17=b) &rest #18=c)
                         (declare #19=(type #20=string #21=a))
-                        a)))
+                        #22=a)))
     (:macrolet
      ((:binding . *) (((:local-macro-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #12#)
@@ -532,7 +749,10 @@
                                                                    :source #20#))
                                                                  ((:variable-name () :name a :source #21#))))
                                                :kind type :source #19#)))
-                         (:form        . *) ((a  :evaluation t)))
+                         (:form        . *) (((:unparsed
+                                               ()
+                                               :expression a :context :form :source #22#)
+                                              :evaluation t)))
                         :source #11#)
                        :evaluation :compound)))
       :source #10#))
@@ -552,6 +772,7 @@
                                                           (foo 1 2))))))
 
 (define-syntax-test (flet)
+  ;; Invalid syntax
   '((flet)
     syn:invalid-syntax-error)
   '((flet #1=1)
@@ -620,7 +841,7 @@
                         :source #17#)
                        :evaluation :compound)))
      :source #16#))
-  '(#23=(flet (#24=(#25=f #26=() a)))
+  '(#23=(flet (#24=(#25=f #26=() #27=a)))
     (:flet
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #25#)
@@ -630,12 +851,16 @@
                                                ()
                                                :source #26#)
                                               :evaluation :compound))
-                         (:form        . *) ((a :evaluation t)))
+                         (:form        . *) (((:unparsed
+                                               ()
+                                               :expression a :context :form :source #27#)
+                                              :evaluation t)))
                         :source #24#)
                        :evaluation :compound)))
       :source #23#)))
 
 (define-syntax-test (labels)
+  ;; Invalid syntax
   '((labels)
     syn:invalid-syntax-error)
   '((labels #1=1)
@@ -706,7 +931,7 @@
                         :source #17#)
                        :evaluation :compound)))
      :source #16#))
-  '(#23=(labels (#24=(#25=f #26=() a)))
+  '(#23=(labels (#24=(#25=f #26=() #27=a)))
     (:labels
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #25#)
@@ -716,7 +941,10 @@
                                                ()
                                                :source #26#)
                                               :evaluation :compound))
-                         (:form        . *) ((a :evaluation t)))
+                         (:form        . *) (((:unparsed
+                                               ()
+                                               :expression a :context :form :source #27#)
+                                              :evaluation t)))
                         :source #24#)
                        :evaluation :compound)))
      :source #23#)))
@@ -724,6 +952,7 @@
 ;;; Special operators `declaim' and `the'
 
 (define-syntax-test (declaim)
+  ;; Invalid syntax
   '((declaim #1=1)
     syn:invalid-syntax-error #1# "must be a declaration")
   ;; Valid syntax
@@ -742,16 +971,24 @@
      :source #3#)))
 
 (define-syntax-test (the)
-  '((the)             syn:invalid-syntax-error)
-  '((the bit)         syn:invalid-syntax-error)
-  '((the bit 1 extra) syn:invalid-syntax-error)
+  ;; Invalid syntax
+  '((the)
+    syn:invalid-syntax-error)
+  '((the bit)
+    syn:invalid-syntax-error)
+  '((the bit 1 extra)
+    syn:invalid-syntax-error)
   ;; Valid syntax
-  '(#1=(the #2=bit 1) (:the
-                       ((:type . 1) (((:atomic-type-specifier
-                                       ((:name . 1) (((:type-name () :name bit :source #2#))))
-                                       :source #2#)))
-                        (:form . 1) ((1 :evaluation t)))
-                       :source #1#)))
+  '(#1=(the #2=bit #3=1)
+    (:the
+     ((:type . 1) (((:atomic-type-specifier
+                     ((:name . 1) (((:type-name () :name bit :source #2#))))
+                     :source #2#)))
+      (:form . 1) (((:unparsed
+                     ()
+                     :expression 1 :context :form :source #3#)
+                    :evaluation t)))
+     :source #1#)))
 
 ;;; Special operators `[p]setq'
 
@@ -768,21 +1005,30 @@
   ;; Valid syntax
   '(#5=(setq)
     (:setq () :source #5#))
-  '(#6=(setq #7=a 1)
+  '(#6=(setq #7=a #8=1)
     (:setq
      ((:name       . *) (((:variable-name () :name a :source #7#)
                           :evaluation (:assignment :namespace variable)))
-      (:value-form . *) ((1 :evaluation t)))
+      (:value-form . *) (((:unparsed
+                           ()
+                           :expression 1 :context :form :source #8#)
+                          :evaluation t)))
      :source #6#))
-  '(#8=(setq #9=a 1 #10=b 2)
+  '(#9=(setq #10=a #11=1 #12=b #13=2)
     (:setq
-     ((:name       . *) (((:variable-name () :name a :source #9#)
+     ((:name       . *) (((:variable-name () :name a :source #10#)
                           :evaluation (:assignment :namespace variable))
-                         ((:variable-name () :name b :source #10#)
+                         ((:variable-name () :name b :source #12#)
                           :evaluation (:assignment :namespace variable)))
-      (:value-form . *) ((1 :evaluation t)
-                         (2 :evaluation t)))
-     :source #8#)))
+      (:value-form . *) (((:unparsed
+                           ()
+                           :expression 1 :context :form :source #11#)
+                          :evaluation t)
+                         ((:unparsed
+                           ()
+                           :expression 2 :context :form :source #13#)
+                          :evaluation t)))
+     :source #9#)))
 
 (define-syntax-test (psetq)
   ;; Invalid syntax
@@ -799,94 +1045,159 @@
   ;; Valid syntax
   '(#6=(psetq)
     (:psetq () :source #6#))
-  '(#7=(psetq #8=a 1)
+  '(#7=(psetq #8=a #9=1)
     (:psetq
      ((:name       . *) (((:variable-name () :name a :source #8#)
                           :evaluation (:assignment :namespace variable)))
-      (:value-form . *) ((1 :evaluation t)))
+      (:value-form . *) (((:unparsed
+                           ()
+                           :expression 1 :context :form :source #9#)
+                          :evaluation t)))
      :source #7#))
-  '(#9=(psetq #10=a 1 #11=b 2)
+  '(#10=(psetq #11=a #12=1 #13=b #14=2)
     (:psetq
-     ((:name       . *) (((:variable-name () :name a :source #10#)
+     ((:name       . *) (((:variable-name () :name a :source #11#)
                           :evaluation (:assignment :namespace variable))
-                         ((:variable-name () :name b :source #11#)
+                         ((:variable-name () :name b :source #13#)
                           :evaluation (:assignment :namespace variable)))
-      (:value-form . *) ((1 :evaluation t)
-                         (2 :evaluation t)))
-     :source #9#)))
+      (:value-form . *) (((:unparsed
+                           () :expression 1 :context :form :source #12#)
+                          :evaluation t)
+                         ((:unparsed
+                           () :expression 2 :context :form :source #14#)
+                          :evaluation t)))
+     :source #10#)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
 
 (define-syntax-test (throw)
+  ;; Invalid syntax
   '((throw)
     syn:invalid-syntax-error)
   '((throw 'foo)
     syn:invalid-syntax-error)
   '((throw 'foo 1 :extra)
     syn:invalid-syntax-error)
-
+  ;; Valid syntax
   '(#1=(throw #2='foo #3=1)
     (:throw
-     ((:tag-form    . 1) ((#2# :evaluation t))
-      (:result-form . 1) ((#3# :evaluation t)))
+     ((:tag-form    . 1) (((:unparsed
+                            ()
+                            :expression 'foo :context :form :source #2#)
+                           :evaluation t))
+      (:result-form . 1) (((:unparsed
+                            ()
+                            :expression 1 :context :form :source #3#)
+                           :evaluation t)))
      :source #1#))
   '(#4=(throw #5=(+ 1 2) #6=:value)
     (:throw
-     ((:tag-form    . 1) ((#5# :evaluation t))
-      (:result-form . 1) ((#6# :evaluation t)))
+     ((:tag-form    . 1) (((:unparsed
+                            ()
+                            :expression (+ 1 2) :context :form :source #5#)
+                           :evaluation t))
+      (:result-form . 1) (((:unparsed
+                            ()
+                            :expression :value :context :form :source #6#)
+                           :evaluation t)))
      :source #4#)))
 
 (define-syntax-test (catch)
+  ;; Invalid syntax
   '((catch)
     syn:invalid-syntax-error)
-
+  ;; Valid syntax
   '(#1=(catch #2='foo #3=1 #4=2)
     (:catch
-     ((:tag-form . 1) ((#2# :evaluation t))
-      (:form     . *) ((#3# :evaluation t)
-                       (#4# :evaluation t)))
-      :source #1#))
+     ((:tag-form . 1) (((:unparsed
+                         ()
+                         :expression 'foo :context :form :source #2#)
+                        :evaluation t))
+      (:form     . *) (((:unparsed
+                         ()
+                         :expression 1 :context :form :source #3#)
+                        :evaluation t)
+                       ((:unparsed
+                         ()
+                         :expression 2 :context :form :source #4#)
+                        :evaluation t)))
+     :source #1#))
   '(#5=(catch #6=(+ 1 2) #7=:value)
     (:catch
-     ((:tag-form . 1) ((#6# :evaluation t))
-      (:form     . *) ((#7# :evaluation t)))
+     ((:tag-form . 1) (((:unparsed
+                         ()
+                         :expression (+ 1 2) :context :form :source #6#)
+                        :evaluation t))
+      (:form     . *) (((:unparsed
+                         ()
+                         :expression :value :context :form :source #7#)
+                        :evaluation t)))
      :source #5#)))
 
 (define-syntax-test (unwind-protect)
+  ;; Invalid syntax
   '((unwind-protect)
     syn:invalid-syntax-error)
-
+  ;; Valid syntax
   '(#1=(unwind-protect #2=foo)
     (:unwind-protect
-     ((:protected . 1) ((#2# :evaluation t)))
+     ((:protected . 1) (((:unparsed
+                          ()
+                          :expression foo :context :form :source #2#)
+                         :evaluation t)))
      :source #1#))
   '(#3=(unwind-protect #4=foo #5=bar)
     (:unwind-protect
-         ((:protected . 1) ((#4# :evaluation t))
-          (:cleanup   . *) ((#5# :evaluation t)))
-      :source #3#))
+     ((:protected . 1) (((:unparsed
+                          ()
+                          :expression foo :context :form :source #4#)
+                         :evaluation t))
+      (:cleanup   . *) (((:unparsed
+                          ()
+                          :expression bar :context :form :source #5#)
+                         :evaluation t)))
+     :source #3#))
   '(#6=(unwind-protect #7=foo #8=bar #9=baz)
     (:unwind-protect
-     ((:protected . 1) ((#7# :evaluation t))
-      (:cleanup   . *) ((#8# :evaluation t)
-                        (#9# :evaluation t)))
+     ((:protected . 1) (((:unparsed
+                          ()
+                          :expression foo :context :form :source #7#)
+                         :evaluation t))
+      (:cleanup   . *) (((:unparsed
+                          ()
+                          :expression bar :context :form :source #8#)
+                         :evaluation t)
+                        ((:unparsed
+                          ()
+                          :expression baz :context :form :source #9#)
+                         :evaluation t)))
      :source #6#))
   '(#10=(unwind-protect #11=(progn 1 2) #12=3 #13=4)
     (:unwind-protect
-     ((:protected . 1) ((#11# :evaluation t))
-      (:cleanup   . *) ((#12# :evaluation t)
-                        (#13#:evaluation t)))
+     ((:protected . 1) (((:unparsed
+                          ()
+                          :expression (progn 1 2) :context :form :source #11#)
+                         :evaluation t))
+      (:cleanup   . *) (((:unparsed
+                          ()
+                          :expression 3 :context :form :source #12#)
+                         :evaluation t)
+                        ((:unparsed
+                          ()
+                          :expression 4 :context :form :source #13#)
+                         :evaluation t)))
      :source #10#)))
 
 ;;; `destructuring-bind'
 
 (define-syntax-test (destructuring-bind)
+  ;; Invalid syntax
   '((destructuring-bind) syn:invalid-syntax-error)
   '((destructuring-bind #1=1)
     syn:invalid-syntax-error #1# "must be a destructuring lambda list")
   '((destructuring-bind ())
     syn:invalid-syntax-error)
-
+  ;; Valid syntax
   '(#2=(destructuring-bind #3=(#4=a) #5=b)
     (:destructuring-bind
      ((:lambda-list . 1) (((:destructuring-lambda-list
@@ -899,22 +1210,29 @@
                                                :evaluation :compound)))
                             :source #3#)
                            :evaluation :compound))
-      (:expression . 1)  ((#5# :evaluation t)))
+      (:expression . 1)  (((:unparsed
+                            ()
+                            :expression b :context :form :source #5#)
+                           :evaluation t)))
      :source #2#)))
 
 ;;; Special operators for multiple values
 
 (define-syntax-test (multiple-value-bind)
+  ;; Invalid syntax
   '((multiple-value-bind . #1= ())
     syn:invalid-syntax-error #1# "must be a list of variable names")
   '((multiple-value-bind #2=1)
     syn:invalid-syntax-error #2# "must be a list of variable names")
   '((multiple-value-bind ())
     syn:invalid-syntax-error nil "a value form must follow the list of variable names")
-
+  ;; Valid syntax
   '(#3=(multiple-value-bind () #4=1)
     (:multiple-value-bind
-     ((:values-form . 1) ((#4# :evaluation t)))
+     ((:values-form . 1) (((:unparsed
+                            ()
+                            :expression 1 :context :form :source #4#)
+                           :evaluation t)))
      :source #3#))
   '(#5=(multiple-value-bind (#6=a #7=b) #8=1 #9=2 #10=3)
     (:multiple-value-bind
@@ -924,45 +1242,94 @@
                           ((:variable-name () :name b :source #7#)
                            :evaluation (:binding :namespace variable
                                                  :scope     :lexical)))
-      (:values-form . 1) ((#8#  :evaluation t))
-      (:form        . *) ((#9#  :evaluation t)
-                          (#10# :evaluation t)))
+      (:values-form . 1) (((:unparsed
+                            ()
+                            :expression 1 :context :form :source #8#)
+                           :evaluation t))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression 2 :context :form :source #9#)
+                           :evaluation t)
+                          ((:unparsed
+                            ()
+                            :expression 3 :context :form :source #10#)
+                           :evaluation t)))
      :source #5#)))
 
 (define-syntax-test (multiple-value-call)
-  '((multiple-value-call) syn:invalid-syntax-error)
-
+  ;; Invalid syntax
+  '((multiple-value-call)
+    syn:invalid-syntax-error)
+  ;; Valid syntax
   '(#1=(multiple-value-call #2=foo)
     (:multiple-value-call
-     ((:function-form . 1) ((#2#  :evaluation t)))
+     ((:function-form . 1) (((:unparsed
+                              ()
+                              :expression foo :context :form :source #2#)
+                             :evaluation t)))
      :source #1#))
   '(#3=(multiple-value-call #4=foo #5=1)
     (:multiple-value-call
-     ((:function-form . 1) ((#4# :evaluation t))
-      (:argument      . *) ((#5# :evaluation t)))
+     ((:function-form . 1) (((:unparsed
+                              ()
+                              :expression foo :context :form :source #4#)
+                             :evaluation t))
+      (:argument      . *) (((:unparsed
+                              ()
+                              :expression 1 :context :form :source #5#)
+                             :evaluation t)))
      :source #3#))
   '(#6=(multiple-value-call #7=foo #8=1 #9=2)
     (:multiple-value-call
-     ((:function-form . 1) ((#7# :evaluation t))
-      (:argument      . *) ((#8# :evaluation t)
-                            (#9# :evaluation t)))
+     ((:function-form . 1) (((:unparsed
+                              ()
+                              :expression foo :context :form :source #7#)
+                             :evaluation t))
+      (:argument      . *) (((:unparsed
+                              ()
+                              :expression 1 :context :form :source #8#)
+                             :evaluation t)
+                            ((:unparsed
+                              ()
+                              :expression 2 :context :form :source #9#)
+                             :evaluation t)))
      :source #6#)))
 
 (define-syntax-test (multiple-value-prog1)
-  '((multiple-value-prog1) syn:invalid-syntax-error)
-
-  '(#1=(multiple-value-prog1 1)
+  ;; Invalid syntax
+  '((multiple-value-prog1)
+    syn:invalid-syntax-error)
+  ;; Valid syntax
+  '(#1=(multiple-value-prog1 #2=1)
     (:multiple-value-prog1
-     ((:values-form . 1) ((1 :evaluation t)))
+     ((:values-form . 1) (((:unparsed
+                            ()
+                            :expression 1 :context :form :source #2#)
+                           :evaluation t)))
      :source #1#))
-  '(#2=(multiple-value-prog1 1 2)
+  '(#3=(multiple-value-prog1 #4=1 #5=2)
     (:multiple-value-prog1
-     ((:values-form . 1) ((1 :evaluation t))
-      (:form        . *) ((2 :evaluation t)))
-     :source #2#))
-  '(#3=(multiple-value-prog1 1 2 3)
+     ((:values-form . 1) (((:unparsed
+                            ()
+                            :expression 1 :context :form :source #4#)
+                           :evaluation t))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression 2 :context :form :source #5#)
+                           :evaluation t)))
+     :source #3#))
+  '(#6=(multiple-value-prog1 #7=1 #8=2 #9=3)
     (:multiple-value-prog1
-     ((:values-form . 1) ((1 :evaluation t))
-      (:form        . *) ((2 :evaluation t)
-                          (3 :evaluation t)))
-     :source #3#)))
+     ((:values-form . 1) (((:unparsed
+                            ()
+                            :expression 1 :context :form :source #7#)
+                           :evaluation t))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression 2 :context :form :source #8#)
+                           :evaluation t)
+                          ((:unparsed
+                            ()
+                            :expression 3 :context :form :source #9#)
+                           :evaluation t)))
+     :source #6#)))

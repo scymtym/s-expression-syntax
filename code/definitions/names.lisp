@@ -1,6 +1,6 @@
 ;;;; names.lisp --- Rules for different kinds of names.
 ;;;;
-;;;; Copyright (C) 2018, 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,7 +11,7 @@
 
 (parser:in-grammar names)
 
-;;; Variable names
+;;; Constant
 
 (defun constant? (name)
   (eq (sb-cltl2:variable-information name) :constant))
@@ -26,6 +26,8 @@
         (:fail)))
     (:fail)))
 
+;;; Variable names
+
 (defrule variable-name/unchecked ()
     (value (source)
       symbol)
@@ -38,9 +40,12 @@
        (variable-name/unchecked)))
 
 (defrule variable-name! ()
-  (and (must (guard (typep 'symbol)) "variable name must be a symbol")
-       (must (not (guard (typep 'keyword))) "variable name must not be a keyword")
-       (must (not (constant)) "variable name must not designate a constant")
+  (and (must (guard (typep 'symbol))
+             "variable name must be a symbol")
+       (must (not (guard (typep 'keyword)))
+             "variable name must not be a keyword")
+       (must (not (constant))
+             "variable name must not designate a constant")
        (variable-name/unchecked)))
 
 ;;; Function names
@@ -85,7 +90,27 @@
 (defrule slot-name! ()
   (must (slot-name) "slot name must be a symbol that is a valid variable name"))
 
-;;; Declaration identifier
+;;; Initarg names
+
+(defrule initarg-name ()
+    (value (source)
+      (guard name (typep 'symbol)))
+  (bp:node* (:initarg-name :name (eg::%naturalize name) :source source)))
+
+(defrule initarg-name! ()
+  (must (initarg-name) "initarg name must be a symbol"))
+
+;;; Custom class and slot options
+
+(defrule option-name ()
+    (value (source)
+      (guard name (typep 'symbol)))
+  (bp:node* (:option-name :name (eg::%naturalize name) :source source)))
+
+(defrule option-name! ()
+  (must (option-name) "option name must be a symbol"))
+
+;;; Declaration identifiers
 
 (defrule declaration-identifier ()
     (value (source)
@@ -98,8 +123,9 @@
 ;;; Block names
 
 (defrule block-name ()
-    (guard name (typep 'symbol))
-  name)
+    (value (source)
+      (guard name (typep 'symbol)))
+  (bp:node* (:block-name :name (eg::%naturalize name) :source source)))
 
 (defrule block-name! ()
   (must (block-name) "block name must be a symbol"))

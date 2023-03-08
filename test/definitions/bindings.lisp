@@ -27,12 +27,15 @@
                              :evaluation (:binding :namespace variable
                                                    :scope     :lexical))))
               :source #5#)))
-    '(#7=(#8=(#9=a 1))
+    '(#7=(#8=(#9=a #10=1))
       t #7# ((:value-binding
               ((:name  . 1) (((:variable-name () :name a :source #9#)
                               :evaluation (:binding :namespace variable
                                                     :scope     :lexical)))
-               (:value . 1) ((1 :evaluation t)))
+               (:value . 1) (((:unparsed
+                               ()
+                               :expression 1 :context :form :source #10#)
+                              :evaluation t)))
               :source #8#)))))
 
 (test function-bindings
@@ -59,7 +62,7 @@
                                      :source #7#)
                                     :evaluation :compound)))
               :source #5#)))
-    '((#8=(#9=a #10=() 1))
+    '((#8=(#9=a #10=() #11=1))
       t #8# ((:local-function-binding
                ((:name        . 1) (((:function-name () :name a :source #9#)
                                      :evaluation (:binding :namespace function
@@ -68,20 +71,42 @@
                                       ()
                                       :source #10#)
                                      :evaluation :compound))
-                (:form        . *) ((1 :evaluation t)))
+                (:form        . *) (((:unparsed
+                                      ()
+                                      :expression 1
+                                      :context    :form
+                                      :source     #11#)
+                                     :evaluation t)))
                :source #8#)))
-    '((#11=(#12=a #13=() "" 1))
-      t #10# ((:local-function-binding
-               ((:name          . 1) (((:function-name () :name a :source #12#)
-                                       :evaluation (:binding :namespace function
-                                                             :scope     :lexical)))
-                (:lambda-list   . 1) (((:ordinary-lambda-list
-                                        ()
-                                        :source #13#)
-                                       :evaluation :compound))
-                (:documentation . 1) ((""))
-                (:form          . *) ((1 :evaluation t)))
-               :source #11#)))))
+     '((#12=(#13=a #14=() #15=1))
+       t #12# ((:local-function-binding
+                ((:name        . 1) (((:function-name () :name a :source #13#)
+                                      :evaluation (:binding :namespace function
+                                                            :scope     :lexical)))
+                 (:lambda-list . 1) (((:ordinary-lambda-list
+                                       ()
+                                       :source #14#)
+                                      :evaluation :compound))
+                 (:form        . *) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source #15#)
+                                      :evaluation t)))
+                :source #12#)))
+     '((#16=(#17=a #18=() #19="" #20=1))
+       t #14# ((:local-function-binding
+                ((:name          . 1) (((:function-name () :name a :source #17#)
+                                        :evaluation (:binding :namespace function
+                                                              :scope     :lexical)))
+                 (:lambda-list   . 1) (((:ordinary-lambda-list
+                                         ()
+                                         :source #18#)
+                                        :evaluation :compound))
+                 (:documentation . 1) (((:documentation () :string "" :source #19#)))
+                 (:form          . *) (((:unparsed
+                                         ()
+                                         :expression 1 :context :form :source #20#)
+                                        :evaluation t)))
+                :source #16#)))))
 
 (test macro-function-bindings
   "Smoke test for the `macro-function-bindings' rule."
@@ -117,14 +142,14 @@
                                                          ((:name . 1) (((:pattern
                                                                          ((:required . *) (((:required-parameter
                                                                                              ((:name . 1) (((:variable-name () :name a :source #13#)
-                                                                                            :evaluation nil)))
-                                                                         :source #13#)
-                                                                        :evaluation :compound)
-                                                                       ((:required-parameter
-                                                                         ((:name . 1) (((:variable-name () :name b :source #14#)
-                                                                                        :evaluation nil)))
-                                                                         :source #14#)
-                                                                        :evaluation :compound)))
+                                                                                                            :evaluation nil)))
+                                                                                             :source #13#)
+                                                                                            :evaluation :compound)
+                                                                                           ((:required-parameter
+                                                                                             ((:name . 1) (((:variable-name () :name b :source #14#)
+                                                                                                            :evaluation nil)))
+                                                                                             :source #14#)
+                                                                                            :evaluation :compound)))
                                                                          :source #12#)
                                                                         :evaluation :compound)))
                                                          :source #12#)
@@ -132,25 +157,31 @@
                                      :source #10#)
                                     :evaluation :compound)))
               :source #8#)))
-    '((#15=(#16=a #17=() 1))
+    '((#15=(#16=a #17=() #18=1))
       t nil ((:local-macro-function-binding
               ((:name        . 1) (((:function-name () :name a :source #16#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
                (:lambda-list . 1) (((:destructuring-lambda-list () :source #17#)
                                     :evaluation :compound))
-               (:form        . *) ((1 :evaluation t)))
+               (:form        . *) (((:unparsed
+                                     ()
+                                     :expression #18# :context :form :source #18#)
+                                    :evaluation t)))
               :source #15#)))
-    '((#18=(#19=a #20=() "" 1))
+    '((#19=(#20=a #21=() #22="" #23=1))
       t nil ((:local-macro-function-binding
-              ((:name          . 1) (((:function-name () :name a :source #19#)
+              ((:name          . 1) (((:function-name () :name a :source #20#)
                                       :evaluation (:binding :namespace function
                                                             :scope     :lexical)))
-               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #20#)
+               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #21#)
                                       :evaluation :compound))
-               (:documentation . 1) ((""))
-               (:form          . *) ((1 :evaluation t)))
-              :source #18#)))))
+               (:documentation . 1) (((:documentation () :string "" :source #22#)))
+               (:form          . *) (((:unparsed
+                                       ()
+                                       :expression #23# :context :form :source #23#)
+                                      :evaluation t)))
+              :source #19#)))))
 
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."
@@ -166,10 +197,13 @@
     ;; Valid
     '(()
       t nil ())
-    '((#5=(#6=a 1))
+    '((#5=(#6=a #7=1))
       t nil ((:symbol-macro-binding
               ((:name      . 1) (((:variable-name () :name a :source #6#)
                                   :evaluation (:binding :namespace variable
                                                         :scope     :lexical)))
-               (:expansion . 1) ((1 :evaluation t)))
+               (:expansion . 1) (((:unparsed
+                                   ()
+                                   :expression 1 :context :form :source #7#)
+                                  :evaluation t)))
               :source #5#)))))

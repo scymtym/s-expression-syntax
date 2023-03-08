@@ -12,10 +12,19 @@
 
 (parser:in-grammar forms)
 
+;;; Unparsed expressions
+
+(defrule unparsed-expression (context)
+    (value (source) expression)
+  (bp:node* (:unparsed :expression expression
+                       :context    context
+                       :source     source)))
+
 ;;; Documentation strings
 
 (defrule documentation-string ()
-  (guard stringp))
+    (value (source) (guard string stringp))
+  (bp:node* (:documentation :string string :source source)))
 
 (defrule documentation-string! ()
   (must (documentation-string) "must be a documentation string"))
@@ -30,7 +39,7 @@
   ;; (cl:declare …) must not appear where a form is required.
   ;; CL:DECLAIM warns in SBCL
   (and (must (not (list* 'declare :any)) "declare is not allowed here")
-       :any))
+       (unparsed-expression ':form)))
 
 (defrule form! () ; TODO use this where appropriate
   (must (form) "must be a form"))
@@ -50,7 +59,9 @@
            (and (guard (typep 'symbol))
                 (not (guard (typep 'keyword)))
                 (not (constant))))
-       (form)))
+       ;; See `form' rule.
+       (must (not (list* 'declare :any)) "declare is not allowed here")
+       (unparsed-expression ':place)))
 
 (defrule place! ()
   (or (place)
@@ -71,8 +82,9 @@
     ;; If the first form in the body is a string, it is a
     ;; documentation string. Exception: if the body consists of only
     ;; one form, the form is not a documentation string.
-    (or (list (<- body (:transform (and (guard stringp) (<- form (form)))
-                         (list () (list form)))))
+    (or (list (and (guard stringp)
+                   (<- body (:transform (<- form (form))
+                              (list () (list form))))))
         (list* (<- docstring (documentation-string)) (<- body (body)))
         (<- body (body)))
   (list* docstring body))

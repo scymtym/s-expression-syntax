@@ -11,12 +11,9 @@
 ;;; Value bindings
 
 (define-syntax value-binding
-    (or (:transform
-         (or (<- name ((variable-name names))) ; TODO repeated variable names
-             (list (<- name ((variable-name! names)))))
-         (setf value nil))
+    (or (<- name ((variable-name names))) ; TODO repeated variable names
         (list (<- name ((variable-name! names)))
-              (<- value ((form! forms)))))
+              (? (and :any (<- value ((form! forms)))))))
   ((name  1 :evaluation (make-instance 'binding-semantics
                                        :namespace 'variable
                                        :scope     :lexical

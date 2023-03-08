@@ -11,7 +11,7 @@
 
 (test compound-type-specifier
   "Smoke test for the `compound-type-specifier' rule."
-  (rule-test-cases ((syn::compound-type-specifier syn::type-specifiers))
+  (rule-test-cases ((syn::compound-type-specifier syn::type-specifiers) 't)
     '(#1=1   nil    #1# nil)
     '((#2=1) :fatal #2# "must be a class name")))
 
@@ -138,22 +138,25 @@
     '(#3=values   :fatal #3# "the symbol VALUES is not a valid type specifier")
     '(#4=(values) :fatal #4# "VALUES type is invalid in this context")
     ;; Valid
-    '(#5=bit                    t nil (:atomic-type-specifier
-                                       ((:name . 1) (((:type-name () :name bit :source #5#))))
-                                       :source #5#))
-    '(#6=(#7=vector #8=t)       t nil (:compound-type-specifier
-                                       ((:name     . 1) (((:type-name
-                                                           ()
-                                                           :name vector :source #7#)))
-                                        (:argument . *) (((:atomic-type-specifier
-                                                           ((:name . 1) (((:type-name
-                                                                           ()
-                                                                           :name t :source #8#))))
-                                                           :source #8#))))
-                                       :source #6#))
-    '(#9=(#10=unsigned-byte 32) t nil (:compound-type-specifier
-                                       ((:name     . 1) (((:type-name
-                                                           ()
-                                                           :name unsigned-byte :source #10#)))
-                                        (:argument . *) ((32)))
-                                       :source #9#))))
+    '(#5=bit
+      t nil (:atomic-type-specifier
+             ((:name . 1) (((:type-name () :name bit :source #5#))))
+             :source #5#))
+    '(#6=(#7=vector #8=t)
+      t nil (:compound-type-specifier
+             ((:name     . 1) (((:type-name
+                                 ()
+                                 :name vector :source #7#)))
+              (:argument . *) (((:atomic-type-specifier
+                                 ((:name . 1) (((:type-name
+                                                 ()
+                                                 :name t :source #8#))))
+                                 :source #8#))))
+             :source #6#))
+    '(#9=(#10=unsigned-byte #11=32)
+      t nil (:compound-type-specifier
+             ((:name     . 1) (((:type-name
+                                 ()
+                                 :name unsigned-byte :source #10#)))
+              (:argument . *) (((:subsidiary-item () :value #11# :source #11#))))
+             :source #9#))))

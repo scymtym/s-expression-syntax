@@ -35,7 +35,7 @@
 (define-special-operator return-from
     (list (<- name ((block-name! names))) (? (<- result ((form! forms)))))
   ((name   1 :evaluation (make-instance 'reference-semantics
-                                       :namespace 'block))
+                                        :namespace 'block))
    (result ? :evaluation t)))
 
 (define-special-operator return
@@ -75,9 +75,11 @@
   :test #'equal)
 
 (defrule eval-when-situation ()
-  (or . #.(mapcar (lambda (situation)
-                    `',situation)
-                  +eval-when-situations+)))
+    (value (source)
+      (<- situation (or . #.(mapcar (lambda (situation)
+                                      `',situation)
+                                    +eval-when-situations+))))
+  (bp:node* (:eval-when-situation :situation situation :source source)))
 
 (defrule eval-when-situation! ()
   (must (eval-when-situation) #.(format nil "must be one of ~{~S~^, ~}"
@@ -90,16 +92,22 @@
   ((situation * :evaluation nil)
    (form      * :evaluation t)))
 
+(defrule read-only-p ()
+    (value (source)
+      (guard value (typep 'boolean)))
+  (bp:node* (:unparsed :expression value :source source)))
+
+(defrule read-only-p! ()
+  (must (<- read-only-p (read-only-p))
+        "READ-ONLY-P must be either T or NIL, not a generalized boolean"))
+
 (define-special-operator load-time-value
-    (list (<- form ((form! forms)))
-          (? (and :any
-                  (must (guard read-only-p (typep 'boolean))
-                        "READ-ONLY-P must be either T or NIL, not a generalized boolean"))))
+    (list (<- form ((form! forms))) (? (<- read-only-p (read-only-p!))))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil)))
 
 (define-special-operator quote
-    (list material)
+    (list (<- material ((unparsed-expression forms) ':quote)))
   ((material 1 :evaluation nil)))
 
 (define-special-operator (lambda-expression :operator lambda)

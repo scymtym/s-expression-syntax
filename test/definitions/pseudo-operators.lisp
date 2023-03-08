@@ -32,30 +32,42 @@
     (:application
      ((:function-name . 1) (((:function-name () :name foo :source #3#))))
      :source #2#))
-  '(#4=(#5=foo 1)
+  '(#4=(#5=foo #6=1)
     (:application
      ((:function-name . 1) (((:function-name () :name foo :source #5#)))
-      (:argument      . *) ((1 :evaluation t)))
+      (:argument      . *) (((:unparsed () :expression 1 :context :form :source #6#)
+                             :evaluation t)))
      :source #4#))
-  '(#6=(#7=(lambda #8=(#9=x) x) 1)
+  '(#7=(#8=(lambda #9=(#10=x) #11=x) #12=1)
     (:application
      ((:function . 1) (((:lambda-expression
                          ((:lambda-list . 1) (((:ordinary-lambda-list
                                                 ((:required . *) (((:required-parameter
                                                                     ((:name . 1) (((:variable-name
                                                                                     ()
-                                                                                    :name x :source #9#)
+                                                                                    :name x :source #10#)
                                                                                    :evaluation nil)))
-                                                                    :source #9#))))
-                                                :source #8#)
+                                                                    :source #10#))))
+                                                :source #9#)
                                                :evaluation :compound))
-                          (:form        . *) ((x :evaluation t)))
-                         :source #7#)
+                          (:form        . *) (((:unparsed
+                                                ()
+                                                :expression x
+                                                :context    :form
+                                                :source     #11#)
+                                               :evaluation t)))
+                         :source #8#)
                         :evaluation :compound))
-      (:argument . *) ((1 :evaluation t)))
-     :source #6#)))
+      (:argument . *) (((:unparsed () :expression 1 :context :form :source #12#)
+                        :evaluation t)))
+     :source #7#)))
 
 ;;; Pseudo-operator "self evaluating"
 
 (define-syntax-test (syn::self-evaluating)
-  '(#1=1 (:self-evaluating ((:value . 1) ((#1#))) :source #1#)))
+  '(#1=1
+    (:self-evaluating
+     ((:value . 1) (((:unparsed
+                      ()
+                      :expression #1# :context :self-evaluating :source #1#))))
+     :source #1#)))

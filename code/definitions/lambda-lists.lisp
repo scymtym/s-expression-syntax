@@ -46,12 +46,11 @@
          (:compose ((variable-name/unchecked names)) (unique-name seen))))
 
 (defrule unique-variable-name! (seen)
-    (and (lambda-list-variable-name!)
-         (or (:compose ((variable-name/unchecked names)) (unique-name seen))
-             (:transform
-                (<- name ((variable-name/unchecked names)))
-              (let ((key (getf (bp:node-initargs* name) :name)))
-                (:fatal (format nil "the variable name ~S occurs more than once" key)))))))
+    (and (<- name (lambda-list-variable-name!))
+         (or (:compose (:transform :any name) (unique-name seen))
+             (:transform :any
+               (let ((key (getf (bp:node-initargs* name) :name)))
+                 (:fatal (format nil "the variable name ~S occurs more than once" key)))))))
 
 (define-syntax (required-parameter :arguments ((seen nil)))
     (<- name (unique-variable-name seen))
@@ -119,7 +118,10 @@
       (seq '&key
            (* (<<- keyword-parameters (keyword-parameter seen)))
            (? (<- allow-other-keys? '&allow-other-keys)))
-    (list (nreverse keyword-parameters) allow-other-keys?))
+    (list (nreverse keyword-parameters)
+          (when allow-other-keys?
+            (bp:node* (:lambda-list-keyword :keyword (eg::%naturalize allow-other-keys?)
+                                            :source  allow-other-keys?)))))
 
   (defrule (aux-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&aux (* (<<- parameters (aux-parameter! seen))))

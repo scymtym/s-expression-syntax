@@ -14,11 +14,19 @@
 
 ;;; General type specifier syntax
 
-(defrule compound-type-specifier ()
+(defrule subsidiary-item ()
+    (value (source) value)
+  (let ((value (eg::%naturalize value)))
+    (bp:node* (:subsidiary-item :value value :source source))))
+
+(defrule compound-type-specifier (must?)
     (value (source)
-      (list (<- name ((class-name! names)))
-            (* (<<- arguments (or (type-specifier)
-                                  :any)))))
+      (list (or (and (:transform :any (unless must? (:fail)))
+                     (<- name ((class-name! names))))
+                (<- name ((class-name names))))
+            (* (<<- arguments (or (%type-specifier 'nil)
+                                  (subsidiary-item)
+                                  )))))
   (bp:node* (:compound-type-specifier :source source)
     (1 (:name     . 1) name)
     (* (:argument . *) (nreverse arguments))))
@@ -26,8 +34,9 @@
 (defrule atomic-type-specifier ()
     (value (source)
       (guard name (typep 'symbol))) ; TODO control whether * is allowed, use class-name or type-name from names grammar
-  (bp:node* (:atomic-type-specifier :source source)
-    (1 (:name . 1) (bp:node* (:type-name :name (eg::%naturalize name) :source source)))))
+  (let ((name (eg::%naturalize name)))
+    (bp:node* (:atomic-type-specifier :source source)
+      (1 (:name . 1) (bp:node* (:type-name :name name :source source))))))
 
 ;;; Well-known compound specifiers
 
@@ -97,14 +106,17 @@
 
 ;;;
 
-(defrule type-specifier ()
+(defrule %type-specifier (list-must-be-compound?)
   (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
        (must (not 'values) "the symbol VALUES is not a valid type specifier")
        (or (atomic-type-specifier)
            (function-type-specifier)
-           (compound-type-specifier)
+           (compound-type-specifier list-must-be-compound?)
            ;; (list (guard (typep 'symbol)) (* :any))
            )))
+
+(defrule type-specifier ()
+  (%type-specifier 't))
 
 (defrule type-specifier! ()
   (must (type-specifier) "must be a type specifier"))
