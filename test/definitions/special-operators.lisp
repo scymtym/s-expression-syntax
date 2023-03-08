@@ -179,15 +179,18 @@
     (:eval-when ((:form . *) ((a :evaluation t))) :source #6#)))
 
 (define-syntax-test (load-time-value)
-  '((load-time-value)     syn:invalid-syntax-error)
-  '((load-time-value 1 2) syn:invalid-syntax-error)
-
-  '(#1=(load-time-value #2=foo)
-    (:load-time-value ((:form . 1) ((#2# :evaluation t))) :source #1#))
-  '(#3=(load-time-value #4=foo #5=t)
-    (:load-time-value ((:form        . 1) ((#4# :evaluation t))
-                       (:read-only-p . 1) ((#5#)))
-     :source #3#)))
+  ;; Invalid syntax
+  '((load-time-value)
+    syn:invalid-syntax-error)
+  '((load-time-value 1 #1=2)
+    syn:invalid-syntax-error #1# "READ-ONLY-P must be either T or NIL, not a generalized boolean")
+  ;; Valid syntax
+  '(#2=(load-time-value #3=foo)
+    (:load-time-value ((:form . 1) ((#3# :evaluation t))) :source #2#))
+  '(#4=(load-time-value #5=foo #6=t)
+    (:load-time-value ((:form        . 1) ((#5# :evaluation t))
+                       (:read-only-p . 1) ((#6#)))
+     :source #4#)))
 
 (define-syntax-test (quote)
   '((quote)     syn:invalid-syntax-error)

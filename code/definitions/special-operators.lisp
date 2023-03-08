@@ -91,7 +91,10 @@
    (form      * :evaluation t)))
 
 (define-special-operator load-time-value
-    (list (<- form ((form! forms))) (? (guard read-only-p (typep 'boolean))))
+    (list (<- form ((form! forms)))
+          (? (and :any
+                  (must (guard read-only-p (typep 'boolean))
+                        "READ-ONLY-P must be either T or NIL, not a generalized boolean"))))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil)))
 
