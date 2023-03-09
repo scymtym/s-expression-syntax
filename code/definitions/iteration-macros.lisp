@@ -43,3 +43,61 @@
            (segment     *> :evaluation :compound)))))
   (define do  :parallel)
   (define do* :sequential))
+
+;;; Standard macros `do-{all,external,}-symbols'
+
+(macrolet ((define (name)
+             `(define-macro ,name
+                  (list* (must (list (<- variable ((variable-name! names)))
+                                     (? (seq (<- package ((form! forms)))
+                                             (? (<- result ((form! forms)))))))
+                               "must be of the form (VARIABLE [PACKAGE [RESULT]])")
+                         (<- (declaration segment) ((tagbody-body forms))))
+                ((variable    1 :evaluation (load-time-value
+                                             (make-instance 'binding-semantics
+                                                            :namespace 'variable
+                                                            :scope     :lexical
+                                                            :values    nil)))
+                 (package     ?  :evaluation t)
+                 (result      ?  :evaluation t)
+                 (declaration *>)
+                 (segment     *> :evaluation :compound)))))
+  (define do-symbols)
+  (define do-external-symbols))
+
+(define-macro do-all-symbols
+    (list* (must (list (<- variable ((variable-name! names)))
+                       (? (<- result ((form! forms)))))
+                 "must be of the form (VARIABLE [RESULT])")
+           (<- (declaration segment) ((tagbody-body forms))))
+  ((variable    1 :evaluation (load-time-value
+                               (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :values    nil)))
+   (result      ?  :evaluation t)
+   (declaration *>)
+   (segment     *> :evaluation :compound)))
+
+;;; Standard macros `dolist' and `dotimes'
+
+(macrolet
+    ((define (name source-name)
+       `(define-macro ,name
+            (list* (must (list (<- variable ((variable-name! names)))
+                               (<- ,source-name ((form! forms)))
+                               (? (<- result ((form! forms)))))
+                         ,(format nil "must be of the form (VARIABLE ~A [RESULT])"
+                                  source-name))
+                   (<- (declaration segment) ((tagbody-body forms))))
+          ((variable     1 :evaluation (load-time-value
+                                        (make-instance 'binding-semantics
+                                                       :namespace 'variable
+                                                       :scope     :lexical
+                                                       :values    nil)))
+           (,source-name 1  :evaluation t)
+           (result       ?  :evaluation t)
+           (declaration  *>)
+           (segment      *> :evaluation :compound)))))
+  (define dolist  list)
+  (define dotimes count))
