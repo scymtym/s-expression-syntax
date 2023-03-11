@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol functions provided by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,7 +13,7 @@
 (setf (documentation 'name 'function)
       "Return the name of THING.
 
-If THING is syntax description that describes a standard special
+If THING is a syntax description that describes a standard special
 operator, macro, class or type, the returned name is the symbol in the
 COMMON-LISP package which names the special operator, macro, class or
 type.
