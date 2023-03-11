@@ -3,10 +3,10 @@
 #+EMAIL:    jmoringe@techfak.uni-bielefeld.de
 #+LANGUAGE: en
 
-#+OPTIONS: toc:t num:nil
+#+OPTIONS:  toc:t num:nil
 #+SEQ_TODO: TODO STARTED | DONE
 
-#+BEGIN_SRC lisp :exports both :results silent
+#+BEGIN_SRC lisp :exports results :results silent
   (ql:quickload '("s-expression-syntax"
                   "architecture.builder-protocol.print-tree"))
 #+END_SRC
@@ -27,9 +27,14 @@
 
   + Standard macros
 
-    + ~cl:loop~
+    + +~cl:loop~+ (work in progress)
 
   + Feature expressions
+
+  + +Format control strings+ (work in progress)
+
+  Note that this library is not a code walker but it could be used to
+  implement a code walker.
 
 * STARTED Concepts
 
@@ -43,7 +48,9 @@
        represented as arbitrary objects which are interpreted as atoms
        and conses according to rules defined by the client using the
        library. That said, processing expressions using the usual
-       interpretation of atoms and conses is of course supported.
+       interpretation of atoms and conses is of course
+       supported. Cons expressions can contain other expressions which
+       are /sub-expressions/ of the respective containing expression.
 
   + Syntax Description :: An object which describes the syntax of one
        kind of /expression/. For example, there is a syntax
@@ -52,12 +59,22 @@
        recognizing well-formed /expressions/ of a certain kind, a
        /syntax description/ also contains descriptions of the /parts/
        that can appear within well-formed /expressions/ of that
-       kind. For example, for ~cl:let~, the /parts/ are variable names,
-       initial value forms, declarations and body forms.
+       kind. For example, for ~cl:let~, the /parts/ are
+
+       + zero or more bindings, in turn consisting of
+
+         + a variable name
+
+         + an optional initial value form
+
+       + zero or more declarations
+
+       + and zero or more body forms.
 
        More precisely, a /syntax description/ consists of a name, a
        list of /parts/ and a parser which consumes /expressions/
-       conforming to the described syntax and produces a parse result.
+       conforming to the described syntax and produces a parse /result
+       tree/.
 
   + Part :: An object which describes a sub-structure of
        the syntax described by a particular /syntax description/. For
@@ -74,10 +91,31 @@
        | Name                 | Cardinality  | Evaluation                                      |
        |----------------------+--------------+-------------------------------------------------|
        | name                 | one          | not evaluated                                   |
-       | lambda-list          | one          | composed of evaluated and non-evaluated /parts/ |
+       | lambda list          | one          | composed of evaluated and non-evaluated /parts/ |
        | documentation string | zero-or-one  | not evaluated                                   |
        | declaration          | zero-or-more | not evaluated                                   |
        | body forms           | zero-or-more | evaluated                                       |
+
+       The "composed of evaluated and non-evaluated /parts/"
+       evaluation of the lambda list is due to the fact that lambda
+       lists contain unevaluated variable names and lambda list
+       keywords as well as, possibly, evaluated initialization forms
+       for optional and keyword parameters and ~&aux~ variables.
+
+  + Result Tree :: A tree that is result of parsing an
+       input /expression/. Each node in the tree corresponds to a
+       /sub-expression/ of the input /expression/ (multiple nodes may
+       correspond to the same /sub-expression/). A node is
+       characterized by its /kind/, its /initargs/ and its /relations/
+       to other nodes.
+
+       The result tree could possibly be called an Abstract Syntax
+       Tree (AST), but we avoid that term because the result directly
+       reflects the structure of the input /expression/.
+
+       We may call a /result tree/ a /partial result tree/ if it
+       contains unparsed /sub-expressions/ of the input /expression/
+       in some of its leaf nodes.
 
 * STARTED Tutorial
 
@@ -137,7 +175,7 @@
              :do  (format t "~A (~A)~%" part-name cardinality)
                   (ecase (s-expression-syntax:cardinality part)
                     ((1) (describe-sub-expression sub-expression evaluation))
-                    ((*) (map 'nil #'describe-sub-expression sub-expression evaluation))))))
+                    ((*) (mapc #'describe-sub-expression sub-expression evaluation))))))
   #+END_SRC
 
   Evaluating the code results in the following output which
@@ -206,9 +244,8 @@
                           (declare (type integer b))
                           (format t "~S" a)
                           (list a b)))
-           (syntax     (s-expression-syntax:classify t expression))
            (builder    'list)
-           (node       (s-expression-syntax:parse builder syntax expression)))
+           (node       (s-expression-syntax:parse builder t expression)))
       (let ((*print-case* :downcase))
         (architecture.builder-protocol.print-tree:print-tree
          builder node *standard-output*)))
