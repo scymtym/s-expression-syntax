@@ -127,7 +127,8 @@
                           ~2@T   evaluation: ~S~%"
                        sub-expression (getf relation-args :evaluation))))
        (loop :for relation    :in (architecture.builder-protocol:node-relations builder node)
-             :for part-name   = (find-symbol (symbol-name (first relation)) (find-package "S-EXPRESSION-SYNTAX"))
+             :for part-name   = (find-symbol (symbol-name (first relation))
+                                             (find-package "S-EXPRESSION-SYNTAX"))
              :for part        = (s-expression-syntax:find-part part-name syntax)
              :for cardinality = (s-expression-syntax:cardinality part)
              :for (sub-expression evaluation)
@@ -161,7 +162,9 @@
          (:OPTIONAL . *)
          (((:OPTIONAL-PARAMETER
             ((:NAME . 1) (((:VARIABLE-NAME NIL :NAME B :SOURCE B)))
-             (:DEFAULT . 1) ((2 :EVALUATION T)))
+             (:DEFAULT . 1)
+             (((:UNPARSED NIL :EXPRESSION 2 :CONTEXT :FORM :SOURCE 2) :EVALUATION
+               T)))
             :SOURCE (B 2))
            :EVALUATION :COMPOUND)))
         :SOURCE (A &OPTIONAL (B 2)))
@@ -184,9 +187,10 @@
         :KIND TYPE :SOURCE (TYPE INTEGER B))
        evaluation: NIL
   FORM (*)
-    -> (FORMAT T "~S" A)
+    -> (:UNPARSED NIL :EXPRESSION (FORMAT T "~S" A) :CONTEXT :FORM :SOURCE
+        (FORMAT T "~S" A))
        evaluation: T
-    -> (LIST A B)
+    -> (:UNPARSED NIL :EXPRESSION (LIST A B) :CONTEXT :FORM :SOURCE (LIST A B))
        evaluation: T
   #+end_example
 
@@ -207,15 +211,10 @@
            (node       (s-expression-syntax:parse builder syntax expression)))
       (let ((*print-case* :downcase))
         (architecture.builder-protocol.print-tree:print-tree
-         builder node *standard-output*
-         :printers (list (cons (lambda (node)
-                                 (not (typep node '(cons keyword))))
-                               (lambda (depth node stream)
-                                 (declare (ignore depth))
-                                 (format stream "[UNPARSED ~A]" node stream)))))))
+         builder node *standard-output*)))
   #+END_SRC
 
-  Note the unparsed leafs indicated by the ~UNPARSED~ labels.
+  Note the unparsed leafs indicated by the ~unparsed~ node kind.
 
   #+RESULTS: tree-parse
   #+begin_example
@@ -240,7 +239,10 @@
   │   ├─name: variable-name
   │   │   name: b
   │   │   source: b
-  │   └─default: [UNPARSED 2]
+  │   └─default: unparsed
+  │       expression: 2
+  │       context: :form
+  │       source: 2
   ├─declaration: declaration
   │ │ kind: type
   │ │ source: (type integer a)
@@ -263,8 +265,14 @@
   │ └─argument: variable-name
   │     name: b
   │     source: b
-  ├─form: [UNPARSED (format t ~S a)]
-  └─form: [UNPARSED (list a b)]
+  ├─form: unparsed
+  │   expression: (format t "~S" a)
+  │   context: :form
+  │   source: (format t "~S" a)
+  └─form: unparsed
+      expression: (list a b)
+      context: :form
+      source: (list a b)
   #+end_example
 
 * STARTED Dictionary
