@@ -6,7 +6,8 @@
 
 (cl:in-package #:s-expression-syntax.test)
 
-(in-suite :s-expression-syntax)
+(def-suite* :s-expression-syntax.forms
+  :in :s-expression-syntax)
 
 (test place
   "Smoke test for the `place' rule."
