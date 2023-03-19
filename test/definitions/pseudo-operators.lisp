@@ -12,11 +12,22 @@
 ;;; Pseudo-operator variable reference
 
 (define-syntax-test (syn::variable-reference)
-  '(#1=:foo syn:invalid-syntax-error #1#)
-
-  '(#2=foo (:variable-reference
-            ((:name . 1) (((:variable-name () :name foo :source #2#))))
-            :source #2#)))
+  ;; Invalid syntax
+  '(#1=1
+    syn:invalid-syntax-error #1#)
+  ;; Valid syntax
+  '(#2=foo
+    (:variable-reference
+     ((:name . 1) (((:variable-name () :name foo :source #2#))))
+     :source #2#))
+  '(#3=:foo
+    (:variable-reference
+     ((:name . 1) (((:variable-name () :name :foo :source #3#))))
+     :source #3#))
+  '(#4=nil
+    (:variable-reference
+     ((:name . 1) (((:variable-name () :name nil :source #4#))))
+     :source #4#)))
 
 ;;; Pseudo-operator "application"
 
@@ -65,9 +76,13 @@
 ;;; Pseudo-operator "self evaluating"
 
 (define-syntax-test (syn::self-evaluating)
-  '(#1=1
+  ;; Invalid syntax
+  '(#1=:foo
+    syn:invalid-syntax-error #1#)
+  ;; Valid syntax
+  '(#2=1
     (:self-evaluating
      ((:value . 1) (((:unparsed
                       ()
-                      :expression #1# :context :self-evaluating :source #1#))))
-     :source #1#)))
+                      :expression 1 :context :self-evaluating :source #2#))))
+     :source #2#)))

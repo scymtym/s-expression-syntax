@@ -20,8 +20,8 @@
         '((nil     syn::variable-reference)
           (t       syn::variable-reference)
           (foo     syn::variable-reference)
+          (:foo    syn::variable-reference)
 
-          (:foo    syn::self-evaluating)
           (1       syn::self-evaluating)
           ("foo"   syn::self-evaluating)
           (#()     syn::self-evaluating)

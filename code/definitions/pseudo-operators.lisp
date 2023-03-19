@@ -23,7 +23,6 @@
 
 (define-syntax variable-reference
     (and (guard (typep 'symbol))
-         (not (guard (typep 'keyword)))
          (<- name ((variable-name/unchecked names))))
   ((name 1)))
 
@@ -49,5 +48,7 @@
 ;;; application or a special form is self-evaluating.
 
 (define-syntax self-evaluating
-    (<- value ((unparsed-expression forms) :self-evaluating))
+    (<- value (and (not (guard (typep 'cons)))
+                   (not (guard (typep 'symbol)))
+                   ((unparsed-expression forms) :self-evaluating)))
   ((value 1)))
