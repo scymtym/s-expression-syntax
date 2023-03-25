@@ -18,15 +18,18 @@
   ;; Valid syntax
   '(#2=foo
     (:variable-reference
-     ((:name . 1) (((:variable-name () :name foo :source #2#))))
+     ((:name . 1) (((:variable-name () :name foo :source #2#)
+                    :evaluation (:reference :namespace variable))))
      :source #2#))
   '(#3=:foo
     (:variable-reference
-     ((:name . 1) (((:variable-name () :name :foo :source #3#))))
+     ((:name . 1) (((:variable-name () :name :foo :source #3#)
+                    :evaluation (:reference :namespace variable))))
      :source #3#))
   '(#4=nil
     (:variable-reference
-     ((:name . 1) (((:variable-name () :name nil :source #4#))))
+     ((:name . 1) (((:variable-name () :name nil :source #4#)
+                    :evaluation (:reference :namespace variable))))
      :source #4#)))
 
 ;;; Pseudo-operator "application"

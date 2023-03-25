@@ -24,7 +24,8 @@
 (define-syntax variable-reference
     (and (guard (typep 'symbol))
          (<- name ((variable-name/unchecked names))))
-  ((name 1)))
+  ((name 1 :evaluation (make-instance 'reference-semantics
+                                      :namespace 'variable))))
 
 ;;; Pseudo-operator "application"
 ;;;
