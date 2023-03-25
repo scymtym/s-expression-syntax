@@ -152,7 +152,9 @@
   '(#3=(tagbody #4=nil)
     (:tagbody
      ((:segment . *) (((:tagbody-segment
-                        ((:label . 1) (((:tag () :name nil :source #4#))))
+                        ((:label . 1) (((:tag () :name nil :source #4#)
+                                        :evaluation (:binding :namespace syn::tag
+                                                              :scope     :lexical))))
                         :source #4#)
                        :evaluation :compound)))
      :source #3#))
@@ -171,11 +173,15 @@
   '(#7=(tagbody #8=0 #9=1 #10="foo" #11="bar" #12=a #13=(list 1) #14=(list 3))
     (:tagbody
      ((:segment . *) (((:tagbody-segment
-                        ((:label . 1) (((:tag () :name 0 :source #8#))))
+                        ((:label . 1) (((:tag () :name 0 :source #8#)
+                                        :evaluation (:binding :namespace syn::tag
+                                                              :scope     :lexical))))
                         :source #8#)
                        :evaluation :compound)
                       ((:tagbody-segment
-                        ((:label     . 1) (((:tag () :name 1 :source #9#)))
+                        ((:label     . 1) (((:tag () :name 1 :source #9#)
+                                            :evaluation (:binding :namespace syn::tag
+                                                                  :scope     :lexical)))
                          (:statement . *) (((:unparsed
                                              ()
                                              :expression "foo"
@@ -191,7 +197,9 @@
                         :source #9#)
                        :evaluation :compound)
                       ((:tagbody-segment
-                        ((:label     . 1) (((:tag () :name a :source #12#)))
+                        ((:label     . 1) (((:tag () :name a :source #12#)
+                                            :evaluation (:binding :namespace syn::tag
+                                                                  :scope     :lexical)))
                          (:statement . *) (((:unparsed
                                              ()
                                              :expression (list 1)
@@ -225,7 +233,9 @@
                         :source #16#)
                        :evaluation :compound)
                       ((:tagbody-segment
-                        ((:label . 1) (((:tag () :name :foo :source #18#))))
+                        ((:label . 1) (((:tag () :name :foo :source #18#)
+                                        :evaluation (:binding :namespace syn::tag
+                                                              :scope     :lexical))))
                         :source #18#)
                        :evaluation :compound)))
      :source #15#)))

@@ -47,14 +47,19 @@
 (defrule (tagbody-segment :environment (make-instance 'eg::expression-environment)) (seen first?)
     (value (source)
       (seq (<- label (or (and (:transform :any (unless first? (:fail)))
-                              (or (and ((integer-or-symbol names)) ((unique-tag! names) seen))
+                              (or (and ((integer-or-symbol names))
+                                       ((unique-tag! names) seen))
                                   (seq)))
                          ((unique-tag! names) seen)))
            (* (<<- statements (and (not ((integer-or-symbol names)))
                                    ((form! forms)))))))
-  (bp:node* (:tagbody-segment :source source)
-    (bp:? (:label     . 1) label)
-    (*    (:statement . *) (nreverse statements) :evaluation (a:circular-list t))))
+  (let ((statements (nreverse statements)))
+    (bp:node* (:tagbody-segment :source source)
+      (bp:? (:label     . 1) label      :evaluation (make-instance 'binding-semantics
+                                                                   :namespace 'tag
+                                                                   :scope     :lexical
+                                                                   :values    nil))
+      (*    (:statement . *) statements :evaluation (a:circular-list t)))))
 
 (define-special-operator tagbody
     (list (? (and (<- seen (:transform :any (make-hash-table)))
