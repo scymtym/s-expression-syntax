@@ -64,7 +64,8 @@
 
 (define-special-operator go
     (list* (must (list (<- tag ((tag! names)))) "must be a single tag"))
-  ((tag 1 :evaluation nil)))
+  ((tag 1 :evaluation (make-instance 'reference-semantics
+                                     :namespace 'tag))))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
 

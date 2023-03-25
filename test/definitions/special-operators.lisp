@@ -241,7 +241,8 @@
 ;; Valid syntax
   '(#3=(go #4=1)
     (:go
-     ((:tag . 1) (((:tag () :name 1 :source #4#))))
+     ((:tag . 1) (((:tag () :name 1 :source #4#)
+                   :evaluation (:reference :namespace syn::tag))))
      :source #3#)))
 
 ;;; Special operators `eval-when', `load-time-value', `quote' and `function'
