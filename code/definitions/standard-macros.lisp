@@ -189,33 +189,40 @@
    (option-name   *)
    (option-value  *)))
 
+(defrule (default-initarg :environment (make-instance 'eg::expression-environment)) ()
+    (value (source)
+      (seq (<- name     ((initarg-name! names)))
+           (<- initform ((form! forms)))))
+  (bp:node* (:default-initarg :source source)
+    (1 (:name     . 1) name)
+    (1 (:initform . 1) initform :evaluation t)))
+
+(defrule (default-initarg! :environment (make-instance 'eg::expression-environment)) ()
+  (must (default-initarg)
+        "default initarg must be a symbol followed by a form"))
+
 (define-macro defclass
     (list (<- name ((class-name! names)))
           (<- superclass (superclasses))
           (list (* (<<- slot (slot-specifier))))
           (* (or ;; Standard options have their respective syntax.
-                 (eg:option :default-initargs
-                            (* (and :any
-                               (must (seq (<<- default-initarg  ((initarg-name names)))
-                                          (<<- default-initform ((form! forms))))
-                                     "default initarg must be a symbol followed by an expression"))))
-                 (eg:option :metaclass     (must (<- metaclass ((class-name names)))
-                                                 "metaclass must be a class name"))
-                 (eg:option :documentation (<- documentation ((documentation-string! forms))))
+                 (eg:option :default-initargs (* (and :any (<<- default-initarg (default-initarg!)))))
+                 (eg:option :metaclass        (must (<- metaclass ((class-name names)))
+                                                    "metaclass must be a class name"))
+                 (eg:option :documentation    (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (list* (<<- option-name  ((option-name! names)))
                         (<<- option-value ((unparsed-expression forms) ':non-standard-defclass-option))))))
-  ((name             1)
-   (superclass       *>)
-   (slot             *  :evaluation :compound)
+  ((name            1)
+   (superclass      *>)
+   (slot            *  :evaluation :compound)
    ;; Standard options
-   (default-initarg  *)
-   (default-initform *  :evaluation t)
-   (metaclass        ?)
-   (documentation    ?)
+   (default-initarg *  :evaluation :compound)
+   (metaclass       ?)
+   (documentation   ?)
    ;; Non-standard options
-   (option-name      *)
-   (option-value     *)))
+   (option-name     *)
+   (option-value    *)))
 
 (define-syntax condition-slot-specifier
     (or (and (not (list* :any)) (<- name ((slot-name! names))))

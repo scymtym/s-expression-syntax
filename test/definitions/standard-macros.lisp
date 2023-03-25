@@ -325,9 +325,9 @@
   #+TODO '((defclass foo #3=1)
     syn:invalid-syntax-error #3# "must be a list")
   '((defclass foo () () (:default-initargs #3=1))
-    syn:invalid-syntax-error #3# "default initarg must be a symbol followed by an expression")
+    syn:invalid-syntax-error #3# "initarg name must be a symbol")
   '((defclass foo () () (:default-initargs :foo))
-    syn:invalid-syntax-error nil "default initarg must be a symbol followed by an expression")
+    syn:invalid-syntax-error nil "default initarg must be a symbol followed by a form")
   '((defclass foo () () (:metaclass #4=1))
     syn:invalid-syntax-error #4# "metaclass must be a class name")
   '((defclass foo () () (:metaclass . #5=(foo 1)))
@@ -353,8 +353,8 @@
          (:metaclass #21=foo)
          (:documentation #22="foo")
          (:default-initargs
-          :bar #23=1)
-         (#24=:my-class-option . #25=(1)))
+          #23=:bar #24=1)
+         (#25=:my-class-option . #26=(1)))
     (:defclass
      ((:name             . 1) (((:type-name () :name foo :source #13#)))
       (:superclass       . *) (((:type-name () :name bar :source #14#))
@@ -376,19 +376,24 @@
                                                          :source     :foo))))
                                  :source #16#)
                                 :evaluation :compound))
-      (:default-initarg  . *) (((:initarg-name ()  :name :bar :source :bar)))
-      (:default-initform . *) (((:unparsed
-                                 ()
-                                 :expression 1 :context :form :source #23#)
-                                :evaluation t))
+      (:default-initarg  . *) (((:default-initarg
+                                 ((:name     . 1) (((:initarg-name
+                                                     ()
+                                                     :name :bar :source #23#)))
+                                  (:initform . 1) (((:unparsed
+                                                     ()
+                                                     :expression 1 :context :form :source #24#)
+                                                    :evaluation t)))
+                                 :source #23#)
+                                :evaluation :compound))
       (:metaclass        . 1) (((:type-name () :name foo :source #21#)))
       (:documentation    . 1) (((:documentation () :string "foo" :source #22#)))
-      (:option-name      . *) (((:option-name () :name :my-class-option :source #24#)))
+      (:option-name      . *) (((:option-name () :name :my-class-option :source #25#)))
       (:option-value     . *) (((:unparsed
                                  ()
                                  :expression (1)
                                  :context    :non-standard-defclass-option
-                                 :source     #25#))))
+                                 :source     #26#))))
      :source #12#)))
 
 (define-macro-test (deftype)
