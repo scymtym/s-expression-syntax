@@ -895,7 +895,10 @@
                      :expression #6# :context :form :source #6#)
                     :evaluation t)))
      :source #5#))
-  '(#7=(restart-case #8=1 #9=(#10=foo #11=(#12=x) :report #13="bar" :test #14=baz))
+  '(#7=(restart-case #8=1 #9=(#10=foo #11=(#12=x)
+                               :report #13="bar"
+                               :test #14=baz
+                               #15=1))
     (:restart-case
      ((:form   . 1) (((:unparsed
                        ()
@@ -918,7 +921,13 @@
                                                 :source     #13#)))
                         (:test-name     . 1) (((:function-name
                                                 ()
-                                                :name baz :source #14#))))
+                                                :name baz :source #14#)))
+                        (:form          . *) (((:unparsed
+                                                ()
+                                                :expression 1
+                                                :context    :form
+                                                :source     #15#)
+                                               :evaluation t)))
                        :source #9#)
                       :evaluation :compound)))
      :source #7#)))

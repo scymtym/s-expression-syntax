@@ -538,7 +538,7 @@
                                                (<- report-lambda      (lambda-expression))))
                   (eg:poption :test        (or (<- test-name          ((function-name/symbol forms)))
                                                (<- test-lambda        (lambda-expression))))))
-           (:transform (<- (declarations forms) ((body forms)))
+           (:transform (<- (declarations form) ((body forms)))
              (when (not (or name report-string report-name report-lambda))
                (:fatal "for an unnamed restart, the :REPORT option must be supplied"))))
   ((name               1)
@@ -551,7 +551,7 @@
    (test-name          ?)
    (test-lambda        ?)
    (declarations       *>)
-   (forms              *> :evaluation t)))
+   (form               *> :evaluation t)))
 
 (define-macro restart-case
     (list (<- form ((form forms)))
