@@ -39,7 +39,8 @@
               (must (<- function (lambda-expression))
                     "must be a symbol naming a function or a lambda expression"))
           (* (<<- argument ((form! forms)))))
-  ((function-name ?)
+  ((function-name ? :evaluation (make-instance 'reference-semantics
+                                               :namespace 'function))
    (function      ? :evaluation :compound)
    (argument      * :evaluation t)))
 

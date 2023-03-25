@@ -44,11 +44,13 @@
   ;; Valid syntax
   '(#2=(#3=foo)
     (:application
-     ((:function-name . 1) (((:function-name () :name foo :source #3#))))
+     ((:function-name . 1) (((:function-name () :name foo :source #3#)
+                             :evaluation (:reference :namespace function))))
      :source #2#))
   '(#4=(#5=foo #6=1)
     (:application
-     ((:function-name . 1) (((:function-name () :name foo :source #5#)))
+     ((:function-name . 1) (((:function-name () :name foo :source #5#)
+                             :evaluation (:reference :namespace function)))
       (:argument      . *) (((:unparsed () :expression 1 :context :form :source #6#)
                              :evaluation t)))
      :source #4#))

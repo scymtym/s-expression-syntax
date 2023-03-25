@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Tests for protocol default behavior.
 ;;;;
-;;;; Copyright (C) 2022 Jan Moringen
+;;;; Copyright (C) 2022, 2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -30,42 +30,44 @@
 
 (test parse.auto-classify
   "Test automatic expression classification in `parse' calls."
-  (is (equal '(:self-evaluating
-               ((:value . 1) (((:unparsed
-                                ()
-                                :expression 1
-                                :context    :self-evaluating
-                                :source     1))))
-               :source 1)
-             (syn:parse 'list t '1)))
-  (is (equal '(:application
-               ((:function-name . 1) (((:function-name
-                                        ()
-                                        :name list :source list)))
-                (:argument      . *) (((:unparsed
-                                        ()
-                                        :expression 1 :context :form :source 1)
-                                       :evaluation t)))
-               :source (list 1))
-             (syn:parse 'list t '(list 1)))))
+  (is (ast-equal '(:self-evaluating
+                   ((:value . 1) (((:unparsed
+                                    ()
+                                    :expression 1
+                                    :context    :self-evaluating
+                                    :source     1))))
+                   :source 1)
+                 (syn:parse 'list t '1)))
+  (is (ast-equal '(:application
+                   ((:function-name . 1) (((:function-name
+                                            ()
+                                            :name list :source list)
+                                           :evaluation (:reference :namespace function)))
+                    (:argument      . *) (((:unparsed
+                                            ()
+                                            :expression 1 :context :form :source 1)
+                                           :evaluation t)))
+                   :source (list 1))
+                 (syn:parse 'list t '(list 1)))))
 
 (test parse.syntax-description-name
   "Test designating syntax descriptions by name in `parse' calls."
-  (is (equal '(:self-evaluating
-               ((:value . 1) (((:unparsed
-                                ()
-                                :expression 1
-                                :context    :self-evaluating
-                                :source     1))))
-               :source 1)
-             (syn:parse 'list 'syn::self-evaluating '1)))
-  (is (equal '(:application
-               ((:function-name . 1) (((:function-name
-                                        ()
-                                        :name list :source list)))
-                (:argument      . *) (((:unparsed
-                                        ()
-                                        :expression 1 :context :form :source 1)
-                                       :evaluation t)))
-               :source (list 1))
-             (syn:parse 'list 'syn::application '(list 1)))))
+  (is (ast-equal '(:self-evaluating
+                   ((:value . 1) (((:unparsed
+                                    ()
+                                    :expression 1
+                                    :context    :self-evaluating
+                                    :source     1))))
+                   :source 1)
+                 (syn:parse 'list 'syn::self-evaluating '1)))
+  (is (ast-equal '(:application
+                   ((:function-name . 1) (((:function-name
+                                            ()
+                                            :name list :source list)
+                                           :evaluation (:reference :namespace function)))
+                    (:argument      . *) (((:unparsed
+                                            ()
+                                            :expression 1 :context :form :source 1)
+                                           :evaluation t)))
+                   :source (list 1))
+                 (syn:parse 'list 'syn::application '(list 1)))))
