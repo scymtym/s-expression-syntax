@@ -124,7 +124,8 @@
                            (must (<- lambda (lambda-expression))
                                  "must be a function name or lambda expression")))
                  "nothing may follow function name or lambda expression"))
-  ((name   ? :evaluation nil)
+  ((name   ? :evaluation (make-instance 'reference-semantics
+                                        :namespace 'function))
    (lambda ? :evaluation :compound)))
 
 ;;; This handles the `lambda' macro by accepting a `lambda-expression'

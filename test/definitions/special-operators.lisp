@@ -338,11 +338,13 @@
   ;; valid syntax
   '(#3=(function #4=foo)
     (:function
-     ((:name . 1) (((:function-name () :name foo :source #4#))))
+     ((:name . 1) (((:function-name () :name foo :source #4#)
+                    :evaluation (:reference :namespace function))))
      :source #3#))
   '(#5=(function #6=(setf foo))
     (:function
-     ((:name . 1) (((:function-name () :name (setf foo) :source #6#))))
+     ((:name . 1) (((:function-name () :name (setf foo) :source #6#)
+                    :evaluation (:reference :namespace function))))
      :source #5#))
   '(#7=(function #8=(lambda #9=()))
     (:function
