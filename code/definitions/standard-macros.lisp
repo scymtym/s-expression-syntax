@@ -201,6 +201,14 @@
   (must (default-initarg)
         "default initarg must be a symbol followed by a form"))
 
+(defrule class-option ()
+    (value (source)
+      (list* (<- name  ((option-name! names)))
+             (<- value ((unparsed-expression forms) ':non-standard-defclass-option))))
+  (bp:node* (:class-option :source source)
+    (1 (:name  . 1) name)
+    (1 (:value . 1) value)))
+
 (define-macro defclass
     (list (<- name ((class-name! names)))
           (<- superclass (superclasses))
@@ -211,8 +219,7 @@
                                                     "metaclass must be a class name"))
                  (eg:option :documentation    (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
-                 (list* (<<- option-name  ((option-name! names)))
-                        (<<- option-value ((unparsed-expression forms) ':non-standard-defclass-option))))))
+                 (<<- option (class-option)))))
   ((name            1)
    (superclass      *>)
    (slot            *  :evaluation :compound)
@@ -221,8 +228,7 @@
    (metaclass       ?)
    (documentation   ?)
    ;; Non-standard options
-   (option-name     *)
-   (option-value    *)))
+   (option          *)))
 
 (define-syntax condition-slot-specifier
     (or (and (not (list* :any)) (<- name ((slot-name! names))))

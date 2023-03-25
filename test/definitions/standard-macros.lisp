@@ -354,7 +354,7 @@
          (:documentation #22="foo")
          (:default-initargs
           #23=:bar #24=1)
-         (#25=:my-class-option . #26=(1)))
+         #25=(#26=:my-class-option . #27=(1)))
     (:defclass
      ((:name             . 1) (((:type-name () :name foo :source #13#)))
       (:superclass       . *) (((:type-name () :name bar :source #14#))
@@ -388,12 +388,17 @@
                                 :evaluation :compound))
       (:metaclass        . 1) (((:type-name () :name foo :source #21#)))
       (:documentation    . 1) (((:documentation () :string "foo" :source #22#)))
-      (:option-name      . *) (((:option-name () :name :my-class-option :source #25#)))
-      (:option-value     . *) (((:unparsed
-                                 ()
-                                 :expression (1)
-                                 :context    :non-standard-defclass-option
-                                 :source     #26#))))
+      (:option           . *) (((:class-option
+                                 ((:name  . 1) (((:option-name
+                                                  ()
+                                                  :name   :my-class-option
+                                                  :source #26#)))
+                                  (:value . 1) (((:unparsed
+                                                  ()
+                                                  :expression (1)
+                                                  :context    :non-standard-defclass-option
+                                                  :source     #27#))))
+                                 :source #25#))))
      :source #12#)))
 
 (define-macro-test (deftype)
