@@ -1,6 +1,6 @@
 ;;;; semantics.lisp --- Semantics supported by the syntax system.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,8 +15,8 @@
 (defmethod print-items:print-items append ((object namespace-mixin))
   `((:namespace "~A" ,(namespace object))))
 
-(defclass binding-semantics (namespace-mixin
-                             print-items:print-items-mixin)
+(defclass binding-semantics (print-items:print-items-mixin
+                             namespace-mixin)
   ((%scope  :initarg  :scope
             :reader   scope)
    ;; TODO extent
@@ -29,9 +29,10 @@
    :scope  (missing-required-initarg 'binding-semantics :scope)
    :values (missing-required-initarg 'binding-semantics :values)))
 
-(defclass assignment-semantics (namespace-mixin
-                                print-items:print-items-mixin)
+(defclass assignment-semantics (print-items:print-items-mixin
+                                namespace-mixin)
   ())
 
-(defclass reference-semantics (namespace-mixin)
+(defclass reference-semantics (print-items:print-items-mixin
+                               namespace-mixin)
   ())
