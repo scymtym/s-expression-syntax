@@ -687,13 +687,13 @@
 ;;; `cond'
 
 (define-syntax cond-clause
-    (list* (<- test-form ((form! forms))) (<- forms ((forms forms))))
+    (list* (<- test-form ((form! forms))) (<- form ((forms forms))))
   ((test-form 1  :evaluation t)
-   (forms     *> :evaluation t)))
+   (form      *> :evaluation t)))
 
 (defrule cond-clause! ()
   (must (cond-clause) "must be a clause of the form (TEST-FORM FORM*)"))
 
 (define-macro cond
-    (list (* (<<- clauses (cond-clause!))))
-  ((clauses * :evaluation :compound)))
+    (list (* (<<- clause (cond-clause!))))
+  ((clause * :evaluation :compound)))
