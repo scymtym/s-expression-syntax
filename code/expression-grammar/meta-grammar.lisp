@@ -1,6 +1,6 @@
 ;;;; meta-grammar.lisp --- Meta grammar used by the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2020-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,6 +18,20 @@
   (a:with-unique-names (context-var)
     `(parser.packrat:defrule ,name (,context-var)
        (:compose ,expression (base::expression ,context-var)))))
+
+;;; Force element context
+;;;
+;;; Force a sub-expression of a sequence context to use the element
+;;; context.
+
+(define-macro-rule element ()
+  ;; Transform into a GUARD expression with a predicate that is always
+  ;; true. The presence of the GUARD expression forces the element
+  ;; context for EXPRESSION. Later, when compiling, the %ALWAYS-TRUE
+  ;; predicate is recognized and no code is emitted for the predicate
+  ;; call.
+  (:transform (list 'element expression)
+    `(guard ,expression (%always-true))))
 
 ;;; Once
 ;;;
@@ -88,7 +102,9 @@
     (emit-property-option-expression name value :repeat? t)))
 
 (parser.packrat:defrule base::expression (context)
-  (or (once context)
+  (or (element context)
+
+      (once context)
 
       (option context)  (option* context)
       (poption context) (poption* context)

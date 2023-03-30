@@ -75,6 +75,16 @@
   (define-method equal %equal)
   (define-method eql   %eql))
 
+(defmethod base::compile-test ((grammar      expression-grammar)
+                               (environment  t)
+                               (expression   t)
+                               (predicate    (eql '%always-true))
+                               (value        t)
+                               (arguments    t)
+                               (success-cont function)
+                               (failure-cont function))
+  (funcall success-cont environment))
+
 ;;; Sequence expression compilation
 
 (defmethod c:compile-expression ((grammar      expression-grammar)

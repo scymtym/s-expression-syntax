@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2019, 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2019-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -52,6 +52,8 @@
 
   ;; Grammar rule macros
   (:export
+   #:element
+
    #:once
 
    #:option  #:option*
