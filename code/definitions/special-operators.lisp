@@ -119,7 +119,7 @@
 (define-special-operator (lambda-expression :operator lambda)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
-  ((lambda-list   1  :evaluation :compound) ; TODO binding
+  ((lambda-list   1  :evaluation :compound)
    (documentation ?)
    (declaration   *>)
    (form          *> :evaluation t)))

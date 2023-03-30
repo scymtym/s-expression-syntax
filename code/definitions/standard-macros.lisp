@@ -450,11 +450,7 @@
    (documentation                  ?)
    (use                            *) ; TODO cannot distinguish empty option, i.e. (:use), from absent
    (shadow                         *)
-   ;; (shadowing-import-from-packages *)
-   ;; (shadowing-import-from-names    *)
    (shadowing-import-from          *)
-   ;; (import-from-packages           *)
-   ;; (import-from-names              *)
    (import-from                    *)
    (export                         *)
    (intern                         *)
