@@ -1,12 +1,12 @@
 ;;;; grammar.lisp --- Grammar class, compilation rules for the expression-grammar module.
 ;;;;
-;;;; Copyright (C) 2020, 2021 Jan Moringen
+;;;; Copyright (C) 2020-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:s-expression-syntax.expression-grammar)
 
-;;; grammar
+;;; Grammar
 
 (defclass expression-grammar (sexp::sexp-grammar)
   ()
@@ -14,7 +14,7 @@
    :meta-grammar    'meta-grammar
    :meta-start-rule 'base::expression))
 
-;;; environment
+;;; Environment
 
 (defclass expression-environment (; env:environment
                                   seq::list-environment ; TODO hack
@@ -26,7 +26,6 @@
 (env:define-state-methods expression-environment
   (seq::tail)
   ())
-
 
 ;;; Base expression compilation
 
