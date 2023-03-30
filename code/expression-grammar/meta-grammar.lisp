@@ -13,25 +13,30 @@
 
 (parser.packrat:in-grammar meta-grammar)
 
+(defmacro define-macro-rule (name ()
+                             expression)
+  (a:with-unique-names (context-var)
+    `(parser.packrat:defrule ,name (,context-var)
+       (:compose ,expression (base::expression ,context-var)))))
+
 ;;; Once
 ;;;
 ;;; Make sure an expression (or one expression in a group of
 ;;; expressions) only matches once.
 
-(parser.packrat:defrule once (context)  ; TODO define-macro-rule
-    (:compose (:transform (list* 'once (must (list expression (* (or (seq:seq :name name)
-                                                                     (seq:seq :flag flag))))
-                                             "must be of the form EXPRESSION {:name NAME|:flag FLAG}"))
-                (let ((result  (gensym "RESULT"))
-                      (flag    (or flag (gensym)))
-                      (message (format nil "~A must not be repeated"
-                                       (or name expression))))
-                  `(:compose (<- ,flag (:transform (<- ,result ,expression)
-                                         (when ,flag
-                                           (:fatal ,message))
-                                         t))
-                             (:transform :any ,result))))
-              (base::expression context)))
+(define-macro-rule once ()
+  (:transform (list* 'once (must (list expression (* (or (seq:seq :name name)
+                                                         (seq:seq :flag flag))))
+                                 "must be of the form EXPRESSION {:name NAME|:flag FLAG}"))
+    (let ((result  (gensym "RESULT"))
+          (flag    (or flag (gensym)))
+          (message (format nil "~A must not be repeated"
+                           (or name expression))))
+      `(:compose (<- ,flag (:transform (<- ,result ,expression)
+                             (when ,flag
+                               (:fatal ,message))
+                             t))
+                 (:transform :any ,result)))))
 
 ;;; List-shaped options
 
@@ -46,25 +51,21 @@
                                 `(once ',name :name ,name*)))))
     `(list* ,name-expression (must (list ,@(reverse values)) ,message))))
 
-(parser.packrat:defrule option (context)
+(define-macro-rule option ()
     ;; Transform (option NAME PARAMETER₁ … PARAMETERₖ) into an
     ;; expression that produces a parse error unless exactly K
     ;; arguments are supplied to the option. However, as a
     ;; hack/exception, expressions of the form (* …) do not count
     ;; towards the required number of arguments.
-    (:compose
-     (:transform (list 'option name (* (and (seq:? (<<- repeated (list* '* :any)))
-                                            (<<- values))))
-       (emit-list-option-expression name values repeated))
-     (base::expression context)))
+  (:transform (list 'option name (* (and (seq:? (<<- repeated (list* '* :any)))
+                                         (<<- values))))
+    (emit-list-option-expression name values repeated)))
 
-(parser.packrat:defrule option* (context)
+(define-macro-rule option* ()
   ;; Like `option' but allow repeated occurrences
-  (:compose
-   (:transform (list 'option* name (* (and (seq:? (<<- repeated (list* '* :any)))
-                                           (<<- values))))
-     (emit-list-option-expression name values repeated :repeat? t))
-   (base::expression context)))
+  (:transform (list 'option* name (* (and (seq:? (<<- repeated (list* '* :any)))
+                                          (<<- values))))
+    (emit-list-option-expression name values repeated :repeat? t)))
 
 ;;; Property-shaped options
 
@@ -75,20 +76,16 @@
                                `(once ',name :name ,name*)))))
     `(seq:seq ,name-expression ,value)))
 
-(parser.packrat:defrule poption (context)
+(define-macro-rule poption ()
   ;; Transform (poption NAME PARAMETER) into an expression that
   ;; matches the option.
-  (:compose
-   (:transform (list 'poption name value)
-     (emit-property-option-expression name value))
-   (base::expression context)))
+  (:transform (list 'poption name value)
+    (emit-property-option-expression name value)))
 
-(parser.packrat:defrule poption* (context)
+(define-macro-rule poption* ()
   ;; Like `poption' but allow repeated occurrences
-  (:compose
-   (:transform (list 'poption* name value)
-     (emit-property-option-expression name value :repeat? t))
-   (base::expression context)))
+  (:transform (list 'poption* name value)
+    (emit-property-option-expression name value :repeat? t)))
 
 (parser.packrat:defrule base::expression (context)
   (or (once context)
