@@ -597,8 +597,8 @@
   ((form * :evaluation t)))
 
 (defrule case-clauses ()
-    (list (* (guard ; HACK guard forces the value context
-              (<<- clauses
+    (list (* (<<- clauses
+                  (eg:element
                    (or (eg:once (case-otherwise-clause)
                                 :flag otherwise? :name "otherwise clause")
                        (:transform (<- clause (case-normal-clause 'nil))
@@ -606,8 +606,7 @@
                            (:fatal "normal clause must not follow otherwise clause"))
                          clause)
                        (:transform :any
-                         (:fatal "must be a clause of one of the forms (KEY-OR-KEYS FORM*), (otherwise FORM*) or (t FORM*)"))))
-              (typep 't))))
+                         (:fatal "must be a clause of one of the forms (KEY-OR-KEYS FORM*), (otherwise FORM*) or (t FORM*)")))))))
   (nreverse clauses))
 
 (define-macro case
@@ -630,12 +629,11 @@
 ;;; `[ec]typecase'
 
 (define-syntax typecase-normal-clause
-    (list (or (guard ; HACK guard forces the value context
+    (list (or (eg:element
                (or (:transform 'otherwise
                      (:fatal "CL:OTHERWISE does not name a type"))
                    (:transform (list* 'otherwise :any)
-                     (:fatal "CL:OTHERWISE does not name a compound type")))
-               (typep 't))
+                     (:fatal "CL:OTHERWISE does not name a compound type"))))
               (<- type ((type-specifier! type-specifiers))))
           (* (<<- form ((form! forms)))))
   ((type 1)
@@ -650,8 +648,8 @@
   ((form * :evaluation t)))
 
 (defrule typecase-clauses ()
-    (list (* (guard ; HACK guard forces the value context
-              (<<- clauses
+    (list (* (<<- clauses
+                  (eg:element
                    (or (eg:once (typecase-otherwise-clause)
                                 :flag otherwise? :name "otherwise clause")
                        (:transform (<- clause (typecase-normal-clause))
@@ -659,8 +657,7 @@
                            (:fatal "normal clause must not follow otherwise clause"))
                          clause)
                        (:transform :any
-                         (:fatal "must be a clause of the form (TYPE FORM*) or (otherwise FORM*)"))))
-              (typep 't))))
+                         (:fatal "must be a clause of the form (TYPE FORM*) or (otherwise FORM*)")))))))
   (nreverse clauses))
 
 (define-macro typecase
