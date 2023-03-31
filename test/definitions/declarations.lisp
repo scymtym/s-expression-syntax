@@ -45,4 +45,15 @@
       t #15# (:declaration-specifier
              ((:argument . *) (((:variable-name () :name a :source #16#))
                                ((:function-name () :name b :source #17#))))
-             :kind ignore :source #15#))))
+             :kind ignore :source #15#))
+    ;; `declaration' declaration
+    '((declaration #18=1)
+      :fatal #18# "declaration identifier must be a symbol")
+    '(#19=(declaration)
+      t #19# (:declaration-specifier () :kind declaration :source #19#))
+    '(#20=(declaration #21=my-declaration)
+      t #20# (:declaration-specifier
+               ((:argument . *) (((:declaration-identifier
+                                   ()
+                                   :name my-declaration :source #21#))))
+               :kind declaration :source #20#))))
