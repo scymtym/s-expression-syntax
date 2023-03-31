@@ -1,6 +1,6 @@
 ;;;; declarations.lisp --- Rules for parsing declarations.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,45 +19,45 @@
     (list (* (<<- arguments)))
   arguments #+later (bp:node* (:declaration-arguments :arguments arguments)))
 
-(defrule declaration () ; TODO rename to declaration-specifier
+(defrule declaration-specifier ()
     (value (source)
-      (or (list (<- kind (or 'ignore 'ignorable 'dynamic-extent))
+      (or (list (<- identifier (or 'ignore 'ignorable 'dynamic-extent))
                 (* (<<- arguments (bound-declaration-reference!))))
 
-          (list (<- kind 'special)
+          (list (<- identifier 'special)
                 (* (<<- arguments ((variable-name! names)))))
 
-          (list (<- kind 'type)
+          (list (<- identifier 'type)
                 (<<- arguments ((type-specifier! type-specifiers)))
                 (* (<<- arguments ((variable-name! names)))))
 
-          (list (<- kind 'ftype)
+          (list (<- identifier 'ftype)
                 (<<- arguments ((function-type-specifier! type-specifiers)))
                 (* (<<- arguments ((function-name! names)))))
 
-          (list (<- kind (or 'inline 'notinline))
+          (list (<- identifier (or 'inline 'notinline))
                 (* (<<- arguments ((function-name! names)))))
 
-          (list (<- kind 'optimize)
+          (list (<- identifier 'optimize)
                 (* (<<- arguments (optimization-specification!))))
 
-          (list (<- kind 'declaration)
+          (list (<- identifier 'declaration)
                 (* (<<- arguments ((declaration-identifier! names)))))
 
-          (list* (<- kind ((declaration-identifier! names)))
+          (list* (<- identifier ((declaration-identifier! names)))
                  (<- arguments (declaration-arguments)))))
-  (let ((kind (eg::%naturalize kind)))
-    (bp:node* (:declaration :kind kind :source source)
+  (let ((identifier (eg::%naturalize identifier)))
+    (bp:node* (:declaration-specifier :kind identifier :source source)
       (* (:argument . *) (nreverse arguments)))))
 
-(defrule declaration! ()
-    (must (declaration) "must be a declaration"))
+(defrule declaration-specifier! ()
+  (must (declaration-specifier) "must be a declaration specifier"))
 
 ;;; Standard declarations
 
 (defrule bound-declaration-reference! ()
   (must (or (variable-name) (function-reference))
-         "must be a variable name or function name"))
+        "must be a variable name or function name"))
 
 (defrule optimization-specification ()
     (value (source)

@@ -9,14 +9,14 @@
 (def-suite* :s-expression-syntax.declarations
   :in :s-expression-syntax)
 
-(test declaration
-  "Smoke test for the `declaration' rule."
-  (rule-test-cases ((declaration syn::special-operators))
+(test declaration-specifier
+  "Smoke test for the `declaration-specifier' rule."
+  (rule-test-cases ((syn::declaration-specifier syn::special-operators))
     '((#1=1) :fatal #1# "declaration identifier must be a symbol")
     ;; `type' declaration
     '((type #2=1 a) :fatal #2# "must be a type specifier")
     '(#3=(type #4=bit #5=a)
-      t #3# (:declaration
+      t #3# (:declaration-specifier
              ((:argument . *) (((:atomic-type-specifier
                                  ((:name . 1) (((:type-name () :name bit :source #4#))))
                                  :source #4#))
@@ -26,7 +26,7 @@
     '((optimize #6=1)         :fatal #6# "must be a quality name or a list (QUALITY {0,1,2,3})")
     '((optimize (speed #7=5)) :fatal #7# "must be an optimization value, that is 0, 1, 2 or 3")
     '(#8=(optimize #9=speed #10=debug)
-      t #8# (:declaration
+      t #8# (:declaration-specifier
              ((:argument . *) (((:optimization-specification
                                  ()
                                  :quality #9# :value nil :source #9#))
@@ -35,14 +35,14 @@
                                  :quality #10# :value nil :source #10#))))
              :kind optimize :source #8#))
     '(#11=(optimize #12=(#13=speed #14=1))
-      t #9# (:declaration
+      t #9# (:declaration-specifier
              ((:argument . *) (((:optimization-specification
                                  ()
                                  :quality #13# :value #14# :source #12#))))
              :kind optimize :source #11#))
     ;; `ignore' declaration
     '(#15=(ignore #16=a (function #17=b))
-      t #15# (:declaration
+      t #15# (:declaration-specifier
              ((:argument . *) (((:variable-name () :name a :source #16#))
                                ((:function-name () :name b :source #17#))))
              :kind ignore :source #15#))))

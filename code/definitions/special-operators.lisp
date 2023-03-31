@@ -205,7 +205,7 @@
 ;;; Special operators `declaim' and `the'
 
 (define-special-operator declaim
-    (list (* (<<- declaration (declaration!)))) ; TODO only free declarations
+    (list (* (<<- declaration (declaration-specifier!)))) ; TODO only free declarations
   ((declaration *> :evaluation nil)))
 
 (define-special-operator the

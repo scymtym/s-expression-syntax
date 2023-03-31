@@ -428,7 +428,7 @@
                                                 :evaluation t)))
                             :source #10#)
                            :evaluation :compound))
-      (:declaration . *) (((:declaration
+      (:declaration . *) (((:declaration-specifier
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()
@@ -493,7 +493,7 @@
                                             :evaluation t)))
                             :source #12#)
                            :evaluation :compound))
-      (:declaration . *) (((:declaration
+      (:declaration . *) (((:declaration-specifier
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()
@@ -562,7 +562,7 @@
                                             :evaluation t)))
                             :source #12#)
                            :evaluation :compound))
-      (:declaration . *) (((:declaration
+      (:declaration . *) (((:declaration-specifier
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()
@@ -582,7 +582,7 @@
     (:locally () :source #1#))
   '(#2=(locally (declare #3=(type #4=bit #5=a)))
     (:locally
-     ((:declaration . *) (((:declaration
+     ((:declaration . *) (((:declaration-specifier
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name () :name bit :source #4#))))
                                                 :source #4#))
@@ -596,7 +596,7 @@
      :source #6#))
   '(#8=(locally (declare #9=(type #10=bit #11=a)) #12=b)
     (:locally
-     ((:declaration . *) (((:declaration
+     ((:declaration . *) (((:declaration-specifier
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name () :name bit :source #10#))))
                                                 :source #10#))
@@ -754,7 +754,7 @@
                                                                   :evaluation :compound)))
                                                :source #13#)
                                               :evaluation :compound))
-                         (:declaration . *) (((:declaration
+                         (:declaration . *) (((:declaration-specifier
                                                ((:argument . *) (((:atomic-type-specifier
                                                                    ((:name . 1) (((:type-name
                                                                                    ()
@@ -841,7 +841,7 @@
                                                ()
                                                :source #19#)
                                               :evaluation :compound))
-                         (:declaration . *) (((:declaration
+                         (:declaration . *) (((:declaration-specifier
                                                ((:argument . *) (((:atomic-type-specifier
                                                                    ((:name . 1) (((:type-name
                                                                                    ()
@@ -931,7 +931,7 @@
                                                ()
                                                :source #19#)
                                               :evaluation :compound))
-                         (:declaration . *) (((:declaration
+                         (:declaration . *) (((:declaration-specifier
                                                ((:argument . *) (((:atomic-type-specifier
                                                                    ((:name . 1) (((:type-name
                                                                                    ()
@@ -967,13 +967,13 @@
 (define-syntax-test (declaim)
   ;; Invalid syntax
   '((declaim #1=1)
-    syn:invalid-syntax-error #1# "must be a declaration")
+    syn:invalid-syntax-error #1# "must be a declaration specifier")
   ;; Valid syntax
   '(#2=(declaim)
     (:declaim () :source #2#))
   '(#3=(declaim #4=(type #5=bit #6=a))
     (:declaim
-     ((:declaration . *) (((:declaration
+     ((:declaration . *) (((:declaration-specifier
                             ((:argument . *) (((:atomic-type-specifier
                                                 ((:name . 1) (((:type-name
                                                                 ()

@@ -350,7 +350,7 @@
                              (* (<<- method-combination-argument)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
                  (eg:option* declare                    (and (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
-                                                             (<<- declarations ((declaration! declarations)))))
+                                                             (<<- declarations ((declaration-specifier! declarations)))))
                  (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
                  (<<- method (method-description))
                  ;; Non-standard options are basically free-form

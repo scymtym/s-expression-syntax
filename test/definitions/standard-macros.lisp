@@ -98,7 +98,7 @@
   #+TODO '((defun foo ((a b)))
            syn:invalid-syntax-error) ; this should fail but doesn't because of the way grammars use each other
   '((defun foo () (declare #4=1))
-    syn:invalid-syntax-error #4# "must be a declaration")
+    syn:invalid-syntax-error #4# "must be a declaration specifier")
   ;; Valid syntax
   '(#5=(defun #6=foo #7=(#8=bar #9=baz)
          #10="bla"
@@ -122,7 +122,7 @@
                               :source #7#)
                              :evaluation :compound))
       (:documentation . 1) (((:documentation () :string "bla" :source #10#)))
-      (:declaration   . *) (((:declaration
+      (:declaration   . *) (((:declaration-specifier
                               ((:argument . *) (((:atomic-type-specifier
                                                   ((:name . 1) (((:type-name
                                                                   ()
@@ -171,7 +171,7 @@
                               :source #6#)
                              :evaluation :compound))
       (:documentation . 1) (((:documentation () :string "bla" :source #9#)))
-      (:declaration   . *) (((:declaration
+      (:declaration   . *) (((:declaration-specifier
                               ((:argument . *) (((:variable-name () :name a :source #11#))))
                               :kind ignore :source #10#)))
       (:form          . *) (((:unparsed
@@ -437,10 +437,10 @@
                               :source #8#)
                              :evaluation :compound))
       (:documentation . 1) (((:documentation () :string "bla bli" :source #11#)))
-      (:declaration   . *) (((:declaration
+      (:declaration   . *) (((:declaration-specifier
                               ((:argument . *) (((:variable-name () :name a :source #13#))))
                               :kind ignore :source #12#))
-                            ((:declaration
+                            ((:declaration-specifier
                               ((:argument . *) (((:variable-name () :name b :source #15#))))
                               :kind ignore :source #14#)))
       (:form          . *) (((:unparsed
@@ -648,7 +648,7 @@
      ((:name          . 1) (((:function-name () :name foo :source #27#)))
       (:lambda-list   . 1) (((:specialized-lambda-list () :source #28#)))
       (:documentation . 1) (((:documentation () :string #29# :source #29#)))
-      (:declaration   . *) (((:declaration () :kind ignore :source #30#)))
+      (:declaration   . *) (((:declaration-specifier () :kind ignore :source #30#)))
       (:form          . *) (((:unparsed
                               ()
                               :expression #31# :context :form :source #31#)

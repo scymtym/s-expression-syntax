@@ -32,7 +32,7 @@
 ;;; Forms
 
 #+later (parser:defrule declaration ()
-    (list 'declare (* (<<- declarations #+maybe ((declaration declarations)))))
+    (list 'declare (* (<<- declarations #+maybe ((declaration-specifier declarations)))))
   (nreverse declarations))
 
 (defrule form ()
@@ -73,7 +73,9 @@
         (:fatal "place must be a cons or a variable name"))))
 
 (defrule body ()
-    (list* (* (list 'declare (* (<<- declarations ((declaration! declarations))))))
+    (list* (* (list 'declare
+                    (* (<<- declarations
+                            ((declaration-specifier! declarations))))))
            (<- forms (forms)))
   (list (nreverse declarations) forms))
 
