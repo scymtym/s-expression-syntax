@@ -60,17 +60,11 @@
 
 ;;; `defstruct' including slots
 
-(defrule slot-read-only ()
-    (value (source) value)
-  (bp:node* (:unparsed :expression value
-                       :context    :slot-read-only
-                       :source     source)))
-
 (define-syntax slot-description
     (or (and (list* :any)
              (must (list (<- name ((variable-name! names)))
                          (? (seq (<- initform ((form! forms)))
-                                 (* (or (eg:poption :read-only (<- read-only (slot-read-only)))
+                                 (* (or (eg:poption :read-only (<- read-only ((unparsed-expression forms) ':slot-read-only)))
                                         (eg:poption :type      (<- type ((type-specifier! type-specifiers)))))))))
                    "must be of the form (NAME [INITFORM] ...)"))
         (<- name ((variable-name! names))))
