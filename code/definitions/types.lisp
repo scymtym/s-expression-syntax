@@ -22,21 +22,19 @@
 (defrule compound-type-specifier (must?)
     (value (source)
       (list (or (and (:transform :any (unless must? (:fail)))
-                     (<- name ((class-name! names))))
-                (<- name ((class-name names))))
+                     (<- name ((type-name! names))))
+                (<- name ((type-name names))))
             (* (<<- arguments (or (%type-specifier 'nil)
-                                  (subsidiary-item)
-                                  )))))
+                                  (subsidiary-item))))))
   (bp:node* (:compound-type-specifier :source source)
     (1 (:name     . 1) name)
     (* (:argument . *) (nreverse arguments))))
 
 (defrule atomic-type-specifier ()
     (value (source)
-      (guard name (typep 'symbol))) ; TODO control whether * is allowed, use class-name or type-name from names grammar
-  (let ((name (eg::%naturalize name)))
-    (bp:node* (:atomic-type-specifier :source source)
-      (1 (:name . 1) (bp:node* (:type-name :name name :source source))))))
+      (<- name ((type-name names)))) ; TODO control whether * is allowed
+  (bp:node* (:atomic-type-specifier :source source)
+    (1 (:name . 1) name)))
 
 ;;; Well-known compound specifiers
 
