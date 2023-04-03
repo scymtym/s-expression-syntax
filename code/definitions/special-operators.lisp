@@ -104,7 +104,7 @@
   (bp:node* (:unparsed :expression value :source source)))
 
 (defrule read-only-p! ()
-  (must (<- read-only-p (read-only-p))
+  (must (read-only-p)
         "READ-ONLY-P must be either T or NIL, not a generalized boolean"))
 
 (define-special-operator load-time-value
