@@ -138,6 +138,7 @@
                             :class 'env:value-environment
                             :state '())))
     `(let ((,tail-var ,(tail environment)))
+       (declare (ignorable ,tail-var))
        ,(c:compile-expression
          grammar rest-environment (exp:sub-expression expression)
          (lambda (new-environment)
@@ -156,12 +157,13 @@
                                  (expression   seq::bounds-test-expression)
                                  (success-cont function)
                                  (failure-cont function))
-  `(if (and (%listp ,(tail environment)) ; TODO consp?
-            (not (%null ,(tail environment))))
-       ,(c:compile-expression
-         grammar environment (exp:sub-expression expression)
-         success-cont failure-cont)
-       ,(funcall failure-cont environment)))
+  (let ((tail (tail environment)))
+    `(if (and (%listp ,tail) ; TODO consp?
+              (not (%null ,tail)))
+         ,(c:compile-expression
+           grammar environment (exp:sub-expression expression)
+           success-cont failure-cont)
+         ,(funcall failure-cont environment))))
 
 (defmethod c:compile-expression ((grammar      t)
                                  (environment  expression-environment)
@@ -172,7 +174,8 @@
          (new-environment (env:environment-at environment (list :value element)
                                               :class 'env:value-environment
                                               :state '())))
-    `(let* ((,element (%first ,(tail environment))))
+    `(let ((,element (%first ,(tail environment))))
+       (declare (ignorable ,element))
        ,(c:compile-expression
          grammar new-environment (exp:sub-expression expression)
          success-cont failure-cont))))
@@ -194,6 +197,7 @@
               (new-tail        (tail new-environment)))
          `(let ((,new-tail ,(ecase amount
                               (1 `(%rest ,tail)))))
+            (declare (ignorable ,new-tail))
             ,(funcall success-cont new-environment))))
      failure-cont)))
 
