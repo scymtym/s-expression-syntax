@@ -339,9 +339,8 @@
                                 (:fatal (format nil "~S must match the set of required parameters ~S"
                                                 order-names required-names))))
                             (nreverse names))))
-                 (eg:option  :method-combination        (<- method-combination (must (guard (typep 'symbol))
-                                                                                     "method combination name must be a symbol"))
-                             (* (<<- method-combination-argument)))
+                 (eg:option  :method-combination        (<- method-combination ((method-combination-name! names)))
+                                                        (* (<<- method-combination-argument)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
                  (eg:option* declare                    (and (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
                                                              (<<- declarations ((declaration-specifier! declarations)))))

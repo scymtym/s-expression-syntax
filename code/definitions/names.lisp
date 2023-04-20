@@ -76,6 +76,8 @@
 (defrule function-name! ()
   (must (function-name) "must be a function name"))
 
+;;; Type and class names
+
 (defrule type-name ()
     (value (source)
       (guard name (typep 'symbol)))
@@ -115,6 +117,16 @@
 
 (defrule option-name! ()
   (must (option-name) "option name must be a symbol"))
+
+;;; Method combination names
+
+(defrule method-combination-name ()
+    (value (source)
+      (guard name (typep 'symbol)))
+  (bp:node* (:method-combination-name :name (eg::%naturalize name) :source source)))
+
+(defrule method-combination-name! ()
+  (must (method-combination-name) "method combination name must be a symbol"))
 
 ;;; Declaration identifiers
 

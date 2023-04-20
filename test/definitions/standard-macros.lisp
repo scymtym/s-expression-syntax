@@ -575,7 +575,15 @@
                                                   :evaluation :compound)))
                             :source #30#)
                            :evaluation :compound)))
-     :source #26#)))
+     :source #26#))
+  '(#36=(defgeneric #37=foo #38=()
+           (:method-combination #39=progn))
+    (:defgeneric
+     ((:name               . 1) (((:function-name () :name foo :source #37#)))
+      (:lambda-list        . 1) (((:generic-function-lambda-list () :source #38#)
+                                  :evaluation :compound))
+      (:method-combination . 1) (((:method-combination-name () :name progn :source #39#))))
+     :source #36#)))
 
 (define-macro-test (defmethod)
   '((defmethod #1=1)
