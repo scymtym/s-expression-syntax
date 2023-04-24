@@ -324,18 +324,23 @@
     ;; Valid syntax
     '(#19=(#20=foo :initform #21=(+ 1) #22=:custom-option #23=:foo :reader #24=bar)
       t t (:slot-specifier
-           ((:name         . 1) (((:variable-name () :name foo :source #20#)))
-            (:reader       . *) (((:function-name () :name bar :source #24#)))
-            (:initform     . 1) (((:unparsed
-                                   ()
-                                   :expression #21# :context :form :source #21#)
-                                  :evaluation t))
-            (:option-name  . *) (((:option-name () :name :custom-option :source #22#)))
-            (:option-value . *) (((:unparsed
-                                   ()
-                                   :expression :foo
-                                   :context    :non-standard-slot-option
-                                   :source     #23#))))
+           ((:name     . 1) (((:variable-name () :name foo :source #20#)))
+            (:reader   . *) (((:function-name () :name bar :source #24#)))
+            (:initform . 1) (((:unparsed
+                               ()
+                               :expression #21# :context :form :source #21#)
+                              :evaluation t))
+            (:option  . *)  (((:slot-option
+                               ((:name  . 1) (((:option-name
+                                                ()
+                                                :name   :custom-option
+                                                :source #22#)))
+                                (:value . 1) (((:unparsed
+                                                ()
+                                                :expression :foo
+                                                :context    :non-standard-slot-option
+                                                :source     #23#))))
+                               :source #22#))))
            :source #19#))))
 
 (define-macro-test (defclass)
@@ -370,56 +375,59 @@
     syn:invalid-syntax-error #11# ":TYPE option must not be repeated")
   ;; Valid syntax
   '(#12=(defclass #13=foo (#14=bar #15=baz)
-         (#16=(#17=foo :initform #18=(+ 1) #19=:custom-option :foo :reader #20=bar))
-         (:metaclass #21=foo)
-         (:documentation #22="foo")
+         (#16=(#17=foo :initform #18=(+ 1) #19=:custom-option #20=:foo :reader #21=bar))
+         (:metaclass #22=foo)
+         (:documentation #23="foo")
          (:default-initargs
-          #23=:bar #24=1)
-         #25=(#26=:my-class-option . #27=(1)))
+          #24=:bar #25=1)
+         #26=(#27=:my-class-option . #28=(1)))
     (:defclass
      ((:name             . 1) (((:type-name () :name foo :source #13#)))
       (:superclass       . *) (((:type-name () :name bar :source #14#))
                                ((:type-name () :name baz :source #15#)))
       (:slot             . *) (((:slot-specifier
-                                 ((:name         . 1) (((:variable-name () :name foo :source #17#)))
-                                  (:reader       . *) (((:function-name () :name bar :source #20#)))
-                                  (:initform     . 1) (((:unparsed
+                                 ((:name     . 1) (((:variable-name () :name foo :source #17#)))
+                                  (:reader   . *) (((:function-name () :name bar :source #21#)))
+                                  (:initform . 1) (((:unparsed
                                                          ()
                                                          :expression #18# :context :form :source #18#)
                                                         :evaluation t))
-                                  (:option-name  . *) (((:option-name ()
-                                                         :name   :custom-option
-                                                         :source #19#)))
-                                  (:option-value . *) (((:unparsed
-                                                         ()
-                                                         :expression :foo
-                                                         :context    :non-standard-slot-option
-                                                         :source     :foo))))
+                                  (:option   . *) (((:slot-option
+                                                     ((:name  . 1) (((:option-name
+                                                                      ()
+                                                                      :name   :custom-option
+                                                                      :source #19#)))
+                                                      (:value . 1) (((:unparsed
+                                                                      ()
+                                                                      :expression :foo
+                                                                      :context    :non-standard-slot-option
+                                                                      :source     #20#))))
+                                                     :source #19#))))
                                  :source #16#)
                                 :evaluation :compound))
       (:default-initarg  . *) (((:default-initarg
                                  ((:name     . 1) (((:initarg-name
                                                      ()
-                                                     :name :bar :source #23#)))
+                                                     :name :bar :source #24#)))
                                   (:initform . 1) (((:unparsed
                                                      ()
-                                                     :expression 1 :context :form :source #24#)
+                                                     :expression 1 :context :form :source #25#)
                                                     :evaluation t)))
-                                 :source #23#)
+                                 :source #24#)
                                 :evaluation :compound))
-      (:metaclass        . 1) (((:type-name () :name foo :source #21#)))
-      (:documentation    . 1) (((:documentation () :string "foo" :source #22#)))
+      (:metaclass        . 1) (((:type-name () :name foo :source #22#)))
+      (:documentation    . 1) (((:documentation () :string "foo" :source #23#)))
       (:option           . *) (((:class-option
                                  ((:name  . 1) (((:option-name
                                                   ()
                                                   :name   :my-class-option
-                                                  :source #26#)))
+                                                  :source #27#)))
                                   (:value . 1) (((:unparsed
                                                   ()
                                                   :expression (1)
                                                   :context    :non-standard-defclass-option
-                                                  :source     #27#))))
-                                 :source #25#))))
+                                                  :source     #28#))))
+                                 :source #26#))))
      :source #12#)))
 
 (define-macro-test (deftype)

@@ -148,10 +148,17 @@
   (must (or :instance :class)
         "allocation must be :INSTANCE or :CLASS"))
 
-(defrule superclasses ()
-    (list (* (and :any (must (<<- superclasses ((class-name names)))
-                             "superclass must be a class name"))))
-  (nreverse superclasses))
+(defrule (slot-option :environment (make-instance 'eg::expression-environment)) ()
+    (value (source)
+      (seq (<- name  ((option-name! names)))
+           (<- value ((unparsed-expression forms) ':non-standard-slot-option))))
+  (bp:node* (:slot-option :source source)
+    (1 (:name  . 1) name)
+    (1 (:value . 1) value)))
+
+(defrule (slot-option! :environment (make-instance 'eg::expression-environment)) ()
+  (must (slot-option)
+        "slot option must be a symbol followed by an expression"))
 
 (define-syntax slot-specifier
     (or (list (must (<- name ((slot-name! names))) "slot must have a name")
@@ -166,8 +173,7 @@
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
-                     (seq (<<- option-name  (and :any ((option-name! names))))
-                          (<<- option-value ((unparsed-expression forms) ':non-standard-slot-option))))))
+                     (and :any (<<- option (slot-option!))))))
         (<- name ((slot-name! names))))
   ((name          1)
    ;; Options
@@ -180,8 +186,12 @@
    (type          ?)
    (documentation ?)
    ;; Non-standard options
-   (option-name   *)
-   (option-value  *)))
+   (option        *)))
+
+(defrule superclasses ()
+    (list (* (and :any (must (<<- superclasses ((class-name names)))
+                             "superclass must be a class name"))))
+  (nreverse superclasses))
 
 (defrule (default-initarg :environment (make-instance 'eg::expression-environment)) ()
     (value (source)
