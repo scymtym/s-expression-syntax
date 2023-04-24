@@ -430,6 +430,122 @@
                                  :source #26#))))
      :source #12#)))
 
+(define-syntax-test (syn::condition-slot-specifier)
+  ;; Invalid syntax
+  '(#1=1
+    syn:invalid-syntax-error #1# "slot name must be a symbol that is a valid variable name")
+  '(#2=()
+    syn:invalid-syntax-error #2# "slot must have a name")
+  '((#3=2)
+    syn:invalid-syntax-error #3# "slot name must be a symbol that is a valid variable name")
+  '((%foo #4=1)
+    syn:invalid-syntax-error #4# "option name must be a symbol")
+  '((%foo :reader #5=3)
+    syn:invalid-syntax-error #5# "reader must be a symbol function name")
+  '((%foo :writer #6=3)
+    syn:invalid-syntax-error #6# "writer must be an extended function name")
+  '((%foo :writer (setf #7=4))
+    syn:invalid-syntax-error #7# "second element of SETF function name must be a symbol")
+  '((%foo :accessor #8=5)
+    syn:invalid-syntax-error #8# "accessor must be a symbol function name")
+  '((%foo :allocation #9=6)
+    syn:invalid-syntax-error #9# "allocation must be :INSTANCE or :CLASS")
+  '((%foo :initarg #10=6)
+    syn:invalid-syntax-error #10# "initarg name must be a symbol")
+  '((%foo :initform #11=(declare))
+    syn:invalid-syntax-error #11# "declare is not allowed here")
+  '((%foo :type #12=7)
+    syn:invalid-syntax-error #12# "must be a type specifier")
+  '((%foo :documentation #13=8)
+    syn:invalid-syntax-error #13# "must be a documentation string")
+  ;; Repeated options
+  '((%foo :documentation "foo" . #14=(:documentation "bar"))
+    syn:invalid-syntax-error #14# ":DOCUMENTATION option must not be repeated")
+  ;; Valid syntax
+  '(#15=%foo
+    (:condition-slot-specifier
+     ((:name . 1) (((:variable-name () :name %foo :source #15#))))
+     :source #15#))
+  '(#16=(%foo :initform #17=pi :type #18=bit)
+    (:condition-slot-specifier
+     ((:name     . 1) (((:variable-name () :name %foo :source #15#)))
+      (:initform . 1) (((:unparsed
+                         ()
+                         :expression pi
+                         :context    :form
+                         :source     #17#)
+                        :evaluation t))
+      (:type     . 1) (((:atomic-type-specifier
+                         ((:name . 1) (((:type-name
+                                         ()
+                                         :name   bit
+                                         :source #18#))))
+                         :source #18#))))
+     :source #16#)))
+
+(define-macro-test (define-condition)
+  ;; Invalid syntax
+  '(#1=(define-condition)
+    syn:invalid-syntax-error #1#)
+  '((define-condition #2=1)
+    syn:invalid-syntax-error #2# "must be a class name")
+  '(#3=(define-condition foo)
+    syn:invalid-syntax-error #3#)
+  '(#4=(define-condition foo ())
+    syn:invalid-syntax-error #4#)
+  '((define-condition foo (#5=1))
+    syn:invalid-syntax-error #5# "superclass must be a class name" )
+  '(#6=(define-condition foo ()
+         1)
+    syn:invalid-syntax-error #6#)
+  '((define-condition foo ()
+      ()
+      (:default-initargs :foo . #7=()))
+    syn:invalid-syntax-error #7# "default initarg must be a symbol followed by a form")
+  ;; Repeated options
+  '((define-condition foo ()
+      ()
+      (:documentation "foo") #8=(:documentation "bar"))
+    syn:invalid-syntax-error #8# ":DOCUMENTATION option must not be repeated")
+  ;; Valid syntax
+  '(#9=(define-condition #10=foo () ())
+    (:define-condition
+     ((:name . 1) (((:type-name () :name foo :source #10#))))
+     :source #9#))
+  '(#11=(define-condition #12=bar () () (:default-initargs #13=:foo #14=1))
+    (:define-condition
+     ((:name             . 1) (((:type-name () :name bar :source #12#)))
+      (:default-initarg  . *) (((:default-initarg
+                                 ((:name     . 1) (((:initarg-name
+                                                     ()
+                                                     :name :foo :source #13#)))
+                                  (:initform . 1) (((:unparsed
+                                                     ()
+                                                     :expression 1
+                                                     :context    :form
+                                                     :source     #14#)
+                                                    :evaluation t)))
+                                 :source #13#)
+                                :evaluation :compound)))
+     :source #11#))
+  '(#15=(define-condition #16=baz () () (:documentation #17="bar"))
+    (:define-condition
+     ((:name . 1) (((:type-name () :name baz :source #16#)))
+      (:documentation . 1) (((:documentation () :string "bar" :source #17#))))
+     :source #15#))
+  '(#18=(define-condition #19=fez () () (:report #20="bar"))
+    (:define-condition
+     ((:name   . 1) (((:type-name () :name fez :source #19#)))
+      (:report . 1) (((:condition-report
+                       ((:string . 1) (((:unparsed
+                                         ()
+                                         :expression "bar"
+                                         :context    :condition-report
+                                         :source     #17#))))
+                       :source #20#)
+                      :evaluation :compound)))
+        :source #18#)))
+
 (define-macro-test (deftype)
   '(#1=(deftype)
     syn:invalid-syntax-error #1#)

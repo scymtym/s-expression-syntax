@@ -243,12 +243,12 @@
                                                                          "writer must be an extended function name")))
                      (eg:poption* :accessor      (<<- accessor     (must ((function-name/symbol names))
                                                                          "accessor must be a symbol function name")))
-                     (eg:poption  :allocation    (<- allocation    (must (allocation-type))))
-                     (eg:poption* :initarg       (<<- initarg      (must (guard (typep 'symbol))
-                                                                         "initarg must be a symbol")))
+                     (eg:poption  :allocation    (<- allocation    (allocation-type!)))
+                     (eg:poption* :initarg       (<<- initarg      ((initarg-name! names))))
                      (eg:poption  :initform      (<- initform      ((form! forms))))
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
-                     (eg:poption  :documentation (<- documentation ((documentation-string! forms))))))))
+                     (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
+                     (and :any (must (guard (typep 'symbol)) "option name must be a symbol"))))))
   ((name          1)
    ;; Options
    (initarg       *)
@@ -261,7 +261,8 @@
    (documentation ?)))
 
 (define-syntax condition-report
-    (or (<- string   (guard (typep 'string)))
+    (or (<- string   (and (guard (typep 'string))
+                          ((unparsed-expression forms) :condition-report)))
         (<- function ((function-name/symbol names)))
         (<- lambda   (lambda-expression)))
   ((string   ?)
@@ -276,18 +277,13 @@
     (list (<- name ((class-name! names)))
           (<- parent-type (superclasses))
           (list (* (<<- slot (condition-slot-specifier))))
-          (* (or (eg:option :default-initargs
-                            (* (and :any
-                                    (must (seq (<<- default-initarg  (guard (typep 'symbol)))
-                                               (<<- default-initform ((form! forms))))
-                                          "default initarg must be a symbol followed by an expression"))))
+          (* (or (eg:option :default-initargs (* (and :any (<<- default-initarg (default-initarg!)))))
                  (eg:option :documentation    (<- documentation ((documentation-string! forms))))
                  (eg:option :report           (<- report (condition-report!))))))
   ((name             1)
    (parent-type      *>)
    (slot             *  :evaluation :compound)
-   (default-initarg  *)
-   (default-initform *  :evaluation t)
+   (default-initarg  *  :evaluation :compound)
    (documentation    ?)
    (report           ?  :evaluation :compound)))
 
