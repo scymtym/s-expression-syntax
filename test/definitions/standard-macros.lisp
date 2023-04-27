@@ -282,66 +282,66 @@
 
 (test slot-specifier
   "Test for `slot-specifier' rule."
-  (rule-test-cases ((syn::slot-specifier syn::special-operators))
+  (syntax-test-cases (syn::slot-specifier)
     ;; Invalid syntax
     '(#1=1
-      :fatal #1# "slot name must be a symbol that is a valid variable name")
+      syn:invalid-syntax-error #1# "slot name must be a symbol that is a valid variable name")
     '(#2=()
-      :fatal #2# "slot must have a name")
+      syn:invalid-syntax-error #2# "slot must have a name")
     '((#3=1)
-      :fatal #3# "slot name must be a symbol that is a valid variable name")
+      syn:invalid-syntax-error #3# "slot name must be a symbol that is a valid variable name")
     '((foo :reader #4=1)
-      :fatal #4# "reader must be a symbol function name")
+      syn:invalid-syntax-error #4# "reader must be a symbol function name")
     '((foo :reader #5=(setf foo))
-      :fatal #5# "reader must be a symbol function name")
+      syn:invalid-syntax-error #5# "reader must be a symbol function name")
     '((foo :writer #6=1)
-      :fatal #6# "writer must be an extended function name")
+      syn:invalid-syntax-error #6# "writer must be an extended function name")
     '((foo :writer (setf #7=1))
-      :fatal #7# "second element of SETF function name must be a symbol")
+      syn:invalid-syntax-error #7# "second element of SETF function name must be a symbol")
     '((foo :accessor #8=1)
-      :fatal #8# "accessor must be a symbol function name")
+      syn:invalid-syntax-error #8# "accessor must be a symbol function name")
     '((foo :accessor #9=(setf foo))
-      :fatal #9# "accessor must be a symbol function name")
+      syn:invalid-syntax-error #9# "accessor must be a symbol function name")
     '((foo :initarg #10=1)
-      :fatal #10# "initarg name must be a symbol")
+      syn:invalid-syntax-error #10# "initarg name must be a symbol")
     '((foo :initform #11=(declare))
-      :fatal #11# "declare is not allowed here")
+      syn:invalid-syntax-error #11# "declare is not allowed here")
     '((foo :type #12=1)
-      :fatal #12# "must be a type specifier")
+      syn:invalid-syntax-error #12# "must be a type specifier")
     '((foo :documentation #13=1)
-      :fatal #13# "must be a documentation string")
+      syn:invalid-syntax-error #13# "must be a documentation string")
     '((foo #14=1)
-      :fatal #14# "option name must be a symbol")
+      syn:invalid-syntax-error #14# "option name must be a symbol")
     ;; Repeated options
     '((foo :allocation :class . #15=(:allocation :class))
-      :fatal #15# ":ALLOCATION option must not be repeated")
+      syn:invalid-syntax-error #15# ":ALLOCATION option must not be repeated")
     '((foo :initform 1 . #16=(:initform 1))
-      :fatal #16# ":INITFORM option must not be repeated")
+      syn:invalid-syntax-error #16# ":INITFORM option must not be repeated")
     '((foo :type bit . #17=(:type bit))
-      :fatal #17# ":TYPE option must not be repeated")
+      syn:invalid-syntax-error #17# ":TYPE option must not be repeated")
     '((foo :documentation "" . #18=(:documentation ""))
-      :fatal #18# ":DOCUMENTATION option must not be repeated")
+      syn:invalid-syntax-error #18# ":DOCUMENTATION option must not be repeated")
     ;; Valid syntax
     '(#19=(#20=foo :initform #21=(+ 1) #22=:custom-option #23=:foo :reader #24=bar)
-      t t (:slot-specifier
-           ((:name     . 1) (((:variable-name () :name foo :source #20#)))
-            (:reader   . *) (((:function-name () :name bar :source #24#)))
-            (:initform . 1) (((:unparsed
-                               ()
-                               :expression #21# :context :form :source #21#)
-                              :evaluation t))
-            (:option  . *)  (((:slot-option
-                               ((:name  . 1) (((:option-name
-                                                ()
-                                                :name   :custom-option
-                                                :source #22#)))
-                                (:value . 1) (((:unparsed
-                                                ()
-                                                :expression :foo
-                                                :context    :non-standard-slot-option
-                                                :source     #23#))))
-                               :source #22#))))
-           :source #19#))))
+      (:slot-specifier
+       ((:name     . 1) (((:variable-name () :name foo :source #20#)))
+        (:reader   . *) (((:function-name () :name bar :source #24#)))
+        (:initform . 1) (((:unparsed
+                           ()
+                           :expression #21# :context :form :source #21#)
+                          :evaluation t))
+        (:option  . *)  (((:slot-option
+                           ((:name  . 1) (((:option-name
+                                            ()
+                                            :name   :custom-option
+                                            :source #22#)))
+                            (:value . 1) (((:unparsed
+                                            ()
+                                            :expression :foo
+                                            :context    :non-standard-slot-option
+                                            :source     #23#))))
+                           :source #22#))))
+       :source #19#))))
 
 (define-macro-test (defclass)
   '(#1=(defclass)
