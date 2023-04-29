@@ -621,7 +621,7 @@
     syn:invalid-syntax-error #7# "must be a class name")
   '((defgeneric foo ()
       #8=(:method))
-    syn:invalid-syntax-error #8# "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
+    syn:invalid-syntax-error #8# "must be of the form (:method QUALIFIER* LAMBDA-LIST DECLARATION* FORM*)")
   ;; Repeated options
   '((defgeneric foo ()
       (:generic-function-class bar)
@@ -728,7 +728,22 @@
       (:lambda-list        . 1) (((:generic-function-lambda-list () :source #38#)
                                   :evaluation :compound))
       (:method-combination . 1) (((:method-combination-name () :name progn :source #39#))))
-     :source #36#)))
+     :source #36#))
+  '(#40=(defgeneric #41=baz #42=()
+          #43=(#44=:custom . #45=(1 2)))
+    (:defgeneric
+     ((:name        . 1) (((:function-name ():name baz :source #41#)))
+      (:lambda-list . 1) (((:generic-function-lambda-list () :source #42#)
+                           :evaluation :compound))
+      (:option      . *) (((:generic-function-option
+                            ((:name  . 1) (((:option-name () :name :custom :source #44#)))
+                             (:value . 1) (((:unparsed
+                                             ()
+                                             :expression (1 2)
+                                             :context    :non-standard-defgeneric-option
+                                             :source     #45#))))
+                            :source #43#))))
+      :source #40#)))
 
 (define-macro-test (defmethod)
   '((defmethod #1=1)

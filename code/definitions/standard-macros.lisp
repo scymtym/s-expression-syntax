@@ -306,11 +306,12 @@
        ((unparsed-expression forms) :method-qualifier)))
 
 (define-syntax method-description
-    (must (list* :method
-                 (* (<<- qualifier (qualifier)))
-                 (<- lambda-list ((specialized-lambda-list! lambda-lists)))
-                 (<- (documentation declaration form) ((docstring-body forms))))
-          "must be of the for (:method [QUALIFIERS] LAMBDA-LIST [DECLARATION] FORM*)")
+    (and (list* :method :any)
+         (must (list* :method
+                      (* (<<- qualifier (qualifier)))
+                      (<- lambda-list ((specialized-lambda-list! lambda-lists)))
+                      (<- (documentation declaration form) ((docstring-body forms))))
+               "must be of the form (:method QUALIFIER* LAMBDA-LIST DECLARATION* FORM*)"))
   ((qualifier     *)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
@@ -326,6 +327,14 @@
                                      (getf (bp:node-initargs* name) :name))
                              precedence-order)))
     (a:set-equal order-names required-names :test #'eg::%eql)))
+
+(defrule generic-function-option ()
+    (value (source)
+      (list* (<- name  ((option-name! names)))
+             (<- value ((unparsed-expression forms) ':non-standard-defgeneric-option))))
+  (bp:node* (:generic-function-option :source source)
+    (1 (:name  . 1) name)
+    (1 (:value . 1) value)))
 
 (define-macro defgeneric
     (list (<- name ((function-name! names)))
@@ -352,9 +361,8 @@
                                                              (<<- declarations ((declaration-specifier! declarations)))))
                  (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
                  (<<- method (method-description))
-                 ;; Non-standard options are basically free-form
-                 (list* (<<- option-name (must (guard (typep 'symbol)) "option name must be a symbol"))
-                        (<<- option-value ((unparsed-expression forms) ':non-standard-defgeneric-option))))))
+                 ;; Non-standard options are or the form (:NON-STANDARD-NAME . VALUE).
+                 (<<- option (generic-function-option)))))
   ((name                        1)
    (lambda-list                 1 :evaluation :compound)
    ;; Standard options
@@ -366,9 +374,8 @@
    (declarations                *)
    (documentation               ?)
    (method                      * :evaluation :compound)
-   ;; Other options
-   (option-name                 *)
-   (option-value                *)))
+   ;; Non-standard options
+   (option                      *)))
 
 ;;; `defmethod'
 
