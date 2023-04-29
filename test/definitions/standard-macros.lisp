@@ -824,80 +824,102 @@
       :source #26#)))
 
 (define-macro-test (defpackage)
+  ;; Invalid syntax
   '((defpackage #1=1)
     syn:invalid-syntax-error #1# "must be a string designator")
   '((defpackage foo #2=2)
-    syn:invalid-syntax-error #2# "option must be a list")
-  '((defpackage foo (:documentation #3=1))
-    syn:invalid-syntax-error #3# "must be a documentation string")
-  '((defpackage foo (:size #4="a"))
-    syn:invalid-syntax-error #4# "package size must be a non-negative integer")
-  '((defpackage foo (:size . #5=(1 2)))
-    syn:invalid-syntax-error #5# ":SIZE option accepts one value")
+    syn:invalid-syntax-error #2# "option must be a list of the form (:NAME . VALUE)")
+  '((defpackage foo #3=(:unknown 1))
+    syn:invalid-syntax-error #3# "unknown option")
+  '((defpackage foo (:documentation #4=1))
+    syn:invalid-syntax-error #4# "must be a documentation string")
+  '((defpackage foo (:size #5="a"))
+    syn:invalid-syntax-error #5# "package size must be a non-negative integer")
+  '((defpackage foo (:size . #6=(1 2)))
+    syn:invalid-syntax-error #6# ":SIZE option accepts one value")
   ;; Repeated options
-  '((defpackage foo (:documentation "") #6=(:documentation ""))
-    syn:invalid-syntax-error #6# ":DOCUMENTATION option must not be repeated")
-  '((defpackage foo (:size 1) #7=(:size 2))
-    syn:invalid-syntax-error #7# ":SIZE option must not be repeated")
+  '((defpackage foo (:documentation "") #7=(:documentation ""))
+    syn:invalid-syntax-error #7# ":DOCUMENTATION option must not be repeated")
+  '((defpackage foo (:size 1) #8=(:size 2))
+    syn:invalid-syntax-error #8# ":SIZE option must not be repeated")
+  '((defpackage foo (:locked t) #9=(:locked nil))
+    syn:invalid-syntax-error #9# ":LOCKED option must not be repeated")
   ;; Valid syntax
-  '(#8=(defpackage #9=foo
-         (:documentation #10="bla")
-         (:use #11=:bar #12="bar")
-         (:size #13=1)
-         #14=(:import-from #15=:foo #16=#\c #17=:bar)
-         #18=(:shadowing-import-from #19=:foo2 #20="BAZ2" #21=:bar2))
+  '(#10=(defpackage #11=foo
+         (:documentation #12="bla")
+         (:use #13=:bar #14="bar")
+         (:size #15=1)
+         #16=(:import-from #17=:foo #18=#\c #19=:bar)
+         #20=(:shadowing-import-from #21=:foo2 #22="BAZ2" #23=:bar2))
     (:defpackage
      ((:name                  . 1) (((:string-designator
                                       ()
-                                      :string "FOO" :source #9#)))
-      (:documentation         . 1) (((:documentation () :string #10# :source #10#)))
+                                      :string "FOO" :source #11#)))
+      (:documentation         . 1) (((:documentation () :string #12# :source #12#)))
       (:use                   . *) (((:string-designator
                                       ()
-                                      :string "BAR" :source #11#))
+                                      :string "BAR" :source #13#))
                                     ((:string-designator
                                       ()
-                                      :string "bar" :source #12#)))
+                                      :string "bar" :source #14#)))
       (:shadowing-import-from . *) (((:import-from
                                       ((:package . 1) (((:string-designator
                                                          ()
-                                                         :string "FOO2" :source #19#)))
+                                                         :string "FOO2" :source #21#)))
                                        (:name    . *) (((:string-designator
                                                          ()
-                                                         :string "BAZ2" :source #20#))
+                                                         :string "BAZ2" :source #22#))
                                                        ((:string-designator
                                                          ()
-                                                         :string "BAR2" :source #21#))))
-                                      :source #18#)))
+                                                         :string "BAR2" :source #23#))))
+                                      :source #20#)))
       (:import-from           . *) (((:import-from
                                       ((:package . 1) (((:string-designator
                                                          ()
-                                                         :string "FOO" :source #15#)))
+                                                         :string "FOO" :source #17#)))
                                        (:name    . *) (((:string-designator
                                                          ()
-                                                         :string "c" :source #16#))
+                                                         :string "c" :source #18#))
                                                        ((:string-designator
                                                          ()
-                                                         :string "BAR" :source #17#))))
-                                      :source #14#)))
-      (:size                  . 1) (((:unparsed
-                                      ()
-                                      :expression 1
-                                      :context    :package-size
-                                      :source     #13#))))
-     :source #8#))
-
-  '(#22=(defpackage #23=foo
-          (:nicknames #24="f" #25=:fo)
-          (:export #26="bar" #27=:baz))
+                                                         :string "BAR" :source #19#))))
+                                      :source #16#)))
+      (:size                  . 1) (((:literal () :value 1 :source #15#))))
+     :source #10#))
+  '(#24=(defpackage #25=foo
+          (:nicknames #26="f" #27=:fo)
+          (:export #28="bar" #29=:baz))
     (:defpackage
-     ((:name     . 1) (((:string-designator () :string "FOO" :source #23#)))
-      (:nickname . *) (((:string-designator () :string "f" :source #24#))
-                       ((:string-designator () :string "FO" :source #25#)))
-      (:export   . *) (((:string-designator () :string "bar" :source #26#))
-                       ((:string-designator () :string "BAZ" :source #27#))))
-     :source #22#)))
+     ((:name     . 1) (((:string-designator () :string "FOO" :source #25#)))
+      (:nickname . *) (((:string-designator () :string "f" :source #26#))
+                       ((:string-designator () :string "FO" :source #27#)))
+      (:export   . *) (((:string-designator () :string "bar" :source #28#))
+                       ((:string-designator () :string "BAZ" :source #29#))))
+     :source #24#))
+  ;; Non-standard options
+  '(#30=(defpackage #31="baz"
+      (:locked #32=nil)
+      #33=(:local-nicknames #34=(#35="foo" #36="bar")))
+    (:defpackage
+     ((:name            . 1) (((:string-designator
+                                () :string "baz" :source #31#)))
+      (:local-nicknames . *) (((:local-nicknames
+                                ((:local-nickname . *) (((:local-nickname
+                                                          ((:local-nickname . 1) (((:string-designator
+                                                                                    ()
+                                                                                    :string "foo"
+                                                                                    :source #35#)))
+                                                           (:package-name   . 1) (((:string-designator
+                                                                                    ()
+                                                                                    :string "bar"
+                                                                                    :source #36#))))
+                                                          :source #34#))))
+                                :source #33#)))
+      (:locked          . 1) (((:literal () :value nil :source #32#))))
+      :source #30#)))
 
 (define-macro-test (in-package)
+  ;; Invalid syntax
   '((in-package)
     syn:invalid-syntax-error nil)
   '((in-package #1=1)

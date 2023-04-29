@@ -411,13 +411,8 @@
 (defrule package-designator! ()
   (must (package-designator) "must be a package designator"))
 
-(defrule non-standard-package-option ()
-  (or (eg:option  :locked          (must (guard (typep 'boolean)) "must be a Boolean")) ; TODO the `once' within this does not work
-      (eg:option* :local-nicknames (* (list (must (string-designator!) "expected TODO")
-                                            (must (string-designator!) "expected TODO"))))))
-
-(define-syntax import-from
-    (list* (or :import-from :shadowing-import-from)
+(define-syntax (import-from :arguments ((keyword :import-from)))
+    (list* keyword
            (must (list (<- package (package-designator!))
                        (* (<<- name (and :any (string-designator!)))))
                  "import from options accept a package designator followed by string designators"))
@@ -427,30 +422,49 @@
 (defrule package-size ()
     (value (source)
       (guard size (typep '(integer 0))))
-  (bp:node* (:unparsed :expression size
-                       :context    :package-size
-                       :source     source)))
+  (let ((size (eg::%naturalize size)))
+    (bp:node* (:literal :value size :source source))))
 
 (defrule package-size! ()
   (must (package-size) "package size must be a non-negative integer"))
 
+(define-syntax local-nickname
+    (list (<- local-nickname (string-designator!))
+          (<- package-name   (string-designator!)))
+  ((local-nickname 1)
+   (package-name   1)))
+
+(define-syntax local-nicknames
+    (list :local-nicknames
+          (* (and :any (must (<<- local-nickname (local-nickname))
+                             "local nickname must be of the form (LOCAL-NICKNAME PACKAGE-NAME)"))))
+  ((local-nickname *)))
+
+(defrule package-locked ()
+    (value (source)
+      (guard locked (typep 'boolean)))
+  (let ((locked (eg::%naturalize locked)))
+    (bp:node* (:literal :value locked :source source))))
+
+(defrule package-locked! ()
+  (must (package-locked) "packed locked must be a Boolean"))
+
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
-          ;; TODO (* (and :any (must (or …) "unknown options"))
           (* (or (eg:option* :nicknames     (* (<<- nickname (and :any (string-designator!)))))
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
                  (eg:option* :use           (* (<<- use (package-designator!))))
                  (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
-                 (<<- shadowing-import-from (and (list* :shadowing-import-from :any)
-                                                 (import-from)))
-                 (<<- import-from           (and (list* :import-from :any)
-                                                 (import-from)))
-                 (eg:option* :export (* (<<- export (string-designator!))))
-                 (eg:option* :intern (* (<<- intern (string-designator!))))
-                 (eg:option  :size   (<- size (package-size!)))
-                 (non-standard-package-option)
+                 (<<- shadowing-import-from (import-from ':shadowing-import-from))
+                 (<<- import-from           (import-from ':import-from))
+                 (eg:option* :export        (* (<<- export (string-designator!))))
+                 (eg:option* :intern        (* (<<- intern (string-designator!))))
+                 (eg:option  :size          (<- size (package-size!)))
+                 ;; Non-standard options
+                 (<<- local-nicknames       (local-nicknames))
+                 (eg:option :locked         (<- locked (package-locked!)))
                  (list* (must (not :any) "unknown option") :any)
-                 (and :any (must (guard (not :any) atom) "option must be a list")))))
+                 (and :any (must (list* :any :any) "option must be a list of the form (:NAME . VALUE)")))))
   ((name                           1)
    (nickname                       *)
    (documentation                  ?)
@@ -460,7 +474,10 @@
    (import-from                    *)
    (export                         *)
    (intern                         *)
-   (size                           ?)))
+   (size                           ?)
+   ;; Non-standard options
+   (local-nicknames                *)
+   (locked                         ?)))
 
 (define-macro in-package
     (list (<- name (must (string-designator!) "name is required")))
