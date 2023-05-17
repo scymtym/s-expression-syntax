@@ -326,7 +326,9 @@
         (order-names    (map 'list (lambda (name)
                                      (getf (bp:node-initargs* name) :name))
                              precedence-order)))
-    (a:set-equal order-names required-names :test #'eg::%eql)))
+    (values (a:set-equal order-names required-names :test #'eg::%eql)
+            required-names
+            order-names)))
 
 (defrule generic-function-option ()
     (value (source)
@@ -341,19 +343,19 @@
           (<- lambda-list ((generic-function-lambda-list! lambda-lists)))
           (* (or ;; Standard options
                  (eg:option  :generic-function-class    (<- generic-function-class ((class-name! names))))
-                 (and (eg:option :argument-precedence-order (* (<<- names ((lambda-list-variable-name! lambda-lists)))))
-                      (<- argument-precedence-order
-                          (:transform :any
-                            ;; Collect names of required parameters in
-                            ;; LAMBDA-LIST and ensure that all names
-                            ;; following :ARGUMENT-PRECEDENCE-ORDER
-                            ;; occur in that set of names.
-                            (multiple-value-bind (compatiblep required-names order-names)
-                                (verify-precedence-order names lambda-list)
-                              (unless compatiblep
-                                (:fatal (format nil "~S must match the set of required parameters ~S"
-                                                order-names required-names))))
-                            (nreverse names))))
+                 (eg:option :argument-precedence-order
+                            (<- argument-precedence-order
+                                (:transform (* (<<- names ((lambda-list-variable-name! lambda-lists))))
+                                  ;; Collect names of required parameters in
+                                  ;; LAMBDA-LIST and ensure that all names
+                                  ;; following :ARGUMENT-PRECEDENCE-ORDER
+                                  ;; occur in that set of names.
+                                  (multiple-value-bind (compatiblep required-names order-names)
+                                      (verify-precedence-order names lambda-list)
+                                    (unless compatiblep
+                                      (:fatal (format nil "~S must match the set of required parameters ~S"
+                                                      order-names required-names))))
+                                  (nreverse names))))
                  (eg:option  :method-combination        (<- method-combination ((method-combination-name! names)))
                                                         (* (<<- method-combination-argument)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
