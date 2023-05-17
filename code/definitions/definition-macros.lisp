@@ -453,7 +453,7 @@
 
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
-          (* (or (eg:option* :nicknames     (* (<<- nickname (and :any (string-designator!)))))
+          (* (or (eg:option* :nicknames     (* (<<- nickname (string-designator!))))
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
                  (eg:option* :use           (* (<<- use (package-designator!))))
                  (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
