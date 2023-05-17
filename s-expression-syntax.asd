@@ -45,7 +45,9 @@
                               (:file       "bindings")
                               (:file       "pseudo-operators")
                               (:file       "special-operators")
-                              (:file       "standard-macros")))
+
+                              (:file       "definition-macros")
+                              (:file       "control-macros")))
 
                 (:file        "classify"
                  :pathname    "code/classify"
@@ -82,7 +84,9 @@
                              (:file       "bindings")
                              (:file       "pseudo-operators")
                              (:file       "special-operators")
-                             (:file       "standard-macros"))))
+
+                             (:file       "definition-macros")
+                             (:file       "control-macros"))))
 
   :perform    (test-op (operation component)
                 (uiop:symbol-call '#:s-expression-syntax.test '#:run-tests)))

@@ -129,3 +129,8 @@
      ,(format nil "Test for the `~(~A~)' special operator syntax."
               syntax-name)
      (syntax-test-cases (,syntax-name) ,@cases)))
+
+(defmacro define-macro-test ((macro-name) &body cases)
+  `(test ,macro-name
+     ,(format nil "Test for the `~(~A~)' macro syntax." macro-name)
+     (syntax-test-cases (,macro-name) ,@cases)))
