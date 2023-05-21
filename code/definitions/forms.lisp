@@ -90,3 +90,31 @@
         (list* (<- docstring (documentation-string)) (<- body (body)))
         (<- body (body)))
   (list* docstring body))
+
+(defrule (tagbody-segment :environment (make-instance 'eg::expression-environment)) (seen first?)
+    (value (source)
+      (seq (<- label (or (and (:transform :any (unless first? (:fail)))
+                              (or (and ((integer-or-symbol names))
+                                       ((unique-tag! names) seen))
+                                  (seq)))
+                         ((unique-tag! names) seen)))
+           (* (<<- statements (and (not ((integer-or-symbol names)))
+                                   ((form! forms)))))))
+  (let ((statements (nreverse statements)))
+    (bp:node* (:tagbody-segment :source source)
+      (bp:? (:label     . 1) label      :evaluation (make-instance 'binding-semantics
+                                                                   :namespace 'tag
+                                                                   :scope     :lexical
+                                                                   :values    nil))
+      (*    (:statement . *) statements :evaluation (a:circular-list t)))))
+
+(defrule tagbody-segments ()
+    (list (? (and (<- seen (:transform :any (make-hash-table)))
+                  (<<- segments (tagbody-segment seen 't))))
+          (* (<<- segments (tagbody-segment seen 'nil))))
+  (nreverse segments))
+
+(defrule tagbody-body ()
+    (list* (* (list 'declare (* (<<- declarations ((declaration-specifier! declarations))))))
+           (<- segments (tagbody-segments)))
+  (list (nreverse declarations) segments))

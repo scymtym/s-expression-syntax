@@ -146,3 +146,39 @@
     '((#15=1 #16="foo")
       t nil (nil () ((:unparsed () :expression 1     :context :form :source #15#)
                      (:unparsed () :expression "foo" :context :form :source #16#))))))
+
+(test tagbody-body
+  "Smoke test for the `tagbody-body' rule."
+  (rule-test-cases ((syn::tagbody-body syn::forms))
+    ;; Invalid syntax
+    '(((declare #1=1))
+      :fatal #1# "must be a declaration specifier")
+    '((nil #2=nil)
+      :fatal #2# "the tag NIL occurs more than once")
+    '((2 #3=2)
+      :fatal #3# "the tag 2 occurs more than once")
+    ;; Valid syntax
+    '(#4=()
+      t #4# (() ()))
+    '(#5=((declare #6=(ignore #7=a)))
+      t #5# (((:declaration-specifier
+               ((:argument . *) (((:variable-name () :name a :source #7#))))
+               :kind ignore :source #6#))
+             ()))
+    '(#8=(#9=7)
+      t #8# (()
+             ((:tagbody-segment
+               ((:label . 1) (((:tag () :name 7 :source #9#)
+                               :evaluation (:binding :namespace syn::tag
+                                                     :scope     :lexical))))
+               :source #9#))))
+    '(#10=(#11=(list))
+      t #10# (()
+             ((:tagbody-segment
+               ((:statement . *) (((:unparsed
+                                    ()
+                                    :expression (list)
+                                    :context    :form
+                                    :source     #11#)
+                                   :evaluation t)))
+               :source #11#))))))
