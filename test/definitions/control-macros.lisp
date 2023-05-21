@@ -64,6 +64,45 @@
                       :evaluation :compound)))
      :source #12#)))
 
+;;; `when' and `unless'
+
+(macrolet ((define (name)
+             (let ((kind (make-keyword name)))
+               `(define-macro-test (,name)
+                  ;; Invalid syntax
+                  '((,name)
+                    syn:invalid-syntax-error)
+                  (let* ((declare '(declare))
+                         (form    `(,',name ,declare)))
+                    `(,form
+                      syn:invalid-syntax-error ,declare))
+                  ;; Valid syntax
+                  (let* ((test '1)
+                         (form `(,',name ,test)))
+                    `(,form
+                      (,',kind
+                       ((:test . 1) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source ,test)
+                                      :evaluation t)))
+                       :source ,form)))
+                  (let* ((test  '1)
+                         (form1 '2)
+                         (form  `(,',name ,test ,form1)))
+                    `(,form
+                      (,',kind
+                       ((:test . 1) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source ,test)
+                                      :evaluation t))
+                        (:form . *) (((:unparsed
+                                       ()
+                                       :expression 2 :context :form :source ,form1)
+                                      :evaluation t)))
+                       :source ,form)))))))
+  (define when)
+  (define unless))
+
 ;;; `[ec]case'
 
 (define-macro-test (case)

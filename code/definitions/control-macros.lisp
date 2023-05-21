@@ -22,6 +22,17 @@
     (list (* (<<- clause (cond-clause!))))
   ((clause * :evaluation :compound)))
 
+;;; Standard macros `when' and `unless'
+
+(macrolet ((define (name)
+             `(define-macro ,name
+                  (list (<- test ((form! forms)))
+                        (* (<<- form ((form! forms)))))
+                ((test 1 :evaluation t)
+                 (form * :evaluation t)))))
+  (define when)
+  (define unless))
+
 ;;; Standard macros `[ec]case'
 
 (defrule otherwise-key ()
