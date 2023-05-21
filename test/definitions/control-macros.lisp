@@ -849,6 +849,76 @@
                        :evaluation :compound)))
      :source #22#)))
 
+;;; `prog' and `prog*'
+
+(macrolet
+    ((define (name)
+       (let ((kind (make-keyword name)))
+         `(define-macro-test (,name)
+            ;; Invalid syntax
+            '((,name)
+              syn:invalid-syntax-error)
+            '((,name #1=1)
+              syn:invalid-syntax-error #1# "must be a list of bindings")
+            '((,name () nil #2=nil)
+              syn:invalid-syntax-error #2# "the tag NIL occurs more than once")
+            ;; Valid syntax
+            '(#3=(,name ())
+              (,kind () :source #3#))
+            '(#4=(,name (#5=a #6=(#7=b #8=1)))
+              (,kind
+               ((:binding . *) (((:value-binding
+                                  ((:name . 1) (((:variable-name () :name a :source #5#)
+                                                 :evaluation (:binding :namespace variable
+                                                                       :scope     :lexical))))
+                                  :source #5#)
+                                 :evaluation :compound)
+                                ((:value-binding
+                                  ((:name  . 1) (((:variable-name () :name b :source #7#)
+                                                  :evaluation (:binding :namespace variable
+                                                                        :scope     :lexical)))
+                                                (:value . 1) (((:unparsed () :expression 1
+                                                                             :context    :form
+                                                                             :source     #8#)
+                                                               :evaluation t)))
+                                  :source #6#)
+                                 :evaluation :compound)))
+               :source #4#))
+            '(#9=(,name () (declare #10=(ignore #11=a) #12=(inline #13=b)))
+              (,kind
+               ((:declaration . *) (((:declaration-specifier
+                                      ((:argument . *) (((:variable-name () :name a :source #11#))))
+                                      :kind ignore :source #10#))
+                                    ((:declaration-specifier
+                                      ((:argument . *) (((:function-name () :name b :source #13#))))
+                                      :kind inline :source #12#))))
+               :source #9#))
+            '(#14=(,name () #15=:foo #16=(list) #17=:bar #18=(progn))
+              (,kind
+               ((:segment . *) (((:tagbody-segment
+                                  ((:label     . 1) (((:tag () :name :foo :source #15#)
+                                                      :evaluation (:binding :namespace syn::tag
+                                                                            :scope     :lexical)))
+                                   (:statement . *) (((:unparsed () :expression (list)
+                                                                    :context    :form
+                                                                    :source     #16#)
+                                                      :evaluation t)))
+                                  :source #15#)
+                                 :evaluation :compound)
+                                ((:tagbody-segment
+                                  ((:label     . 1) (((:tag () :name :bar :source #17#)
+                                                      :evaluation (:binding :namespace syn::tag
+                                                                            :scope     :lexical)))
+                                   (:statement . *) (((:unparsed () :expression (progn)
+                                                                    :context    :form
+                                                                    :source     #18#)
+                                                      :evaluation t)))
+                                  :source #17#)
+                                 :evaluation :compound)))
+               :source #14#))))))
+  (define prog)
+  (define prog*))
+
 ;;; `handler-{bind,case}' and  `restart-{bind,case}'
 
 (define-macro-test (handler-bind)

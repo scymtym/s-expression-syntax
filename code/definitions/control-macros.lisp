@@ -129,6 +129,19 @@
   ((keyform 1 :evaluation t)
    (clause  * :evaluation :compound)))
 
+;;; Standard macros `prog' and `prog*'
+
+(macrolet ((define (name order)
+             (declare (ignore order))
+             `(define-macro ,name
+                  (list* (<- binding (value-bindings!))
+                         (<- (declaration segment) ((tagbody-body forms))))
+                ((binding     *> :evaluation :compound) ; TODO :order order
+                 (declaration *>)
+                 (segment     *> :evaluation :compound)))))
+  (define prog  :parallel)
+  (define prog* :sequential))
+
 ;;; Standard macros `handler-bind' and `handler-case'
 
 (define-syntax handler-binding
