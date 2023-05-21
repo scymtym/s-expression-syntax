@@ -919,6 +919,54 @@
   (define prog)
   (define prog*))
 
+;;; `prog1' and `prog2'
+
+(define-macro-test (prog1)
+  ;; Invalid syntax
+  '((prog1 . #1=())
+    syn:invalid-syntax-error #1# "must be of the form (prog1 FIRST-FORM FORM*)")
+  '((prog1 #2=(declare))
+    syn:invalid-syntax-error #2# "declare is not allowed here")
+  ;; Valid syntax
+  '(#3=(prog1 #4=1)
+    (:prog1
+     ((:first . 1) (((:unparsed () :expression 1 :context :form :source #4#)
+                     :evaluation t)))
+     :source #3#))
+  '(#5=(prog1 #6=1 #7=2)
+    (:prog1
+     ((:first . 1) (((:unparsed () :expression 1 :context :form :source #6#)
+                     :evaluation t))
+      (:rest  . *) (((:unparsed () :expression 2 :context :form :source #7#)
+                     :evaluation t)))
+     :source #5#)))
+
+(define-macro-test (prog2)
+  ;; Invalid syntax
+  '((prog2 . #1=())
+    syn:invalid-syntax-error #1# "must be of the form (prog2 FIRST-FORM SECOND-FORM FORM*)")
+  '((prog2 1 . #2=())
+    syn:invalid-syntax-error #2# "must be of the form (prog2 FIRST-FORM SECOND-FORM FORM*)")
+  '((prog2 #3=(declare))
+    syn:invalid-syntax-error #3# "declare is not allowed here")
+  ;; Valid syntax
+  '(#4=(prog2 #5=1 #6=2)
+    (:prog2
+     ((:first  . 1) (((:unparsed () :expression 1 :context :form :source #5#)
+                      :evaluation t))
+      (:second . 1) (((:unparsed () :expression 2 :context :form :source #6#)
+                      :evaluation t)))
+     :source #4#))
+  '(#7=(prog2 #8=1 #9=2 #10=3)
+    (:prog2
+     ((:first  . 1) (((:unparsed () :expression 1 :context :form :source #8#)
+                      :evaluation t))
+      (:second . 1) (((:unparsed () :expression 2 :context :form :source #9#)
+                      :evaluation t))
+      (:rest   . *) (((:unparsed () :expression 3 :context :form :source #10#)
+                      :evaluation t)))
+     :source #7#)))
+
 ;;; `handler-{bind,case}' and  `restart-{bind,case}'
 
 (define-macro-test (handler-bind)

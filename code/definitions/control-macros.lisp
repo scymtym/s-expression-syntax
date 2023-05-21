@@ -142,6 +142,27 @@
   (define prog  :parallel)
   (define prog* :sequential))
 
+;;; Standard macros `prog1' and `prog2'
+;;;
+;;; Note that `progn' is a special operator, not a macro and therefore
+;;; not defined here.
+
+(define-macro prog1
+    (list (must (<- first ((form! forms)))
+                "must be of the form (prog1 FIRST-FORM FORM*)")
+          (* (<<- rest ((form! forms)))))
+  ((first 1 :evaluation t)
+   (rest  * :evaluation t)))
+
+(define-macro prog2
+    (list (must (seq (<- first ((form! forms)))
+                     (<- second ((form! forms))))
+                "must be of the form (prog2 FIRST-FORM SECOND-FORM FORM*)")
+          (* (<<- rest ((form! forms)))))
+  ((first  1 :evaluation t)
+   (second 1 :evaluation t)
+   (rest   * :evaluation t)))
+
 ;;; Standard macros `handler-bind' and `handler-case'
 
 (define-syntax handler-binding
