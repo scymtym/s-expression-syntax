@@ -9,6 +9,46 @@
 (def-suite* :s-expression-syntax.control-macros
   :in :s-expression-syntax)
 
+;;; `and' and `or'
+
+(macrolet ((define (name)
+             (let ((kind (make-keyword name)))
+               `(define-macro-test (,name)
+                  ;; Invalid syntax
+                  (let* ((declare '(declare))
+                         (form    `(,',name ,declare)))
+                    `(,form
+                      syn:invalid-syntax-error ,declare))
+                  ;; Valid syntax
+                  (let ((form `(,',name)))
+                    `(,form
+                      (,',kind () :source ,form)))
+                  (let* ((test '1)
+                         (form `(,',name ,test)))
+                    `(,form
+                      (,',kind
+                       ((:form . *) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source ,test)
+                                      :evaluation t)))
+                       :source ,form)))
+                  (let* ((form1 '1)
+                         (form2 '2)
+                         (form  `(,',name ,form1 ,form2)))
+                    `(,form
+                      (,',kind
+                       ((:form . *) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source ,form1)
+                                      :evaluation t)
+                                     ((:unparsed
+                                       ()
+                                       :expression 2 :context :form :source ,form2)
+                                      :evaluation t)))
+                       :source ,form)))))))
+  (define and)
+  (define or))
+
 ;;; `cond'
 
 (define-macro-test (cond)

@@ -8,6 +8,15 @@
 
 (parser:in-grammar special-operators)
 
+;;; Standard macros `and' and `or'
+
+(macrolet ((define (name)
+             `(define-macro ,name
+                  (list (* (<<- form ((form! forms)))))
+                ((form * :evaluation t)))))
+  (define and)
+  (define or))
+
 ;;; Standard macro `cond'
 
 (define-syntax cond-clause
