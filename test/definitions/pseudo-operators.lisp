@@ -11,7 +11,7 @@
 
 ;;; Pseudo-operator variable reference
 
-(define-syntax-test (syn::variable-reference)
+(define-syntax-test (syn:variable-reference)
   ;; Invalid syntax
   '(#1=1
     syn:invalid-syntax-error #1#)
@@ -34,7 +34,7 @@
 
 ;;; Pseudo-operator "application"
 
-(define-syntax-test (syn::application)
+(define-syntax-test (syn:application)
   '((1)
     syn:invalid-syntax-error 1 "must be a symbol naming a function or a lambda expression")
   '(((lambda 1) 1)
@@ -80,7 +80,7 @@
 
 ;;; Pseudo-operator "self evaluating"
 
-(define-syntax-test (syn::self-evaluating)
+(define-syntax-test (syn:self-evaluating)
   ;; Invalid syntax
   '(#1=:foo
     syn:invalid-syntax-error #1#)

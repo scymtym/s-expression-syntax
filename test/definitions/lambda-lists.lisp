@@ -13,7 +13,7 @@
 
 (test keyword-parameter
   "Smoke test for the `keyword-parameter' rule."
-  (rule-test-cases ((syn::keyword-parameter syn::lambda-lists)
+  (rule-test-cases ((syn:keyword-parameter syn::lambda-lists)
                     (make-hash-table :test #'eq))
     '((x #1=(declare)) :fatal #1# "declare is not allowed here")
     '(#2=5             :fatal #2# "variable name must be a symbol")
@@ -49,7 +49,7 @@
 
 (test ordinary-lambda-list
   "Smoke test for the `ordinary-lambda-list' rule."
-  (rule-test-cases ((syn::ordinary-lambda-list syn::lambda-lists))
+  (rule-test-cases ((syn:ordinary-lambda-list syn::lambda-lists))
     ;; Invalid syntax
     '((#1=(a))
       :fatal #1# "variable name must be a symbol")
@@ -205,7 +205,7 @@
 
 (test specialized-lambda-list
   "Smoke test for the `specialized-lambda-list' rule."
-  (rule-test-cases ((syn::specialized-lambda-list syn::lambda-lists))
+  (rule-test-cases ((syn:specialized-lambda-list syn::lambda-lists))
     '(((foo #1=1))
       :fatal #1# "must be a class name")
     '((#2=(foo t 1))
@@ -249,7 +249,7 @@
 
 (test destructuring-lambda-list
   "Smoke test for the `destructuring-lambda-list' rule."
-  (rule-test-cases ((syn::destructuring-lambda-list syn::destructuring-lambda-list))
+  (rule-test-cases ((syn:destructuring-lambda-list syn::destructuring-lambda-list))
     ;; Repeated section
     '((&environment e1 foo bar . #1= (&environment e2))
       :fatal #1# "&ENVIRONMENT must not be repeated")
@@ -367,7 +367,7 @@
 
 (test deftype-lambda-list
   "Smoke test for the `deftype-lambda-list' rule."
-  (rule-test-cases ((syn::deftype-lambda-list syn::deftype-lambda-list))
+  (rule-test-cases ((syn:deftype-lambda-list syn::deftype-lambda-list))
     '(#1=(#2=foo #3=bar)
       t nil (:deftype-lambda-list
              ((:required . *) (((:required-parameter

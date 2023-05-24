@@ -69,4 +69,67 @@
 
   ;; Macros
   (:export
-   #:define-syntax))
+   #:define-syntax)
+
+  ;; Lambda lists
+  (:export
+   #:required-parameter
+   #:optional-parameter
+   #:keyword-parameter
+   #:aux-parameter
+
+   #:ordinary-lambda-list
+   #:generic-function-lambda-list
+   #:specialized-lambda-list
+   #:pattern
+   #:destructuring-lambda-list
+   #:deftype-lambda-list)
+
+  ;; Bindings
+  (:export
+   #:value-binding
+   #:local-function-binding
+   #:local-macro-function-binding
+   #:symbol-macro-binding)
+
+  ;; Pseudo operators
+  (:export
+   #:variable-reference
+   #:application
+   #:self-evaluating)
+
+  ;; Special operators
+  (:export
+   #:lambda-expression)
+
+  ;; Definition macros
+  (:export
+   #:slot-description
+
+   #:slot-specifier
+
+   #:condition-slot-specifier
+   #:condition-report
+
+   #:method-description
+
+   #:import-from
+   #:local-nicknames
+   #:local-nickname)
+
+  ;; Control macros
+  (:export
+   #:cond-clause
+
+   #:case-normal-clause
+   #:case-otherwise-clause
+
+   #:typecase-normal-clause
+   #:typecase-otherwise-clause
+
+   #:handler-binding
+   #:no-error-clause
+   #:handler-clause
+
+   #:restart-binding
+   #:restart-clause))

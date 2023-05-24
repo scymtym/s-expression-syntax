@@ -177,7 +177,7 @@
 
 ;;; `defstruct' including slots
 
-(define-syntax-test (syn::slot-description)
+(define-syntax-test (syn:slot-description)
   '((#1=1)
     syn:invalid-syntax-error #1# "variable name must be a symbol")
   '((foo #2=(declare))
@@ -277,7 +277,7 @@
 
 (test slot-specifier
   "Test for `slot-specifier' rule."
-  (syntax-test-cases (syn::slot-specifier)
+  (syntax-test-cases (syn:slot-specifier)
     ;; Invalid syntax
     '(#1=1
       syn:invalid-syntax-error #1# "slot name must be a symbol that is a valid variable name")
@@ -425,7 +425,7 @@
                                  :source #26#))))
      :source #12#)))
 
-(define-syntax-test (syn::condition-slot-specifier)
+(define-syntax-test (syn:condition-slot-specifier)
   ;; Invalid syntax
   '(#1=1
     syn:invalid-syntax-error #1# "slot name must be a symbol that is a valid variable name")
