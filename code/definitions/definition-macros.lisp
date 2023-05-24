@@ -330,13 +330,11 @@
             required-names
             order-names)))
 
-(defrule generic-function-option ()
-    (value (source)
-      (list* (<- name  ((option-name! names)))
-             (<- value ((unparsed-expression forms) ':non-standard-defgeneric-option))))
-  (bp:node* (:generic-function-option :source source)
-    (1 (:name  . 1) name)
-    (1 (:value . 1) value)))
+(define-syntax generic-function-option
+    (list* (<- name  ((option-name! names)))
+           (<- value ((unparsed-expression forms) ':non-standard-defgeneric-option)))
+  ((name  1)
+   (value 1)))
 
 (define-macro defgeneric
     (list (<- name ((function-name! names)))

@@ -114,6 +114,7 @@
    #:condition-report
 
    #:method-description
+   #:generic-function-option
 
    #:import-from
    #:local-nicknames
