@@ -206,48 +206,68 @@
 (test specialized-lambda-list
   "Smoke test for the `specialized-lambda-list' rule."
   (rule-test-cases ((syn:specialized-lambda-list syn::lambda-lists))
+    ;; Invalid syntax
     '(((foo #1=1))
       :fatal #1# "must be a class name")
     '((#2=(foo t 1))
       :fatal #2# "must be of the form (NAME SPECIALIZER)")
     '(((foo (eql . #3=(1 2))))
       :fatal #3# "must be a single object")
-
-    '(((baz fez) (#4=foo bar) &rest foo)
-      :fatal #4# "the variable name FOO occurs more than once")
-
-    '(#5=(#6=(#7=baz #8=fez) #9=(#10=foo #11=bar) &rest #12=whoop)
-      t #5# (:specialized-lambda-list
+    '(((foo (eql #4=(declare))))
+      :fatal #4# "declare is not allowed here")
+    ;; Repeated names
+    '(((baz fez) (#5=foo bar) &rest foo)
+      :fatal #5# "the variable name FOO occurs more than once")
+    ;; Valid syntax
+    '(#6=(#7=(#8=baz #9=fez) #10=(#11=foo #12=bar) &rest #13=whoop)
+      t #6# (:specialized-lambda-list
              ((:required . *) (((:specialized-parameter
                                  ((:name        . 1) (((:variable-name
                                                         ()
-                                                        :name baz :source #7#)))
+                                                        :name baz :source #8#)))
                                   (:specializer . 1) (((:type-name
                                                         ()
-                                                        :name fez :source #8#)
+                                                        :name fez :source #9#)
                                                        :evaluation :compound)))
-                                 :source #6#)
+                                 :source #7#)
                                 :evaluation :compound)
                                ((:specialized-parameter
                                  ((:name        . 1) (((:variable-name
                                                         ()
-                                                        :name foo :source #10#)))
+                                                        :name foo :source #11#)))
                                   (:specializer . 1) (((:type-name
                                                         ()
-                                                        :name bar :source #11#)
+                                                        :name bar :source #12#)
                                                        :evaluation :compound)))
-                                 :source #9#)
+                                 :source #10#)
                                 :evaluation :compound))
-              (:rest     . 1) (((:variable-name () :name whoop :source #12#))))
-             :source #5#))
-
-    '(#13=(&aux #14=a)
-      t #13# (:specialized-lambda-list
+              (:rest     . 1) (((:variable-name () :name whoop :source #13#))))
+             :source #6#))
+    '(#14=(#15=(#16=x #17=(eql #18=5)))
+      t #14# (:specialized-lambda-list
+               ((:required . *) (((:specialized-parameter
+                                   ((:name        . 1) (((:variable-name
+                                                          ()
+                                                          :name x :source #16#)))
+                                    (:specializer . 1) (((:eql-specializer
+                                                          ((:object . 1) (((:unparsed
+                                                                            ()
+                                                                            :expression 5
+                                                                            :context    :form
+                                                                            :source     #18#)
+                                                                           :evaluation t)))
+                                                          :source #17#)
+                                                         :evaluation :compound)))
+                                   :source #15#)
+                                  :evaluation :compound)))
+               :source #14#))
+    '(#19=(&aux #20=a)
+      t #19# (:specialized-lambda-list
               ((:aux . *) (((:aux-parameter
-                             ((:name . 1) (((:variable-name () :name a :source #14#))))
-                             :source #14#)
+                             ((:name . 1) (((:variable-name () :name a :source #20#))))
+                             :source #20#)
                             :evaluation :compound)))
-              :source #13#))))
+              :source #19#))))
 
 ;;; Destructuring lambda list
 

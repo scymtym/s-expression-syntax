@@ -80,6 +80,7 @@
 
    #:ordinary-lambda-list
    #:generic-function-lambda-list
+   #:eql-specializer
    #:specialized-parameter
    #:specialized-lambda-list
    #:pattern

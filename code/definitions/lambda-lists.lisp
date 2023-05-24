@@ -176,9 +176,13 @@
 
 ;;; 3.4.3 Specialized Lambda Lists
 
+(define-syntax eql-specializer
+    (list* 'eql (must (list (<- object ((form! forms))))
+                      "must be a single object"))
+  ((object 1 :evaluation t)))
+
 (defrule specializer ()
-  (or (list* 'eql (must (list :any) "must be a single object")) ; TODO evaluated
-      ((class-name! names))))
+  (or (eql-specializer) ((class-name! names))))
 
 (define-syntax (specialized-parameter :arguments ((seen nil)))
     (or (and (list* :any)
