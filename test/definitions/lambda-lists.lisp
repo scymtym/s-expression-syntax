@@ -224,16 +224,20 @@
                                                         :name baz :source #7#)))
                                   (:specializer . 1) (((:type-name
                                                         ()
-                                                        :name fez :source #8#))))
-                                 :source #6#))
+                                                        :name fez :source #8#)
+                                                       :evaluation :compound)))
+                                 :source #6#)
+                                :evaluation :compound)
                                ((:specialized-parameter
                                  ((:name        . 1) (((:variable-name
                                                         ()
                                                         :name foo :source #10#)))
                                   (:specializer . 1) (((:type-name
                                                         ()
-                                                        :name bar :source #11#))))
-                                 :source #9#)))
+                                                        :name bar :source #11#)
+                                                       :evaluation :compound)))
+                                 :source #9#)
+                                :evaluation :compound))
               (:rest     . 1) (((:variable-name () :name whoop :source #12#))))
              :source #5#))
 

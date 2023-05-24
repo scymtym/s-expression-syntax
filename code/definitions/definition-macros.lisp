@@ -388,7 +388,7 @@
            (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
    (qualifier     *)
-   (lambda-list   1)
+   (lambda-list   1 :evaluation :compound)
    (documentation ?)
    (declaration   *>)
    (form          *> :evaluation t)))

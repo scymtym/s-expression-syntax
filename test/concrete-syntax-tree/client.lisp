@@ -47,20 +47,24 @@
                               ((:name        . 1) (((:variable-name
                                                      ()
                                                      :name a :source ,a)))
-                                                  (:specializer . 1) (((:type-name
-                                                                        ()
-                                                                        :name integer :source ,specializer))))
-                              :source ,parameter))
+                               (:specializer . 1) (((:type-name
+                                                     ()
+                                                     :name integer :source ,specializer)
+                                                    :evaluation :compound)))
+                              :source ,parameter)
+                             :evaluation :compound)
                             ((:specialized-parameter
                               ((:name . 1) (((:variable-name
                                               ()
                                               :name b :source ,b))))
-                              :source ,b))
+                              :source ,b)
+                             :evaluation :compound)
                             ((:specialized-parameter
                               ((:name . 1) (((:variable-name
                                               ()
                                               :name c :source ,c))))
-                              :source ,c)))
+                              :source ,c)
+                             :evaluation :compound))
           (:optional . *)  (((:optional-parameter
                               ((:name . 1) (((:variable-name
                                               ()

@@ -714,7 +714,8 @@
                                                                        ((:name . 1) (((:variable-name
                                                                                        ()
                                                                                        :name a :source #36#))))
-                                                                       :source #36#))))
+                                                                       :source #36#)
+                                                                      :evaluation :compound)))
                                                    :source #35#)
                                                   :evaluation :compound)))
                             :source #31#)
@@ -763,7 +764,8 @@
   '(#7=(defmethod #8=foo #9=())
     (:defmethod
      ((:name        . 1) (((:function-name () :name foo :source #8#)))
-      (:lambda-list . 1) (((:specialized-lambda-list () :source #9#))))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #9#)
+                           :evaluation :compound)))
      :source #7#))
   '(#10=(defmethod #11=foo #12=:around #13=())
     (:defmethod
@@ -773,7 +775,8 @@
                             :expression :around
                             :context    :method-qualifier
                             :source     #12#)))
-      (:lambda-list . 1) (((:specialized-lambda-list () :source #13#))))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #13#)
+                           :evaluation :compound)))
      :source #10#))
   '(#14=(defmethod #15=foo #16=:custom #17=1 #18="foo" #19=())
     (:defmethod
@@ -793,7 +796,8 @@
                             :expression "foo"
                             :context    :method-qualifier
                             :source     #18#)))
-      (:lambda-list . 1) (((:specialized-lambda-list () :source #19#))))
+      (:lambda-list . 1) (((:specialized-lambda-list () :source #19#)
+                           :evaluation :compound)))
      :source #14#))
   '(#20=(defmethod #21=foo #22=(#23=(#24=x #25=t)))
     (:defmethod
@@ -805,15 +809,19 @@
                                                                        :name x :source #24#)))
                                                  (:specializer . 1) (((:type-name
                                                                        ()
-                                                                       :name t :source #25#))))
-                                            :source #23#))))
-                            :source #22#))))
+                                                                       :name t :source #25#)
+                                                                      :evaluation :compound)))
+                                                :source #23#)
+                                               :evaluation :compound)))
+                            :source #22#)
+                           :evaluation :compound)))
      :source #20#))
   '(#26=(defmethod #27=foo #28=()
           #29="foo" (declare #30=(ignore)) #31=1)
     (:defmethod
      ((:name          . 1) (((:function-name () :name foo :source #27#)))
-      (:lambda-list   . 1) (((:specialized-lambda-list () :source #28#)))
+      (:lambda-list   . 1) (((:specialized-lambda-list () :source #28#)
+                             :evaluation :compound))
       (:documentation . 1) (((:documentation () :string #29# :source #29#)))
       (:declaration   . *) (((:declaration-specifier () :kind ignore :source #30#)))
       (:form          . *) (((:unparsed

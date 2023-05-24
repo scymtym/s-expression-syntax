@@ -188,7 +188,7 @@
         (and (not (lambda-list-keyword))
              (<- name (unique-variable-name! seen))))
   ((name        1)
-   (specializer ?)))
+   (specializer ? :evaluation :compound)))
 
 (defrule %specialized-lambda-list (seen)
     (list (* (<<- required                    (specialized-parameter seen)))
@@ -202,7 +202,7 @@
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required optional rest keyword allow-other-keys? aux)
              (%specialized-lambda-list seen)))
-  ((required          *>)
+  ((required          *> :evaluation :compound)
    (optional          *> :evaluation :compound)
    (rest              ?)
    (keyword           *> :evaluation :compound)
