@@ -80,6 +80,7 @@
 
    #:ordinary-lambda-list
    #:generic-function-lambda-list
+   #:specialized-parameter
    #:specialized-lambda-list
    #:pattern
    #:destructuring-lambda-list
