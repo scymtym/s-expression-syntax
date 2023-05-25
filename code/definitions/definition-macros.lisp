@@ -62,7 +62,7 @@
 
 (define-syntax slot-description
     (or (and (list* :any)
-             (must (list (<- name ((variable-name! names)))
+             (must (list (<- name ((slot-name! names)))
                          (? (seq (<- initform ((form! forms)))
                                  (* (or (eg:poption :read-only (<- read-only ((unparsed-expression forms) ':slot-read-only)))
                                         (eg:poption :type      (<- type ((type-specifier! type-specifiers)))))))))

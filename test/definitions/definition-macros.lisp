@@ -179,7 +179,7 @@
 
 (define-syntax-test (syn:slot-description)
   '((#1=1)
-    syn:invalid-syntax-error #1# "variable name must be a symbol")
+    syn:invalid-syntax-error #1# "slot name must be a symbol that is a valid variable name")
   '((foo #2=(declare))
     syn:invalid-syntax-error #2# "declare is not allowed here")
   '(#3=(foo 1 :bar 2)
