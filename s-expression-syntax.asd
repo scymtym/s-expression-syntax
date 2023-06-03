@@ -48,7 +48,8 @@
 
                               (:file       "definition-macros")
                               (:file       "control-macros")
-                              (:file       "debug-macros")))
+                              (:file       "debug-macros")
+                              (:file       "iteration-macros")))
 
                 (:file        "classify"
                  :pathname    "code/classify"
