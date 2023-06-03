@@ -47,7 +47,8 @@
                               (:file       "special-operators")
 
                               (:file       "definition-macros")
-                              (:file       "control-macros")))
+                              (:file       "control-macros")
+                              (:file       "debug-macros")))
 
                 (:file        "classify"
                  :pathname    "code/classify"
@@ -86,7 +87,8 @@
                              (:file       "special-operators")
 
                              (:file       "definition-macros")
-                             (:file       "control-macros"))))
+                             (:file       "control-macros")
+                             (:file       "debug-macros"))))
 
   :perform    (test-op (operation component)
                 (uiop:symbol-call '#:s-expression-syntax.test '#:run-tests)))
