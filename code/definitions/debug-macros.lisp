@@ -16,3 +16,13 @@
                 ((function-name *)))))
   (define trace)
   (define untrace))
+
+;;; Standard macros `time' and `step'
+
+(macrolet ((define (name)
+             `(define-macro ,name
+                  (list* (must (list (<- form ((form! forms))))
+                               "must be a single form"))
+                ((form 1 :evaluation t)))))
+  (define time)
+  (define step))

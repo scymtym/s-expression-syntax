@@ -36,3 +36,25 @@
                      :source ,form))))))
   (define trace   :trace)
   (define untrace :untrace))
+
+;;; `time' and `step'
+
+(macrolet ((define (name kind)
+             `(define-macro-test (,name)
+                ;; Invalid syntax
+                '((,name . #1=())
+                  syn:invalid-syntax-error #1# "must be a single form")
+                (let* ((forms '(1 2))
+                       (form  `(,',name ,@forms)))
+                  `(,form
+                    syn:invalid-syntax-error ,forms "must be a single form"))
+                ;; Valid syntax
+                (let* ((form1 '1)
+                       (form  `(,',name ,form1)))
+                  `(,form
+                    (,',kind
+                     ((:form . 1) (((:unparsed () :expression 1 :context :form :source ,form1)
+                                    :evaluation t)))
+                     :source ,form))))))
+  (define time :time)
+  (define step :step))
