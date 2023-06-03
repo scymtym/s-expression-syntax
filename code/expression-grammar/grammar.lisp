@@ -121,7 +121,10 @@
          ,(c:compile-expression
            grammar list-environment (exp:sub-expression expression)
            (lambda (new-environment)
-             (c:compile-expression
+             `(if (%null ,(tail new-environment))
+                  ,(call-with-value-environment success-cont new-environment)
+                  ,(call-with-value-environment failure-cont new-environment))
+             #+old (c:compile-expression
               grammar new-environment sexp::*just-test-bounds*
               (a:curry #'call-with-value-environment failure-cont)
               (a:curry #'call-with-value-environment success-cont)))
