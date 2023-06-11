@@ -50,7 +50,8 @@
                               (:file       "control-macros")
                               (:file       "debug-macros")
                               (:file       "iteration-macros")
-                              (:file       "io-macros")))
+                              (:file       "io-macros")
+                              (:file       "modify-macros")))
 
                 (:file        "classify"
                  :pathname    "code/classify"
@@ -91,7 +92,8 @@
                              (:file       "definition-macros")
                              (:file       "control-macros")
                              (:file       "debug-macros")
-                             (:file       "io-macros"))))
+                             (:file       "io-macros")
+                             (:file       "modify-macros"))))
 
   :perform    (test-op (operation component)
                 (uiop:symbol-call '#:s-expression-syntax.test '#:run-tests)))
