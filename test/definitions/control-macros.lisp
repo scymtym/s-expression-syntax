@@ -1125,18 +1125,19 @@
                                :evaluation :compound))
       (:no-error-clause . 1) (((:no-error-clause
                                 ((:lambda-list . 1) (((:ordinary-lambda-list
-                                                       ((:required . *) (((:required-parameter
-                                                                           ((:name . 1) (((:variable-name
-                                                                                           ()
-                                                                                           :name y :source #14#)
-                                                                                          :evaluation nil)))
-                                                                           :source #14#))
-                                                                         ((:required-parameter
-                                                                           ((:name . 1) (((:variable-name
-                                                                                           ()
-                                                                                           :name z :source #15#)
-                                                                                          :evaluation nil)))
-                                                                           :source #15#))))
+                                                       ((:required-section . 1) (((:required-section
+                                                                                   ((:parameter . *) (((:required-parameter
+                                                                                                        ((:name . 1) (((:variable-name
+                                                                                                                        ()
+                                                                                                                        :name y :source #14#)
+                                                                                                                       :evaluation nil)))
+                                                                                                        :source #14#))
+                                                                                                      ((:required-parameter
+                                                                                                        ((:name . 1) (((:variable-name
+                                                                                                                        ()
+                                                                                                                        :name z :source #15#)
+                                                                                                                       :evaluation nil)))
+                                                                                                        :source #15#))))))))
                                                        :source #13#)
                                                       :evaluation :compound))
                                  (:form        . *) (((:unparsed
@@ -1217,12 +1218,13 @@
       (:clause . *) (((:restart-clause
                        ((:name        . 1) (((:variable-name () :name foo :source #10#)))
                         (:lambda-list . 1) (((:ordinary-lambda-list
-                                              ((:required . *) (((:required-parameter
-                                                                  ((:name . 1) (((:variable-name
-                                                                                  ()
-                                                                                  :name x :source #12#)
-                                                                                 :evaluation nil)))
-                                                                  :source #12#))))
+                                              ((:required-section . 1) (((:required-section
+                                                                          ((:parameter . *) (((:required-parameter
+                                                                                               ((:name . 1) (((:variable-name
+                                                                                                               ()
+                                                                                                               :name x :source #12#)
+                                                                                                              :evaluation nil)))
+                                                                                               :source #12#))))))))
                                               :source #11#)))
                         (:report-string . 1) (((:unparsed
                                                 ()

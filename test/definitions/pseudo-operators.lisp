@@ -58,12 +58,13 @@
     (:application
      ((:function . 1) (((:lambda-expression
                          ((:lambda-list . 1) (((:ordinary-lambda-list
-                                                ((:required . *) (((:required-parameter
-                                                                    ((:name . 1) (((:variable-name
-                                                                                    ()
-                                                                                    :name x :source #10#)
-                                                                                   :evaluation nil)))
-                                                                    :source #10#))))
+                                                ((:required-section . 1) (((:required-section
+                                                                            ((:parameter . *) (((:required-parameter
+                                                                                                 ((:name . 1) (((:variable-name
+                                                                                                                 ()
+                                                                                                                 :name x :source #10#)
+                                                                                                                :evaluation nil)))
+                                                                                                 :source #10#))))))))
                                                 :source #9#)
                                                :evaluation :compound))
                           (:form        . *) (((:unparsed

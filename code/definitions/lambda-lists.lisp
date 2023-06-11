@@ -16,15 +16,15 @@
 ;;; Shared rules
 
 ;; TODO could use lambda-list-keywords
-(defrule lambda-list-keyword ()
-  (or '&whole '&environment '&optional '&rest '&key '&aux '&allow-other-keys))
+(defrule not-lambda-list-keyword ()
+  (not (or '&whole '&environment '&optional '&rest '&key '&aux '&allow-other-keys)))
 
 (defrule lambda-list-variable-name ()
-  (and (not (lambda-list-keyword))
+  (and (not-lambda-list-keyword)
        ((variable-name names))))
 
 (defrule lambda-list-variable-name! ()
-  (must (and (must (not (lambda-list-keyword))
+  (must (and (must (not-lambda-list-keyword)
                    "must not be a lambda list keyword")
              ((variable-name! names)))
         "must be a lambda list variable name"))
@@ -58,7 +58,7 @@
 
 (defrule required-parameter! (seen) ; TODO this should use required-parameter
     (value (source)
-      (and (not (lambda-list-keyword))
+      (and (not-lambda-list-keyword)
            (<- name (unique-variable-name! seen))))
   (bp:node* (:required-parameter :source source)
     (1 (:name . 1) name)))
@@ -67,7 +67,7 @@
     (or (list (<- name (unique-variable-name! seen))
               (? (seq (<- default ((form! forms)))
                       (? (<- supplied (unique-variable-name! seen))))))
-        (<- name (and (not (lambda-list-keyword))
+        (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
   ((name     1)
    (default  ? :evaluation t)
@@ -82,7 +82,7 @@
                   (<- name (unique-variable-name! seen)))
               (? (seq (<- default ((form! forms)))
                       (? (<- supplied (unique-variable-name! seen))))))
-        (<- name (and (not (lambda-list-keyword))
+        (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
   ((name     1)
    (keyword  ?)
@@ -101,52 +101,81 @@
 
 ;;; Reusable sections of lambda lists
 
+(defrule lambda-list-keyword (which)
+    (and which keyword)
+  (bp:node* (:lambda-list-keyword :keyword (eg::%naturalize keyword)
+                                  :source  keyword)))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defrule (required-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (+ (<<- parameters (required-parameter! seen)))
-    (nreverse parameters))
+      (value (source)
+        (+ (<<- parameters (required-parameter! seen))))
+    source
+    (bp:node* (:required-section ; :source source
+               )
+      (* (:parameter . *) (nreverse parameters))))
 
   (defrule (optional-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&optional (* (<<- parameters (optional-parameter seen))))
-    (nreverse parameters))
+      (value (source)
+        (seq    (<-  keyword    (lambda-list-keyword '&optional))
+             (* (<<- parameters (optional-parameter seen)))))
+    source
+    (bp:node* (:optional-section ; :source source
+               )
+      (1 (:keyword   . 1) keyword)
+      (* (:parameter . *) (nreverse parameters) :evaluation :compound)))
 
   (defrule (rest-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&rest (<- parameter (rest-parameter seen)))
-    parameter)
+      (value (source)
+        (seq (<- keyword   (lambda-list-keyword '&rest))
+             (<- parameter (rest-parameter seen))))
+    source
+    (bp:node* (:rest-section ; :source source
+               )
+      (1 (:keyword   . 1) keyword)
+      (1 (:parameter . 1) parameter)))
 
   (defrule (keyword-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&key
-           (* (<<- keyword-parameters (keyword-parameter seen)))
-           (? (<- allow-other-keys? '&allow-other-keys)))
-    (list (nreverse keyword-parameters)
-          (when allow-other-keys?
-            (bp:node* (:lambda-list-keyword :keyword (eg::%naturalize allow-other-keys?)
-                                            :source  allow-other-keys?)))))
+      (value (source)
+        (seq    (<-  keyword            (lambda-list-keyword '&key))
+             (* (<<- keyword-parameters (keyword-parameter seen)))
+             (? (<-  allow-other-keys   (lambda-list-keyword '&allow-other-keys)))))
+    source
+    (bp:node* (:keyword-section ; :source source
+               )
+      (1    (:keyword          . 1) keyword)
+      (*    (:parameter        . *) (nreverse keyword-parameters) :evaluation :compound)
+      (bp:? (:allow-other-keys . 1) allow-other-keys)))
 
   (defrule (aux-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&aux (* (<<- parameters (aux-parameter! seen))))
-    (nreverse parameters)))
+      (value (source)
+        (seq    (<-  keyword    (lambda-list-keyword '&aux))
+             (* (<<- parameters (aux-parameter! seen)))))
+    source
+    (bp:node* (:aux-section ; :source source
+               )
+      (1 (:keyword   . 1) keyword)
+      (* (:parameter . *) (nreverse parameters) :evaluation :compound))))
 
 ;;; 3.4.1 Ordinary Lambda Lists
 
 (defrule %ordinary-lambda-list (seen)
-    (list (? (<- required                    (required-section seen)))
-          (? (<- optional                    (optional-section seen)))
-          (? (<- rest                        (rest-section seen)))
-          (? (<- (keyword allow-other-keys?) (keyword-section seen)))
-          (? (<- aux                         (aux-section seen))))
-  (list required optional rest keyword allow-other-keys? aux))
+    (list (? (<- required (required-section seen)))
+          (? (<- optional (optional-section seen)))
+          (? (<- rest     (rest-section seen)))
+          (? (<- keyword  (keyword-section seen)))
+          (? (<- aux      (aux-section seen))))
+  (list required optional rest keyword aux))
 
 (define-syntax ordinary-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (required optional rest keyword allow-other-keys? aux)
+         (<- (required-section optional-section rest-section keyword-section aux-section)
              (%ordinary-lambda-list seen)))
-  ((required          *>)
-   (optional          *> :evaluation :compound)
-   (rest              ?)
-   (keyword           *> :evaluation :compound)
-   (allow-other-keys? ?)
-   (aux               *> :evaluation :compound)))
+  ((required-section  ?)
+   (optional-section  ? :evaluation :compound)
+   (rest-section      ?)
+   (keyword-section   ? :evaluation :compound)
+   (aux-section       ? :evaluation :compound)))
 
 (defrule ordinary-lambda-list! ()
   (must (ordinary-lambda-list) "must be an ordinary lambda list"))
@@ -154,21 +183,20 @@
 ;;; 3.4.2 Generic Function Lambda Lists
 
 (defrule %generic-function-lambda-list (seen)
-    (list (? (<- required                    (required-section seen)))
-          (? (<- optional                    (optional-section seen))) ; TODO disallow defaults
-          (? (<- rest                        (rest-section seen)))
-          (? (<- (keyword allow-other-keys?) (keyword-section seen)))) ; TODO disallow defaults
-  (list required optional rest keyword allow-other-keys?))
+    (list (? (<- required (required-section seen)))
+          (? (<- optional (optional-section seen))) ; TODO disallow defaults
+          (? (<- rest     (rest-section seen)))
+          (? (<- keyword  (keyword-section seen)))) ; TODO disallow defaults
+  (list required optional rest keyword))
 
 (define-syntax generic-function-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (required optional rest keyword allow-other-keys?)
+         (<- (required-section optional-section rest-section keyword-section)
              (%generic-function-lambda-list seen)))
-  ((required          *>)
-   (optional          *>)
-   (rest              ?)
-   (keyword           *>)
-   (allow-other-keys? ?)))
+  ((required-section ?)
+   (optional-section ?)
+   (rest-section     ?)
+   (keyword-section  ?)))
 
 (defrule generic-function-lambda-list! ()
   (must (generic-function-lambda-list)
@@ -189,29 +217,37 @@
              (must (list (<- name (unique-variable-name! seen))
                          (<- specializer (specializer)))
                    "must be of the form (NAME SPECIALIZER)"))
-        (and (not (lambda-list-keyword))
+        (and (not-lambda-list-keyword)
              (<- name (unique-variable-name! seen))))
   ((name        1)
    (specializer ? :evaluation :compound)))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defrule (specialized-required-section :environment (make-instance 'eg::expression-environment)) (seen)
+      (value (source)
+        (+ (<<- parameters (specialized-parameter seen))))
+    source
+    (bp:node* (:required-section ; :source source
+               )
+      (* (:parameter . *) (nreverse parameters) :evaluation :compound))))
+
 (defrule %specialized-lambda-list (seen)
-    (list (* (<<- required                    (specialized-parameter seen)))
-          (? (<-  optional                    (optional-section seen)))
-          (? (<-  rest                        (rest-section seen)))
-          (? (<-  (keyword allow-other-keys?) (keyword-section seen)))
-          (? (<-  aux                         (aux-section seen))))
-  (list (nreverse required) optional rest keyword allow-other-keys? aux))
+    (list (? (<- required (specialized-required-section seen)))
+          (? (<- optional (optional-section seen)))
+          (? (<- rest     (rest-section seen)))
+          (? (<- keyword  (keyword-section seen)))
+          (? (<- aux      (aux-section seen))))
+  (list required optional rest keyword aux))
 
 (define-syntax specialized-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (required optional rest keyword allow-other-keys? aux)
+         (<- (required-section optional-section rest-section keyword-section aux-section)
              (%specialized-lambda-list seen)))
-  ((required          *> :evaluation :compound)
-   (optional          *> :evaluation :compound)
-   (rest              ?)
-   (keyword           *> :evaluation :compound)
-   (allow-other-keys? ?)
-   (aux               *> :evaluation :compound)))
+  ((required-section  ? :evaluation :compound)
+   (optional-section  ? :evaluation :compound)
+   (rest-section      ?)
+   (keyword-section   ? :evaluation :compound)
+   (aux-section       ? :evaluation :compound)))
 
 (defrule specialized-lambda-list! ()
   (must (specialized-lambda-list)
@@ -242,36 +278,58 @@
 
 (defrule required-parameter! (seen) ; TODO this should use required-parameter
     (value (source)
-      (and (not (lambda-list-keyword))
+      (and (not-lambda-list-keyword)
            (<- name (unique-variable-name! seen))))
   (bp:node* (:required-parameter :source source)
     (1 (:name . 1) name :evaluation (if (eq (bp:node-kind* name) :pattern) :compound nil))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; This is like `required-section' in the ordinary lambda list
+  ;; grammar except that the `:evaluation' of all `:parameter's is
+  ;; `:compound'.
+  #+TODO (defrule (required-section :environment (make-instance 'eg::expression-environment)) (seen)
+      (value (source)
+        (+ (<<- parameters (required-parameter! seen))))
+    source
+    (bp:node* (:required-section ; :source source
+               )
+      (* (:parameter . *) (nreverse parameters) :evaluation :compound)))
+
   (defrule (whole-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&whole (<- name (unique-variable-name! seen)))
-    name)
+      (value (source)
+        (seq (<- keyword   (lambda-list-keyword '&whole))
+             (<- parameter (unique-variable-name! seen))))
+    source
+    (bp:node* (:whole-section ; :source source
+               )
+      (1 (:keyword   . 1) keyword)
+      (1 (:parameter . 1) parameter)))
 
   (defrule (environment-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&environment (<- name (unique-variable-name! seen)))
-    name))
+      (value (source)
+        (seq (<- keyword   (lambda-list-keyword '&environment))
+             (<- parameter (unique-variable-name! seen))))
+    source
+    (bp:node* (:environment-section ; :source source
+               )
+      (1 (:keyword   . 1) keyword)
+      (1 (:parameter . 1) parameter))))
 
 (define-syntax (pattern :arguments ((seen nil)))
-    (list* (? (<- whole    (whole-section seen)))
-           (? (<- required (required-section seen)))
-           (? (<- optional (optional-section seen)))
+    (list* (? (<- whole-section    (whole-section seen)))
+           (? (<- required-section (required-section seen)))
+           (? (<- optional-section (optional-section seen)))
            (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
-               (list (? (<- rest                    (rest-section seen)))
-                     (? (<- (key allow-other-keys?) (keyword-section seen)))
-                     (? (<- aux                     (aux-section seen))))))
-  ((whole             ?)
-   (required          *> :evaluation :compound)
-   (optional          *> :evaluation :compound)
-   (rest              ?)
-   (key               *> :evaluation :compound)
-   (allow-other-keys? ?)
-   (aux               *> :evaluation :compound)
-   (cdr               ?)))
+               (list (? (<- rest-section    (rest-section seen)))
+                     (? (<- keyword-section (keyword-section seen)))
+                     (? (<- aux-section     (aux-section seen))))))
+  ((whole-section    ?)
+   (required-section ? :evaluation :compound)
+   (optional-section ? :evaluation :compound)
+   (rest-section     ?)
+   (keyword-section  ? :evaluation :compound)
+   (aux-section      ? :evaluation :compound)
+   (cdr              ?)))
 
 (defrule %destructuring-lambda-list (seen)
     (list* (? (<- whole    (whole-section seen)))
@@ -282,27 +340,28 @@
            (? (<- optional (optional-section seen)))
            (? (<- env      #1#))
            (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
-               (list (? (<- rest                    (rest-section seen)))
-                     (? (<- env                     #1#))
-                     (? (<- (key allow-other-keys?) (keyword-section seen)))
-                     (? (<- env                     #1#))
-                     (? (<- aux                     (aux-section seen)))
-                     (? (<- env                     #1#)))))
-  (list whole env required optional rest key allow-other-keys? aux cdr))
+               (list (? (<- rest    (rest-section seen)))
+                     (? (<- env     #1#))
+                     (? (<- keyword (keyword-section seen)))
+                     (? (<- env     #1#))
+                     (? (<- aux     (aux-section seen)))
+                     (? (<- env     #1#)))))
+  (list whole env required optional rest keyword aux cdr))
 
 (define-syntax destructuring-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (whole env required optional rest keyword allow-other-keys? aux cdr)
+         (<- (whole-section env-section
+              required-section optional-section rest-section keyword-section aux-section
+              cdr)
              (%destructuring-lambda-list seen)))
-  ((whole             ?)
-   (env               ?)
-   (required          *> :evaluation :compound)
-   (optional          *> :evaluation :compound)
-   (rest              ?  :evaluation :compound)
-   (keyword           *> :evaluation :compound)
-   (allow-other-keys? ?)
-   (aux               *> :evaluation :compound)
-   (cdr               ?  :evaluation :compound)))
+  ((whole-section    ?)
+   (env-section      ?)
+   (required-section ? :evaluation :compound)
+   (optional-section ? :evaluation :compound)
+   (rest-section     ? :evaluation :compound)
+   (keyword-section  ? :evaluation :compound)
+   (aux-section      ? :evaluation :compound)
+   (cdr              ? :evaluation :compound)))
 
 (defrule destructuring-lambda-list! ()
   (must (destructuring-lambda-list)
@@ -323,17 +382,18 @@
 
 (define-syntax deftype-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (whole env required optional rest keyword allow-other-keys? aux cdr)
+         (<- (whole-section env-section
+              required-section optional-section rest-section keyword-section aux-section
+              cdr)
              ((%destructuring-lambda-list destructuring-lambda-list) seen)))
-  ((whole             ?)
-   (env               ?)
-   (required          *> :evaluation :compound)
-   (optional          *> :evaluation :compound)
-   (rest              ?  :evaluation :compound)
-   (keyword           *> :evaluation :compound)
-   (allow-other-keys? ?)
-   (aux               *> :evaluation :compound)
-   (cdr               ?  :evaluation :compound)))
+  ((whole-section    ?)
+   (env-section      ?)
+   (required-section ? :evaluation :compound)
+   (optional-section ? :evaluation :compound)
+   (rest-section     ? :evaluation :compound)
+   (keyword-section  ? :evaluation :compound)
+   (aux-section      ? :evaluation :compound)
+   (cdr              ? :evaluation :compound)))
 
 (defrule deftype-lambda-list! ()
   (must (deftype-lambda-list) "must be a DEFTYPE lambda list"))
