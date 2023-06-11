@@ -45,11 +45,12 @@
                               (:file       "bindings")
                               (:file       "pseudo-operators")
                               (:file       "special-operators")
-
+                              ;; Standard macros
                               (:file       "definition-macros")
                               (:file       "control-macros")
                               (:file       "debug-macros")
-                              (:file       "iteration-macros")))
+                              (:file       "iteration-macros")
+                              (:file       "io-macros")))
 
                 (:file        "classify"
                  :pathname    "code/classify"
@@ -86,10 +87,11 @@
                              (:file       "bindings")
                              (:file       "pseudo-operators")
                              (:file       "special-operators")
-
+                             ;; Standard macros
                              (:file       "definition-macros")
                              (:file       "control-macros")
-                             (:file       "debug-macros"))))
+                             (:file       "debug-macros")
+                             (:file       "io-macros"))))
 
   :perform    (test-op (operation component)
                 (uiop:symbol-call '#:s-expression-syntax.test '#:run-tests)))
