@@ -72,6 +72,6 @@
 ;;; Standard macro `remf'
 
 (define-macro remf
-  (list (<- place ((place! forms))) (<- indicator ((form! forms))))
+    (list (<- place ((place! forms))) (<- indicator ((form! forms))))
   ((place     1)
    (indicator 1 :evaluation t)))
