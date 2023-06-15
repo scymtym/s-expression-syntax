@@ -42,15 +42,15 @@
            ))))
 
 (defrule unique-variable-name (seen)
-    (and (lambda-list-variable-name)
-         (:compose ((variable-name/unchecked names)) (unique-name seen))))
+  (and (lambda-list-variable-name)
+       (:compose ((variable-name/unchecked names)) (unique-name seen))))
 
 (defrule unique-variable-name! (seen)
-    (and (<- name (lambda-list-variable-name!))
-         (or (:compose (:transform :any name) (unique-name seen))
-             (:transform :any
-               (let ((key (getf (bp:node-initargs* name) :name)))
-                 (:fatal (format nil "the variable name ~S occurs more than once" key)))))))
+  (and (<- name (lambda-list-variable-name!))
+       (or (:compose (:transform :any name) (unique-name seen))
+           (:transform :any
+             (let ((key (getf (bp:node-initargs* name) :name)))
+               (:fatal (format nil "the variable name ~S occurs more than once" key)))))))
 
 (define-syntax (required-parameter :arguments ((seen nil)))
     (<- name (unique-variable-name seen))
@@ -84,10 +84,10 @@
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not (lambda-list-keyword))
                       (unique-variable-name! seen))))
-  ((name      1)
-   (keyword   ?)
-   (default   ? :evaluation t)
-   (supplied  ?)))
+  ((name     1)
+   (keyword  ?)
+   (default  ? :evaluation t)
+   (supplied ?)))
 
 (define-syntax (aux-parameter :arguments ((seen nil)))
     (or (list (<- name (unique-variable-name! seen))
@@ -241,9 +241,9 @@
     (1 (:name . 1) name :evaluation (if (eq (bp:node-kind* name) :pattern) :compound nil))))
 
 (defrule required-parameter! (seen) ; TODO this should use required-parameter
-  (value (source)
-    (and (not (lambda-list-keyword))
-         (<- name (unique-variable-name! seen))))
+    (value (source)
+      (and (not (lambda-list-keyword))
+           (<- name (unique-variable-name! seen))))
   (bp:node* (:required-parameter :source source)
     (1 (:name . 1) name :evaluation (if (eq (bp:node-kind* name) :pattern) :compound nil))))
 

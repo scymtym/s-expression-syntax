@@ -340,10 +340,11 @@
     (list (<- name ((function-name! names)))
           (<- lambda-list ((generic-function-lambda-list! lambda-lists)))
           (* (or ;; Standard options
-                 (eg:option  :generic-function-class    (<- generic-function-class ((class-name! names))))
-                 (eg:option :argument-precedence-order
-                            (<- argument-precedence-order
-                                (:transform (* (<<- names ((lambda-list-variable-name! lambda-lists))))
+                 (eg:option  :generic-function-class
+                             (<- generic-function-class ((class-name! names))))
+                 (eg:option  :argument-precedence-order
+                             (<- argument-precedence-order
+                                 (:transform (* (<<- names ((lambda-list-variable-name! lambda-lists))))
                                   (when (null names)
                                     (:fatal (format nil "at least one name must follow ~S"
                                                     ':argument-precedence-order)))
@@ -358,18 +359,22 @@
                                         (:fatal (format nil "~S must match the set of required parameters ~:S"
                                                         order-names required-names))))
                                     names))))
-                 (eg:option  :method-combination        (<- method-combination ((method-combination-name! names)))
-                                                        (* (<<- method-combination-argument)))
-                 (eg:option  :method-class              (<- method-class ((class-name! names))))
-                 (eg:option* declare                    (:transform
-                                                           (* (and :any
-                                                                   (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
-                                                                   (<<- declarations ((declaration-specifier! declarations)))))
-                                                         (when (null declarations)
-                                                           (:fatal (format nil "at least one ~S declaration specifier must follow ~S"
-                                                                           'optimize 'declare)))
-                                                         declarations))
-                 (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
+                 (eg:option  :method-combination
+                             (<- method-combination ((method-combination-name! names)))
+                             (* (<<- method-combination-argument)))
+                 (eg:option  :method-class
+                             (<- method-class ((class-name! names))))
+                 (eg:option* declare
+                             (:transform
+                                (* (and :any
+                                        (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
+                                        (<<- declarations ((declaration-specifier! declarations)))))
+                              (when (null declarations)
+                                (:fatal (format nil "at least one ~S declaration specifier must follow ~S"
+                                                'optimize 'declare)))
+                              declarations))
+                 (eg:option  :documentation
+                             (<- documentation ((documentation-string! forms))))
                  (<<- method (method-description))
                  ;; Non-standard options are or the form (:NON-STANDARD-NAME . VALUE).
                  (<<- option (generic-function-option)))))
