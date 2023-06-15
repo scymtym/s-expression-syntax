@@ -22,6 +22,16 @@
    (datum    ? :evaluation t)
    (argument * :evaluation t)))
 
+;;; Standard macro `check-type'
+
+(define-macro check-type
+    (list (<- place ((place! forms)))
+          (<- type ((type-specifier! type-specifiers)))
+          (? (<- description ((form! forms)))))
+  ((place       1)
+   (type        1)
+   (description ? :evaluation t)))
+
 ;;; Standard macros `trace' and `untrace'
 
 (macrolet ((define (name)
