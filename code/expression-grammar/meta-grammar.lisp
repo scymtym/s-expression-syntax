@@ -46,11 +46,12 @@
           (flag    (or flag (gensym)))
           (message (format nil "~A must not be repeated"
                            (or name expression))))
-      `(:compose (<- ,flag (:transform (<- ,result ,expression)
-                             (when ,flag
-                               (:fatal ,message))
-                             t))
-                 (:transform :any ,result)))))
+      `(or (and (not :any) (<- ,flag :any))
+           (:transform (<- ,result ,expression)
+             (if ,flag
+                 (:fatal ,message)
+                 (setf ,flag t))
+             ,result)))))
 
 ;;; List-shaped options
 
