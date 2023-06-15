@@ -8,6 +8,20 @@
 
 (parser:in-grammar special-operators)
 
+;;; Standard macro `assert'
+
+(define-macro assert
+    (list (<- test ((form! forms)))
+          (? (seq (and :any
+                       (must (list (* (<<- place ((place forms)))))
+                             "must be a list of places"))
+                  (? (seq (<- datum ((form forms)))
+                          (* (<<- argument ((form forms)))))))))
+  ((test     1 :evaluation t)
+   (place    *)
+   (datum    ? :evaluation t)
+   (argument * :evaluation t)))
+
 ;;; Standard macros `trace' and `untrace'
 
 (macrolet ((define (name)
