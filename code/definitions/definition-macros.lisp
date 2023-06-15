@@ -344,6 +344,9 @@
                  (eg:option :argument-precedence-order
                             (<- argument-precedence-order
                                 (:transform (* (<<- names ((lambda-list-variable-name! lambda-lists))))
+                                  (when (null names)
+                                    (:fatal (format nil "at least one name must follow ~S"
+                                                    ':argument-precedence-order)))
                                   ;; Collect names of required parameters in
                                   ;; LAMBDA-LIST and ensure that all names
                                   ;; following :ARGUMENT-PRECEDENCE-ORDER
