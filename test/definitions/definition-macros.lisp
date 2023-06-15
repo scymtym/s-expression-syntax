@@ -636,7 +636,7 @@
   ;; Argument precedence order mismatch
   '((defgeneric foo (a b)
       (:argument-precedence-order . #13=(a c)))
-    syn:invalid-syntax-error #13# "(C A) must match the set of required parameters (A B)")
+    syn:invalid-syntax-error #13# "(A C) must match the set of required parameters (A B)")
   ;; Valid syntax
   '(#14=(defgeneric #15=foo #16=(#17=a #18=b)
          (:documentation #19="foo")

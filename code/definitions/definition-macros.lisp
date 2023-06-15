@@ -351,12 +351,13 @@
                                   ;; LAMBDA-LIST and ensure that all names
                                   ;; following :ARGUMENT-PRECEDENCE-ORDER
                                   ;; occur in that set of names.
-                                  (multiple-value-bind (compatiblep required-names order-names)
-                                      (verify-precedence-order names lambda-list)
-                                    (unless compatiblep
-                                      (:fatal (format nil "~S must match the set of required parameters ~S"
-                                                      order-names required-names))))
-                                  (nreverse names))))
+                                  (let ((names (nreverse names)))
+                                    (multiple-value-bind (compatiblep required-names order-names)
+                                        (verify-precedence-order names lambda-list)
+                                      (unless compatiblep
+                                        (:fatal (format nil "~S must match the set of required parameters ~:S"
+                                                        order-names required-names))))
+                                    names))))
                  (eg:option  :method-combination        (<- method-combination ((method-combination-name! names)))
                                                         (* (<<- method-combination-argument)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
