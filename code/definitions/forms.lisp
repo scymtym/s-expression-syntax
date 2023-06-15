@@ -72,24 +72,43 @@
       (:transform :any
         (:fatal "place must be a cons or a variable name"))))
 
-(defrule body ()
-    (list* (* (list 'declare
-                    (* (<<- declarations
-                            ((declaration-specifier! declarations))))))
-           (<- forms (forms)))
-  (list (nreverse declarations) forms))
+;;; Body
 
-(defrule docstring-body ()
+(define-syntax declaration
+    (list 'declare (* (<<- declaration-specifier
+                           ((declaration-specifier! declarations)))))
+    `(declare ,@declaration-specifier)
+  ((declaration-specifier *)))
+
+(defrule (declarations :environment (make-instance 'eg::expression-environment)) ()
+    (* (<<- declarations (declaration)))
+  (nreverse declarations))
+
+(defrule body ()
+    (list* (<- declarations (declarations)) (<- forms (forms)))
+  (list declarations forms))
+
+(defrule (declarations-and-docstring :environment (make-instance 'eg::expression-environment)) ()
+    ;; TODO cite docstring amidst declarations section
     ;; 3.4.11 Syntactic Interaction of Documentation Strings and Declarations
     ;; If the first form in the body is a string, it is a
     ;; documentation string. Exception: if the body consists of only
     ;; one form, the form is not a documentation string.
-    (or (list (and (guard stringp)
-                   (<- body (:transform (<- form (form))
-                              (list () (list form))))))
-        (list* (<- docstring (documentation-string)) (<- body (body)))
-        (<- body (body)))
-  (list* docstring body))
+    (seq (* (<<- declarations (declaration)))
+         (? (and (seq :any :any) ; docstring cannot be final sub-expression
+                 (seq (<- documentation (documentation-string)))))
+         (* (<<- declarations (declaration)))
+         (? (:transform (seq (guard :any (typep 'string))
+                             (list* 'declare :any))
+              (:fatal "only a single documentation string may appear amidst declarations"))))
+  (list (nreverse declarations) documentation))
+
+(defrule docstring-body ()
+    (list* (? (<- (declarations docstring) (declarations-and-docstring)))
+           (<- body (forms)))
+  (list declarations docstring body))
+
+;;; Tagbodies
 
 (defrule (tagbody-segment :environment (make-instance 'eg::expression-environment)) (seen first?)
     (value (source)
@@ -115,6 +134,5 @@
   (nreverse segments))
 
 (defrule tagbody-body ()
-    (list* (* (list 'declare (* (<<- declarations ((declaration-specifier! declarations))))))
-           (<- segments (tagbody-segments)))
-  (list (nreverse declarations) segments))
+    (list* (<- declarations (declarations)) (<- segments (tagbody-segments)))
+  (list declarations segments))

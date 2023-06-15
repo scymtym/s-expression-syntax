@@ -109,7 +109,7 @@
 
 (define-special-operator (lambda-expression :operator lambda)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((lambda-list   1  :evaluation :compound)
    (documentation ?)

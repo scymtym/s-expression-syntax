@@ -410,7 +410,7 @@
   '(#5=(symbol-macrolet ())
     (:symbol-macrolet () :source #5#))
   '(#6=(symbol-macrolet (#7=(#8=a #9=1) #10=(#11=b #12=2))
-         (declare #13=(type #14=bit #15=d))
+         #100=(declare #13=(type #14=bit #15=d))
          #16=c)
     (:symbol-macrolet
      ((:binding     . *) (((:symbol-macro-binding
@@ -433,14 +433,17 @@
                                                 :evaluation t)))
                             :source #10#)
                            :evaluation :compound))
-      (:declaration . *) (((:declaration-specifier
-                            ((:argument . *) (((:atomic-type-specifier
-                                                ((:name . 1) (((:type-name
-                                                                ()
-                                                                :name bit :source #14#))))
-                                                :source #14#))
-                                              ((:variable-name () :name d :source #15#))))
-                            :kind type :source #13#)))
+      (:declaration . *) (((:declaration
+                            ((:declaration-specifier . *)
+                             (((:declaration-specifier
+                                ((:argument . *) (((:atomic-type-specifier
+                                                    ((:name . 1) (((:type-name
+                                                                    ()
+                                                                    :name bit :source #14#))))
+                                                    :source #14#))
+                                                  ((:variable-name () :name d :source #15#))))
+                                :kind type :source #13#))))
+                            :source #100#)))
       (:form        . *) (((:unparsed
                             ()
                             :expression c :context :form :source #16#)
@@ -470,7 +473,7 @@
                        :evaluation :compound)))
       :source #5#))
   '(#7=(let (#8=(#9=a #10=1) #11=b #12=(#13=c #14=2))
-         (declare #15=(type #16=boolean #17=a)) #18=a)
+         #100=(declare #15=(type #16=boolean #17=a)) #18=a)
     (:let
      ((:binding . *)     (((:value-binding
                             ((:name  . 1) (((:variable-name () :name a :source #9#)
@@ -498,14 +501,17 @@
                                             :evaluation t)))
                             :source #12#)
                            :evaluation :compound))
-      (:declaration . *) (((:declaration-specifier
-                            ((:argument . *) (((:atomic-type-specifier
-                                                ((:name . 1) (((:type-name
-                                                                ()
-                                                                :name boolean :source #16#))))
-                                                :source #16#))
-                                           ((:variable-name () :name a :source #17#))))
-                            :kind type :source #15#)))
+      (:declaration . *) (((:declaration
+                            ((:declaration-specifier . *)
+                             (((:declaration-specifier
+                                ((:argument . *) (((:atomic-type-specifier
+                                                    ((:name . 1) (((:type-name
+                                                                    ()
+                                                                    :name boolean :source #16#))))
+                                                    :source #16#))
+                                                  ((:variable-name () :name a :source #17#))))
+                                :kind type :source #15#))))
+                            :source #100#)))
       (:form        . *) (((:unparsed
                             ()
                             :expression a :context :form :source #18#)
@@ -538,7 +544,7 @@
                        :evaluation :compound)))
       :source #5#))
   '(#7=(let* (#8=(#9=a #10=1) #11=b #12=(#13=c #14=2))
-         (declare #15=(type #16=boolean #17=a))
+         #100=(declare #15=(type #16=boolean #17=a))
          #18=a)
     (:let*
      ((:binding     . *) (((:value-binding
@@ -567,14 +573,17 @@
                                             :evaluation t)))
                             :source #12#)
                            :evaluation :compound))
-      (:declaration . *) (((:declaration-specifier
-                            ((:argument . *) (((:atomic-type-specifier
-                                                ((:name . 1) (((:type-name
-                                                                ()
-                                                                :name boolean :source #16#))))
-                                                :source #16#))
-                                              ((:variable-name () :name a :source #17#))))
-                            :kind type :source #15#)))
+      (:declaration . *) (((:declaration
+                            ((:declaration-specifier . *)
+                             (((:declaration-specifier
+                                ((:argument . *) (((:atomic-type-specifier
+                                                    ((:name . 1) (((:type-name
+                                                                    ()
+                                                                    :name boolean :source #16#))))
+                                                    :source #16#))
+                                                  ((:variable-name () :name a :source #17#))))
+                                :kind type :source #15#))))
+                            :source #100#)))
       (:form        . *) (((:unparsed
                             ()
                             :expression a :context :form :source #18#)
@@ -585,28 +594,34 @@
   ;; Valid syntax
   '(#1=(locally)
     (:locally () :source #1#))
-  '(#2=(locally (declare #3=(type #4=bit #5=a)))
+  '(#2=(locally #100=(declare #3=(type #4=bit #5=a)))
     (:locally
-     ((:declaration . *) (((:declaration-specifier
-                            ((:argument . *) (((:atomic-type-specifier
-                                                ((:name . 1) (((:type-name () :name bit :source #4#))))
-                                                :source #4#))
-                                              ((:variable-name () :name a :source #5#))))
-                            :kind type :source #3#))))
+     ((:declaration . *) (((:declaration
+                            ((:declaration-specifier . *)
+                             (((:declaration-specifier
+                                ((:argument . *) (((:atomic-type-specifier
+                                                    ((:name . 1) (((:type-name () :name bit :source #4#))))
+                                                    :source #4#))
+                                                  ((:variable-name () :name a :source #5#))))
+                                :kind type :source #3#))))
+                            :source #100#))))
       :source #2#))
   '(#6=(locally #7=a)
     (:locally
      ((:form . *) (((:unparsed () :expression a :context :form :source #7#)
                     :evaluation t)))
      :source #6#))
-  '(#8=(locally (declare #9=(type #10=bit #11=a)) #12=b)
+  '(#8=(locally #101=(declare #9=(type #10=bit #11=a)) #12=b)
     (:locally
-     ((:declaration . *) (((:declaration-specifier
-                            ((:argument . *) (((:atomic-type-specifier
-                                                ((:name . 1) (((:type-name () :name bit :source #10#))))
-                                                :source #10#))
-                                              ((:variable-name () :name a :source #11#))))
-                            :kind type :source #9#)))
+     ((:declaration . *) (((:declaration
+                            ((:declaration-specifier . *)
+                             (((:declaration-specifier
+                                ((:argument . *) (((:atomic-type-specifier
+                                                    ((:name . 1) (((:type-name () :name bit :source #10#))))
+                                                    :source #10#))
+                                                  ((:variable-name () :name a :source #11#))))
+                                :kind type :source #9#))))
+                            :source #101#)))
       (:form        . *) (((:unparsed () :expression b :context :form :source #12#)
                            :evaluation t)))
      :source #8#))
@@ -722,7 +737,7 @@
                        :evaluation :compound)))
      :source #6#))
   '(#10=(macrolet (#11=(#12=f #13=(#101=&whole #14=w #15=(#16=a #17=b) #102=&rest #18=c)
-                        (declare #19=(type #20=string #21=a))
+                        #100=(declare #19=(type #20=string #21=a))
                         #22=a)))
     (:macrolet
      ((:binding . *)
@@ -775,14 +790,17 @@
                                    :evaluation :compound)))
                                 :source #13#)
                                :evaluation :compound))
-          (:declaration . *) (((:declaration-specifier
-                                ((:argument . *) (((:atomic-type-specifier
-                                                    ((:name . 1) (((:type-name
-                                                                    ()
-                                                                    :name string :source #20#))))
-                                                    :source #20#))
-                                                  ((:variable-name () :name a :source #21#))))
-                                :kind type :source #19#)))
+          (:declaration . *) (((:declaration
+                                ((:declaration-specifier . *)
+                                 (((:declaration-specifier
+                                    ((:argument . *) (((:atomic-type-specifier
+                                                        ((:name . 1) (((:type-name
+                                                                        ()
+                                                                        :name string :source #20#))))
+                                                        :source #20#))
+                                                      ((:variable-name () :name a :source #21#))))
+                                    :kind type :source #19#))))
+                                :source #100#)))
           (:form        . *) (((:unparsed
                                 ()
                                 :expression a :context :form :source #22#)
@@ -857,7 +875,7 @@
                         :source #11#)
                        :evaluation :compound)))
      :source #10#))
-  '(#16=(flet (#17=(#18=f #19=() (declare #20=(type #21=bit #22=a)))))
+  '(#16=(flet (#17=(#18=f #19=() #100=(declare #20=(type #21=bit #22=a)))))
     (:flet
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #18#)
@@ -867,16 +885,19 @@
                                                ()
                                                :source #19#)
                                               :evaluation :compound))
-                         (:declaration . *) (((:declaration-specifier
-                                               ((:argument . *) (((:atomic-type-specifier
-                                                                   ((:name . 1) (((:type-name
-                                                                                   ()
-                                                                                   :name bit :source #21#))))
-                                                                   :source #21#))
-                                                                 ((:variable-name
-                                                                   ()
-                                                                   :name a :source #22#))))
-                                               :kind type :source #20#))))
+                         (:declaration . *) (((:declaration
+                                               ((:declaration-specifier . *)
+                                                (((:declaration-specifier
+                                                   ((:argument . *) (((:atomic-type-specifier
+                                                                       ((:name . 1) (((:type-name
+                                                                                       ()
+                                                                                       :name bit :source #21#))))
+                                                                       :source #21#))
+                                                                     ((:variable-name
+                                                                       ()
+                                                                       :name a :source #22#))))
+                                                   :kind type :source #20#))))
+                                               :source #100#))))
                         :source #17#)
                        :evaluation :compound)))
      :source #16#))
@@ -933,26 +954,28 @@
                                               :evaluation (:binding :namespace function
                                                                     :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
-                                               ((:required-section . 1) (((:required-section
-                                                                           ((:parameter . *) (((:required-parameter
-                                                                                                ((:name . 1) (((:variable-name
-                                                                                                                ()
-                                                                                                                :name a :source #14#)
-                                                                                                               :evaluation nil)))
-                                                                                                :source #14#)))))))
-                                                (:rest-section     . 1) (((:rest-section
-                                                                           ((:keyword   . 1) (((:lambda-list-keyword
-                                                                                                ()
-                                                                                                :keyword &rest :source #101#)))
-                                                                            (:parameter . 1) (((:variable-name
-                                                                                                ()
-                                                                                                :name b :source #15#))))))))
+                                               ((:required-section . 1)
+                                                (((:required-section
+                                                   ((:parameter . *) (((:required-parameter
+                                                                        ((:name . 1) (((:variable-name
+                                                                                        ()
+                                                                                        :name a :source #14#)
+                                                                                       :evaluation nil)))
+                                                                        :source #14#)))))))
+                                                (:rest-section     . 1)
+                                                (((:rest-section
+                                                   ((:keyword   . 1) (((:lambda-list-keyword
+                                                                        ()
+                                                                        :keyword &rest :source #101#)))
+                                                                     (:parameter . 1) (((:variable-name
+                                                                                         ()
+                                                                                         :name b :source #15#))))))))
                                                :source #13#)
                                               :evaluation :compound)))
                         :source #11#)
                        :evaluation :compound)))
      :source #10#))
-  '(#16=(labels (#17=(#18=f #19=() (declare #20=(type #21=bit #22=a)))))
+  '(#16=(labels (#17=(#18=f #19=() #100=(declare #20=(type #21=bit #22=a)))))
     (:labels
      ((:binding . *) (((:local-function-binding
                         ((:name        . 1) (((:function-name () :name f :source #18#)
@@ -962,16 +985,19 @@
                                                ()
                                                :source #19#)
                                               :evaluation :compound))
-                         (:declaration . *) (((:declaration-specifier
-                                               ((:argument . *) (((:atomic-type-specifier
-                                                                   ((:name . 1) (((:type-name
-                                                                                   ()
-                                                                                   :name bit :source #21#))))
-                                                                   :source #21#))
-                                                                 ((:variable-name
-                                                                   ()
-                                                                   :name a :source #22#))))
-                                               :kind type :source #20#))))
+                         (:declaration . *) (((:declaration
+                                               ((:declaration-specifier . *)
+                                                (((:declaration-specifier
+                                                   ((:argument . *) (((:atomic-type-specifier
+                                                                       ((:name . 1) (((:type-name
+                                                                                       ()
+                                                                                       :name bit :source #21#))))
+                                                                       :source #21#))
+                                                                     ((:variable-name
+                                                                       ()
+                                                                       :name a :source #22#))))
+                                                   :kind type :source #20#))))
+                                               :source #100#))))
                         :source #17#)
                        :evaluation :compound)))
      :source #16#))

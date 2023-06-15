@@ -963,14 +963,17 @@
                                   :source #6#)
                                  :evaluation :compound)))
                :source #4#))
-            '(#9=(,name () (declare #10=(ignore #11=a) #12=(inline #13=b)))
+            '(#9=(,name () #100=(declare #10=(ignore #11=a) #12=(inline #13=b)))
               (,kind
-               ((:declaration . *) (((:declaration-specifier
-                                      ((:argument . *) (((:variable-name () :name a :source #11#))))
-                                      :kind ignore :source #10#))
-                                    ((:declaration-specifier
-                                      ((:argument . *) (((:function-name () :name b :source #13#))))
-                                      :kind inline :source #12#))))
+               ((:declaration . *) (((:declaration
+                                      ((:declaration-specifier . *)
+                                       (((:declaration-specifier
+                                          ((:argument . *) (((:variable-name () :name a :source #11#))))
+                                          :kind ignore :source #10#))
+                                        ((:declaration-specifier
+                                          ((:argument . *) (((:function-name () :name b :source #13#))))
+                                          :kind inline :source #12#))))
+                                      :source #100#))))
                :source #9#))
             '(#14=(,name () #15=:foo #16=(list) #17=:bar #18=(progn))
               (,kind
