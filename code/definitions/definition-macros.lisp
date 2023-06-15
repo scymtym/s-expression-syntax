@@ -361,8 +361,14 @@
                  (eg:option  :method-combination        (<- method-combination ((method-combination-name! names)))
                                                         (* (<<- method-combination-argument)))
                  (eg:option  :method-class              (<- method-class ((class-name! names))))
-                 (eg:option* declare                    (and (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
-                                                             (<<- declarations ((declaration-specifier! declarations)))))
+                 (eg:option* declare                    (:transform
+                                                           (* (and :any
+                                                                   (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
+                                                                   (<<- declarations ((declaration-specifier! declarations)))))
+                                                         (when (null declarations)
+                                                           (:fatal (format nil "at least one ~S declaration specifier must follow ~S"
+                                                                           'optimize 'declare)))
+                                                         declarations))
                  (eg:option  :documentation             (<- documentation ((documentation-string! forms))))
                  (<<- method (method-description))
                  ;; Non-standard options are or the form (:NON-STANDARD-NAME . VALUE).
