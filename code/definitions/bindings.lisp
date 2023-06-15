@@ -39,7 +39,7 @@
 (define-syntax local-function-binding
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((name          1 :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
@@ -67,7 +67,7 @@
 (define-syntax local-macro-function-binding
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((name          1 :evaluation (make-instance 'binding-semantics
                                                :namespace 'function

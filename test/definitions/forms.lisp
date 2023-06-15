@@ -63,49 +63,70 @@
              ((:unparsed () :expression 1 :context :form :source #6#)
               (:unparsed () :expression 2 :context :form :source #7#))))
     ;; Valid declarations
-    '(((declare #8=(ignore #9=a)))
-      t nil (((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #9#))))
-               :kind ignore :source #8#))
+    '((#106=(declare #8=(ignore #9=a)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #9#))))
+                   :kind ignore :source #8#))))
+               :source #106#))
              ()))
-    '(((declare #10=(type #11=bit)))
-      t nil (((:declaration-specifier
-               ((:argument . *) (((:atomic-type-specifier
-                                   ((:name . 1) (((:type-name () :name bit :source #11#))))
-                                   :source #11#))))
-               :kind type :source #10#))
+    '((#105=(declare #10=(type #11=bit)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:atomic-type-specifier
+                                       ((:name . 1) (((:type-name () :name bit :source #11#))))
+                                       :source #11#))))
+                   :kind type :source #10#))))
+               :source #105#))
              ()))
-    '(((declare #12=(type #13=bit #14=a)))
-      t nil (((:declaration-specifier
-               ((:argument . *) (((:atomic-type-specifier
-                                   ((:name . 1) (((:type-name () :name bit :source #13#))))
-                                   :source #13#))
-                                 ((:variable-name () :name a :source #14#))))
-               :kind type :source #12#))
+    '((#104=(declare #12=(type #13=bit #14=a)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:atomic-type-specifier
+                                       ((:name . 1) (((:type-name () :name bit :source #13#))))
+                                       :source #13#))
+                                     ((:variable-name () :name a :source #14#))))
+                   :kind type :source #12#))))
+               :source #104#))
              ()))
-    '(((declare #15=(type #16=bit #17=a #18=b)))
-      t nil (((:declaration-specifier
-               ((:argument . *) (((:atomic-type-specifier
-                                   ((:name . 1) (((:type-name () :name bit :source #16#))))
-                                   :source #16#))
-                                 ((:variable-name () :name a :source #17#))
-                                 ((:variable-name () :name b :source #18#))))
-               :kind type :source #15#))
+    '((#103=(declare #15=(type #16=bit #17=a #18=b)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:atomic-type-specifier
+                                       ((:name . 1) (((:type-name () :name bit :source #16#))))
+                                       :source #16#))
+                                     ((:variable-name () :name a :source #17#))
+                                     ((:variable-name () :name b :source #18#))))
+                   :kind type :source #15#))))
+               :source #103#))
              ()))
     ;; Multiple declarations
-    '(((declare #19=(ignore #20=a)) (declare #21=(ignore #22=b)))
-      t nil (((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #20#))))
-               :kind ignore :source #19#)
-              (:declaration-specifier
-               ((:argument . *) (((:variable-name () :name b :source #22#))))
-               :kind ignore :source #21#))
+    '((#101=(declare #19=(ignore #20=a)) #102=(declare #21=(ignore #22=b)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #20#))))
+                   :kind ignore :source #19#))))
+               :source #101#)
+              (:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name b :source #22#))))
+                   :kind ignore :source #21#))))
+               :source #102#))
              ()))
     ;; Declarations and forms
-    '(((declare #23=(ignore #24=a)) #25=3 #26=4)
-      t nil (((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #24#))))
-               :kind ignore :source #23#))
+    '((#100=(declare #23=(ignore #24=a)) #25=3 #26=4)
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #24#))))
+                   :kind ignore :source #23#))))
+               :source #100#))
              ((:unparsed () :expression 3 :context :form :source #25#)
               (:unparsed () :expression 4 :context :form :source #26#))))))
 
@@ -118,30 +139,39 @@
     '((#1="foo") t nil
       (nil () ((:unparsed () :expression "foo" :context :form :source #1#))))
     ;; Declarations and docstrings
-    '(#2=((declare #3=(ignore #4=a)))
-      t #2# (nil
-             ((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #4#))))
-               :kind ignore :source #3#))
+    '(#2=(#103=(declare #3=(ignore #4=a)))
+      t #2# (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #4#))))
+                   :kind ignore :source #3#))))
+               :source #103#))
+             nil
              ()))
-    '(#5=((declare #6=(ignore #7=a)) #8="foo")
-      t #5# (nil
-             ((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #7#))))
-               :kind ignore :source #6#))
+    '(#5=(#102=(declare #6=(ignore #7=a)) #8="foo")
+      t #5# (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #7#))))
+                   :kind ignore :source #6#))))
+               :source #102#))
+             nil
              ((:unparsed () :expression "foo" :context :form :source #8#))))
-    '((#9="foo" (declare #10=(ignore #11=a)))
-      t nil ((:documentation () :string "foo" :source #9#)
-             ((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #11#))))
-               :kind ignore :source #10#))
+    '((#9="foo" #101=(declare #10=(ignore #11=a)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #11#))))
+                   :kind ignore :source #10#))))
+               :source #101#))
+             (:documentation () :string "foo" :source #9#)
              ()))
     ;; Forms and docstrings
     '((#12=1)
       t nil (nil () ((:unparsed () :expression 1 :context :form :source #12#))))
     '((#13="foo" #14=1)
-      t nil ((:documentation () :string "foo" :source #13#)
-             ()
+      t nil (()
+             (:documentation () :string "foo" :source #13#)
              ((:unparsed () :expression 1 :context :form :source #14#))))
     '((#15=1 #16="foo")
       t nil (nil () ((:unparsed () :expression 1     :context :form :source #15#)
@@ -160,10 +190,13 @@
     ;; Valid syntax
     '(#4=()
       t #4# (() ()))
-    '(#5=((declare #6=(ignore #7=a)))
-      t #5# (((:declaration-specifier
-               ((:argument . *) (((:variable-name () :name a :source #7#))))
-               :kind ignore :source #6#))
+    '(#5=(#100=(declare #6=(ignore #7=a)))
+      t #5# (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #7#))))
+                   :kind ignore :source #6#))))
+               :source #100#))
              ()))
     '(#8=(#9=7)
       t #8# (()

@@ -42,12 +42,12 @@
 (define-macro defun
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,lambda-list ,@(? documentation) ,@declaration ,@form)
   ((name          1)
    (lambda-list   1  :evaluation :compound)
-   (documentation ?)
    (declaration   *>)
+   (documentation ?)
    (form          *> :evaluation t)))
 
 ;;; Standard macro `define-compiler-macro'
@@ -55,12 +55,12 @@
 (define-macro define-compiler-macro
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((macro-lambda-list! macro-lambda-list)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,lambda-list ,@(? documentation) ,@declaration ,@form)
   ((name          1)
    (lambda-list   1)
-   (documentation ?)
    (declaration   *>)
+   (documentation ?)
    (form          *> :evaluation t)))
 
 ;;; Standard macro `defmacro'
@@ -68,12 +68,12 @@
 (define-macro defmacro
     (list* (<- name ((function-name/symbol! names)))
            (<- lambda-list ((macro-lambda-list! macro-lambda-list)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,lambda-list ,@(? documentation) ,@declaration ,@form)
   ((name          1)
    (lambda-list   1  :evaluation :compound)
-   (documentation ?)
    (declaration   *>)
+   (documentation ?)
    (form          *> :evaluation t)))
 
 ;;; Standard macro `defstruct' (including slot description, constructor, ...)
@@ -358,12 +358,12 @@
 (define-macro deftype
     (list* (<- name ((type-name! names)))
            (<- lambda-list ((deftype-lambda-list! deftype-lambda-list)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((name          1)
    (lambda-list   1  :evaluation :compound)
-   (documentation ?)
    (declaration   *>)
+   (documentation ?)
    (form          *> :evaluation t)))
 
 ;;; Standard macro `defgeneric'
@@ -377,14 +377,14 @@
          (must (list* :method
                       (* (<<- qualifier (qualifier)))
                       (<- lambda-list ((specialized-lambda-list! lambda-lists)))
-                      (<- (documentation declaration form) ((docstring-body forms))))
+                      (<- (declaration documentation form) ((docstring-body forms))))
                "must be of the form (:method QUALIFIER* LAMBDA-LIST DECLARATION* FORM*)"))
     `(:method ,@qualifier ,lambda-list
       ,@declaration ,@(? documentation) ,@form)
   ((qualifier     *)
    (lambda-list   1  :evaluation :compound)
-   (documentation ?)
    (declaration   *>)
+   (documentation ?)
    (form          *> :evaluation t)))
 
 (defun verify-precedence-order (precedence-order lambda-list)
@@ -479,14 +479,14 @@
     (list* (<- name ((function-name! names)))
            (* (<<- qualifier (qualifier)))
            (<- lambda-list ((specialized-lambda-list! lambda-lists)))
-           (<- (documentation declaration form) ((docstring-body forms))))
+           (<- (declaration documentation form) ((docstring-body forms))))
     `(,name ,@qualifier ,lambda-list
       ,@declaration ,@(? documentation) ,@form)
   ((name          1)
    (qualifier     *)
    (lambda-list   1 :evaluation :compound)
-   (documentation ?)
    (declaration   *>)
+   (documentation ?)
    (form          *> :evaluation t)))
 
 ;;; Standard macros `defpackage' and `in-package'

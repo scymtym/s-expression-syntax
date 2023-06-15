@@ -1006,14 +1006,17 @@
                                   :source #6#)
                                  :evaluation :compound)))
                :source #4#))
-            '(#9=(,name () (declare #10=(ignore #11=a) #12=(inline #13=b)))
+            '(#9=(,name () #100=(declare #10=(ignore #11=a) #12=(inline #13=b)))
               (,kind
-               ((:declaration . *) (((:declaration-specifier
-                                      ((:argument . *) (((:variable-name () :name a :source #11#))))
-                                      :kind ignore :source #10#))
-                                    ((:declaration-specifier
-                                      ((:argument . *) (((:function-name () :name b :source #13#))))
-                                      :kind inline :source #12#))))
+               ((:declaration . *) (((:declaration
+                                      ((:declaration-specifier . *)
+                                       (((:declaration-specifier
+                                          ((:argument . *) (((:variable-name () :name a :source #11#))))
+                                          :kind ignore :source #10#))
+                                        ((:declaration-specifier
+                                          ((:argument . *) (((:function-name () :name b :source #13#))))
+                                          :kind inline :source #12#))))
+                                      :source #100#))))
                :source #9#))
             '(#14=(,name () #15=:foo #16=(list) #17=:bar #18=(progn))
               (,kind
@@ -1304,7 +1307,7 @@
                        :source #12#)
                       :evaluation :compound)))
      :source #10#))
-  '(#19=(restart-case #20=1 #21=(#22=foo #23=() (declare #24=(ignore #25=x))))
+  '(#19=(restart-case #20=1 #21=(#22=foo #23=() #100=(declare #24=(ignore #25=x))))
     (:restart-case
      ((:form    . 1) (((:unparsed
                         ()
@@ -1313,11 +1316,14 @@
       (:clause  . *) (((:restart-clause
                         ((:name        . 1) (((:variable-name () :name foo :source #22#)))
                          (:lambda-list . 1) (((:ordinary-lambda-list () :source #23#)))
-                         (:declaration . *) (((:declaration-specifier
-                                               ((:argument . *)
-                                                (((:variable-name
-                                                   () :name x :source #25#))))
-                                               :kind ignore :source #24#))))
+                         (:declaration . *) (((:declaration
+                                               ((:declaration-specifier . *)
+                                                (((:declaration-specifier
+                                                   ((:argument . *)
+                                                    (((:variable-name
+                                                       () :name x :source #25#))))
+                                                   :kind ignore :source #24#))))
+                                               :source #100#))))
                         :source #21#)
                        :evaluation :compound)))
       :source #19#))

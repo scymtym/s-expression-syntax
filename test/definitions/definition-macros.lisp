@@ -97,36 +97,40 @@
   ;; Valid syntax
   '(#5=(defun #6=foo #7=(#8=bar #9=baz)
          #10="bla"
-         (declare #11=(type #12=integer #13=bar #14=baz))
+         #100=(declare #11=(type #12=integer #13=bar #14=baz))
          #15=(+ 1 2))
     (:defun
      ((:name          . 1) (((:function-name () :name foo :source #6#)))
       (:lambda-list   . 1) (((:ordinary-lambda-list
-                              ((:required-section . 1) (((:required-section
-                                                          ((:parameter . *) (((:required-parameter
-                                                                               ((:name . 1) (((:variable-name
-                                                                                               ()
-                                                                                               :name bar :source #8#)
-                                                                                              :evaluation nil)))
-                                                                               :source #8#))
-                                                                             ((:required-parameter
-                                                                               ((:name . 1) (((:variable-name
-                                                                                               ()
-                                                                                               :name baz :source #9#)
-                                                                                              :evaluation nil)))
-                                                                               :source #9#))))))))
+                              ((:required-section . 1)
+                               (((:required-section
+                                  ((:parameter . *) (((:required-parameter
+                                                       ((:name . 1) (((:variable-name
+                                                                       ()
+                                                                       :name bar :source #8#)
+                                                                      :evaluation nil)))
+                                                       :source #8#))
+                                                     ((:required-parameter
+                                                       ((:name . 1) (((:variable-name
+                                                                       ()
+                                                                       :name baz :source #9#)
+                                                                      :evaluation nil)))
+                                                       :source #9#))))))))
                               :source #7#)
                              :evaluation :compound))
+      (:declaration   . *) (((:declaration
+                              ((:declaration-specifier . *)
+                               (((:declaration-specifier
+                                  ((:argument . *) (((:atomic-type-specifier
+                                                      ((:name . 1) (((:type-name
+                                                                      ()
+                                                                      :name integer :source #12#))))
+                                                      :source #12#))
+                                                    ((:variable-name () :name bar :source #13#))
+                                                    ((:variable-name () :name baz :source #14#))))
+                                  :kind type :source #11#))))
+                              :source #100#)))
       (:documentation . 1) (((:documentation () :string "bla" :source #10#)))
-      (:declaration   . *) (((:declaration-specifier
-                              ((:argument . *) (((:atomic-type-specifier
-                                                  ((:name . 1) (((:type-name
-                                                                  ()
-                                                                  :name integer :source #12#))))
-                                                  :source #12#))
-                                                ((:variable-name () :name bar :source #13#))
-                                                ((:variable-name () :name baz :source #14#))))
-                              :kind type :source #11#)))
       (:form          . *) (((:unparsed
                               ()
                               :expression #15# :context :form :source #15#)
@@ -145,7 +149,7 @@
   ;; Valid syntax
   '(#4=(defmacro #5=foo #6=(#7=a #8=b)
          #9="bla"
-         (declare #10=(ignore #11=a))
+         #100=(declare #10=(ignore #11=a))
          #12=(list 'cons b b))
     (:defmacro
      ((:name          . 1) (((:function-name () :name foo :source #5#)))
@@ -169,10 +173,13 @@
                                  :evaluation :compound)))
                               :source #6#)
                              :evaluation :compound))
+      (:declaration   . *) (((:declaration
+                              ((:declaration-specifier . *)
+                               (((:declaration-specifier
+                                  ((:argument . *) (((:variable-name () :name a :source #11#))))
+                                  :kind ignore :source #10#))))
+                              :source #100#)))
       (:documentation . 1) (((:documentation () :string "bla" :source #9#)))
-      (:declaration   . *) (((:declaration-specifier
-                              ((:argument . *) (((:variable-name () :name a :source #11#))))
-                              :kind ignore :source #10#)))
       (:form          . *) (((:unparsed
                               ()
                               :expression #12# :context :form :source #12#)
@@ -604,8 +611,8 @@
   ;; Valid syntax
   '(#6=(deftype #7=foo #8=(#9=a #10=&key #11=b)
          #12="bla bli"
-         (declare #13=(ignore #14=a))
-         (declare #15=(ignore #16=b))
+         #105=(declare #13=(ignore #14=a))
+         #106=(declare #15=(ignore #16=b))
          #17=(list a b))
     (:deftype
      ((:name          . 1) (((:type-name () :name foo :source #7#)))
@@ -632,13 +639,19 @@
                                  :evaluation :compound)))
                               :source #8#)
                              :evaluation :compound))
+      (:declaration   . *) (((:declaration
+                              ((:declaration-specifier . *)
+                               (((:declaration-specifier
+                                  ((:argument . *) (((:variable-name () :name a :source #14#))))
+                                  :kind ignore :source #13#))))
+                              :source #105#))
+                            ((:declaration
+                              ((:declaration-specifier . *)
+                               (((:declaration-specifier
+                                  ((:argument . *) (((:variable-name () :name b :source #16#))))
+                                  :kind ignore :source #15#))))
+                              :source #106#)))
       (:documentation . 1) (((:documentation () :string "bla bli" :source #12#)))
-      (:declaration   . *) (((:declaration-specifier
-                              ((:argument . *) (((:variable-name () :name a :source #14#))))
-                              :kind ignore :source #13#))
-                            ((:declaration-specifier
-                              ((:argument . *) (((:variable-name () :name b :source #16#))))
-                              :kind ignore :source #15#)))
       (:form          . *) (((:unparsed
                               ()
                               :expression #17# :context :form :source #17#)
@@ -873,29 +886,33 @@
     (:defmethod
      ((:name        . 1) (((:function-name () :name foo :source #21#)))
       (:lambda-list . 1) (((:specialized-lambda-list
-                            ((:required-section  . 1) (((:required-section
-                                                         ((:parameter . *) (((:specialized-parameter
-                                                                              ((:name        . 1) (((:variable-name
-                                                                                                     ()
-                                                                                                     :name x :source #24#)))
-                                                                               (:specializer . 1) (((:type-name
-                                                                                                     ()
-                                                                                                     :name t :source #25#)
-                                                                                                    :evaluation :compound)))
-                                                                              :source #23#)
-                                                                             :evaluation :compound))))
-                                                        :evaluation :compound)))
+                            ((:required-section  . 1)
+                             (((:required-section
+                                ((:parameter . *) (((:specialized-parameter
+                                                     ((:name        . 1) (((:variable-name
+                                                                            ()
+                                                                            :name x :source #24#)))
+                                                      (:specializer . 1) (((:type-name
+                                                                            ()
+                                                                            :name t :source #25#)
+                                                                           :evaluation :compound)))
+                                                     :source #23#)
+                                                    :evaluation :compound))))
+                               :evaluation :compound)))
                             :source #22#)
                            :evaluation :compound)))
      :source #20#))
   '(#26=(defmethod #27=foo #28=()
-          #29="foo" (declare #30=(ignore)) #31=1)
+          #29="foo" #100=(declare #30=(ignore)) #31=1)
     (:defmethod
      ((:name          . 1) (((:function-name () :name foo :source #27#)))
       (:lambda-list   . 1) (((:specialized-lambda-list () :source #28#)
                              :evaluation :compound))
+      (:declaration   . *) (((:declaration
+                              ((:declaration-specifier . *)
+                               (((:declaration-specifier () :kind ignore :source #30#))))
+                              :source #100#)))
       (:documentation . 1) (((:documentation () :string #29# :source #29#)))
-      (:declaration   . *) (((:declaration-specifier () :kind ignore :source #30#)))
       (:form          . *) (((:unparsed
                               ()
                               :expression #31# :context :form :source #31#)
