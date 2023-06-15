@@ -46,6 +46,19 @@
    (declaration   *>)
    (form          *> :evaluation t)))
 
+;;; Standard macro `define-compiler-macro'
+
+(define-macro define-compiler-macro
+    (list* (<- name ((function-name! names)))
+           (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)) ; TODO ((macro-lambda-list! macro-lambda-list))
+               )
+           (<- (documentation declaration form) ((docstring-body forms))))
+  ((name          1)
+   (lambda-list   1)
+   (documentation ?)
+   (declaration   *>)
+   (form          *> :evaluation t)))
+
 ;;; Standard macro `defmacro'
 
 (define-macro defmacro
