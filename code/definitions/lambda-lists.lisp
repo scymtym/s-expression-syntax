@@ -260,10 +260,10 @@
     (list* (? (<- whole    (whole-section seen)))
            (? (<- required (required-section seen)))
            (? (<- optional (optional-section seen)))
-           (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
-               (list (? (<- rest                    (rest-section seen)))
+           (or (list (? (<- rest                    (rest-section seen)))
                      (? (<- (key allow-other-keys?) (keyword-section seen)))
-                     (? (<- aux                     (aux-section seen))))))
+                     (? (<- aux                     (aux-section seen))))
+               (<- cdr ((unique-variable-name! lambda-lists) seen))))
   ((whole             ?)
    (required          *> :evaluation :compound)
    (optional          *> :evaluation :compound)
@@ -281,13 +281,13 @@
            (? (<- env      #1#))
            (? (<- optional (optional-section seen)))
            (? (<- env      #1#))
-           (or (<- cdr ((unique-variable-name lambda-lists) seen)) ; TODO name!
-               (list (? (<- rest                    (rest-section seen)))
+           (or (list (? (<- rest                    (rest-section seen)))
                      (? (<- env                     #1#))
                      (? (<- (key allow-other-keys?) (keyword-section seen)))
                      (? (<- env                     #1#))
                      (? (<- aux                     (aux-section seen)))
-                     (? (<- env                     #1#)))))
+                     (? (<- env                     #1#)))
+               (<- cdr ((unique-variable-name! lambda-lists) seen))))
   (list whole env required optional rest key allow-other-keys? aux cdr))
 
 (define-syntax destructuring-lambda-list
@@ -302,7 +302,7 @@
    (keyword           *> :evaluation :compound)
    (allow-other-keys? ?)
    (aux               *> :evaluation :compound)
-   (cdr               ?  :evaluation :compound)))
+   (cdr               ?)))
 
 (defrule destructuring-lambda-list! ()
   (must (destructuring-lambda-list)
@@ -333,7 +333,7 @@
    (keyword           *> :evaluation :compound)
    (allow-other-keys? ?)
    (aux               *> :evaluation :compound)
-   (cdr               ?  :evaluation :compound)))
+   (cdr               ?)))
 
 (defrule deftype-lambda-list! ()
   (must (deftype-lambda-list) "must be a DEFTYPE lambda list"))
