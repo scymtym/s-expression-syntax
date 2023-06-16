@@ -72,6 +72,7 @@
                      ,(funcall success-cont environment)
                      ,(funcall failure-cont environment)))))
   (define-method typep %typep)
+  (define-method listp %listp)
   (define-method equal %equal)
   (define-method eql   %eql))
 
