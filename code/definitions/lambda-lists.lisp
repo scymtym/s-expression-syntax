@@ -91,14 +91,13 @@
    (supplied ?)))
 
 (define-syntax (aux-parameter :arguments ((seen nil)))
-    (or (list (<- name (unique-variable-name! seen))
+    (or (list (<- name (and (not (lambda-list-keyword))
+                            (unique-variable-name! seen)))
               (? (<- value ((form! forms)))))
-        (<- name (unique-variable-name! seen)))
+        (<- name (and (not (lambda-list-keyword))
+                      (unique-variable-name! seen))))
   ((name  1)
    (value ? :evaluation t)))
-
-(defrule aux-parameter! (seen)
-  (must (aux-parameter seen) "must be an aux parameter"))
 
 ;;; Reusable sections of lambda lists
 
@@ -125,7 +124,7 @@
                                             :source  allow-other-keys?)))))
 
   (defrule (aux-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&aux (* (<<- parameters (aux-parameter! seen))))
+      (seq '&aux (* (<<- parameters (aux-parameter seen))))
     (nreverse parameters)))
 
 ;;; 3.4.1 Ordinary Lambda Lists
