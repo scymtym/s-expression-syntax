@@ -17,7 +17,8 @@
 
 ;; TODO could use lambda-list-keywords
 (defrule lambda-list-keyword ()
-  (or '&whole '&environment '&optional '&rest '&key '&aux '&allow-other-keys))
+  (or '&whole '&environment
+      '&optional '&rest '&body '&key '&aux '&allow-other-keys))
 
 (defrule lambda-list-variable-name ()
   (and (not (lambda-list-keyword))
@@ -254,13 +255,18 @@
 
   (defrule (environment-section :environment (make-instance 'eg::expression-environment)) (seen)
       (seq '&environment (<- name (unique-variable-name! seen)))
-    name))
+    name)
+
+  ;; TODO should be able to use the name `rest-section' here
+  (defrule (destructuring-rest-section :environment (make-instance 'eg::expression-environment)) (seen)
+      (seq (or '&rest '&body) (<- parameter (rest-parameter seen)))
+    parameter))
 
 (define-syntax (pattern :arguments ((seen nil)))
     (list* (? (<- whole    (whole-section seen)))
            (? (<- required (required-section seen)))
            (? (<- optional (optional-section seen)))
-           (or (list (? (<- rest                    (rest-section seen)))
+           (or (list (? (<- rest                    (destructuring-rest-section seen)))
                      (? (<- (key allow-other-keys?) (keyword-section seen)))
                      (? (<- aux                     (aux-section seen))))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
@@ -281,7 +287,7 @@
            (? (<- env      #1#))
            (? (<- optional (optional-section seen)))
            (? (<- env      #1#))
-           (or (list (? (<- rest                    (rest-section seen)))
+           (or (list (? (<- rest                    (destructuring-rest-section seen)))
                      (? (<- env                     #1#))
                      (? (<- (key allow-other-keys?) (keyword-section seen)))
                      (? (<- env                     #1#))
