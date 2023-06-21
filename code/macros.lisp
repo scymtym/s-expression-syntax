@@ -6,7 +6,7 @@
 
 (cl:in-package #:s-expression-syntax)
 
-(defmacro define-syntax (name-and-options syntax parts &rest options)
+(defmacro define-syntax (name-and-options syntax unparser parts &rest options)
   (destructuring-bind (name &key (grammar  (parser.packrat.grammar:name
                                             parser.packrat::*grammar*))
                                  arguments
@@ -58,10 +58,16 @@
                                       `'(,name ,@arguments)
                                       `',name)
                         :grammar ',grammar
+                        :unparser (lambda (initargs &key ,@(mapcar #'first parts))
+                                    (declare (ignorable initargs))
+                                    (flet ((? (thing &optional (value thing) &rest more-values)
+                                             (when thing (list* value more-values))))
+                                      (declare (ignorable #'?))
+                                      ,unparser))
                         ,@(when documentation
                             `(:documentation ,documentation)))))))
 
-(defmacro define-special-operator (name-and-options syntax &rest parts)
+(defmacro define-special-operator (name-and-options syntax unparser &rest parts)
   (check-type syntax (cons (member list list*)))
   (destructuring-bind (name &rest options
                             &key (operator name) &allow-other-keys)
@@ -69,10 +75,12 @@
     (let ((other-options (a:remove-from-plist options :operator)))
       `(define-syntax (,name :class special-operator-syntax ,@other-options)
            (,(first syntax) ',operator ,@(rest syntax))
+           (list* ',operator ,unparser)
          ,@parts))))
 
-(defmacro define-macro (name syntax &rest parts)
+(defmacro define-macro (name syntax unparser &rest parts)
   (check-type syntax (cons (member list list*)))
   `(define-syntax (,name :class macro-syntax)
        (,(first syntax) ',name ,@(rest syntax))
+       (list* ',name ,unparser)
      ,@parts))

@@ -17,6 +17,9 @@
                                  (? (<- step ((form! forms)))))))
                    "must be of the form (VARIABLE [INIT-FORM [STEP-FORM]])"))
         (<- variable ((unique-variable-name! lambda-lists) seen)))
+    (if init
+        `(,variable ,init ,@(? step))
+        variable)
   ((variable 1 :evaluation (load-time-value
                             (make-instance 'binding-semantics
                                            :namespace 'variable
@@ -36,6 +39,8 @@
                                (* (<<- result ((form! forms)))))
                          "must be of the form (END-TEST RESULT*)")
                    (<- (declaration segment) ((tagbody-body forms))))
+            `((,@variable) (,end-test ,@result)
+              ,@declaration ,@(apply #'append segment)) ; TODO
           ((variable    *  :evaluation :compound) ; :order order
            (end-test    1  :evaluation t)
            (result      *  :evaluation t)
@@ -53,6 +58,8 @@
                                              (? (<- result ((form! forms)))))))
                                "must be of the form (VARIABLE [PACKAGE [RESULT]])")
                          (<- (declaration segment) ((tagbody-body forms))))
+                  `((,variable ,@(? package) ,@(? result))
+                    ,@declaration ,@ (apply #'append segment))
                 ((variable    1 :evaluation (load-time-value
                                              (make-instance 'binding-semantics
                                                             :namespace 'variable
@@ -70,6 +77,7 @@
                        (? (<- result ((form! forms)))))
                  "must be of the form (VARIABLE [RESULT])")
            (<- (declaration segment) ((tagbody-body forms))))
+    `((,variable ,@(? result)) ,@declaration ,@(apply #'append segment))
   ((variable    1 :evaluation (load-time-value
                                (make-instance 'binding-semantics
                                               :namespace 'variable
@@ -90,6 +98,8 @@
                          ,(format nil "must be of the form (VARIABLE ~A [RESULT])"
                                   source-name))
                    (<- (declaration segment) ((tagbody-body forms))))
+            `((,variable ,,source-name ,@(? result))
+              ,@declaration ,@(apply #'append segment))
           ((variable     1 :evaluation (load-time-value
                                         (make-instance 'binding-semantics
                                                        :namespace 'variable

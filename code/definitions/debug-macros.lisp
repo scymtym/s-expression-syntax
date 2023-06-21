@@ -17,6 +17,7 @@
                              "must be a list of places"))
                   (? (seq (<- datum ((form forms)))
                           (* (<<- argument ((form forms)))))))))
+    `(,test ,@(? `(,@place)) ,@(? datum) ,@argument)
   ((test     1 :evaluation t)
    (place    *)
    (datum    ? :evaluation t)
@@ -28,6 +29,7 @@
     (list (<- place ((place! forms)))
           (<- type ((type-specifier! type-specifiers)))
           (? (<- description ((form! forms)))))
+    `(,place ,type ,@(? description))
   ((place       1)
    (type        1)
    (description ? :evaluation t)))
@@ -37,6 +39,7 @@
 (macrolet ((define (name)
              `(define-macro ,name
                   (list (* (<<- function-name ((function-name! names)))))
+                  `(,@function-name)
                 ((function-name *)))))
   (define trace)
   (define untrace))
@@ -47,6 +50,7 @@
              `(define-macro ,name
                   (list* (must (list (<- form ((form! forms))))
                                "must be a single form"))
+                  `(,form)
                 ((form 1 :evaluation t)))))
   (define time)
   (define step))

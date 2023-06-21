@@ -12,6 +12,7 @@
 
 (define-macro with-standard-io-syntax
     (list (* (<<- form ((form forms)))))
+    form
   ((form * :evaluation t)))
 
 (define-macro with-input-from-string
@@ -22,6 +23,11 @@
                               (seq :end   (<- end   ((form! forms)))))))
                  "must be of the form (VAR STRING &KEY INDEX START END)")
            (<- (declaration form) ((body forms))))
+    `((,var ,string
+       ,@(? index :index index)
+       ,@(? start :start start)
+       ,@(? end   :end   end))
+      ,@declaration ,@form)
   ((var         1  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
                                               :scope     :lexical
@@ -39,6 +45,8 @@
                                (? (seq :element-type (<- element-type ((form! forms))))))))
                  "must be of the form (VAR STRING &key ELEMENT-TYPE)")
            (<- (declaration form) ((body forms))))
+    `((,var ,@(? string) ,@(? element-type :element-type element-type))
+      ,@declaration ,@form)
   ((var          1  :evaluation (make-instance 'binding-semantics
                                                :namespace 'variable
                                                :scope     :lexical
@@ -54,6 +62,7 @@
                        (* (<<- option ((form forms)))))
                  "must be of the form (STREAM FILESPEC OPTION*)")
            (<- (declaration form) ((body forms))))
+    `((,stream ,filespec ,@option) ,@declaration ,@form)
   ((stream      1  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
                                               :scope     :lexical
@@ -68,6 +77,7 @@
                        (<- stream ((form! forms))))
                  "must be of the form (VAR STREAM)")
            (<- (declaration form) ((body forms))))
+    `((,var ,stream) ,@declaration ,@form)
   ((var         1  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
                                               :scope     :lexical
@@ -83,6 +93,7 @@
                                         ((unparsed-expression forms)
                                          :format-control)))
                 "must be a format control string"))
+    `(,control-string)
   ((control-string 1)))
 
 ;;; Pretty printer
@@ -95,6 +106,11 @@
                               (seq :suﬃx           (<- suﬃx            ((form! forms)))))))
                  "must be of the form (STREAM-DESIGNATOR OBJECT &key PREFIX PER-LINE-PREFIX SUFFIX)")
            (<- (declaration form) ((body forms))))
+    `((,stream-symbol ,object
+       ,@(? prefix          :prefix          prefix)
+       ,@(? per-line-prefix :per-line-prefix per-line-prefix)
+       ,@(? suffix          :suffix          suffix))
+      ,@declaration ,@form)
   ((stream-symbol   1  :evaluation (make-instance 'binding-semantics
                                                   :namespace 'variable
                                                   :scope     :lexical
@@ -108,10 +124,12 @@
 
 (define-macro pprint-exit-if-list-exhausted
     (list* (must (list) "no arguments allowed"))
+    '()
   ())
 
 (define-macro pprint-pop
     (list* (must (list) "no arguments allowed"))
+    '()
   ())
 
 ;;;
@@ -123,6 +141,10 @@
                               (seq :identity (<- identity ((form! forms)))))))
                  "must be of the form (OBJECT STREAM &key TYPE IDENTITY)")
            (<- form ((forms forms))))
+    `((,object ,stream
+       ,@(? type     :type     type)
+       ,@(? identity :identity identity))
+      ,@form)
   ((object   1  :evaluation t)
    (stream   1  :evaluation t)
    (type     ?  :evaluation t)

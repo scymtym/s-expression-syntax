@@ -14,6 +14,9 @@
     (or (<- name ((variable-name names))) ; TODO repeated variable names
         (list (<- name ((variable-name! names)))
               (? (and :any (<- value ((form! forms)))))))
+    (if value
+        `(,name ,value)
+        name)
   ((name  1 :evaluation (make-instance 'binding-semantics
                                        :namespace 'variable
                                        :scope     :lexical
@@ -37,6 +40,7 @@
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((name          1 :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
                                                :scope     :lexical
@@ -64,6 +68,7 @@
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)))
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((name          1 :evaluation (make-instance 'binding-semantics
                                                :namespace 'function
                                                :scope     :lexical
@@ -88,6 +93,7 @@
 
 (define-syntax symbol-macro-binding
     (list (<- name ((variable-name! names))) (<- expansion ((form! forms))))
+  `(,name ,expansion)
   ((name      1 :evaluation (make-instance 'binding-semantics
                                            :namespace 'variable
                                            :scope     :lexical

@@ -16,16 +16,18 @@
 (let ((lambda-expression (find-syntax 'lambda-expression)))
   (setf (find-syntax 'lambda)
         (make-instance 'syntax-description
-                       :name    'lambda
-                       :parts   (parts lambda-expression)
-                       :rule    '(lambda-expression (kind :lambda))
-                       :grammar 'special-operators)))
+                       :name     'lambda
+                       :parts    (parts lambda-expression)
+                       :rule     '(lambda-expression (kind :lambda))
+                       :grammar  'special-operators
+                       :unparser (%unparser lambda-expression))))
 
 ;;; Standard macros `and' and `or'
 
 (macrolet ((define (name)
              `(define-macro ,name
                   (list (* (<<- form ((form! forms)))))
+                  form
                 ((form * :evaluation t)))))
   (define and)
   (define or))
@@ -34,6 +36,7 @@
 
 (define-syntax cond-clause
     (list* (<- test ((form! forms))) (<- form ((forms forms))))
+    `(,test ,@form)
   ((test 1  :evaluation t)
    (form *> :evaluation t)))
 
@@ -42,6 +45,7 @@
 
 (define-macro cond
     (list (* (<<- clause (cond-clause!))))
+    clause
   ((clause * :evaluation :compound)))
 
 ;;; Standard macros `when' and `unless'
@@ -50,6 +54,7 @@
              `(define-macro ,name
                   (list (<- test ((form! forms)))
                         (* (<<- form ((form! forms)))))
+                  `(,test ,@form)
                 ((test 1 :evaluation t)
                  (form * :evaluation t)))))
   (define when)
@@ -70,6 +75,7 @@
     (list (or (list (* (<<- key ((unparsed-expression forms) ':key))))
               (<<- key (normal-key allow-otherwise?)))
           (* (<<- form ((form! forms)))))
+    `(,key ,@form)
   ((key  *)
    (form * :evaluation t)))
 
@@ -79,6 +85,7 @@
 
 (define-syntax case-otherwise-clause
     (list (otherwise-key) (* (<<- form ((form! forms)))))
+    `(otherwise ,@form)
   ((form * :evaluation t)))
 
 (defrule case-clauses ()
@@ -96,18 +103,21 @@
 
 (define-macro case
     (list* (<- keyform ((form! forms))) (<- clause (case-clauses)))
-  ((keyform 1  :evaluation t)
+    `(,keyform ,@clause)
+  ((keyform 1  :evaluation t) ; TODO remove form
    (clause  *> :evaluation :compound)))
 
 (define-macro ccase
     (list (<- keyplace ((place! forms)))
           (* (<<- clause (case-normal-clause! 't))))
+    `(,keyplace ,@clause)
   ((keyplace 1 :evaluation t)
    (clause   * :evaluation :compound)))
 
 (define-macro ecase
     (list (<- keyform ((form! forms)))
           (* (<<- clause (case-normal-clause! 't))))
+    `(,keyform ,@clause)
   ((keyform 1 :evaluation t)
    (clause  * :evaluation :compound)))
 
@@ -121,6 +131,7 @@
                      (:fatal "CL:OTHERWISE does not name a compound type"))))
               (<- type ((type-specifier! type-specifiers))))
           (* (<<- form ((form! forms)))))
+    `(,type ,@form)
   ((type 1)
    (form * :evaluation t)))
 
@@ -130,6 +141,7 @@
 
 (define-syntax typecase-otherwise-clause
     (list 'otherwise (* (<<- form ((form! forms)))))
+    `(otherwise ,@form)
   ((form * :evaluation t)))
 
 (defrule typecase-clauses ()
@@ -147,18 +159,21 @@
 
 (define-macro typecase
     (list* (<- keyform ((form! forms))) (<- clause (typecase-clauses)))
+    `(,keyform ,@clause)
   ((keyform 1  :evaluation t)
    (clause  *> :evaluation :compound)))
 
 (define-macro ctypecase
     (list (<- keyplace ((place! forms)))
           (* (<<- clause (typecase-normal-clause!))))
+    `(,keyplace ,@clause)
   ((keyplace 1 :evaluation t)
    (clause   * :evaluation :compound)))
 
 (define-macro etypecase
     (list (<- keyform ((form! forms)))
           (* (<<- clause (typecase-normal-clause!))))
+    `(,keyform ,@clause)
   ((keyform 1 :evaluation t)
    (clause  * :evaluation :compound)))
 
@@ -169,6 +184,7 @@
              `(define-macro ,name
                   (list* (<- binding (value-bindings!))
                          (<- (declaration segment) ((tagbody-body forms))))
+                  `((,@binding) ,@declaration ,@(apply #'append segment)) ; TODO
                 ((binding     *> :evaluation :compound) ; TODO :order order
                  (declaration *>)
                  (segment     *> :evaluation :compound)))))
@@ -184,6 +200,7 @@
     (list (must (<- first ((form! forms)))
                 "must be of the form (prog1 FIRST-FORM FORM*)")
           (* (<<- rest ((form! forms)))))
+    `(,first ,@rest)
   ((first 1 :evaluation t)
    (rest  * :evaluation t)))
 
@@ -192,6 +209,7 @@
                      (<- second ((form! forms))))
                 "must be of the form (prog2 FIRST-FORM SECOND-FORM FORM*)")
           (* (<<- rest ((form! forms)))))
+    `(,first ,second ,@rest)
   ((first  1 :evaluation t)
    (second 1 :evaluation t)
    (rest   * :evaluation t)))
@@ -201,6 +219,7 @@
 (define-syntax handler-binding
     (list (<- type ((type-specifier! type-specifiers)))
           (<- form ((form! forms))))
+  `(,type ,form)
   ((type 1)
    (form 1 :evaluation t)))
 
@@ -211,6 +230,7 @@
     (list* (must (list (* (<<- binding (handler-binding!))))
                  "must be a list of handler bindings")
            (<- form (forms)))
+    `((,@binding) ,@form)
   ((binding *  :evaluation :compound)
    (form    *> :evaluation t)))
 
@@ -219,6 +239,7 @@
            (must (list (? (<- variable ((required-parameter! lambda-lists) '()))))
                  "must be a lambda list with zero or one required parameter")
            (<- (declaration form) ((body forms))))
+  `(,type (,variable) ,@declaration ,@form)
   ((type        1)
    (variable    ?  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
@@ -231,6 +252,7 @@
     (list* :no-error
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (declaration form) ((body forms))))
+    `(:no-error ,lambda-list ,@declaration ,@form)
   ((lambda-list 1  :evaluation :compound)
    (declaration *>)
    (form        *> :evaluation t)))
@@ -242,6 +264,7 @@
                  (<<- clause (handler-clause))))
           (must (not :any)
                 "must be a list of handler clauses"))
+    `(,@form ,@clause ,@(? no-error-clause))
   ((form            1 :evaluation t)
    (clause          * :evaluation :compound)
    (no-error-clause ? :evaluation :compound)))
@@ -257,6 +280,10 @@
                              (<- report-function ((form! forms))))
                  (eg:poption :test-function
                              (<- test-function ((form! forms)))))))
+    `(,name ,function
+      ,@(? interactive-function :interactive-function interactive-function)
+      ,@(? report-function      :report-function      report-function)
+      ,@(? test-function        :test-function        test-function))
   ((name                 1)
    (function             1 :evaluation t)
    (interactive-function ? :evaluation t)
@@ -270,6 +297,7 @@
     (list* (must (list (* (<<- binding (restart-binding!))))
                  "must be a list of restart bindings")
            (<- form ((forms forms))))
+    `((,@binding) ,@form)
   ((binding *  :evaluation :compound)
    (form    *> :evaluation t)))
 
@@ -291,6 +319,16 @@
            (:transform (<- (declaration form) ((body forms)))
              (when (not (or name report-string report-name report-lambda))
                (:fatal "for an unnamed restart, the :REPORT option must be supplied"))))
+    `(,name ,lambda-list
+      ,@(? interactive-name   :interactive interactive-name)
+      ,@(? interactive-lambda :interactive interactive-lambda)
+      ,@(? report-string      :report      report-string)
+      ,@(? report-name        :report      report-name)
+      ,@(? report-lambda      :report      report-lambda)
+      ,@(? test-name          :test        test-name)
+      ,@(? test-lambda        :test        test-lambda)
+      ,@declaration
+      ,@form)
   ((name               1)
    (lambda-list        1)
    (interactive-name   ?)
@@ -307,5 +345,6 @@
     (list (<- form ((form forms)))
           (* (<<- clause (restart-clause)))
           (must (not :any) "must be a list of restart clauses"))
+    `(,form ,@clause)
   ((form   1 :evaluation t)
    (clause * :evaluation :compound)))
