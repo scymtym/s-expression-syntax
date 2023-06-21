@@ -73,7 +73,7 @@
    (form        *> :evaluation t)))
 
 (define-macro with-open-stream
-    (list* (must (list (<- var   ((variable-name! names)))
+    (list* (must (list (<- var    ((variable-name! names)))
                        (<- stream ((form! forms))))
                  "must be of the form (VAR STREAM)")
            (<- (declaration form) ((body forms))))
