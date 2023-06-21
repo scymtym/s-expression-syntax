@@ -54,6 +54,7 @@
 
 (define-syntax (required-parameter :arguments ((seen nil)))
     (<- name (unique-variable-name seen))
+    name
   ((name 1)))
 
 (defrule required-parameter! (seen) ; TODO this should use required-parameter
@@ -69,6 +70,9 @@
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
+    (if (not (null default))
+        `(,name ,default ,@(? supplied))
+        name)
   ((name     1)
    (default  ? :evaluation t)
    (supplied ?)))
@@ -84,6 +88,12 @@
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
+    (let ((name (if (not (null keyword))
+                    `(,keyword ,name)
+                    name)))
+      (if (or (not (null keyword)) (not (null default)))
+          `(,name ,@(? default) ,@(? supplied))
+          name))
   ((name     1)
    (keyword  ?)
    (default  ? :evaluation t)
@@ -93,6 +103,9 @@
     (or (list (<- name (unique-variable-name! seen))
               (? (<- value ((form! forms)))))
         (<- name (unique-variable-name! seen)))
+    (if (not (null value))
+        `(name ,value)
+        name)
   ((name  1)
    (value ? :evaluation t)))
 
@@ -171,6 +184,7 @@
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required-section optional-section rest-section keyword-section aux-section)
              (%ordinary-lambda-list seen)))
+    `(,@required-section ,@optional-section ,@rest-section ,@keyword-section ,@aux-section)
   ((required-section  ?)
    (optional-section  ? :evaluation :compound)
    (rest-section      ?)
@@ -193,6 +207,7 @@
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required-section optional-section rest-section keyword-section)
              (%generic-function-lambda-list seen)))
+    `(,@required-section ,@optional-section ,@rest-section ,@keyword-section)
   ((required-section ?)
    (optional-section ?)
    (rest-section     ?)
@@ -207,6 +222,7 @@
 (define-syntax eql-specializer
     (list* 'eql (must (list (<- object ((form! forms))))
                       "must be a single object"))
+    `(eql ,object)
   ((object 1 :evaluation t)))
 
 (defrule specializer ()
@@ -219,6 +235,9 @@
                    "must be of the form (NAME SPECIALIZER)"))
         (and (not-lambda-list-keyword)
              (<- name (unique-variable-name! seen))))
+    (if (not (null specializer))
+        `(,name ,specializer)
+        name)
   ((name        1)
    (specializer ? :evaluation :compound)))
 
@@ -243,6 +262,7 @@
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required-section optional-section rest-section keyword-section aux-section)
              (%specialized-lambda-list seen)))
+    `(,@required-section ,@optional-section ,@rest-section ,@keyword-section ,@aux-section)
   ((required-section  ? :evaluation :compound)
    (optional-section  ? :evaluation :compound)
    (rest-section      ?)
@@ -323,6 +343,10 @@
                (list (? (<- rest-section    (rest-section seen)))
                      (? (<- keyword-section (keyword-section seen)))
                      (? (<- aux-section     (aux-section seen))))))
+    (append `(,@whole-section ,@required-section ,@optional-section)
+            (if (not (null cdr))
+                cdr
+                `(,@rest-section ,@keyword-section ,@aux-section)))
   ((whole-section    ?)
    (required-section ? :evaluation :compound)
    (optional-section ? :evaluation :compound)
@@ -354,6 +378,10 @@
               required-section optional-section rest-section keyword-section aux-section
               cdr)
              (%destructuring-lambda-list seen)))
+    (append `(,@env-section ,@whole-section ,@required-section ,@optional-section)
+            (if (not (null cdr))
+                cdr
+                `(,@rest-section ,@keyword-section ,@aux-section)))
   ((whole-section    ?)
    (env-section      ?)
    (required-section ? :evaluation :compound)
@@ -386,6 +414,10 @@
               required-section optional-section rest-section keyword-section aux-section
               cdr)
              ((%destructuring-lambda-list destructuring-lambda-list) seen)))
+    (append `(,@env-section ,@whole-section ,@required-section ,@optional-section)
+            (if (not (null cdr))
+                cdr
+                `(,@rest-section ,@keyword-section ,@aux-section)))
   ((whole-section    ?)
    (env-section      ?)
    (required-section ? :evaluation :compound)

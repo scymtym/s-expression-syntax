@@ -24,6 +24,7 @@
 (define-syntax variable-reference
     (and (guard (typep 'symbol))
          (<- name ((variable-name/unchecked names))))
+    name
   ((name 1 :evaluation (make-instance 'reference-semantics
                                       :namespace 'variable))))
 
@@ -39,6 +40,7 @@
               (must (<- function (lambda-expression))
                     "must be a symbol naming a function or a lambda expression"))
           (* (<<- argument ((form! forms)))))
+    `(,function-name ,function ,@argument)
   ((function-name ? :evaluation (make-instance 'reference-semantics
                                                :namespace 'function))
    (function      ? :evaluation :compound)
@@ -53,4 +55,5 @@
     (<- value (and (not (guard (typep 'cons)))
                    (not (guard (typep 'symbol)))
                    ((unparsed-expression forms) :self-evaluating)))
+    value
   ((value 1)))

@@ -13,6 +13,7 @@
 (define-macro setf
     (list (* (seq (<<- place     ((place! forms)))
                   (<<- new-value ((form! forms)))))) ; TODO explicit pair?
+    (a:mappend #'list place new-value)
   ((place     *)
    (new-value * :evaluation t)))
 
@@ -20,6 +21,7 @@
 (define-macro psetf
     (list (* (seq (<<- place     ((place! forms)))
                   (<<- new-value ((form! forms))))))
+    (a:mappend #'list place new-value)
   ((place     *)
    (new-value * :evaluation t)))
 
@@ -28,17 +30,20 @@
 (define-macro shiftf
     (list (+ (and (seq :any :any) (<<- place ((place! forms)))))
           (<- new-value ((form! forms))))
+    `(,@place ,new-value)
   ((place     *)
    (new-value 1 :evaluation t)))
 
 (define-macro rotatef
     (list (* (<<- place ((place! forms)))))
+    place
   ((place *)))
 
 (macrolet ((define (name)
              `(define-macro ,name
                   (list (<- place ((place! forms)))
                         (? (<- delta ((form! forms)))))
+                  `(,place ,@(? delta))
                 ((place 1)
                  (delta ? :evaluation t)))))
   (define decf)
@@ -48,6 +53,7 @@
 
 (define-macro push
     (list (<- item ((form! forms))) (<- place ((place! forms))))
+    `(,item ,place)
   ((item  1 :evaluation t)
    (place 1)))
 
@@ -59,6 +65,10 @@
                  (seq :test-not (<- test-not ((form! forms))))
                  (:transform :any
                    (:fatal "valid keywords are :key, :test and :test-not")))))
+    `(,item ,place
+      ,@(? key      `(:key      ,key))
+      ,@(? test     `(:test     ,test))
+      ,@(? test-not `(:test-not ,test-not)))
   ((item     1 :evaluation t)
    (place    1)
    (key      ? :evaluation t)
@@ -67,11 +77,13 @@
 
 (define-macro pop
     (list (<- place ((place! forms))))
+    `(,place)
   ((place 1)))
 
 ;;; Standard macro `remf'
 
 (define-macro remf
     (list (<- place ((place! forms))) (<- indicator ((form! forms))))
+    `(,place ,indicator)
   ((place     1)
    (indicator 1 :evaluation t)))

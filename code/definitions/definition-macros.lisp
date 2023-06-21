@@ -14,6 +14,7 @@
     (list (<- name ((variable-name! names)))
           (<- initial-value ((form! forms)))
           (? (<- documentation ((documentation-string! forms)))))
+    `(,name ,initial-value ,@(? documentation))
   ((name          1)
    (initial-value 1 :evaluation t)
    (documentation ?)))
@@ -22,6 +23,7 @@
     (list (<- name ((variable-name! names)))
           (? (seq (<- initial-value ((form! forms)))
                   (? (<- documentation ((documentation-string! forms)))))))
+    `(,name ,initial-value ,@(? documentation))
   ((name          1)
    (initial-value ? :evaluation t)
    (documentation ?)))
@@ -30,6 +32,7 @@
     (list (<- name ((variable-name! names)))
           (<- initial-value ((form! forms)))
           (? (<- documentation ((documentation-string! forms)))))
+    `(,name ,initial-value ,@(? documentation))
   ((name          1)
    (initial-value 1 :evaluation t)
    (documentation ?)))
@@ -40,6 +43,7 @@
     (list* (<- name ((function-name! names)))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,lambda-list ,@(? documentation) ,@declaration ,@form)
   ((name          1)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
@@ -53,6 +57,7 @@
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list)) ; TODO ((macro-lambda-list! macro-lambda-list))
                )
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,lambda-list ,@(? documentation) ,@declaration ,@form)
   ((name          1)
    (lambda-list   1)
    (documentation ?)
@@ -65,6 +70,7 @@
     (list* (<- name ((function-name/symbol! names)))
            (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list))) ; TODO macro lambda list
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,lambda-list ,@(? documentation) ,@declaration ,@form)
   ((name          1)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
@@ -81,6 +87,9 @@
                                         (eg:poption :type      (<- type ((type-specifier! type-specifiers)))))))))
                    "must be of the form (NAME [INITFORM] ...)"))
         (<- name ((variable-name! names))))
+    `(,name ,@(? initform)
+      ,@(? read-only `(:read-only ,read-only))
+      ,@(? type      `(:type      ,type)))
   ((name      1)
    (initform  ? :evaluation t)
    (read-only ?)
@@ -132,7 +141,7 @@
                         (<- print-function          (structure-print-function))
                         (eg:option :type            (<- type ((type-specifier! type-specifiers))))
                         (:transform :any
-                                    (:fatal "must be a DEFSTRUCT option"))))
+                          (:fatal "must be a DEFSTRUCT option"))))
                  (when (and offset (not type))
                    (:fatal (format nil "Cannot specify ~S without ~S"
                                    :initial-offset :type)))
@@ -148,6 +157,13 @@
               (structure-name))
           (? (<- documentation ((documentation-string forms))))
           (* (<<- slot (slot-description))))
+    `(,@(if (or constructor include)
+            `(,name
+              ,@(? constructor `(:constructor ,constructor))
+              ,@(? include     `(:include     ,include     ,@include-slot)))
+            name)
+      ,@(? documentation)
+      ,@slot)
   ((name          1)
    (constructor   *> :evaluation :compound)
    (include       ?)
@@ -188,6 +204,16 @@
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
                      (and :any (<<- option (slot-option!))))))
         (<- name ((slot-name! names))))
+    `(,name
+      ,@(a:mappend (a:curry #'list :initarg)  initarg)
+      ,@(a:mappend (a:curry #'list :reader)   reader)
+      ,@(a:mappend (a:curry #'list :writer)   writer)
+      ,@(a:mappend (a:curry #'list :accessor) accessor)
+      ,@(? allocation    `(:allocation    ,allocation))
+      ,@(? initform      `(:initform      ,initform))
+      ,@(? type          `(:type          ,type))
+      ,@(? documentation `(:documentation ,documentation))
+      ,@option)
   ((name          1)
    ;; Options
    (initarg       *)
@@ -237,6 +263,12 @@
                  (eg:option :documentation    (<- documentation ((documentation-string! forms))))
                  ;; Non-standard options are basically free-form
                  (<<- option (class-option)))))
+    `(,name (,@superclass)
+        (,@slot)
+      ,@default-initarg
+      ,@(? metaclass     `(:metaclass ,metaclass))
+      ,@(? documentation `(:documentation ,documentation))
+      ,@option)
   ((name            1)
    (superclass      *>)
    (slot            *  :evaluation :compound)
@@ -262,6 +294,15 @@
                      (eg:poption  :type          (<- type          ((type-specifier! type-specifiers))))
                      (eg:poption  :documentation (<- documentation ((documentation-string! forms))))
                      (and :any (must (guard (typep 'symbol)) "option name must be a symbol"))))))
+    `(,name
+      ,@(a:mappend (a:curry #'list :initarg)  initarg)
+      ,@(a:mappend (a:curry #'list :reader)   reader)
+      ,@(a:mappend (a:curry #'list :writer)   writer)
+      ,@(a:mappend (a:curry #'list :accessor) accessor)
+      ,@(? allocation    `(:allocation    ,allocation))
+      ,@(? initform      `(:initform      ,initform))
+      ,@(? type          `(:type          ,type))
+      ,@(? documentation `(:documentation ,documentation)))
   ((name          1)
    ;; Options
    (initarg       *)
@@ -278,6 +319,7 @@
                           ((unparsed-expression forms) :condition-report)))
         (<- function ((function-name/symbol names)))
         (<- lambda   (lambda-expression)))
+  (or string function lambda)
   ((string   ?)
    (function ?)
    (lambda   ? :evaluation :compound)))
@@ -293,6 +335,11 @@
           (* (or (eg:option :default-initargs (* (and :any (<<- default-initarg (default-initarg!)))))
                  (eg:option :documentation    (<- documentation ((documentation-string! forms))))
                  (eg:option :report           (<- report (condition-report!))))))
+    `(,name (,@parent-type)
+        (,@slot)
+      ,@default-initarg
+      ,@(? documentation `(:documentation ,documentation))
+      ,@(? report        `(:report        ,report)))
   ((name             1)
    (parent-type      *>)
    (slot             *  :evaluation :compound)
@@ -306,6 +353,7 @@
     (list* (<- name ((class-name! names)))
            (<- lambda-list ((deftype-lambda-list! deftype-lambda-list)))
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((name          1)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
@@ -325,6 +373,8 @@
                       (<- lambda-list ((specialized-lambda-list! lambda-lists)))
                       (<- (documentation declaration form) ((docstring-body forms))))
                "must be of the form (:method QUALIFIER* LAMBDA-LIST DECLARATION* FORM*)"))
+    `(:method ,@qualifier ,lambda-list
+      ,@declaration ,@(? documentation) ,@form)
   ((qualifier     *)
    (lambda-list   1  :evaluation :compound)
    (documentation ?)
@@ -347,6 +397,7 @@
 (define-syntax generic-function-option
     (list* (<- name  ((option-name! names)))
            (<- value ((unparsed-expression forms) ':non-standard-defgeneric-option)))
+    `(,name ,value)
   ((name  1)
    (value 1)))
 
@@ -377,6 +428,16 @@
                  (<<- method (method-description))
                  ;; Non-standard options are or the form (:NON-STANDARD-NAME . VALUE).
                  (<<- option (generic-function-option)))))
+    `(,name ,lambda-list
+      ,@(? generic-function-class    `(:generic-function-class    ,generic-function-class))
+      ,@(? argument-precedence-order `(:argument-precedence-order ,@argument-precedence-order))
+      ,@(? method-combination        `(:method-combination        ,method-combination
+                                                                  ,@method-combination-argument))
+      ,@(? method-class              `(:method-class              ,method-class))
+      ,@(? documentation             `(:documentation             ,documentation))
+      ,@(mapcar (a:curry 'list* 'declare) declarations)
+      ,@method
+      ,@option)
   ((name                        1)
    (lambda-list                 1 :evaluation :compound)
    ;; Standard options
@@ -398,6 +459,8 @@
            (* (<<- qualifier (qualifier)))
            (<- lambda-list ((specialized-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,name ,@qualifier ,lambda-list
+      ,@declaration ,@(? documentation) ,@form)
   ((name          1)
    (qualifier     *)
    (lambda-list   1 :evaluation :compound)
@@ -430,6 +493,7 @@
            (must (list (<- package (package-designator!))
                        (* (<<- name (and :any (string-designator!)))))
                  "import from options accept a package designator followed by string designators"))
+    `(:import-from ,package ,@name) ; TODO
   ((package 1)
    (name    *)))
 
@@ -445,6 +509,7 @@
 (define-syntax local-nickname
     (list (<- local-nickname (string-designator!))
           (<- package-name   (string-designator!)))
+    `(,local-nickname ,package-name)
   ((local-nickname 1)
    (package-name   1)))
 
@@ -452,6 +517,7 @@
     (list :local-nicknames
           (* (and :any (must (<<- local-nickname (local-nickname))
                              "local nickname must be of the form (LOCAL-NICKNAME PACKAGE-NAME)"))))
+    `(:local-nicknames ,@local-nickname)
   ((local-nickname *)))
 
 (defrule package-locked ()
@@ -468,7 +534,7 @@
           (* (or (eg:option* :nicknames     (* (<<- nickname (string-designator!))))
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
                  (eg:option* :use           (* (<<- use (package-designator!))))
-                 (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
+                 (eg:option* :shadow        (* (<<- shadow (guard symbolp)))) ; TODO not a node
                  (<<- shadowing-import-from (import-from ':shadowing-import-from))
                  (<<- import-from           (import-from ':import-from))
                  (eg:option* :export        (* (<<- export (string-designator!))))
@@ -479,6 +545,18 @@
                  (eg:option :locked         (<- locked (package-locked!)))
                  (list* (must (not :any) "unknown option") :any)
                  (and :any (must (list* :any :any) "option must be a list of the form (:NAME . VALUE)")))))
+    `(,name
+      ,@(? nickname      `(:nicknames ,@nickname))
+      ,@(? documentation `(:documentation ,documentation))
+      ,@(? use           `(:use ,@use))
+      ,@(? shadow        `(:shadow ,@shadow))
+      ,@shadowing-import-from
+      ,@import-from
+      ,@(? export         `(:export ,@export))
+      ,@(? intern         `(:intern ,@intern))
+      ,@(? size `(:size ,size))
+      ,@local-nicknames
+      ,@(? locked `(:locked ,locked)))
   ((name                  1)
    (nickname              *)
    (documentation         ?)
@@ -495,4 +573,5 @@
 
 (define-macro in-package
     (list (<- name (must (string-designator!) "name is required")))
+  `(,name)
   ((name 1)))

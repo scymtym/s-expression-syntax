@@ -12,12 +12,14 @@
 
 (define-special-operator progn
     (list* (<- form ((forms forms))))
+    form
   ((form *> :evaluation t)))
 
 (define-special-operator if
     (list (<- test ((form! forms)))
           (<- then ((form! forms)))
           (? (<- else ((form! forms)))))
+    `(,test ,then ,@(? else))
   ((test 1 :evaluation t)
    (then 1 :evaluation t)
    (else ? :evaluation t)))
@@ -26,6 +28,7 @@
 
 (define-special-operator block
     (list* (<- name ((block-name! names))) (<- form ((forms forms))))
+    `(,name ,@form)
   ((name 1  :evaluation (make-instance 'binding-semantics
                                        :namespace 'block
                                        :scope     :lexical
@@ -34,22 +37,26 @@
 
 (define-special-operator return-from
     (list (<- name ((block-name! names))) (? (<- result ((form! forms)))))
+    `(,name ,@(? result))
   ((name   1 :evaluation (make-instance 'reference-semantics
                                         :namespace 'block))
    (result ? :evaluation t)))
 
 (define-special-operator return
     (list (? (<- result ((form! forms)))))
+    `(,@(? result))
   ((result ? :evaluation t)))
 
 ;;; Special operators `tagbody' and `go'
 
 (define-special-operator tagbody
     (list* (<- segment ((tagbody-segments forms))))
+    (apply #'append segment) ; TODO
   ((segment *> :evaluation :compound)))
 
 (define-special-operator go
     (list* (must (list (<- tag ((tag! names)))) "must be a single tag"))
+    `(,tag)
   ((tag 1 :evaluation (make-instance 'reference-semantics
                                      :namespace 'tag))))
 
@@ -76,6 +83,7 @@
     (list (must (list (* (<<- situation (eval-when-situation!))))
                 "must be a list of situations")
           (* (<<- form ((form! forms)))))
+    `((,@situation) ,@form)
   ((situation * :evaluation nil)
    (form      * :evaluation t)))
 
@@ -90,16 +98,19 @@
 
 (define-special-operator load-time-value
     (list (<- form ((form! forms))) (? (<- read-only-p (read-only-p!))))
+    `(,form ,@(? read-only-p))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil)))
 
 (define-special-operator quote
     (list (<- material ((unparsed-expression forms) ':quote)))
+    material
   ((material 1 :evaluation nil)))
 
 (define-special-operator (lambda-expression :operator lambda)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
+    `(,lambda-list ,@declaration ,@(? documentation) ,@form)
   ((lambda-list   1  :evaluation :compound)
    (documentation ?)
    (declaration   *>)
@@ -110,6 +121,7 @@
                            (must (<- lambda (lambda-expression))
                                  "must be a function name or lambda expression")))
                  "nothing may follow function name or lambda expression"))
+    `(,@(? name) ,@(? lambda))
   ((name   ? :evaluation (make-instance 'reference-semantics
                                         :namespace 'function))
    (lambda ? :evaluation :compound)))
@@ -118,6 +130,7 @@
 ;;; and wrapping it in an AST node of kind `:lambda'.
 (define-syntax (lambda)
     (<- lambda (lambda-expression))
+    lambda
   ((lambda 1 :evaluation :compound)))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
@@ -127,6 +140,7 @@
 (define-special-operator symbol-macrolet
     (list* (<- binding (symbol-macro-bindings!))
            (<- (declaration form) ((body forms))))
+    `((,@binding) ,@declaration ,@form)
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
@@ -134,6 +148,7 @@
 (define-special-operator let ; TODO macro for this and let* and maybe symbol-macrolet
     (list* (<- binding (value-bindings!))
            (<- (declaration form) ((body forms))))
+    `((,@binding) ,@declaration ,@form)
   ((binding     *> :evaluation :compound) ; :order     :parallel
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
@@ -141,18 +156,21 @@
 (define-special-operator let*
     (list* (<- binding (value-bindings!)) ; :order     :sequential
            (<- (declaration form) ((body forms))))
+    `((,@binding) ,@declaration ,@form)
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
 (define-special-operator locally
     (list* (<- (declaration form) ((body forms))))
+    `(,@declaration ,@form)
   ((declaration *> :evaluation nil)
    (form        *> :evaluation t)))
 
 (define-special-operator progv
     (list* (<- symbols ((form! forms))) (<- values ((form! forms)))
            (<- (declaration form) ((body forms))))
+    `(,symbols ,values ,@declaration ,@form)
   ((symbols     1  :evaluation t)
    (values      1  :evaluation t)
    (declaration *> :evaluation nil)
@@ -165,6 +183,7 @@
 (define-special-operator macrolet
     (list* (<- binding (macro-function-bindings!))
            (<- (declaration form) ((body forms))))
+    `((,@binding) ,@declaration ,@form)
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
@@ -172,6 +191,7 @@
 (define-special-operator flet
     (list* (<- binding (function-bindings!))
            (<- (declaration form) ((body forms))))
+    `((,@binding) ,@declaration ,@form)
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
@@ -179,6 +199,7 @@
 (define-special-operator labels
     (list* (<- binding (function-bindings!))
            (<- (declaration form) ((body forms))))
+    `((,@binding) ,@declaration ,@form)
   ((binding     *> :evaluation :compound)
    (declaration *> :evaluation nil)
    (form        *> :evaluation t)))
@@ -187,11 +208,13 @@
 
 (define-special-operator declaim
     (list (* (<<- declaration (declaration-specifier!)))) ; TODO only free declarations
+    declaration
   ((declaration *> :evaluation nil)))
 
 (define-special-operator the
     (list (<- type ((type-specifier! type-specifiers)))
           (<- form ((form! forms))))
+    `(,type ,form)
   ((type 1 :evaluation nil)
    (form 1 :evaluation t)))
 
@@ -202,6 +225,7 @@
                   (must (seq (<<- name       (variable-name!))
                              (<<- value-form ((form! forms))))
                         "must be a variable name followed by a form"))))
+    (a:mappend #'list name value-form)
   ((name       * :evaluation (make-instance 'assignment-semantics
                                             :namespace 'variable))
    (value-form * :evaluation t)))
@@ -217,6 +241,7 @@
 
 (define-special-operator psetq
     (list* (<- (name value-form) (unique-assignment-pairs)))
+    (a:mappend #'list name value-form)
   ((name       * :evaluation (make-instance 'assignment-semantics
                                             :namespace 'variable))
    (value-form * :evaluation t)))
@@ -225,16 +250,19 @@
 
 (define-special-operator throw
     (list (<- tag-form ((form! forms))) (<- result-form ((form! forms))))
-  ((tag-form    1 :evaluation t)
+    `(,tag-form ,result-form)
+  ((tag-form    1 :evaluation t) ; TODO remove -form
    (result-form 1 :evaluation t)))
 
 (define-special-operator catch
     (list* (<- tag-form ((form! forms))) (<- form ((forms forms))))
-  ((tag-form 1  :evaluation t)
+    `(,tag-form ,@form)
+  ((tag-form 1  :evaluation t) ; TODO rename to tag
    (form     *> :evaluation t)))
 
 (define-special-operator unwind-protect
     (list* (<- protected ((form! forms))) (<- cleanup ((forms forms))))
+    `(,protected ,@cleanup)
   ((protected 1  :evaluation t)
    (cleanup   *> :evaluation t)))
 
@@ -244,6 +272,7 @@
     (list* (<- lambda-list        ((destructuring-lambda-list! destructuring-lambda-list)))
            (<- expression         ((form! forms)))
            (<- (declaration form) ((body forms))))
+    `(,lambda-list ,expression ,@declaration ,@form)
   ((lambda-list 1  :evaluation :compound)
    (expression  1  :evaluation t)
    (declaration *>)
@@ -257,6 +286,7 @@
            (must (<- values-form ((form! forms)))
                  "a value form must follow the list of variable names")
            (<- (declaration form) ((body forms))))
+    `((,@name) ,values-form ,@declaration ,@form)
   ((name        *  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
                                               :scope     :lexical
@@ -268,10 +298,12 @@
 
 (define-special-operator multiple-value-call
     (list* (<- function-form ((form! forms))) (<- argument ((forms forms))))
-  ((function-form 1  :evaluation t)
+    `(,function-form ,@argument)
+  ((function-form 1  :evaluation t) ; TODO remove -form
    (argument      *> :evaluation t)))
 
 (define-special-operator multiple-value-prog1
     (list* (<- values-form ((form! forms))) (<- form ((forms forms))))
-  ((values-form 1  :evaluation t)
+    `(,values-form ,@form)
+  ((values-form 1  :evaluation t) ; TODO remove -form
    (form        *> :evaluation t)))
