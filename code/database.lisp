@@ -76,19 +76,19 @@
         (invalid-syntax-error
          syntax result (if (stringp value) value "invalid expression")))))
 
-;;; `special-operator'
+;;; `syntax-description'
 
-(defclass special-operator (named-mixin
-                            documentation-mixin
-                            parser-mixin
-                            print-items:print-items-mixin)
+(defclass syntax-description (named-mixin
+                              documentation-mixin
+                              parser-mixin
+                              print-items:print-items-mixin)
   ((%parts :initarg :parts
            :type    list
            :reader  parts))
   (:default-initargs
    :parts (missing-required-initarg 'special-operator :parts)))
 
-(defmethod find-part ((name t) (container special-operator)
+(defmethod find-part ((name t) (container syntax-description)
                       &key if-does-not-exist)
   (declare (ignore if-does-not-exist))
   (find name (parts container) :key #'name :test #'eq))
@@ -113,6 +113,16 @@
       ((:cardinality (:after :name)) " ~A" ,(cardinality object))
       ,@(when semantics
           `(((:semantics (:after :cardinality)) " ~/print-items:format-print-items/" ,semantics))))))
+
+;;; `special-operator-syntax'
+
+(defclass special-operator-syntax (syntax-description)
+  ())
+
+;;; `macro-synax'
+
+(defclass macro-syntax (syntax-description)
+  ())
 
 ;;; Database of named syntax definitions
 

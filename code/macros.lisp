@@ -11,7 +11,8 @@
                                             parser.packrat::*grammar*))
                                  arguments
                                  (kind     (a:make-keyword name))
-                                 (source   (gensym "SOURCE")))
+                                 (source   (gensym "SOURCE"))
+                                 (class    'syntax-description))
       (a:ensure-list name-and-options)
     (let ((documentation (second (find :documentation options :key #'first)))
           (part-forms    '())
@@ -51,7 +52,7 @@
            (value (,source) ,syntax)
            (bp:node* (,kind :source ,source)
              ,@(nreverse relations)))
-         (ensure-syntax ',name 'special-operator
+         (ensure-syntax ',name ',class
                         :parts   (list ,@(nreverse part-forms))
                         :rule    ,(if arguments
                                       `'(,name ,@arguments)
@@ -66,12 +67,12 @@
                             &key (operator name) &allow-other-keys)
       (a:ensure-list name-and-options)
     (let ((other-options (a:remove-from-plist options :operator)))
-      `(define-syntax (,name ,@other-options)
+      `(define-syntax (,name :class special-operator-syntax ,@other-options)
            (,(first syntax) ',operator ,@(rest syntax))
          ,@parts))))
 
 (defmacro define-macro (name syntax &rest parts)
   (check-type syntax (cons (member list list*)))
-  `(define-syntax ,name
+  `(define-syntax (,name :class macro-syntax)
        (,(first syntax) ',name ,@(rest syntax))
      ,@parts))

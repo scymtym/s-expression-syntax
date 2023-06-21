@@ -49,10 +49,14 @@
    #:cardinality
    #:evaluation)
 
-  ;; Syntax description protocol (extends name protocol)
+  ;; Syntax description protocol (extends name protocol) and classes
   (:export
    #:parts
-   #:find-part)
+   #:find-part
+
+   #:syntax-description
+   #:special-operator-syntax
+   #:macro-syntax)
 
   ;; Syntax lookup protocol
   (:export

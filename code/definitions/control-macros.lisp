@@ -15,7 +15,7 @@
 
 (let ((lambda-expression (find-syntax 'lambda-expression)))
   (setf (find-syntax 'lambda)
-        (make-instance 'special-operator
+        (make-instance 'syntax-description
                        :name    'lambda
                        :parts   (parts lambda-expression)
                        :rule    '(lambda-expression (kind :lambda))
