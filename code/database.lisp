@@ -75,11 +75,41 @@
         (invalid-syntax-error
          syntax result (if (stringp value) value "invalid expression")))))
 
+;;; `unparser-mixin'
+
+(defclass unparser-mixin ()
+  ((%unparser :initarg  :unparser
+              :accessor %unparser)))
+
+(defmethod unparse ((client t) (syntax unparser-mixin) (node t))
+  (multiple-value-bind (initargs sub-expressions)
+      (destructure-and-unparse-node client node)
+    (apply (%unparser syntax) initargs sub-expressions)))
+
+(defun destructure-and-unparse-node (client node)
+  (bp:with-unbuilder (client)
+    (let ((initargs  (bp:node-initargs* node))
+          (relations (bp:node-relations* node)))
+      (labels ((sub-expression (right)
+                 (unparse client t right))
+               (sub-expressions ()
+                 (loop :for relation           :in relations
+                       :for (name cardinality) = (multiple-value-list
+                                                  (bp:normalize-relation relation))
+                       :for right              = (bp:node-relation* relation node)
+                       :collect name
+                       :collect (bp:cardinality-case cardinality
+                                  (1 (sub-expression right))
+                                  (* (map 'list #'sub-expression right))))))
+        (values initargs (sub-expressions))))))
+
+
 ;;; `syntax-description'
 
 (defclass syntax-description (named-mixin
                               documentation-mixin
                               parser-mixin
+                              unparser-mixin
                               print-items:print-items-mixin)
   ((%parts :initarg :parts
            :type    list
