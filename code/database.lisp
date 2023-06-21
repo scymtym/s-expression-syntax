@@ -104,6 +104,90 @@
         (values initargs (sub-expressions))))))
 
 
+(defmethod unparse ((client t) (syntax (eql :unparsed)) (node t))
+  (getf (bp:node-initargs client node) :expression))
+
+(defmethod unparse ((client t) (syntax (eql :variable-name)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :function-name)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :type-name)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :initarg-name)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :tag)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :documentation)) (node t))
+  (getf (bp:node-initargs client node) :string))
+
+(defmethod unparse ((client t) (syntax (eql :string-designator)) (node t))
+  (getf (bp:node-initargs client node) :string))
+
+(defmethod unparse ((client t) (syntax (eql :keyword)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :lambda-list-keyword)) (node t))
+  (getf (bp:node-initargs client node) :keyword))
+
+(defmethod unparse ((client t) (syntax (eql :literal)) (node t))
+  (getf (bp:node-initargs client node) :value))
+
+(defmethod unparse ((client t) (syntax (eql :declaration-specifier)) (node t))
+  (destructuring-bind ((&key kind &allow-other-keys) (&key argument))
+      (multiple-value-list (destructure-and-unparse-node client node)) ; TODO don't cons the list
+    `(,kind ,@argument)))
+
+(defmethod unparse ((client t) (syntax (eql 'required-section)) (node t))
+  (destructuring-bind (&key parameter)
+      (nth-value 1 (destructure-and-unparse-node client node))
+    parameter))
+
+(defmethod unparse ((client t) (syntax (eql 'optional-section)) (node t))
+  (destructuring-bind (&key keyword parameter)
+      (nth-value 1 (destructure-and-unparse-node client node))
+    (list* keyword parameter)))
+
+(defmethod unparse ((client t) (syntax (eql 'rest-section)) (node t))
+  (destructuring-bind (&key keyword parameter)
+      (nth-value 1 (destructure-and-unparse-node client node))
+    (list keyword parameter)))
+
+(defmethod unparse ((client t) (syntax (eql 'keyword-section)) (node t))
+  (destructuring-bind (&key keyword parameter allow-other-keys)
+      (nth-value 1 (destructure-and-unparse-node client node))
+    `(,keyword ,@parameter ,@(if allow-other-keys `(,allow-other-keys) '()))))
+
+(defmethod unparse ((client t) (syntax (eql 'aux-section)) (node t))
+  (destructuring-bind (&key keyword parameter)
+      (nth-value 1 (destructure-and-unparse-node client node))
+    (list* keyword parameter)))
+
+(defmethod unparse ((client t) (syntax (eql 'tagbody-segment)) (node t))
+  (destructuring-bind (&key label statement)
+      (nth-value 1 (destructure-and-unparse-node client node))
+    (list* label statement)))
+
+(defmethod unparse ((client t) (syntax (eql t)) (node t))
+  (let* ((kind   (bp:node-kind client node))
+         (name   (or (find-symbol (symbol-name kind) (find-package '#:cl))
+                     (find-symbol (symbol-name kind) (find-package '#:s-expression-syntax))))
+         (syntax (case kind
+                   ((:unparsed :variable-name :function-name :type-name :initarg-name
+                     :keyword :lambda-list-keyword
+                     :tag :string-designator :documentation :literal :declaration-specifier)
+                    kind)
+                   ((:required-section :optional-section :rest-section :keyword-section :aux-section
+                     :tagbody-segment)
+                    name)
+                   (t
+                    (find-syntax name)))))
+    (unparse client syntax node)))
+
 ;;; `syntax-description'
 
 (defclass syntax-description (named-mixin
