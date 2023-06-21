@@ -216,3 +216,22 @@ protocol with CLIENT as the builder."))
 
 (defmethod parse ((client t) (syntax symbol) (expression t))
   (parse client (find-syntax syntax) expression))
+
+;;; Unparse protocol
+
+(defgeneric unparse (client syntax node)
+  (:documentation
+   "Unparse NODE according to SYNTAX and return the resulting expression.
+
+SYNTAX is a designator for a syntax description:
+
++ If SYNTAX is `t', this function uses the kind of NODE to obtain an
+  appropriate syntax description object.
+
++ If SYNTAX is any other symbol, this function calls `find-syntax' to
+  obtain the syntax description named by SYNTAX. An error is signaled if
+  SYNTAX does not name a syntax description.
+
++ Otherwise SYNTAX must be a syntax description object.
+
+TODO"))

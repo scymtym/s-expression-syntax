@@ -71,6 +71,10 @@
    #:classify
    #:parse)
 
+  ;; Unparse protocol
+  (:export
+   #:unparse)
+
   ;; Macros
   (:export
    #:define-syntax)
