@@ -87,7 +87,7 @@
     (apply (%unparser syntax) initargs sub-expressions)))
 
 (defun destructure-and-unparse-node (client node)
-  (bp:with-unbuilder (client)
+  (bp:with-unbuilder (client) ; TODO this does too much work
     (let ((initargs  (bp:node-initargs* node))
           (relations (bp:node-relations* node)))
       (labels ((sub-expression (right)
@@ -98,9 +98,13 @@
                                                   (bp:normalize-relation relation))
                        :for right              = (bp:node-relation* relation node)
                        :collect name
-                       :collect (bp:cardinality-case cardinality
-                                  (1 (sub-expression right))
-                                  (* (map 'list #'sub-expression right))))))
+                       :collect (bp:cardinality-ecase cardinality
+                                  ((1 bp:?)
+                                   (sub-expression right))
+                                  (*
+                                   (map 'list #'sub-expression right))
+                                  (:map
+                                   (error "not implemented"))))))
         (values initargs (sub-expressions))))))
 
 
