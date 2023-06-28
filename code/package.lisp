@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the syntax system.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -89,6 +89,7 @@
    #:environment-parameter
    #:pattern
    #:destructuring-lambda-list
+   #:macro-lambda-list
    #:deftype-lambda-list)
 
   ;; Bindings

@@ -340,39 +340,36 @@
     ;; Invalid syntax
     '((a . #1=1)
       syn:invalid-syntax-error #1# "variable name must be a symbol")
-    ;; Repeated section
-    '((&environment e1 foo bar . #2=(&environment e2))
-      syn:invalid-syntax-error #2# "&ENVIRONMENT must not be repeated")
     ;; Valid syntax
-    '(#3=(#4=&rest #5=r)
+    '(#2=(#3=&rest #4=r)
       (:destructuring-lambda-list
        ((:rest-section . 1)
         (((:rest-section
            ((:keyword   . 1) (((:lambda-list-keyword
                                 ()
-                                :keyword &rest :source #4#)))
+                                :keyword &rest :source #3#)))
             (:parameter . 1) (((:rest-parameter
                                 ((:name . 1) (((:variable-name
-                                                () :name r :source #5#))))
-                                :source #5#)
+                                                () :name r :source #4#))))
+                                :source #4#)
                                :evaluation nil))))
           :evaluation :compound)))
-       :source #3#))
-    '(#6=(#7=&body #8=b)
+       :source #2#))
+    '(#5=(#6=&body #7=b)
       (:destructuring-lambda-list
        ((:rest-section . 1)
         (((:rest-section
            ((:keyword   . 1) (((:lambda-list-keyword
                                 ()
-                                :keyword &body :source #7#)))
+                                :keyword &body :source #6#)))
             (:parameter . 1) (((:rest-parameter
                                 ((:name . 1) (((:variable-name
-                                                () :name b :source #8#))))
-                                :source #8#)
+                                                () :name b :source #7#))))
+                                :source #7#)
                                :evaluation nil))))
           :evaluation :compound)))
-       :source #6#))
-    '(#9=(#10=(#11=foo #12=bar))
+       :source #5#))
+    '(#8=(#9=(#10=foo #11=bar))
       (:destructuring-lambda-list
        ((:required-section . 1)
         (((:required-section
@@ -384,35 +381,35 @@
                                         ((:parameter . *) (((:required-parameter
                                                              ((:name . 1) (((:variable-name
                                                                              ()
-                                                                             :name foo :source #11#)
+                                                                             :name foo :source #10#)
                                                                             :evaluation nil)))
-                                                             :source #11#)
+                                                             :source #10#)
                                                             :evaluation :compound)
                                                            ((:required-parameter
                                                              ((:name . 1) (((:variable-name
                                                                              ()
-                                                                             :name bar :source #12#)
+                                                                             :name bar :source #11#)
                                                                             :evaluation nil)))
-                                                             :source #12#)
+                                                             :source #11#)
                                                             :evaluation :compound))))
                                        :evaluation :compound)))
-                                    :source #10#)
+                                    :source #9#)
                                    :evaluation :compound)))
-                                :source #10#)
+                                :source #9#)
                                :evaluation :compound))))
           :evaluation :compound)))
-       :source #9#))
-    '(#13=(#14=&whole #15=whole #16=(#17=foo #18=&key #19=a) . (#20=&rest #21=fez))
+       :source #8#))
+    '(#12=(#13=&whole #14=whole #15=(#16=foo #17=&key #18=a) #19=&rest #20=fez)
       (:destructuring-lambda-list
        ((:whole-section . 1)
         (((:whole-section
            ((:keyword   . 1) (((:lambda-list-keyword
                                 ()
-                                :keyword &whole :source #14#)))
+                                :keyword &whole :source #13#)))
             (:parameter . 1) (((:whole-parameter
                                 ((:name . 1) (((:variable-name
-                                                () :name whole :source #15#))))
-                                :source #15#)))))))
+                                                () :name whole :source #14#))))
+                                :source #14#)))))))
         (:required-section . 1)
         (((:required-section
            ((:parameter . *) (((:required-parameter
@@ -423,44 +420,44 @@
                                         ((:parameter . *) (((:required-parameter
                                                              ((:name . 1) (((:variable-name
                                                                              ()
-                                                                             :name foo :source #17#)
+                                                                             :name foo :source #16#)
                                                                             :evaluation nil)))
-                                                             :source #17#)
+                                                             :source #16#)
                                                             :evaluation :compound))))
                                        :evaluation :compound))
                                      (:keyword-section . 1)
                                      (((:keyword-section
                                         ((:keyword   . 1) (((:lambda-list-keyword
                                                              ()
-                                                             :keyword &key :source #18#)))
+                                                             :keyword &key :source #17#)))
                                          (:parameter . *) (((:keyword-parameter
                                                              ((:name . 1) (((:variable-name
                                                                              ()
-                                                                             :name a :source #19#))))
-                                                             :source #19#)
+                                                                             :name a :source #18#))))
+                                                             :source #18#)
                                                             :evaluation :compound))))
                                        :evaluation :compound)))
-                                    :source #16#)
+                                    :source #15#)
                                    :evaluation :compound)))
-                                :source #16#)
+                                :source #15#)
                                :evaluation :compound))))
           :evaluation :compound))
         (:rest-section . 1)
         (((:rest-section
-           ((:keyword   . 1) (((:lambda-list-keyword () :keyword &rest :source #20#)))
+           ((:keyword   . 1) (((:lambda-list-keyword () :keyword &rest :source #19#)))
             (:parameter . 1) (((:rest-parameter
                                 ((:name . 1) (((:variable-name
-                                                () :name fez :source #21#))))
-                                :source #21#)
+                                                () :name fez :source #20#))))
+                                :source #20#)
                                :evaluation nil))))
           :evaluation :compound)))
-       :source #13#))
-    '(#22=(#23=&optional #24=(#25=(#26=bar #27=baz) #28=(5 6) #29=bar-baz-p))
+       :source #12#))
+    '(#21=(#22=&optional #23=(#24=(#25=bar #26=baz) #27=(5 6) #28=bar-baz-p))
       (:destructuring-lambda-list
        ((:optional-section . 1)
         (((:optional-section
            ((:keyword   . 1)
-            (((:lambda-list-keyword () :keyword &optional :source #23#)))
+            (((:lambda-list-keyword () :keyword &optional :source #22#)))
             (:parameter . *)
             (((:optional-parameter
                ((:name     . 1) (((:pattern
@@ -469,64 +466,164 @@
                                        ((:parameter . *) (((:required-parameter
                                                             ((:name . 1) (((:variable-name
                                                                             ()
-                                                                            :name bar :source #26#)
+                                                                            :name bar :source #25#)
                                                                            :evaluation nil)))
-                                                            :source #26#)
+                                                            :source #25#)
                                                            :evaluation :compound)
                                                           ((:required-parameter
                                                             ((:name . 1) (((:variable-name
                                                                             ()
-                                                                            :name baz :source #27#)
+                                                                            :name baz :source #26#)
                                                                            :evaluation nil)))
-                                                            :source #27#)
+                                                            :source #26#)
                                                            :evaluation :compound))))
                                       :evaluation :compound)))
-                                   :source #25#)))
+                                   :source #24#)))
                 (:default  . 1) (((:unparsed
                                    ()
                                    :expression (5 6)
                                    :context    :form
-                                   :source     #28#)
+                                   :source     #27#)
                                   :evaluation t))
                 (:supplied . 1) (((:variable-name
                                    ()
-                                   :name bar-baz-p :source #29#))))
-               :source #24#)
+                                   :name bar-baz-p :source #28#))))
+               :source #23#)
               :evaluation :compound))))
           :evaluation :compound)))
-       :source #22#))
-    '(#30=(#31=&aux #32=a #33=(#34=b #35=1))
+       :source #21#))
+    '(#29=(#30=&aux #31=a #32=(#33=b #34=1))
       (:destructuring-lambda-list
        ((:aux-section . 1)
         (((:aux-section
-           ((:keyword   . 1) (((:lambda-list-keyword () :keyword &aux :source #31#)))
+           ((:keyword . 1) (((:lambda-list-keyword () :keyword &aux :source #30#)))
             (:parameter . *) (((:aux-parameter
-                                ((:name . 1) (((:variable-name () :name a :source #32#))))
-                                :source #32#)
+                                ((:name . 1) (((:variable-name () :name a :source #31#))))
+                                :source #31#)
                                :evaluation :compound)
                               ((:aux-parameter
-                                ((:name  . 1) (((:variable-name () :name b :source #34#)))
+                                ((:name  . 1) (((:variable-name () :name b :source #33#)))
                                  (:value . 1) (((:unparsed
                                                  ()
-                                                 :expression 1 :context :form :source #35#)
+                                                 :expression 1 :context :form :source #34#)
                                                 :evaluation t)))
-                                :source #33#)
+                                :source #32#)
                                :evaluation :compound))))
           :evaluation :compound)))
-       :source #30#))
-    '(#36=(#37=a . #38=rest)
+       :source #29#))
+    '(#35=(#36=a . #37=rest)
       (:destructuring-lambda-list
        ((:required-section . 1)
         (((:required-section
            ((:parameter . *) (((:required-parameter
-                                ((:name . 1) (((:variable-name () :name a :source #37#)
+                                ((:name . 1) (((:variable-name () :name a :source #36#)
                                                :evaluation nil)))
-                                :source #37#)
+                                :source #36#)
                                :evaluation :compound))))
           :evaluation :compound))
         (:cdr . 1)
-        (((:variable-name () :name rest :source #38#))))
-       :source #36#))))
+        (((:variable-name () :name rest :source #37#))))
+       :source #35#))))
+
+;;; Macro lambda list
+
+(test macro-lambda-list
+  "Smoke test for the `macro-lambda-list' syntax description."
+  (syntax-test-cases (syn:macro-lambda-list)
+    ;; Invalid syntax
+    '((&whole #1=1)
+      syn:invalid-syntax-error #1# "variable name must be a symbol")
+    '((a . #2=1)
+      syn:invalid-syntax-error #2# "variable name must be a symbol")
+    ;; Repeated section
+    '((&environment e1 foo bar . #3=(&environment e2))
+      syn:invalid-syntax-error #3# "&ENVIRONMENT must not be repeated")
+    ;; Repeated names
+    '((x #4=x)
+      syn:invalid-syntax-error #4# "the variable name X occurs more than once")
+    ;; Valid syntax
+    '(#5=()
+      (:macro-lambda-list () :source #5#))
+    '(#6=(#7=&rest #8=rest)
+      (:macro-lambda-list
+       ((:rest-section . 1)
+        (((:rest-section
+           ((:keyword   . 1) (((:lambda-list-keyword
+                                ()
+                                :keyword &rest :source #7#)))
+            (:parameter . 1) (((:rest-parameter
+                                ((:name . 1) (((:variable-name
+                                                () :name rest :source #8#))))
+                                :source #8#)
+                               :evaluation nil))))
+          :evaluation :compound)))
+       :source #6#))
+    '(#9=(#10=&body #11=body)
+      (:macro-lambda-list
+       ((:rest-section . 1)
+        (((:rest-section
+           ((:keyword   . 1) (((:lambda-list-keyword
+                                ()
+                                :keyword &body :source #10#)))
+            (:parameter . 1) (((:rest-parameter
+                                ((:name . 1) (((:variable-name
+                                                () :name body :source #11#))))
+                                :source #11#)
+                               :evaluation nil))))
+          :evaluation :compound)))
+       :source #9#))
+    '(#12=(#13=&aux #14=a #15=&environment #16=e)
+      (:macro-lambda-list
+       ((:environment-section . 1)
+        (((:environment-section
+           ((:keyword   . 1) (((:lambda-list-keyword
+                                ()
+                                :keyword &environment :source #15#)))
+            (:parameter . 1) (((:environment-parameter
+                                ((:name . 1) (((:variable-name () :name e :source #16#))))
+                                :source #16#)))))))
+        (:aux-section . 1)
+        (((:aux-section
+           ((:keyword   . 1) (((:lambda-list-keyword
+                                ()
+                                :keyword &aux :source #13#)))
+            (:parameter . *) (((:aux-parameter
+                                ((:name . 1) (((:variable-name
+                                                ()
+                                                :name a :source #14#))))
+                                :source #14#)
+                               :evaluation :compound))))
+          :evaluation :compound)))
+        :source #12#))
+    '(#17=(#18=(#19=x #20=y))
+      (:macro-lambda-list
+       ((:required-section . 1)
+        (((:required-section
+           ((:parameter . *) (((:required-parameter
+                                ((:name . 1) (((:pattern
+                                                ((:required-section . 1)
+                                                 (((:required-section
+                                                    ((:parameter . *) (((:required-parameter
+                                                                         ((:name . 1) (((:variable-name
+                                                                                         ()
+                                                                                         :name x :source #19#)
+                                                                                        :evaluation nil)))
+                                                                         :source #19#)
+                                                                        :evaluation :compound)
+                                                                       ((:required-parameter
+                                                                         ((:name . 1) (((:variable-name
+                                                                                         ()
+                                                                                         :name y :source #20#)
+                                                                                        :evaluation nil)))
+                                                                         :source #20#)
+                                                                        :evaluation :compound))))
+                                                   :evaluation :compound)))
+                                                :source #18#)
+                                               :evaluation :compound)))
+                                :source #18#)
+                               :evaluation :compound))))
+          :evaluation :compound)))
+       :source #17#))))
 
 ;;; Deftype lambda list
 

@@ -50,7 +50,7 @@
 
 (define-macro defmacro
     (list* (<- name ((function-name/symbol! names)))
-           (<- lambda-list ((destructuring-lambda-list! destructuring-lambda-list))) ; TODO macro lambda list
+           (<- lambda-list ((macro-lambda-list! macro-lambda-list)))
            (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
    (lambda-list   1  :evaluation :compound)

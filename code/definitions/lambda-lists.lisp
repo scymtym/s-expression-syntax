@@ -254,9 +254,10 @@
   (must (specialized-lambda-list)
         "must be a specialized lambda list"))
 
-;;; 3.4.4 Macro Lambda Lists
-
 ;;; 3.4.5 Destructuring Lambda Lists
+;;;
+;;; Macro lambda lists are defined below because our macro lambda
+;;; lists extend destructuring lambda lists.
 
 (defun compute-name-evaluation (name-node)
   (if (eq (bp:node-kind* name-node) :pattern) :compound nil))
@@ -364,29 +365,21 @@
 
 (defrule %destructuring-lambda-list (seen)
     (list* (? (<- whole    (whole-section seen)))
-           (? (<- env      #1=(eg:once (environment-section seen)
-                                       :flag env? :name &environment)))
            (? (<- required (destructuring-required-section seen)))
-           (? (<- env      #1#))
            (? (<- optional (optional-section seen)))
-           (? (<- env      #1#))
            (or (list (? (<- rest    (destructuring-rest-section seen)))
-                     (? (<- env     #1#))
                      (? (<- keyword (keyword-section seen)))
-                     (? (<- env     #1#))
-                     (? (<- aux     (aux-section seen)))
-                     (? (<- env     #1#)))
+                     (? (<- aux     (aux-section seen))))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
-  (list whole env required optional rest keyword aux cdr))
+  (list whole required optional rest keyword aux cdr))
 
 (define-syntax destructuring-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (whole-section env-section
+         (<- (whole-section
               required-section optional-section rest-section keyword-section aux-section
               cdr)
              (%destructuring-lambda-list seen)))
   ((whole-section    ?)
-   (env-section      ?)
    (required-section ? :evaluation :compound)
    (optional-section ? :evaluation :compound)
    (rest-section     ? :evaluation :compound)
@@ -398,6 +391,51 @@
   (must (destructuring-lambda-list)
         "must be a destructuring lambda list"))
 
+;;; 3.4.4 Macro Lambda Lists
+
+(parser:defgrammar macro-lambda-list
+  (:class eg::expression-grammar)
+  (:use lambda-lists
+        destructuring-lambda-list))
+
+(parser:in-grammar macro-lambda-list)
+
+(defrule %macro-lambda-list (seen)
+    (list* (? (<- whole    (whole-section seen)))
+           (? (<- env1     #1=(eg:once (environment-section seen)
+                                       :flag env? :name &environment)))
+           (? (<- required (destructuring-required-section seen)))
+           (? (<- env2     #1#))
+           (? (<- optional (optional-section seen)))
+           (? (<- env3     #1#))
+           (or (list (? (<- rest    (destructuring-rest-section seen)))
+                     (? (<- env4    #1#))
+                     (? (<- keyword (keyword-section seen)))
+                     (? (<- env5    #1#))
+                     (? (<- aux     (aux-section seen)))
+                     (? (<- env6    #1#)))
+               (<- cdr ((unique-variable-name! lambda-lists) seen))))
+  (list whole (or env1 env2 env3 env4 env5 env6)
+        required optional rest keyword aux cdr))
+
+(define-syntax macro-lambda-list
+    (and (<- seen (:transform :any (make-hash-table :test #'eq)))
+         (<- (whole-section environment-section
+              required-section optional-section rest-section keyword-section aux-section
+              cdr)
+             (%macro-lambda-list seen)))
+  ((whole-section       ?)
+   (environment-section ?)
+   (required-section    ? :evaluation :compound)
+   (optional-section    ? :evaluation :compound)
+   (rest-section        ? :evaluation :compound)
+   (keyword-section     ? :evaluation :compound)
+   (aux-section         ? :evaluation :compound)
+   (cdr                 ?)))
+
+(defrule macro-lambda-list! ()
+  (must (macro-lambda-list) "must be a macro lambda list"))
+
 ;;; 3.4.8 Deftype Lambda Lists
 ;;;
 ;;; A deftype lambda list differs from a macro lambda list only in
@@ -407,24 +445,24 @@
 
 (parser:defgrammar deftype-lambda-list
   (:class eg::expression-grammar)
-  (:use destructuring-lambda-list))
+  (:use macro-lambda-list))
 
 (parser:in-grammar deftype-lambda-list)
 
 (define-syntax deftype-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
-         (<- (whole-section env-section
+         (<- (whole-section environment-section
               required-section optional-section rest-section keyword-section aux-section
               cdr)
-             ((%destructuring-lambda-list destructuring-lambda-list) seen)))
-  ((whole-section    ?)
-   (env-section      ?)
-   (required-section ? :evaluation :compound)
-   (optional-section ? :evaluation :compound)
-   (rest-section     ? :evaluation :compound)
-   (keyword-section  ? :evaluation :compound)
-   (aux-section      ? :evaluation :compound)
-   (cdr              ?)))
+             ((%macro-lambda-list macro-lambda-list) seen)))
+  ((whole-section       ?)
+   (environment-section ?)
+   (required-section    ? :evaluation :compound)
+   (optional-section    ? :evaluation :compound)
+   (rest-section        ? :evaluation :compound)
+   (keyword-section     ? :evaluation :compound)
+   (aux-section         ? :evaluation :compound)
+   (cdr                 ?)))
 
 (defrule deftype-lambda-list! ()
   (must (deftype-lambda-list) "must be a DEFTYPE lambda list"))

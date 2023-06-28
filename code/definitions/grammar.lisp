@@ -11,6 +11,7 @@
   (:use names
         lambda-lists
         destructuring-lambda-list
+        macro-lambda-list
         deftype-lambda-list
         type-specifiers
         forms))

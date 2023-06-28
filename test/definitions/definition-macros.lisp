@@ -139,7 +139,7 @@
   '((defmacro #1=1)
     syn:invalid-syntax-error #1# "function name must be a symbol")
   '((defmacro foo #2=1)
-    syn:invalid-syntax-error #2# "must be a destructuring lambda list")
+    syn:invalid-syntax-error #2# "must be a macro lambda list")
   '((defmacro foo (x (y #3=x)))
     syn:invalid-syntax-error #3# "the variable name X occurs more than once")
   ;; Valid syntax
@@ -149,7 +149,7 @@
          #12=(list 'cons b b))
     (:defmacro
      ((:name          . 1) (((:function-name () :name foo :source #5#)))
-      (:lambda-list   . 1) (((:destructuring-lambda-list
+      (:lambda-list   . 1) (((:macro-lambda-list
                               ((:required-section . 1)
                                (((:required-section
                                   ((:parameter . *) (((:required-parameter
