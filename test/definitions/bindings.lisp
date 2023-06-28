@@ -131,60 +131,69 @@
                                      :source #7#)
                                     :evaluation :compound)))
               :source #5#)))
-    '((#8=(#9=a #10=(&whole #11=w #12=(#13=a #14=b))))
+    '((#8=(#9=a #10=(#11=&whole #12=w #13=(#14=a #15=b))))
       t nil ((:local-macro-function-binding
               ((:name        . 1) (((:function-name () :name a :source #9#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
                (:lambda-list . 1) (((:destructuring-lambda-list
-                                     ((:whole    . 1) (((:whole-parameter
-                                                         ((:name . 1) (((:variable-name
-                                                                         () :name w :source #11#))))
-                                                         :source #11#)))
-                                      (:required . *) (((:required-parameter
-                                                         ((:name . 1) (((:pattern
-                                                                         ((:required . *) (((:required-parameter
-                                                                                             ((:name . 1) (((:variable-name () :name a :source #13#)
-                                                                                                            :evaluation nil)))
-                                                                                             :source #13#)
-                                                                                            :evaluation :compound)
-                                                                                           ((:required-parameter
-                                                                                             ((:name . 1) (((:variable-name () :name b :source #14#)
-                                                                                                            :evaluation nil)))
-                                                                                             :source #14#)
-                                                                                            :evaluation :compound)))
-                                                                         :source #12#)
-                                                                        :evaluation :compound)))
-                                                         :source #12#)
-                                                        :evaluation :compound)))
+                                     ((:whole-section . 1)
+                                      (((:whole-section
+                                         ((:keyword   . 1) (((:lambda-list-keyword () :keyword &whole :source #11#)))
+                                          (:parameter . 1) (((:whole-parameter
+                                                              ((:name . 1) (((:variable-name
+                                                                              () :name w :source #12#))))
+                                                              :source #12#)))))))
+                                      (:required-section . 1)
+                                      (((:required-section
+                                         ((:parameter . *) (((:required-parameter
+                                                              ((:name . 1) (((:pattern
+                                                                              ((:required-section . 1)
+                                                                               (((:required-section
+                                                                                  ((:parameter . *) (((:required-parameter
+                                                                                                       ((:name . 1) (((:variable-name () :name a :source #14#)
+                                                                                                                      :evaluation nil)))
+                                                                                                       :source #14#)
+                                                                                                      :evaluation :compound)
+                                                                                                     ((:required-parameter
+                                                                                                       ((:name . 1) (((:variable-name () :name b :source #15#)
+                                                                                                                      :evaluation nil)))
+                                                                                                       :source #15#)
+                                                                                                      :evaluation :compound))))
+                                                                                 :evaluation :compound)))
+                                                                              :source #13#)
+                                                                             :evaluation :compound)))
+                                                              :source #13#)
+                                                             :evaluation :compound))))
+                                        :evaluation :compound)))
                                      :source #10#)
                                     :evaluation :compound)))
               :source #8#)))
-    '((#15=(#16=a #17=() #18=1))
+    '((#16=(#17=a #18=() #19=1))
       t nil ((:local-macro-function-binding
-              ((:name        . 1) (((:function-name () :name a :source #16#)
+              ((:name        . 1) (((:function-name () :name a :source #17#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
-               (:lambda-list . 1) (((:destructuring-lambda-list () :source #17#)
+               (:lambda-list . 1) (((:destructuring-lambda-list () :source #18#)
                                     :evaluation :compound))
                (:form        . *) (((:unparsed
                                      ()
-                                     :expression #18# :context :form :source #18#)
+                                     :expression #19# :context :form :source #19#)
                                     :evaluation t)))
-              :source #15#)))
-    '((#19=(#20=a #21=() #22="" #23=1))
+              :source #16#)))
+    '((#20=(#21=a #22=() #23="" #24=1))
       t nil ((:local-macro-function-binding
-              ((:name          . 1) (((:function-name () :name a :source #20#)
+              ((:name          . 1) (((:function-name () :name a :source #21#)
                                       :evaluation (:binding :namespace function
                                                             :scope     :lexical)))
-               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #21#)
+               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #22#)
                                       :evaluation :compound))
-               (:documentation . 1) (((:documentation () :string "" :source #22#)))
+               (:documentation . 1) (((:documentation () :string "" :source #23#)))
                (:form          . *) (((:unparsed
                                        ()
-                                       :expression #23# :context :form :source #23#)
+                                       :expression #24# :context :form :source #24#)
                                       :evaluation t)))
-              :source #19#)))))
+              :source #20#)))))
 
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."

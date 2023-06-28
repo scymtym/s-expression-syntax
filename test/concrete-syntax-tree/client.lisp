@@ -33,55 +33,69 @@
            (parameter   (cst:list a specializer))
            (b           (cst:cst-from-expression 'b))
            (c           (cst:cst-from-expression 'c))
+           (&optional   (cst:cst-from-expression '&optional))
            (d           (cst:cst-from-expression 'd))
+           (&rest       (cst:cst-from-expression '&rest))
            (r           (cst:cst-from-expression 'r))
+           (&key        (cst:cst-from-expression '&key))
            (e           (cst:cst-from-expression 'e))
-           (cst         (cst:list parameter b c
-                                  (cst:cst-from-expression '&optional) d
-                                  (cst:cst-from-expression '&rest) r
-                                  (cst:cst-from-expression '&key) e)))
+           (cst         (cst:list parameter b c &optional d &rest r &key e)))
       (list
        cst t :input
        `(:specialized-lambda-list
-         ((:required . *)  (((:specialized-parameter
-                              ((:name        . 1) (((:variable-name
-                                                     ()
-                                                     :name a :source ,a)))
-                               (:specializer . 1) (((:type-name
-                                                     ()
-                                                     :name integer :source ,specializer)
-                                                    :evaluation :compound)))
-                              :source ,parameter)
-                             :evaluation :compound)
-                            ((:specialized-parameter
-                              ((:name . 1) (((:variable-name
-                                              ()
-                                              :name b :source ,b))))
-                              :source ,b)
-                             :evaluation :compound)
-                            ((:specialized-parameter
-                              ((:name . 1) (((:variable-name
-                                              ()
-                                              :name c :source ,c))))
-                              :source ,c)
-                             :evaluation :compound))
-          (:optional . *)  (((:optional-parameter
-                              ((:name . 1) (((:variable-name
-                                              ()
-                                              :name d :source ,d))))
-                              :source ,d)
-                             :evaluation :compound))
-          (:rest     . 1)  (((:rest-parameter
-                              ((:name . 1) (((:variable-name
-                                              ()
-                                              :name r :source ,r))))
-                              :source ,r)))
-          (:keyword  . *)  (((:keyword-parameter
-                              ((:name . 1) (((:variable-name
-                                              ()
-                                              :name e :source ,e))))
-                              :source ,e)
-                             :evaluation :compound)))
+         ((:required-section . 1)
+          (((:required-section
+             ((:parameter . *) (((:specialized-parameter
+                                  ((:name        . 1) (((:variable-name
+                                                         ()
+                                                         :name a :source ,a)))
+                                   (:specializer . 1) (((:type-name
+                                                         ()
+                                                         :name integer :source ,specializer)
+                                                        :evaluation :compound)))
+                                  :source ,parameter)
+                                 :evaluation :compound)
+                                ((:specialized-parameter
+                                  ((:name . 1) (((:variable-name
+                                                  ()
+                                                  :name b :source ,b))))
+                                  :source ,b)
+                                 :evaluation :compound)
+                                ((:specialized-parameter
+                                  ((:name . 1) (((:variable-name
+                                                  ()
+                                                  :name c :source ,c))))
+                                  :source ,c)
+                                 :evaluation :compound))))
+            :evaluation :compound))
+          (:optional-section . 1)
+          (((:optional-section
+             ((:keyword   . 1) (((:lambda-list-keyword () :keyword &optional :source ,&optional)))
+              (:parameter . *) (((:optional-parameter
+                                  ((:name . 1) (((:variable-name
+                                                  ()
+                                                  :name d :source ,d))))
+                                  :source ,d)
+                                 :evaluation :compound))))
+            :evaluation :compound))
+          (:rest-section . 1)
+          (((:rest-section
+             ((:keyword   . 1) (((:lambda-list-keyword () :keyword &rest :source ,&rest)))
+              (:parameter . 1) (((:rest-parameter
+                                  ((:name . 1) (((:variable-name
+                                                  ()
+                                                  :name r :source ,r))))
+                                  :source ,r)))))))
+          (:keyword-section  . 1)
+          (((:keyword-section
+             ((:keyword    . 1) (((:lambda-list-keyword () :keyword &key :source ,&key)))
+              (:parameter  . *) (((:keyword-parameter
+                                   ((:name . 1) (((:variable-name
+                                                   ()
+                                                   :name e :source ,e))))
+                                   :source ,e)
+                                  :evaluation :compound))))
+            :evaluation :compound)))
          :source ,cst)))
 
     (let* ((cst         (cst:cst-from-expression

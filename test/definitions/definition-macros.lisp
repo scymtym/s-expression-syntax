@@ -102,18 +102,19 @@
     (:defun
      ((:name          . 1) (((:function-name () :name foo :source #6#)))
       (:lambda-list   . 1) (((:ordinary-lambda-list
-                              ((:required . *) (((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name bar :source #8#)
-                                                                 :evaluation nil)))
-                                                  :source #8#))
-                                                ((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name baz :source #9#)
-                                                                 :evaluation nil)))
-                                                  :source #9#))))
+                              ((:required-section . 1) (((:required-section
+                                                          ((:parameter . *) (((:required-parameter
+                                                                               ((:name . 1) (((:variable-name
+                                                                                               ()
+                                                                                               :name bar :source #8#)
+                                                                                              :evaluation nil)))
+                                                                               :source #8#))
+                                                                             ((:required-parameter
+                                                                               ((:name . 1) (((:variable-name
+                                                                                               ()
+                                                                                               :name baz :source #9#)
+                                                                                              :evaluation nil)))
+                                                                               :source #9#))))))))
                               :source #7#)
                              :evaluation :compound))
       (:documentation . 1) (((:documentation () :string "bla" :source #10#)))
@@ -149,20 +150,23 @@
     (:defmacro
      ((:name          . 1) (((:function-name () :name foo :source #5#)))
       (:lambda-list   . 1) (((:destructuring-lambda-list
-                              ((:required . *) (((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name a :source #7#)
-                                                                 :evaluation nil)))
-                                                  :source #7#)
-                                                 :evaluation :compound)
-                                                ((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name b :source #8#)
-                                                                 :evaluation nil)))
-                                                  :source #8#)
-                                                 :evaluation :compound)))
+                              ((:required-section . 1)
+                               (((:required-section
+                                  ((:parameter . *) (((:required-parameter
+                                                       ((:name . 1) (((:variable-name
+                                                                       ()
+                                                                       :name a :source #7#)
+                                                                      :evaluation nil)))
+                                                       :source #7#)
+                                                      :evaluation :compound)
+                                                     ((:required-parameter
+                                                       ((:name . 1) (((:variable-name
+                                                                       ()
+                                                                       :name b :source #8#)
+                                                                      :evaluation nil)))
+                                                       :source #8#)
+                                                      :evaluation :compound))))
+                                 :evaluation :compound)))
                               :source #6#)
                              :evaluation :compound))
       (:documentation . 1) (((:documentation () :string "bla" :source #9#)))
@@ -250,18 +254,19 @@
       (:constructor . *) (((:structure-constructor
                             ((:name        . 1) (((:function-name () :name foo :source #19#)))
                              (:lambda-list . 1) (((:ordinary-lambda-list
-                                                   ((:required . *) (((:required-parameter
-                                                                       ((:name . 1) (((:variable-name
-                                                                                       ()
-                                                                                       :name a :source #21#)
-                                                                                      :evaluation nil)))
-                                                                       :source #21#))
-                                                                     ((:required-parameter
-                                                                       ((:name . 1) (((:variable-name
-                                                                                       ()
-                                                                                       :name b :source #22#)
-                                                                                      :evaluation nil)))
-                                                                       :source #22#))))
+                                                   ((:required-section . 1) (((:required-section
+                                                                               ((:parameter . *) (((:required-parameter
+                                                                                                    ((:name . 1) (((:variable-name
+                                                                                                                    ()
+                                                                                                                    :name a :source #21#)
+                                                                                                                   :evaluation nil)))
+                                                                                                    :source #21#))
+                                                                                                  ((:required-parameter
+                                                                                                    ((:name . 1) (((:variable-name
+                                                                                                                    ()
+                                                                                                                    :name b :source #22#)
+                                                                                                                   :evaluation nil)))
+                                                                                                    :source #22#))))))))
                                                    :source #20#)
                                                   :evaluation :compound)))
                             :source #18#)
@@ -553,39 +558,46 @@
   '((deftype foo (x #5=x))
     syn:invalid-syntax-error #5# "the variable name X occurs more than once")
   ;; Valid syntax
-  '(#6=(deftype #7=foo #8=(#9=a &key #10=b)
-         #11="bla bli"
-         (declare #12=(ignore #13=a))
-         (declare #14=(ignore #15=b))
-         #16=(list a b))
+  '(#6=(deftype #7=foo #8=(#9=a #10=&key #11=b)
+         #12="bla bli"
+         (declare #13=(ignore #14=a))
+         (declare #15=(ignore #16=b))
+         #17=(list a b))
     (:deftype
      ((:name          . 1) (((:type-name () :name foo :source #7#)))
       (:lambda-list   . 1) (((:deftype-lambda-list
-                              ((:required . *) (((:required-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name a :source #9#)
-                                                                 :evaluation nil)))
-                                                  :source #9#)
-                                                 :evaluation :compound))
-                               (:keyword  . *) (((:keyword-parameter
-                                                  ((:name . 1) (((:variable-name
-                                                                  ()
-                                                                  :name b :source #10#))))
-                                                  :source #10#)
-                                                 :evaluation :compound)))
+                              ((:required-section . 1)
+                               (((:required-section
+                                  ((:parameter . *) (((:required-parameter
+                                                       ((:name . 1) (((:variable-name
+                                                                       ()
+                                                                       :name a :source #9#)
+                                                                      :evaluation nil)))
+                                                       :source #9#)
+                                                      :evaluation :compound))))
+                                 :evaluation :compound))
+                               (:keyword-section  . 1)
+                               (((:keyword-section
+                                  ((:keyword    . 1) (((:lambda-list-keyword () :keyword &key :source #10#)))
+                                   (:parameter  . *) (((:keyword-parameter
+                                                        ((:name . 1) (((:variable-name
+                                                                        ()
+                                                                        :name b :source #11#))))
+                                                        :source #11#)
+                                                       :evaluation :compound))))
+                                 :evaluation :compound)))
                               :source #8#)
                              :evaluation :compound))
-      (:documentation . 1) (((:documentation () :string "bla bli" :source #11#)))
+      (:documentation . 1) (((:documentation () :string "bla bli" :source #12#)))
       (:declaration   . *) (((:declaration-specifier
-                              ((:argument . *) (((:variable-name () :name a :source #13#))))
-                              :kind ignore :source #12#))
+                              ((:argument . *) (((:variable-name () :name a :source #14#))))
+                              :kind ignore :source #13#))
                             ((:declaration-specifier
-                              ((:argument . *) (((:variable-name () :name b :source #15#))))
-                              :kind ignore :source #14#)))
+                              ((:argument . *) (((:variable-name () :name b :source #16#))))
+                              :kind ignore :source #15#)))
       (:form          . *) (((:unparsed
                               ()
-                              :expression #16# :context :form :source #16#)
+                              :expression #17# :context :form :source #17#)
                              :evaluation t)))
      :source #6#)))
 
@@ -650,18 +662,19 @@
     (:defgeneric
      ((:name                   . 1) (((:function-name () :name foo :source #17#)))
       (:lambda-list            . 1) (((:generic-function-lambda-list
-                                       ((:required . *) (((:required-parameter
-                                                           ((:name . 1) (((:variable-name
-                                                                           ()
-                                                                           :name a :source #19#)
-                                                                          :evaluation nil)))
-                                                           :source #19#))
-                                                         ((:required-parameter
-                                                           ((:name . 1) (((:variable-name
-                                                                           ()
-                                                                           :name b :source #20#)
-                                                                          :evaluation nil)))
-                                                           :source #20#))))
+                                       ((:required-section . 1) (((:required-section
+                                                                   ((:parameter . *) (((:required-parameter
+                                                                                        ((:name . 1) (((:variable-name
+                                                                                                        ()
+                                                                                                        :name a :source #19#)
+                                                                                                       :evaluation nil)))
+                                                                                        :source #19#))
+                                                                                      ((:required-parameter
+                                                                                        ((:name . 1) (((:variable-name
+                                                                                                        ()
+                                                                                                        :name b :source #20#)
+                                                                                                       :evaluation nil)))
+                                                                                        :source #20#))))))))
                                        :source #18#)
                                       :evaluation :compound))
       (:generic-function-class . 1) (((:type-name () :name clazz :source #22#)))
@@ -672,18 +685,19 @@
     (:defgeneric
      ((:name                      . 1) (((:function-name () :name foo :source #24#)))
       (:lambda-list               . 1) (((:generic-function-lambda-list
-                                          ((:required . *) (((:required-parameter
-                                                              ((:name . 1) (((:variable-name
-                                                                              ()
-                                                                              :name a :source #26#)
-                                                                             :evaluation nil)))
-                                                              :source #26#))
-                                                            ((:required-parameter
-                                                              ((:name . 1) (((:variable-name
-                                                                              ()
-                                                                              :name b :source #27#)
-                                                                             :evaluation nil)))
-                                                              :source #27#))))
+                                          ((:required-section . 1) (((:required-section
+                                                                      ((:parameter . *) (((:required-parameter
+                                                                                           ((:name . 1) (((:variable-name
+                                                                                                           ()
+                                                                                                           :name a :source #26#)
+                                                                                                          :evaluation nil)))
+                                                                                           :source #26#))
+                                                                                         ((:required-parameter
+                                                                                           ((:name . 1) (((:variable-name
+                                                                                                           ()
+                                                                                                           :name b :source #27#)
+                                                                                                          :evaluation nil)))
+                                                                                           :source #27#))))))))
                                           :source #25#)
                                          :evaluation :compound))
       (:argument-precedence-order . *) (((:variable-name () :name b :source #28#))
@@ -694,12 +708,13 @@
     (:defgeneric
      ((:name        . 1) (((:function-name () :name foo :source #31#)))
       (:lambda-list . 1) (((:generic-function-lambda-list
-                            ((:required . *) (((:required-parameter
-                                                ((:name . 1) (((:variable-name
-                                                                ()
-                                                                :name a :source #33#)
-                                                               :evaluation nil)))
-                                                :source #33#))))
+                            ((:required-section . 1) (((:required-section
+                                                        ((:parameter . *) (((:required-parameter
+                                                                             ((:name . 1) (((:variable-name
+                                                                                             ()
+                                                                                             :name a :source #33#)
+                                                                                            :evaluation nil)))
+                                                                             :source #33#))))))))
                             :source #32#)
                            :evaluation :compound))
       (:method      . *) (((:method-description
@@ -719,12 +734,14 @@
                                                    :context    :method-qualifier
                                                    :source     #37#)))
                              (:lambda-list . 1) (((:specialized-lambda-list
-                                                   ((:required . *) (((:specialized-parameter
-                                                                       ((:name . 1) (((:variable-name
-                                                                                       ()
-                                                                                       :name a :source #39#))))
-                                                                       :source #39#)
-                                                                      :evaluation :compound)))
+                                                   ((:required-section . 1) (((:required-section
+                                                                               ((:parameter . *) (((:specialized-parameter
+                                                                                                    ((:name . 1) (((:variable-name
+                                                                                                                    ()
+                                                                                                                    :name a :source #39#))))
+                                                                                                    :source #39#)
+                                                                                                   :evaluation :compound))))
+                                                                              :evaluation :compound)))
                                                    :source #38#)
                                                   :evaluation :compound)))
                             :source #34#)
@@ -812,16 +829,18 @@
     (:defmethod
      ((:name        . 1) (((:function-name () :name foo :source #21#)))
       (:lambda-list . 1) (((:specialized-lambda-list
-                            ((:required . *) (((:specialized-parameter
-                                                ((:name        . 1) (((:variable-name
-                                                                       ()
-                                                                       :name x :source #24#)))
-                                                 (:specializer . 1) (((:type-name
-                                                                       ()
-                                                                       :name t :source #25#)
-                                                                      :evaluation :compound)))
-                                                :source #23#)
-                                               :evaluation :compound)))
+                            ((:required-section  . 1) (((:required-section
+                                                         ((:parameter . *) (((:specialized-parameter
+                                                                              ((:name        . 1) (((:variable-name
+                                                                                                     ()
+                                                                                                     :name x :source #24#)))
+                                                                               (:specializer . 1) (((:type-name
+                                                                                                     ()
+                                                                                                     :name t :source #25#)
+                                                                                                    :evaluation :compound)))
+                                                                              :source #23#)
+                                                                             :evaluation :compound))))
+                                                        :evaluation :compound)))
                             :source #22#)
                            :evaluation :compound)))
      :source #20#))
