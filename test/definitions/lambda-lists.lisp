@@ -110,7 +110,10 @@
                                                      :evaluation t)))
                                    :source #14#)
                                   :evaluation :compound))
-        (:rest             . 1) (((:variable-name () :name x :source #17#)))
+        (:rest             . 1) (((:rest-parameter
+                                   ((:name . 1) (((:variable-name
+                                                   () :name x :source #17#))))
+                                   :source #17#)))
         (:keyword          . *) (((:keyword-parameter
                                    ((:name     . 1) (((:variable-name
                                                        ()
@@ -166,7 +169,10 @@
                                            ()
                                            :name foo2 :source #30#))))
                            :source #30#)))
-        (:rest     . 1)     (((:variable-name () :name pie :source #31#)))
+        (:rest     . 1) (((:rest-parameter
+                           ((:name . 1) (((:variable-name
+                                           () :name pie :source #31#))))
+                           :source #31#)))
         (:keyword  . *) (((:keyword-parameter
                            ((:name     . 1) (((:variable-name
                                                ()
@@ -241,7 +247,10 @@
                                                  :evaluation :compound)))
                            :source #10#)
                           :evaluation :compound))
-        (:rest     . 1) (((:variable-name () :name whoop :source #13#))))
+        (:rest     . 1) (((:rest-parameter
+                           ((:name . 1) (((:variable-name
+                                           () :name whoop :source #13#))))
+                           :source #13#))))
        :source #6#))
     '(#14=(#15=(#16=x #17=(eql #18=5)))
       (:specialized-lambda-list
@@ -283,12 +292,18 @@
     ;; Valid syntax
     '(#3=(&rest #4=r)
       (:destructuring-lambda-list
-       ((:rest . 1) (((:variable-name () :name r :source #4#)
+       ((:rest . 1) (((:rest-parameter
+                       ((:name . 1) (((:variable-name
+                                       () :name r :source #4#))))
+                       :source #4#)
                       :evaluation :compound)))
        :source #3#))
     '(#5=(&body #6=b)
       (:destructuring-lambda-list
-       ((:rest . 1) (((:variable-name () :name b :source #6#)
+       ((:rest . 1) (((:rest-parameter
+                       ((:name . 1) (((:variable-name
+                                       () :name b :source #6#))))
+                       :source #6#)
                       :evaluation :compound)))
        :source #5#))
     '(#7=(#8=(#9=foo #10=bar))
@@ -316,7 +331,10 @@
        :source #7#))
     '(#11=(&whole #12=whole #13=(#14=foo &key #15=a) . (&rest #16=fez))
       (:destructuring-lambda-list
-       ((:whole    . 1) (((:variable-name () :name whole :source #12#)))
+       ((:whole    . 1) (((:whole-parameter
+                           ((:name . 1) (((:variable-name
+                                           () :name whole :source #12#))))
+                           :source #12#)))
         (:required . *) (((:required-parameter
                            ((:name . 1) (((:pattern
                                            ((:required . *) (((:required-parameter
@@ -336,7 +354,10 @@
                                           :evaluation :compound)))
                            :source #13#)
                           :evaluation :compound))
-        (:rest     . 1) (((:variable-name () :name fez :source #16#)
+        (:rest     . 1) (((:rest-parameter
+                           ((:name . 1) (((:variable-name
+                                           () :name fez :source #16#))))
+                           :source #16#)
                           :evaluation :compound)))
        :source #11#))
     '(#17=(&optional #18=(#19=(#20=bar #21=baz) #22=(5 6) #23=bar-baz-p))

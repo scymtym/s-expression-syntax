@@ -374,9 +374,11 @@
                                                                                   :name a :source #13#)
                                                                                  :evaluation nil)))
                                                                   :source #13#)))
-                                               (:rest     . 1) (((:variable-name
-                                                                  ()
-                                                                  :name b :source #14#))))
+                                               (:rest     . 1) (((:rest-parameter
+                                                                  ((:name . 1) (((:variable-name
+                                                                                  ()
+                                                                                  :name b :source #14#))))
+                                                                  :source #14#))))
                                               :source #12#)
                                              :evaluation :compound))
                         (:form        . *) (((:unparsed
@@ -725,9 +727,11 @@
                                               :evaluation (:binding :namespace function
                                                                     :scope    :lexical)))
                          (:lambda-list . 1) (((:destructuring-lambda-list
-                                               ((:whole    . 1) (((:variable-name
-                                                                   ()
-                                                                   :name w :source #14#)))
+                                               ((:whole    . 1) (((:whole-parameter
+                                                                   ((:name . 1) (((:variable-name
+                                                                                   ()
+                                                                                   :name w :source #14#))))
+                                                                   :source #14#)))
                                                 (:required . *) (((:required-parameter
                                                                    ((:name . 1) (((:pattern
                                                                                    ((:required . *) (((:required-parameter
@@ -748,9 +752,11 @@
                                                                                   :evaluation :compound)))
                                                                    :source #15#)
                                                                   :evaluation :compound))
-                                                (:rest     . 1) (((:variable-name
-                                                                   ()
-                                                                   :name c :source #18#)
+                                                (:rest     . 1) (((:rest-parameter
+                                                                   ((:name . 1) (((:variable-name
+                                                                                   ()
+                                                                                   :name c :source #18#))))
+                                                                   :source #18#)
                                                                   :evaluation :compound)))
                                                :source #13#)
                                               :evaluation :compound))
@@ -823,9 +829,11 @@
                                                                                    :name a :source #14#)
                                                                                   :evaluation nil)))
                                                                    :source #14#)))
-                                                (:rest     . 1) (((:variable-name
-                                                                   ()
-                                                                   :name b :source #15#))))
+                                                (:rest     . 1) (((:rest-parameter
+                                                                   ((:name . 1) (((:variable-name
+                                                                                   ()
+                                                                                   :name b :source #15#))))
+                                                                   :source #15#))))
                                                :source #13#)
                                               :evaluation :compound)))
                         :source #11#)
@@ -913,9 +921,11 @@
                                                                                    :name a :source #14#)
                                                                                   :evaluation nil)))
                                                                    :source #14#)))
-                                                                (:rest     . 1) (((:variable-name
+                                                (:rest     . 1) (((:rest-parameter
+                                                                   ((:name . 1) (((:variable-name
                                                                                    ()
                                                                                    :name b :source #15#))))
+                                                                   :source #15#))))
                                                :source #13#)
                                               :evaluation :compound)))
                         :source #11#)

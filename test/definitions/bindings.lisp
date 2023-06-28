@@ -137,7 +137,10 @@
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
                (:lambda-list . 1) (((:destructuring-lambda-list
-                                     ((:whole    . 1) (((:variable-name () :name w :source #11#)))
+                                     ((:whole    . 1) (((:whole-parameter
+                                                         ((:name . 1) (((:variable-name
+                                                                         () :name w :source #11#))))
+                                                         :source #11#)))
                                       (:required . *) (((:required-parameter
                                                          ((:name . 1) (((:pattern
                                                                          ((:required . *) (((:required-parameter

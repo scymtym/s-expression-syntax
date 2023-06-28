@@ -75,6 +75,7 @@
   (:export
    #:required-parameter
    #:optional-parameter
+   #:rest-parameter
    #:keyword-parameter
    #:aux-parameter
 
@@ -83,6 +84,9 @@
    #:eql-specializer
    #:specialized-parameter
    #:specialized-lambda-list
+
+   #:whole-parameter
+   #:environment-parameter
    #:pattern
    #:destructuring-lambda-list
    #:deftype-lambda-list)

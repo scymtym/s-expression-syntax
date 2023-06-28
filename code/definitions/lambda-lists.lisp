@@ -74,8 +74,9 @@
    (default  ? :evaluation t)
    (supplied ?)))
 
-(defrule rest-parameter (seen)
-  (unique-variable-name! seen))
+(define-syntax (rest-parameter :arguments ((seen nil)))
+    (<- name (unique-variable-name! seen))
+  ((name 1)))
 
 (define-syntax (keyword-parameter :arguments ((seen nil)))
     (or (list (or (list (<- keyword ((parameter-keyword! names)))
@@ -221,6 +222,9 @@
 
 ;;; 3.4.5 Destructuring Lambda Lists
 
+(defun compute-name-evaluation (name-node)
+  (if (eq (bp:node-kind* name-node) :pattern) :compound nil))
+
 (parser:defgrammar destructuring-lambda-list
   (:class eg::expression-grammar)
   (:use lambda-lists))
@@ -238,23 +242,32 @@
 (defrule required-parameter (seen)
     (value (source) (<- name (unique-variable-name seen)))
   (bp:node* (:required-parameter :source source)
-    (1 (:name . 1) name :evaluation (if (eq (bp:node-kind* name) :pattern) :compound nil))))
+    (1 (:name . 1) name :evaluation (compute-name-evaluation name))))
 
 (defrule required-parameter! (seen) ; TODO this should use required-parameter
     (value (source)
       (and (not (lambda-list-keyword))
            (<- name (unique-variable-name! seen))))
   (bp:node* (:required-parameter :source source)
-    (1 (:name . 1) name :evaluation (if (eq (bp:node-kind* name) :pattern) :compound nil))))
+    (1 (:name . 1) name :evaluation (compute-name-evaluation name))))
+
+(define-syntax (whole-parameter :arguments ((seen nil)))
+    (<- name (unique-variable-name! seen))
+  ((name 1)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defrule (whole-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&whole (<- name (unique-variable-name! seen)))
-    name)
+      (seq '&whole (<- parameter (whole-parameter seen)))
+    parameter))
 
+(define-syntax (environment-parameter :arguments ((seen nil)))
+    (<- name (unique-variable-name! seen))
+  ((name 1)))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
   (defrule (environment-section :environment (make-instance 'eg::expression-environment)) (seen)
-      (seq '&environment (<- name (unique-variable-name! seen)))
-    name)
+      (seq '&environment (<- parameter (environment-parameter seen)))
+    parameter)
 
   ;; TODO should be able to use the name `rest-section' here
   (defrule (destructuring-rest-section :environment (make-instance 'eg::expression-environment)) (seen)
@@ -272,7 +285,7 @@
   ((whole             ?)
    (required          *> :evaluation :compound)
    (optional          *> :evaluation :compound)
-   (rest              ?)
+   (rest              ?  :evaluation :compound)
    (key               *> :evaluation :compound)
    (allow-other-keys? ?)
    (aux               *> :evaluation :compound)

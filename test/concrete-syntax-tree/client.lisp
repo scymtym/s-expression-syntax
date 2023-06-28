@@ -71,9 +71,11 @@
                                               :name d :source ,d))))
                               :source ,d)
                              :evaluation :compound))
-          (:rest     . 1)  (((:variable-name
-                              ()
-                              :name r :source ,r)))
+          (:rest     . 1)  (((:rest-parameter
+                              ((:name . 1) (((:variable-name
+                                              ()
+                                              :name r :source ,r))))
+                              :source ,r)))
           (:keyword  . *)  (((:keyword-parameter
                               ((:name . 1) (((:variable-name
                                               ()
