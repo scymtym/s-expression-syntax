@@ -66,9 +66,9 @@
                  (:transform :any
                    (:fatal "valid keywords are :key, :test and :test-not")))))
     `(,item ,place
-      ,@(? key      `(:key      ,key))
-      ,@(? test     `(:test     ,test))
-      ,@(? test-not `(:test-not ,test-not)))
+      ,@(? key      :key      key)
+      ,@(? test     :test     test)
+      ,@(? test-not :test-not test-not))
   ((item     1 :evaluation t)
    (place    1)
    (key      ? :evaluation t)

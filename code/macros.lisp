@@ -60,8 +60,8 @@
                         :grammar ',grammar
                         :unparser (lambda (initargs &key ,@(mapcar #'first parts))
                                     (declare (ignorable initargs))
-                                    (flet ((? (thing &optional (value thing))
-                                             (when thing (list value))))
+                                    (flet ((? (thing &optional (value thing) &rest more-values)
+                                             (when thing (list* value more-values))))
                                       (declare (ignorable #'?))
                                       ,unparser))
                         ,@(when documentation

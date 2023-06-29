@@ -267,9 +267,9 @@
                  (eg:poption :test-function
                              (<- test-function ((form! forms)))))))
     `(,name ,function
-      ,@(? interactive-function `(:interactive-function ,interactive-function))
-      ,@(? report-function      `(:report-function      ,report-function))
-      ,@(? test-function        `(:test-function        ,test-function)))
+      ,@(? interactive-function :interactive-function interactive-function)
+      ,@(? report-function      :report-function      report-function)
+      ,@(? test-function        :test-function        test-function))
   ((name                 1)
    (function             1 :evaluation t)
    (interactive-function ? :evaluation t)
@@ -303,13 +303,13 @@
              (when (not (or name report-string report-name report-lambda))
                (:fatal "for an unnamed restart, the :REPORT option must be supplied"))))
     `(,name ,lambda-list
-      ,@(? interactive-name   `(:interactive ,interactive-name))
-      ,@(? interactive-lambda `(:interactive ,interactive-lambda))
-      ,@(? report-string      `(:report      ,report-string))
-      ,@(? report-name        `(:report      ,report-name))
-      ,@(? report-lambda      `(:report      ,report-lambda))
-      ,@(? test-name          `(:test        ,test-name))
-      ,@(? test-lambda        `(:test        ,test-name))
+      ,@(? interactive-name   :interactive interactive-name)
+      ,@(? interactive-lambda :interactive interactive-lambda)
+      ,@(? report-string      :report      report-string)
+      ,@(? report-name        :report      report-name)
+      ,@(? report-lambda      :report      report-lambda)
+      ,@(? test-name          :test        test-name)
+      ,@(? test-lambda        :test        test-lambda)
       ,@declarations
       ,@form)
   ((name               1)

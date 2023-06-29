@@ -107,7 +107,6 @@
                                    (error "not implemented"))))))
         (values initargs (sub-expressions))))))
 
-
 (defmethod unparse ((client t) (syntax (eql :unparsed)) (node t))
   (getf (bp:node-initargs client node) :expression))
 
@@ -118,6 +117,9 @@
   (getf (bp:node-initargs client node) :name))
 
 (defmethod unparse ((client t) (syntax (eql :type-name)) (node t))
+  (getf (bp:node-initargs client node) :name))
+
+(defmethod unparse ((client t) (syntax (eql :block-name)) (node t))
   (getf (bp:node-initargs client node) :name))
 
 (defmethod unparse ((client t) (syntax (eql :initarg-name)) (node t))
@@ -140,6 +142,10 @@
 
 (defmethod unparse ((client t) (syntax (eql :literal)) (node t))
   (getf (bp:node-initargs client node) :value))
+
+(defmethod unparse ((client t) (syntax (eql :atomic-type-specifier)) (node t))
+  (let ((name (bp:node-relation client :name node)))
+    (unparse client t name)))
 
 (defmethod unparse ((client t) (syntax (eql :declaration-specifier)) (node t))
   (destructuring-bind ((&key kind &allow-other-keys) (&key argument))
@@ -181,9 +187,11 @@
          (name   (or (find-symbol (symbol-name kind) (find-package '#:cl))
                      (find-symbol (symbol-name kind) (find-package '#:s-expression-syntax))))
          (syntax (case kind
-                   ((:unparsed :variable-name :function-name :type-name :initarg-name
+                   ((:unparsed
+                     :variable-name :function-name :type-name :block-name :initarg-name
                      :keyword :lambda-list-keyword
-                     :tag :string-designator :documentation :literal :declaration-specifier)
+                     :tag :string-designator :documentation :literal
+                     :declaration-specifier :atomic-type-specifier)
                     kind)
                    ((:required-section :optional-section :rest-section :keyword-section :aux-section
                      :tagbody-segment)

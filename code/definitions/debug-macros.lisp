@@ -39,7 +39,7 @@
 (macrolet ((define (name)
              `(define-macro ,name
                   (list (* (<<- function-name ((function-name! names)))))
-                  `(,function-name)
+                  `(,@function-name)
                 ((function-name *)))))
   (define trace)
   (define untrace))
