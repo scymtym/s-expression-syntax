@@ -174,8 +174,11 @@
 ;;; Standard macros `defclass' and `define-condition' (including slots, ...)
 
 (defrule allocation-type! ()
-  (must (or :instance :class)
-        "allocation must be :INSTANCE or :CLASS"))
+    (value (source)
+      (must (<- value (or :instance :class))
+            "allocation must be :INSTANCE or :CLASS"))
+  (let ((value (eg::%naturalize value))) ; TODO make a literal rule
+    (bp:node* (:literal :value value :source source))))
 
 (defrule (slot-option :environment (make-instance 'eg::expression-environment)) ()
     (value (source)
