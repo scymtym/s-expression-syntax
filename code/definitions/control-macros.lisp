@@ -291,7 +291,7 @@
     (list* (or 'nil (<- name ((variable-name! names))))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (* (or (eg:poption :interactive (or (<- interactive-name   ((function-name/symbol names)))
-                                               (<- interactive-lambda (lambda-expression))))
+                                               (<- interactive-lambda (lambda-expression)))) ; TODO error otherwise
                   (eg:poption :report      (or (<- report-string      (and (guard (typep 'string))
                                                                            ((unparsed-expression forms)
                                                                             ':restart-report-string)))
