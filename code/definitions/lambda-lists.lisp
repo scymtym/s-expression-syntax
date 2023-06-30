@@ -16,9 +16,12 @@
 ;;; Shared rules
 
 ;; TODO could use lambda-list-keywords
+(defrule lambda-list-keyword ()
+  (or '&whole '&environment
+      '&optional '&rest '&body '&key '&aux '&allow-other-keys))
+
 (defrule not-lambda-list-keyword ()
-  (not (or '&whole '&environment
-           '&optional '&rest '&body '&key '&aux '&allow-other-keys)))
+  (not (lambda-list-keyword)))
 
 (defrule lambda-list-variable-name ()
   (and (not-lambda-list-keyword)
@@ -107,6 +110,17 @@
   (bp:node* (:lambda-list-keyword :keyword (eg::%naturalize keyword)
                                   :source  keyword)))
 
+(defrule lambda-list-junk (lambda-list-kind)
+  (or (list* (:transform (<- keyword (lambda-list-keyword))
+               (let ((keyword (eg::%naturalize keyword)))
+                 (:fatal (format nil "~A is not allowed at this position in ~A"
+                                 keyword lambda-list-kind))))
+                    :any)
+      (:transform (not 'nil)
+        (:fatal (format nil "not allowed at this position in ~A"
+                        lambda-list-kind)))
+      :any))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defrule (required-section :environment (make-instance 'eg::expression-environment)) (seen)
       (value (source)
@@ -161,11 +175,12 @@
 ;;; 3.4.1 Ordinary Lambda Lists
 
 (defrule %ordinary-lambda-list (seen)
-    (list (? (<- required (required-section seen)))
-          (? (<- optional (optional-section seen)))
-          (? (<- rest     (rest-section seen)))
-          (? (<- keyword  (keyword-section seen)))
-          (? (<- aux      (aux-section seen))))
+    (list* (? (<- required (required-section seen)))
+           (? (<- optional (optional-section seen)))
+           (? (<- rest     (rest-section seen)))
+           (? (<- keyword  (keyword-section seen)))
+           (? (<- aux      (aux-section seen)))
+           (lambda-list-junk '"an ordinary lambda list"))
   (list required optional rest keyword aux))
 
 (define-syntax ordinary-lambda-list
@@ -184,10 +199,11 @@
 ;;; 3.4.2 Generic Function Lambda Lists
 
 (defrule %generic-function-lambda-list (seen)
-    (list (? (<- required (required-section seen)))
-          (? (<- optional (optional-section seen))) ; TODO disallow defaults
-          (? (<- rest     (rest-section seen)))
-          (? (<- keyword  (keyword-section seen)))) ; TODO disallow defaults
+    (list* (? (<- required (required-section seen)))
+           (? (<- optional (optional-section seen))) ; TODO disallow defaults
+           (? (<- rest     (rest-section seen)))
+           (? (<- keyword  (keyword-section seen)))  ; TODO disallow defaults
+           (lambda-list-junk '"a generic function lambda list"))
   (list required optional rest keyword))
 
 (define-syntax generic-function-lambda-list
@@ -233,11 +249,12 @@
       (* (:parameter . *) (nreverse parameters) :evaluation :compound))))
 
 (defrule %specialized-lambda-list (seen)
-    (list (? (<- required (specialized-required-section seen)))
-          (? (<- optional (optional-section seen)))
-          (? (<- rest     (rest-section seen)))
-          (? (<- keyword  (keyword-section seen)))
-          (? (<- aux      (aux-section seen))))
+    (list* (? (<- required (specialized-required-section seen)))
+           (? (<- optional (optional-section seen)))
+           (? (<- rest     (rest-section seen)))
+           (? (<- keyword  (keyword-section seen)))
+           (? (<- aux      (aux-section seen)))
+           (lambda-list-junk '"a specialized lambda list"))
   (list required optional rest keyword aux))
 
 (define-syntax specialized-lambda-list
@@ -351,9 +368,10 @@
     (list* (? (<- whole-section    (whole-section seen)))
            (? (<- required-section (destructuring-required-section seen)))
            (? (<- optional-section (optional-section seen)))
-           (or (list (? (<- rest-section    (destructuring-rest-section seen)))
-                     (? (<- keyword-section (keyword-section seen)))
-                     (? (<- aux-section     (aux-section seen))))
+           (or (list* (? (<- rest-section    (destructuring-rest-section seen)))
+                      (? (<- keyword-section (keyword-section seen)))
+                      (? (<- aux-section     (aux-section seen)))
+                      (lambda-list-junk '"a destructuring pattern"))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
   ((whole-section    ?)
    (required-section ? :evaluation :compound)
@@ -367,9 +385,10 @@
     (list* (? (<- whole    (whole-section seen)))
            (? (<- required (destructuring-required-section seen)))
            (? (<- optional (optional-section seen)))
-           (or (list (? (<- rest    (destructuring-rest-section seen)))
-                     (? (<- keyword (keyword-section seen)))
-                     (? (<- aux     (aux-section seen))))
+           (or (list* (? (<- rest    (destructuring-rest-section seen)))
+                      (? (<- keyword (keyword-section seen)))
+                      (? (<- aux     (aux-section seen)))
+                      (lambda-list-junk '"a destructuring lambda list"))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
   (list whole required optional rest keyword aux cdr))
 
@@ -408,12 +427,13 @@
            (? (<- env2     #1#))
            (? (<- optional (optional-section seen)))
            (? (<- env3     #1#))
-           (or (list (? (<- rest    (destructuring-rest-section seen)))
-                     (? (<- env4    #1#))
-                     (? (<- keyword (keyword-section seen)))
-                     (? (<- env5    #1#))
-                     (? (<- aux     (aux-section seen)))
-                     (? (<- env6    #1#)))
+           (or (list* (? (<- rest    (destructuring-rest-section seen)))
+                      (? (<- env4    #1#))
+                      (? (<- keyword (keyword-section seen)))
+                      (? (<- env5    #1#))
+                      (? (<- aux     (aux-section seen)))
+                      (? (<- env6    #1#))
+                      (lambda-list-junk '"a macro lambda list"))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
   (list whole (or env1 env2 env3 env4 env5 env6)
         required optional rest keyword aux cdr))
