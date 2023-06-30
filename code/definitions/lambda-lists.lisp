@@ -67,9 +67,14 @@
   (bp:node* (:required-parameter :source source)
     (1 (:name . 1) name)))
 
-(define-syntax (optional-parameter :arguments ((seen nil)))
+(define-syntax (optional-parameter :arguments ((seen nil) (forbid-initform nil)))
     (or (list (<- name (unique-variable-name! seen))
-              (? (seq (<- default ((form! forms)))
+              (? (seq (<- default (and (eg::element
+                                        (:transform :any
+                                          (when forbid-initform
+                                            (:fatal (format nil "optional parameter initializer form is not allowed in ~A"
+                                                            forbid-initform)))))
+                                       ((form! forms))))
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
@@ -81,11 +86,16 @@
     (<- name (unique-variable-name! seen))
   ((name 1)))
 
-(define-syntax (keyword-parameter :arguments ((seen nil)))
+(define-syntax (keyword-parameter :arguments ((seen nil) (forbid-initform nil)))
     (or (list (or (list (<- keyword ((parameter-keyword! names)))
                         (<- name (unique-variable-name! seen)))
                   (<- name (unique-variable-name! seen)))
-              (? (seq (<- default ((form! forms)))
+              (? (seq (<- default (and (eg::element
+                                        (:transform :any
+                                          (when forbid-initform
+                                            (:fatal (format nil "keyword parameter initializer form is not allowed in ~A"
+                                                            forbid-initform)))))
+                                       ((form! forms))))
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
@@ -130,15 +140,18 @@
                )
       (* (:parameter . *) (nreverse parameters))))
 
-  (defrule (optional-section :environment (make-instance 'eg::expression-environment)) (seen)
+  (defrule (optional-section :environment (make-instance 'eg::expression-environment))
+      (seen forbid-initforms)
       (value (source)
         (seq    (<-  keyword    (the-lambda-list-keyword '&optional))
-             (* (<<- parameters (optional-parameter seen)))))
+             (* (<<- parameters (optional-parameter seen forbid-initforms)))))
     source
-    (bp:node* (:optional-section ; :source source
-               )
-      (1 (:keyword   . 1) keyword)
-      (* (:parameter . *) (nreverse parameters) :evaluation :compound)))
+    (let ((parameter  (nreverse parameters))
+          (evaluation (if forbid-initforms nil :compound)))
+      (bp:node* (:optional-section ; :source source
+                 )
+        (1 (:keyword   . 1) keyword)
+        (* (:parameter . *) parameters :evaluation evaluation))))
 
   (defrule (rest-section :environment (make-instance 'eg::expression-environment)) (seen)
       (value (source)
@@ -150,17 +163,20 @@
       (1 (:keyword   . 1) keyword)
       (1 (:parameter . 1) parameter)))
 
-  (defrule (keyword-section :environment (make-instance 'eg::expression-environment)) (seen)
+  (defrule (keyword-section :environment (make-instance 'eg::expression-environment))
+      (seen forbid-initforms)
       (value (source)
-        (seq    (<-  keyword            (the-lambda-list-keyword '&key))
-             (* (<<- keyword-parameters (keyword-parameter seen)))
-             (? (<-  allow-other-keys   (the-lambda-list-keyword '&allow-other-keys)))))
+        (seq    (<-  keyword          (the-lambda-list-keyword '&key))
+             (* (<<- parameters       (keyword-parameter seen forbid-initforms)))
+             (? (<-  allow-other-keys (the-lambda-list-keyword '&allow-other-keys)))))
     source
-    (bp:node* (:keyword-section ; :source source
-               )
-      (1    (:keyword          . 1) keyword)
-      (*    (:parameter        . *) (nreverse keyword-parameters) :evaluation :compound)
-      (bp:? (:allow-other-keys . 1) allow-other-keys)))
+    (let ((parameters (nreverse parameters))
+          (evaluation (if forbid-initforms nil :compound)))
+      (bp:node* (:keyword-section ; :source source
+                 )
+        (1    (:keyword          . 1) keyword)
+        (*    (:parameter        . *) parameters :evaluation evaluation)
+        (bp:? (:allow-other-keys . 1) allow-other-keys))))
 
   (defrule (aux-section :environment (make-instance 'eg::expression-environment)) (seen)
       (value (source)
@@ -176,9 +192,9 @@
 
 (defrule %ordinary-lambda-list (seen)
     (list* (? (<- required (required-section seen)))
-           (? (<- optional (optional-section seen)))
+           (? (<- optional (optional-section seen 'nil)))
            (? (<- rest     (rest-section seen)))
-           (? (<- keyword  (keyword-section seen)))
+           (? (<- keyword  (keyword-section seen 'nil)))
            (? (<- aux      (aux-section seen)))
            (lambda-list-junk '"an ordinary lambda list"))
   (list required optional rest keyword aux))
@@ -200,9 +216,9 @@
 
 (defrule %generic-function-lambda-list (seen)
     (list* (? (<- required (required-section seen)))
-           (? (<- optional (optional-section seen))) ; TODO disallow defaults
+           (? (<- optional (optional-section seen "a generic function lambda list")))
            (? (<- rest     (rest-section seen)))
-           (? (<- keyword  (keyword-section seen)))  ; TODO disallow defaults
+           (? (<- keyword  (keyword-section seen "a generic function lambda list")))
            (lambda-list-junk '"a generic function lambda list"))
   (list required optional rest keyword))
 
@@ -250,9 +266,9 @@
 
 (defrule %specialized-lambda-list (seen)
     (list* (? (<- required (specialized-required-section seen)))
-           (? (<- optional (optional-section seen)))
+           (? (<- optional (optional-section seen 'nil)))
            (? (<- rest     (rest-section seen)))
-           (? (<- keyword  (keyword-section seen)))
+           (? (<- keyword  (keyword-section seen 'nil)))
            (? (<- aux      (aux-section seen)))
            (lambda-list-junk '"a specialized lambda list"))
   (list required optional rest keyword aux))
@@ -367,9 +383,9 @@
 (define-syntax (pattern :arguments ((seen nil)))
     (list* (? (<- whole-section    (whole-section seen)))
            (? (<- required-section (destructuring-required-section seen)))
-           (? (<- optional-section (optional-section seen)))
+           (? (<- optional-section (optional-section seen 'nil)))
            (or (list* (? (<- rest-section    (destructuring-rest-section seen)))
-                      (? (<- keyword-section (keyword-section seen)))
+                      (? (<- keyword-section (keyword-section seen 'nil)))
                       (? (<- aux-section     (aux-section seen)))
                       (lambda-list-junk '"a destructuring pattern"))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
@@ -384,9 +400,9 @@
 (defrule %destructuring-lambda-list (seen)
     (list* (? (<- whole    (whole-section seen)))
            (? (<- required (destructuring-required-section seen)))
-           (? (<- optional (optional-section seen)))
+           (? (<- optional (optional-section seen 'nil)))
            (or (list* (? (<- rest    (destructuring-rest-section seen)))
-                      (? (<- keyword (keyword-section seen)))
+                      (? (<- keyword (keyword-section seen 'nil)))
                       (? (<- aux     (aux-section seen)))
                       (lambda-list-junk '"a destructuring lambda list"))
                (<- cdr ((unique-variable-name! lambda-lists) seen))))
@@ -425,11 +441,11 @@
                                        :flag env? :name &environment)))
            (? (<- required (destructuring-required-section seen)))
            (? (<- env2     #1#))
-           (? (<- optional (optional-section seen)))
+           (? (<- optional (optional-section seen 'nil)))
            (? (<- env3     #1#))
            (or (list* (? (<- rest    (destructuring-rest-section seen)))
                       (? (<- env4    #1#))
-                      (? (<- keyword (keyword-section seen)))
+                      (? (<- keyword (keyword-section seen 'nil)))
                       (? (<- env5    #1#))
                       (? (<- aux     (aux-section seen)))
                       (? (<- env6    #1#))

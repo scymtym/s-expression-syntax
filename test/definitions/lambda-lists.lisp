@@ -253,6 +253,33 @@
           :evaluation :compound)))
        :source #36#))))
 
+;;; Generic function lambda list
+
+(test generic-function-lambda-list
+  (syntax-test-cases (syn:generic-function-lambda-list)
+    ;; Invalid syntax
+    '((&optional (k #1=2))
+      syn:invalid-syntax-error #1# "optional parameter initializer form is not allowed in a generic function lambda list")
+    '((&key (k #2=3))
+      syn:invalid-syntax-error #2# "keyword parameter initializer form is not allowed in a generic function lambda list")
+    '(#3=(&aux)
+      syn:invalid-syntax-error #3# "&AUX is not allowed at this position in a generic function lambda list")
+    ;; Valid syntax
+    '(#4=(#5=&optional #6=a)
+      (:generic-function-lambda-list
+       ((:optional-section . 1)
+        (((:optional-section
+           ((:keyword   . 1) (((:lambda-list-keyword
+                                ()
+                                :keyword &optional :source #5#)))
+            (:parameter . *) (((:optional-parameter
+                                ((:name . 1) (((:variable-name
+                                                ()
+                                                :name a :source #6#))))
+                                :source #6#)
+                               :evaluation nil)))))))
+       :source #4#))))
+
 ;;; Specialized lambda list
 
 (test specialized-lambda-list
