@@ -146,7 +146,7 @@
         (seq    (<-  keyword    (the-lambda-list-keyword '&optional))
              (* (<<- parameters (optional-parameter seen forbid-initforms)))))
     source
-    (let ((parameter  (nreverse parameters))
+    (let ((parameters (nreverse parameters))
           (evaluation (if forbid-initforms nil :compound)))
       (bp:node* (:optional-section ; :source source
                  )
@@ -155,8 +155,9 @@
 
   (defrule (rest-section :environment (make-instance 'eg::expression-environment)) (seen)
       (value (source)
-        (seq (<- keyword   (the-lambda-list-keyword '&rest))
-             (<- parameter (rest-parameter seen))))
+        (seq       (<- keyword   (the-lambda-list-keyword '&rest))
+             (must (<- parameter (rest-parameter seen))
+                   "a variable name must follow &REST")))
     source
     (bp:node* (:rest-section ; :source source
                )
@@ -332,8 +333,9 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defrule (whole-section :environment (make-instance 'eg::expression-environment)) (seen)
       (value (source)
-        (seq (<- keyword   (the-lambda-list-keyword '&whole))
-             (<- parameter (whole-parameter seen))))
+        (seq       (<- keyword   (the-lambda-list-keyword '&whole))
+             (must (<- parameter (whole-parameter seen))
+                   "a variable name must follow &WHOLE")))
     source
     (bp:node* (:whole-section ; :source source
                )
@@ -347,8 +349,9 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defrule (environment-section :environment (make-instance 'eg::expression-environment)) (seen)
       (value (source)
-        (seq (<- keyword   (the-lambda-list-keyword '&environment))
-             (<- parameter (environment-parameter seen))))
+        (seq       (<- keyword   (the-lambda-list-keyword '&environment))
+             (must (<- parameter (environment-parameter seen))
+                   "a variable name must follow &ENVIRONMENT")))
     source
     (bp:node* (:environment-section ; :source source
                )
@@ -372,7 +375,11 @@
       (value (source)
         (seq (<- keyword   (or (the-lambda-list-keyword '&rest)
                                (the-lambda-list-keyword '&body)))
-             (<- parameter (rest-parameter seen))))
+             (or (<- parameter (rest-parameter seen))
+                 (:transform (seq)
+                   (let* ((keyword (getf (bp:node-initargs* keyword) :keyword))
+                          (keyword (eg::%naturalize keyword)))
+                     (:fatal (format nil "a variable name must follow ~S" keyword)))))))
     source
     (let ((evaluation (compute-parameter-evaluation parameter)))
       (bp:node* (:rest-section ; :source source
