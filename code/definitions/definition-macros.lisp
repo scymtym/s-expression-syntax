@@ -369,11 +369,11 @@
                              (:transform
                                 (* (and :any
                                         (must (list* 'optimize :any) "must be an OPTIMIZE declaration")
-                                        (<<- declarations ((declaration-specifier! declarations)))))
-                              (when (null declarations)
+                                        (<<- declaration ((declaration-specifier! declarations)))))
+                              (when (null declaration)
                                 (:fatal (format nil "at least one ~S declaration specifier must follow ~S"
                                                 'optimize 'declare)))
-                              declarations))
+                              declaration))
                  (eg:option  :documentation
                              (<- documentation ((documentation-string! forms))))
                  (<<- method (method-description))
@@ -387,7 +387,7 @@
    (method-combination          ?)
    (method-combination-argument *)
    (method-class                ?)
-   (declarations                *)
+   (declaration                 *)
    (documentation               ?)
    (method                      * :evaluation :compound)
    ;; Non-standard options

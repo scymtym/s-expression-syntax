@@ -1253,4 +1253,21 @@
                                                :evaluation t)))
                        :source #9#)
                       :evaluation :compound)))
-     :source #7#)))
+     :source #7#))
+  '(#16=(restart-case #17=1 #18=(#19=foo #20=() (declare #21=(ignore #22=x))))
+    (:restart-case
+     ((:form    . 1) (((:unparsed
+                        ()
+                        :expression 1 :context :form :source #17#)
+                       :evaluation t))
+      (:clause  . *) (((:restart-clause
+                        ((:name        . 1) (((:variable-name () :name foo :source #19#)))
+                         (:lambda-list . 1) (((:ordinary-lambda-list () :source #20#)))
+                         (:declaration . *) (((:declaration-specifier
+                                               ((:argument . *)
+                                                (((:variable-name
+                                                   () :name x :source #22#))))
+                                               :kind ignore :source #21#))))
+                        :source #18#)
+                       :evaluation :compound)))
+      :source #16#)))
