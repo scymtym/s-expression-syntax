@@ -94,8 +94,8 @@
    (read-only-p ? :evaluation nil)))
 
 (define-special-operator quote
-    (list (<- material ((unparsed-expression forms) ':quote)))
-  ((material 1 :evaluation nil)))
+    (list (<- object ((unparsed-expression forms) ':quote)))
+  ((object 1 :evaluation nil)))
 
 (define-special-operator (lambda-expression :operator lambda)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))

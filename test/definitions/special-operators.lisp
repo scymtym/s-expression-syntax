@@ -310,27 +310,27 @@
   ;; Valid syntax
   '(#1=(quote #2=1)
     (:quote
-     ((:material . 1) (((:unparsed
-                         ()
-                         :expression 1
-                         :context    :quote
-                         :source     #2#))))
+     ((:object . 1) (((:unparsed
+                       ()
+                       :expression 1
+                       :context    :quote
+                       :source     #2#))))
      :source #1#))
   '(#3=(quote #4=x)
     (:quote
-     ((:material . 1) (((:unparsed
-                         ()
-                         :expression x
-                         :context    :quote
-                         :source     #4#))))
+     ((:object . 1) (((:unparsed
+                       ()
+                       :expression x
+                       :context    :quote
+                       :source     #4#))))
      :source #3#))
   '(#5=(quote #6=quote)
     (:quote
-     ((:material . 1) (((:unparsed
-                         ()
-                         :expression quote
-                         :context    :quote
-                         :source     #6#))))
+     ((:object . 1) (((:unparsed
+                       ()
+                       :expression quote
+                       :context    :quote
+                       :source     #6#))))
      :source #5#)))
 
 (define-syntax-test (function)
