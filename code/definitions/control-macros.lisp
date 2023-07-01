@@ -257,8 +257,8 @@
     (list* (must (list (* (<<- binding (restart-binding!))))
                  "must be a list of restart bindings")
            (<- form ((forms forms))))
-  ((binding * :evaluation :compound)
-   (form    * :evaluation t)))
+  ((binding *  :evaluation :compound)
+   (form    *> :evaluation t)))
 
 (define-syntax restart-clause
     (list* (or 'nil (<- name ((variable-name! names))))

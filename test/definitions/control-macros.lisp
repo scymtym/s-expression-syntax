@@ -1185,7 +1185,18 @@
                         ()
                         :expression #13# :context :form :source #13#)
                        :evaluation t)))
-     :source #8#)))
+     :source #8#))
+  '(#14=(restart-bind () #15=a #16=b)
+    (:restart-bind
+     ((:form . *) (((:unparsed
+                     ()
+                     :expression a :context :form :source #15#)
+                    :evaluation t)
+                   ((:unparsed
+                     ()
+                     :expression b :context :form :source #16#)
+                    :evaluation t)))
+     :source #14#)))
 
 (define-macro-test (restart-case)
   '((restart-case #1=(declare))
