@@ -550,7 +550,7 @@
   '(#1=(deftype)
     syn:invalid-syntax-error #1#)
   '((deftype #2=1)
-    syn:invalid-syntax-error #2# "must be a class name")
+    syn:invalid-syntax-error #2# "must be a type name")
   '(#3=(deftype foo)
     syn:invalid-syntax-error #3#)
   '((deftype foo #4=1)

@@ -290,7 +290,7 @@
 ;;; Standard macro `deftype'
 
 (define-macro deftype
-    (list* (<- name ((class-name! names)))
+    (list* (<- name ((type-name! names)))
            (<- lambda-list ((deftype-lambda-list! deftype-lambda-list)))
            (<- (documentation declaration form) ((docstring-body forms))))
   ((name          1)
