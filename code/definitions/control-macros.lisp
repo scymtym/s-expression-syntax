@@ -20,12 +20,12 @@
 ;;; Standard macro `cond'
 
 (define-syntax cond-clause
-    (list* (<- test-form ((form! forms))) (<- form ((forms forms))))
-  ((test-form 1  :evaluation t)
-   (form      *> :evaluation t)))
+    (list* (<- test ((form! forms))) (<- form ((forms forms))))
+  ((test 1  :evaluation t)
+   (form *> :evaluation t)))
 
 (defrule cond-clause! ()
-  (must (cond-clause) "must be a clause of the form (TEST-FORM FORM*)"))
+  (must (cond-clause) "must be a clause of the form (TEST FORM*)"))
 
 (define-macro cond
     (list (* (<<- clause (cond-clause!))))

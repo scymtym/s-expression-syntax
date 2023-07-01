@@ -54,9 +54,9 @@
 (define-macro-test (cond)
   ;; Invalid syntax
   '((cond #1=1)
-    syn:invalid-syntax-error #1# "must be a clause of the form (TEST-FORM FORM*)")
+    syn:invalid-syntax-error #1# "must be a clause of the form (TEST FORM*)")
   '((cond #2=())
-    syn:invalid-syntax-error #2# "must be a clause of the form (TEST-FORM FORM*)")
+    syn:invalid-syntax-error #2# "must be a clause of the form (TEST FORM*)")
   '((cond (1 #3=(declare)))
     syn:invalid-syntax-error #3# "declare is not allowed here")
   ;; Valid syntax
@@ -65,41 +65,41 @@
   '(#5=(cond #6=(#7=1))
     (:cond
      ((:clause . *) (((:cond-clause
-                       ((:test-form . 1) (((:unparsed
-                                            ()
-                                            :expression 1 :context :form :source #7#)
-                                           :evaluation t)))
+                       ((:test . 1) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source #7#)
+                                      :evaluation t)))
                        :source #6#)
                       :evaluation :compound)))
      :source #5#))
   '(#8=(cond #9=(#10=1 #11=2))
     (:cond
      ((:clause . *) (((:cond-clause
-                       ((:test-form . 1) (((:unparsed
-                                            ()
-                                            :expression 1 :context :form :source #10#)
-                                           :evaluation t))
-                        (:form      . *) (((:unparsed
-                                            ()
-                                            :expression 2 :context :form :source #11#)
-                                           :evaluation t)))
+                       ((:test . 1) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source #10#)
+                                      :evaluation t))
+                        (:form . *) (((:unparsed
+                                       ()
+                                       :expression 2 :context :form :source #11#)
+                                      :evaluation t)))
                        :source #9#)
                       :evaluation :compound)))
      :source #8#))
   '(#12=(cond #13=(#14=1) #15=(#16=2))
     (:cond
      ((:clause . *) (((:cond-clause
-                       ((:test-form . 1) (((:unparsed
-                                            ()
-                                            :expression 1 :context :form :source #14#)
-                                           :evaluation t)))
+                       ((:test . 1) (((:unparsed
+                                       ()
+                                       :expression 1 :context :form :source #14#)
+                                      :evaluation t)))
                        :source #13#)
                       :evaluation :compound)
                      ((:cond-clause
-                       ((:test-form . 1) (((:unparsed
-                                            ()
-                                            :expression 2 :context :form :source #16#)
-                                           :evaluation t)))
+                       ((:test . 1) (((:unparsed
+                                       ()
+                                       :expression 2 :context :form :source #16#)
+                                      :evaluation t)))
                        :source #15#)
                       :evaluation :compound)))
      :source #12#)))
