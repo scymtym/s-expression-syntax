@@ -17,8 +17,8 @@
                                  (? (<- step ((form! forms)))))))
                    "must be of the form (VARIABLE [INIT-FORM [STEP-FORM]])"))
         (<- variable ((unique-variable-name! lambda-lists) seen)))
-    (if init
-        `(,variable ,init ,@(? step))
+    (if init-supplied?
+        `(,variable ,init ,@(? step-supplied? step))
         variable)
   ((variable 1 :evaluation (load-time-value
                             (make-instance 'binding-semantics
@@ -58,7 +58,8 @@
                                              (? (<- result ((form! forms)))))))
                                "must be of the form (VARIABLE [PACKAGE [RESULT]])")
                          (<- (declaration segment) ((tagbody-body forms))))
-                  `((,variable ,@(? package) ,@(? result))
+                  `((,variable ,@(? package-supplied? package)
+                     ,@(? result-supplied? result))
                     ,@declaration ,@ (apply #'append segment))
                 ((variable    1 :evaluation (load-time-value
                                              (make-instance 'binding-semantics
@@ -77,7 +78,8 @@
                        (? (<- result ((form! forms)))))
                  "must be of the form (VARIABLE [RESULT])")
            (<- (declaration segment) ((tagbody-body forms))))
-    `((,variable ,@(? result)) ,@declaration ,@(apply #'append segment))
+    `((,variable ,@(? result-supplied? result))
+      ,@declaration ,@(apply #'append segment))
   ((variable    1 :evaluation (load-time-value
                                (make-instance 'binding-semantics
                                               :namespace 'variable
@@ -98,7 +100,7 @@
                          ,(format nil "must be of the form (VARIABLE ~A [RESULT])"
                                   source-name))
                    (<- (declaration segment) ((tagbody-body forms))))
-            `((,variable ,,source-name ,@(? result))
+            `((,variable ,,source-name ,@(? result-supplied? result))
               ,@declaration ,@(apply #'append segment))
           ((variable     1 :evaluation (load-time-value
                                         (make-instance 'binding-semantics

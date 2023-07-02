@@ -264,7 +264,7 @@
                  (<<- clause (handler-clause))))
           (must (not :any)
                 "must be a list of handler clauses"))
-    `(,@form ,@clause ,@(? no-error-clause))
+    `(,form ,@clause ,@(? no-error-clause))
   ((form            1 :evaluation t)
    (clause          * :evaluation :compound)
    (no-error-clause ? :evaluation :compound)))

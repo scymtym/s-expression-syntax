@@ -79,7 +79,7 @@
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
-    (if (not (null default))
+    (if default-supplied?
         `(,name ,default ,@(? supplied))
         name)
   ((name     1)
@@ -104,11 +104,11 @@
                       (? (<- supplied (unique-variable-name! seen))))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
-    (let ((name (if (not (null keyword))
+    (let ((name (if keyword-supplied?
                     `(,keyword ,name)
                     name)))
-      (if (or (not (null keyword)) (not (null default)))
-          `(,name ,@(? default) ,@(? supplied))
+      (if (or keyword-supplied? default-supplied?)
+          `(,name ,@(? default-supplied? default) ,@(? supplied))
           name))
   ((name     1)
    (keyword  ?)

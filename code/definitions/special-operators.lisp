@@ -19,7 +19,7 @@
     (list (<- test ((form! forms)))
           (<- then ((form! forms)))
           (? (<- else ((form! forms)))))
-    `(,test ,then ,@(? else))
+    `(,test ,then ,@(? else-supplied? else))
   ((test 1 :evaluation t)
    (then 1 :evaluation t)
    (else ? :evaluation t)))
@@ -37,14 +37,14 @@
 
 (define-special-operator return-from
     (list (<- name ((block-name! names))) (? (<- result ((form! forms)))))
-    `(,name ,@(? result))
+    `(,name ,@(? result-supplied? result))
   ((name   1 :evaluation (make-instance 'reference-semantics
                                         :namespace 'block))
    (result ? :evaluation t)))
 
 (define-special-operator return
     (list (? (<- result ((form! forms)))))
-    `(,@(? result))
+    `(,@(? result-supplied? result))
   ((result ? :evaluation t)))
 
 ;;; Special operators `tagbody' and `go'
@@ -98,7 +98,7 @@
 
 (define-special-operator load-time-value
     (list (<- form ((form! forms))) (? (<- read-only-p (read-only-p!))))
-    `(,form ,@(? read-only-p))
+    `(,form ,@(? read-only-p-supplied? read-only-p))
   ((form        1 :evaluation t)
    (read-only-p ? :evaluation nil)))
 

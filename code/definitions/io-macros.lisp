@@ -24,9 +24,9 @@
                  "must be of the form (VAR STRING &KEY INDEX START END)")
            (<- (declaration form) ((body forms))))
     `((,var ,string
-       ,@(? index :index index)
-       ,@(? start :start start)
-       ,@(? end   :end   end))
+       ,@(? index-supplied? :index index)
+       ,@(? start-supplied? :start start)
+       ,@(? end-supplied?   :end   end))
       ,@declaration ,@form)
   ((var         1  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
@@ -45,7 +45,8 @@
                                (? (seq :element-type (<- element-type ((form! forms))))))))
                  "must be of the form (VAR STRING &key ELEMENT-TYPE)")
            (<- (declaration form) ((body forms))))
-    `((,var ,@(? string) ,@(? element-type :element-type element-type))
+    `((,var ,@(? string-supplied? string)
+       ,@(? element-type-supplied? :element-type element-type))
       ,@declaration ,@form)
   ((var          1  :evaluation (make-instance 'binding-semantics
                                                :namespace 'variable
@@ -107,9 +108,9 @@
                  "must be of the form (STREAM-DESIGNATOR OBJECT &key PREFIX PER-LINE-PREFIX SUFFIX)")
            (<- (declaration form) ((body forms))))
     `((,stream-symbol ,object
-       ,@(? prefix          :prefix          prefix)
-       ,@(? per-line-prefix :per-line-prefix per-line-prefix)
-       ,@(? suffix          :suffix          suffix))
+       ,@(? prefix-supplied?          :prefix          prefix)
+       ,@(? per-line-prefix-supplied? :per-line-prefix per-line-prefix)
+       ,@(? suffix-supplied?          :suffix          suffix))
       ,@declaration ,@form)
   ((stream-symbol   1  :evaluation (make-instance 'binding-semantics
                                                   :namespace 'variable
@@ -142,8 +143,8 @@
                  "must be of the form (OBJECT STREAM &key TYPE IDENTITY)")
            (<- form ((forms forms))))
     `((,object ,stream
-       ,@(? type     :type     type)
-       ,@(? identity :identity identity))
+       ,@(? type-supplied?     :type     type)
+       ,@(? identity-supplied? :identity identity))
       ,@form)
   ((object   1  :evaluation t)
    (stream   1  :evaluation t)

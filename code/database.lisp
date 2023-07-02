@@ -179,9 +179,9 @@
     (list* keyword parameter)))
 
 (defmethod unparse ((client t) (syntax (eql 'tagbody-segment)) (node t))
-  (destructuring-bind (&key label statement)
+  (destructuring-bind (&key (label nil label-supplied?) statement)
       (nth-value 1 (destructure-and-unparse-node client node))
-    (list* label statement)))
+    `(,@(when label-supplied? `(,label)) ,@statement))) ; make the ? macro available everywhere
 
 (defmethod unparse ((client t) (syntax (eql t)) (node t))
   (let* ((kind   (bp:node-kind client node))
