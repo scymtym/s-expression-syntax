@@ -104,7 +104,7 @@
 
 (define-special-operator quote
     (list (<- object ((unparsed-expression forms) ':quote)))
-    object
+    `(,object)
   ((object 1 :evaluation nil)))
 
 (define-special-operator (lambda-expression :arguments ((kind :lambda-expression))
