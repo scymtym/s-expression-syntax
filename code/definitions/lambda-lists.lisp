@@ -121,8 +121,8 @@
               (? (<- value ((form! forms)))))
         (<- name (and (not-lambda-list-keyword)
                       (unique-variable-name! seen))))
-    (if (not (null value))
-        `(name ,value)
+    (if value-supplied?
+        `(,name ,value)
         name)
   ((name  1)
    (value ? :evaluation t)))
