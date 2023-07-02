@@ -6,6 +6,20 @@
 
 (cl:in-package #:s-expression-syntax)
 
+(defun generate-unparser (parts body)
+  (let ((supplied?-variables '()))
+    (flet ((part-parameter (part)
+             (let* ((name               (first part))
+                    (supplied?-variable (a:symbolicate name '#:-supplied?)))
+               (push supplied?-variable supplied?-variables)
+               `(,name nil ,supplied?-variable))))
+      `(lambda (initargs &key ,@(mapcar #'part-parameter parts))
+         (declare (ignorable initargs ,@supplied?-variables))
+         (flet ((? (thing &optional (value thing) &rest more-values)
+                  (when thing (list* value more-values))))
+           (declare (ignorable #'?))
+           ,body)))))
+
 (defmacro define-syntax (name-and-options syntax unparser parts &rest options)
   (destructuring-bind (name &key (grammar  (parser.packrat.grammar:name
                                             parser.packrat::*grammar*))
@@ -58,12 +72,7 @@
                                       `'(,name ,@arguments)
                                       `',name)
                         :grammar ',grammar
-                        :unparser (lambda (initargs &key ,@(mapcar #'first parts))
-                                    (declare (ignorable initargs))
-                                    (flet ((? (thing &optional (value thing) &rest more-values)
-                                             (when thing (list* value more-values))))
-                                      (declare (ignorable #'?))
-                                      ,unparser))
+                        :unparser ,(generate-unparser parts unparser)
                         ,@(when documentation
                             `(:documentation ,documentation)))))))
 
