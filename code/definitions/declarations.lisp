@@ -28,11 +28,13 @@
                 (* (<<- arguments ((variable-name! names)))))
 
           (list (<- identifier 'type)
-                (<<- arguments ((type-specifier! type-specifiers)))
+                (must (<<- arguments ((type-specifier! type-specifiers)))
+                      "type specifier must follow TYPE declaration identifier")
                 (* (<<- arguments ((variable-name! names)))))
 
           (list (<- identifier 'ftype)
-                (<<- arguments ((function-type-specifier! type-specifiers)))
+                (must (<<- arguments ((function-type-specifier! type-specifiers)))
+                      "function type specifier must follow FTYPE declaration identifier")
                 (* (<<- arguments ((function-name! names)))))
 
           (list (<- identifier (or 'inline 'notinline))

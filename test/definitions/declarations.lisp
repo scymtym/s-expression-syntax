@@ -12,48 +12,59 @@
 (test declaration-specifier
   "Smoke test for the `declaration-specifier' rule."
   (rule-test-cases ((syn::declaration-specifier syn::special-operators))
+    ;; Invalid syntax
     '((#1=1) :fatal #1# "declaration identifier must be a symbol")
     ;; `type' declaration
-    '((type #2=1 a) :fatal #2# "must be a type specifier")
-    '(#3=(type #4=bit #5=a)
-      t #3# (:declaration-specifier
+    '((type . #2=())
+      :fatal #2# "type specifier must follow TYPE declaration identifier")
+    '((type #3=1 a)
+      :fatal #3# "must be a type specifier")
+    '(#4=(type #5=bit #6=a)
+      t #4# (:declaration-specifier
              ((:argument . *) (((:atomic-type-specifier
-                                 ((:name . 1) (((:type-name () :name bit :source #4#))))
-                                 :source #4#))
-                               ((:variable-name () :name a :source #5#))))
-             :kind type :source #3#))
+                                 ((:name . 1) (((:type-name () :name bit :source #5#))))
+                                 :source #5#))
+                               ((:variable-name () :name a :source #6#))))
+             :kind type :source #4#))
+    ;; `ftype' declaration
+    '((ftype . #7=())
+      :fatal #7# "function type specifier must follow FTYPE declaration identifier")
+    '((ftype #8=1 a)
+      :fatal #8# "must be a function type specifier")
     ;; `optimize' declaration
-    '((optimize #6=1)         :fatal #6# "must be a quality name or a list (QUALITY {0,1,2,3})")
-    '((optimize (speed #7=5)) :fatal #7# "must be an optimization value, that is 0, 1, 2 or 3")
-    '(#8=(optimize #9=speed #10=debug)
-      t #8# (:declaration-specifier
+    '((optimize #9=1)
+      :fatal #9# "must be a quality name or a list (QUALITY {0,1,2,3})")
+    '((optimize (speed #10=5))
+      :fatal #10# "must be an optimization value, that is 0, 1, 2 or 3")
+    '(#11=(optimize #12=speed #13=debug)
+      t #11# (:declaration-specifier
              ((:argument . *) (((:optimization-specification
                                  ()
-                                 :quality #9# :value nil :source #9#))
+                                 :quality #12# :value nil :source #12#))
                                ((:optimization-specification
                                  ()
-                                 :quality #10# :value nil :source #10#))))
-             :kind optimize :source #8#))
-    '(#11=(optimize #12=(#13=speed #14=1))
-      t #9# (:declaration-specifier
+                                 :quality #13# :value nil :source #13#))))
+             :kind optimize :source #11#))
+    '(#14=(optimize #15=(#16=speed #17=1))
+      t #12# (:declaration-specifier
              ((:argument . *) (((:optimization-specification
                                  ()
-                                 :quality #13# :value #14# :source #12#))))
-             :kind optimize :source #11#))
+                                 :quality #16# :value #17# :source #15#))))
+             :kind optimize :source #14#))
     ;; `ignore' declaration
-    '(#15=(ignore #16=a (function #17=b))
-      t #15# (:declaration-specifier
-             ((:argument . *) (((:variable-name () :name a :source #16#))
-                               ((:function-name () :name b :source #17#))))
-             :kind ignore :source #15#))
+    '(#18=(ignore #19=a (function #20=b))
+      t #18# (:declaration-specifier
+             ((:argument . *) (((:variable-name () :name a :source #19#))
+                               ((:function-name () :name b :source #20#))))
+             :kind ignore :source #18#))
     ;; `declaration' declaration
-    '((declaration #18=1)
-      :fatal #18# "declaration identifier must be a symbol")
-    '(#19=(declaration)
-      t #19# (:declaration-specifier () :kind declaration :source #19#))
-    '(#20=(declaration #21=my-declaration)
-      t #20# (:declaration-specifier
+    '((declaration #21=1)
+      :fatal #21# "declaration identifier must be a symbol")
+    '(#22=(declaration)
+      t #22# (:declaration-specifier () :kind declaration :source #22#))
+    '(#23=(declaration #24=my-declaration)
+      t #23# (:declaration-specifier
                ((:argument . *) (((:declaration-identifier
                                    ()
-                                   :name my-declaration :source #21#))))
-               :kind declaration :source #20#))))
+                                   :name my-declaration :source #24#))))
+               :kind declaration :source #23#))))
