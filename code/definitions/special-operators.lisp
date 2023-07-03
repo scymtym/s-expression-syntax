@@ -267,9 +267,9 @@
    (form        *> :evaluation t)))
 
 (define-special-operator multiple-value-call
-    (list* (<- function-form ((form! forms))) (<- argument ((forms forms))))
-  ((function-form 1  :evaluation t)
-   (argument      *> :evaluation t)))
+    (list* (<- function ((form! forms))) (<- argument ((forms forms))))
+  ((function 1  :evaluation t)
+   (argument *> :evaluation t)))
 
 (define-special-operator multiple-value-prog1
     (list* (<- values ((form! forms))) (<- form ((forms forms))))

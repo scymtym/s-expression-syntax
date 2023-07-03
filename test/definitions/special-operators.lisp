@@ -1328,36 +1328,36 @@
   ;; Valid syntax
   '(#1=(multiple-value-call #2=foo)
     (:multiple-value-call
-     ((:function-form . 1) (((:unparsed
-                              ()
-                              :expression foo :context :form :source #2#)
-                             :evaluation t)))
+     ((:function . 1) (((:unparsed
+                         ()
+                         :expression foo :context :form :source #2#)
+                        :evaluation t)))
      :source #1#))
   '(#3=(multiple-value-call #4=foo #5=1)
     (:multiple-value-call
-     ((:function-form . 1) (((:unparsed
-                              ()
-                              :expression foo :context :form :source #4#)
-                             :evaluation t))
-      (:argument      . *) (((:unparsed
-                              ()
-                              :expression 1 :context :form :source #5#)
-                             :evaluation t)))
+     ((:function . 1) (((:unparsed
+                         ()
+                         :expression foo :context :form :source #4#)
+                        :evaluation t))
+      (:argument . *) (((:unparsed
+                         ()
+                         :expression 1 :context :form :source #5#)
+                        :evaluation t)))
      :source #3#))
   '(#6=(multiple-value-call #7=foo #8=1 #9=2)
     (:multiple-value-call
-     ((:function-form . 1) (((:unparsed
-                              ()
-                              :expression foo :context :form :source #7#)
-                             :evaluation t))
-      (:argument      . *) (((:unparsed
-                              ()
-                              :expression 1 :context :form :source #8#)
-                             :evaluation t)
-                            ((:unparsed
-                              ()
-                              :expression 2 :context :form :source #9#)
-                             :evaluation t)))
+     ((:function . 1) (((:unparsed
+                         ()
+                         :expression foo :context :form :source #7#)
+                        :evaluation t))
+      (:argument . *) (((:unparsed
+                         ()
+                         :expression 1 :context :form :source #8#)
+                        :evaluation t)
+                       ((:unparsed
+                         ()
+                         :expression 2 :context :form :source #9#)
+                        :evaluation t)))
      :source #6#)))
 
 (define-syntax-test (multiple-value-prog1)
