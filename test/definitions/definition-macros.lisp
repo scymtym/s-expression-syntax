@@ -897,7 +897,7 @@
                                     ((:string-designator
                                       ()
                                       :string "bar" :source #14#)))
-      (:shadowing-import-from . *) (((:import-from
+      (:shadowing-import-from . *) (((:shadowing-import-from
                                       ((:package . 1) (((:string-designator
                                                          ()
                                                          :string "FOO2" :source #21#)))

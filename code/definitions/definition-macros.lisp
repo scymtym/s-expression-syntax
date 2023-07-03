@@ -427,13 +427,18 @@
 (defrule package-designator! ()
   (must (package-designator) "must be a package designator"))
 
-(define-syntax (import-from :arguments ((keyword :import-from)))
-    (list* keyword
-           (must (list (<- package (package-designator!))
-                       (* (<<- name (and :any (string-designator!)))))
-                 "import from options accept a package designator followed by string designators"))
-  ((package 1)
-   (name    *)))
+(macrolet ((define (name keyword)
+             `(define-syntax ,name
+                  (list* ',keyword
+                         (must (list (<- package (package-designator!))
+                                     (* (<<- name (and :any (string-designator!)))))
+                               ,(format nil "~A accepts a package designator ~
+                                             followed by string designators"
+                                        keyword)))
+                ((package 1)
+                 (name    *)))))
+  (define import-from           :import-from)
+  (define shadowing-import-from :shadowing-import-from))
 
 (defrule package-size ()
     (value (source)
@@ -471,8 +476,8 @@
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
                  (eg:option* :use           (* (<<- use (package-designator!))))
                  (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
-                 (<<- shadowing-import-from (import-from ':shadowing-import-from))
-                 (<<- import-from           (import-from ':import-from))
+                 (<<- shadowing-import-from (shadowing-import-from))
+                 (<<- import-from           (import-from))
                  (eg:option* :export        (* (<<- export (string-designator!))))
                  (eg:option* :intern        (* (<<- intern (string-designator!))))
                  (eg:option  :size          (<- size (package-size!)))
