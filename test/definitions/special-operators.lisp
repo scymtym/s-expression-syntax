@@ -1069,27 +1069,27 @@
     (:setq () :source #5#))
   '(#6=(setq #7=a #8=1)
     (:setq
-     ((:name       . *) (((:variable-name () :name a :source #7#)
-                          :evaluation (:assignment :namespace variable)))
-      (:value-form . *) (((:unparsed
-                           ()
-                           :expression 1 :context :form :source #8#)
-                          :evaluation t)))
+     ((:name  . *) (((:variable-name () :name a :source #7#)
+                     :evaluation (:assignment :namespace variable)))
+      (:value . *) (((:unparsed
+                      ()
+                      :expression 1 :context :form :source #8#)
+                     :evaluation t)))
      :source #6#))
   '(#9=(setq #10=a #11=1 #12=b #13=2)
     (:setq
-     ((:name       . *) (((:variable-name () :name a :source #10#)
-                          :evaluation (:assignment :namespace variable))
-                         ((:variable-name () :name b :source #12#)
-                          :evaluation (:assignment :namespace variable)))
-      (:value-form . *) (((:unparsed
-                           ()
-                           :expression 1 :context :form :source #11#)
-                          :evaluation t)
-                         ((:unparsed
-                           ()
-                           :expression 2 :context :form :source #13#)
-                          :evaluation t)))
+     ((:name  . *) (((:variable-name () :name a :source #10#)
+                     :evaluation (:assignment :namespace variable))
+                    ((:variable-name () :name b :source #12#)
+                     :evaluation (:assignment :namespace variable)))
+      (:value . *) (((:unparsed
+                      ()
+                      :expression 1 :context :form :source #11#)
+                     :evaluation t)
+                    ((:unparsed
+                      ()
+                      :expression 2 :context :form :source #13#)
+                     :evaluation t)))
      :source #9#)))
 
 (define-syntax-test (psetq)
@@ -1109,25 +1109,25 @@
     (:psetq () :source #6#))
   '(#7=(psetq #8=a #9=1)
     (:psetq
-     ((:name       . *) (((:variable-name () :name a :source #8#)
-                          :evaluation (:assignment :namespace variable)))
-      (:value-form . *) (((:unparsed
-                           ()
-                           :expression 1 :context :form :source #9#)
-                          :evaluation t)))
+     ((:name  . *) (((:variable-name () :name a :source #8#)
+                     :evaluation (:assignment :namespace variable)))
+      (:value . *) (((:unparsed
+                      ()
+                      :expression 1 :context :form :source #9#)
+                     :evaluation t)))
      :source #7#))
   '(#10=(psetq #11=a #12=1 #13=b #14=2)
     (:psetq
-     ((:name       . *) (((:variable-name () :name a :source #11#)
-                          :evaluation (:assignment :namespace variable))
-                         ((:variable-name () :name b :source #13#)
-                          :evaluation (:assignment :namespace variable)))
-      (:value-form . *) (((:unparsed
-                           () :expression 1 :context :form :source #12#)
-                          :evaluation t)
-                         ((:unparsed
-                           () :expression 2 :context :form :source #14#)
-                          :evaluation t)))
+     ((:name  . *) (((:variable-name () :name a :source #11#)
+                     :evaluation (:assignment :namespace variable))
+                    ((:variable-name () :name b :source #13#)
+                     :evaluation (:assignment :namespace variable)))
+      (:value . *) (((:unparsed
+                      () :expression 1 :context :form :source #12#)
+                     :evaluation t)
+                    ((:unparsed
+                      () :expression 2 :context :form :source #14#)
+                     :evaluation t)))
      :source #10#)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
@@ -1294,31 +1294,31 @@
   ;; Valid syntax
   '(#3=(multiple-value-bind () #4=1)
     (:multiple-value-bind
-     ((:values-form . 1) (((:unparsed
-                            ()
-                            :expression 1 :context :form :source #4#)
-                           :evaluation t)))
+     ((:values . 1) (((:unparsed
+                       ()
+                       :expression 1 :context :form :source #4#)
+                      :evaluation t)))
      :source #3#))
   '(#5=(multiple-value-bind (#6=a #7=b) #8=1 #9=2 #10=3)
     (:multiple-value-bind
-     ((:name        . *) (((:variable-name () :name a :source #6#)
-                           :evaluation (:binding :namespace variable
-                                                 :scope     :lexical))
-                          ((:variable-name () :name b :source #7#)
-                           :evaluation (:binding :namespace variable
-                                                 :scope     :lexical)))
-      (:values-form . 1) (((:unparsed
-                            ()
-                            :expression 1 :context :form :source #8#)
-                           :evaluation t))
-      (:form        . *) (((:unparsed
-                            ()
-                            :expression 2 :context :form :source #9#)
-                           :evaluation t)
-                          ((:unparsed
-                            ()
-                            :expression 3 :context :form :source #10#)
-                           :evaluation t)))
+     ((:name   . *) (((:variable-name () :name a :source #6#)
+                      :evaluation (:binding :namespace variable
+                                            :scope     :lexical))
+                     ((:variable-name () :name b :source #7#)
+                      :evaluation (:binding :namespace variable
+                                            :scope     :lexical)))
+      (:values . 1) (((:unparsed
+                       ()
+                       :expression 1 :context :form :source #8#)
+                      :evaluation t))
+      (:form   . *) (((:unparsed
+                       ()
+                       :expression 2 :context :form :source #9#)
+                      :evaluation t)
+                     ((:unparsed
+                       ()
+                       :expression 3 :context :form :source #10#)
+                      :evaluation t)))
      :source #5#)))
 
 (define-syntax-test (multiple-value-call)
@@ -1367,34 +1367,34 @@
   ;; Valid syntax
   '(#1=(multiple-value-prog1 #2=1)
     (:multiple-value-prog1
-     ((:values-form . 1) (((:unparsed
-                            ()
-                            :expression 1 :context :form :source #2#)
-                           :evaluation t)))
+     ((:values . 1) (((:unparsed
+                       ()
+                       :expression 1 :context :form :source #2#)
+                      :evaluation t)))
      :source #1#))
   '(#3=(multiple-value-prog1 #4=1 #5=2)
     (:multiple-value-prog1
-     ((:values-form . 1) (((:unparsed
-                            ()
-                            :expression 1 :context :form :source #4#)
-                           :evaluation t))
-      (:form        . *) (((:unparsed
-                            ()
-                            :expression 2 :context :form :source #5#)
-                           :evaluation t)))
+     ((:values . 1) (((:unparsed
+                       ()
+                       :expression 1 :context :form :source #4#)
+                      :evaluation t))
+      (:form   . *) (((:unparsed
+                       ()
+                       :expression 2 :context :form :source #5#)
+                      :evaluation t)))
      :source #3#))
   '(#6=(multiple-value-prog1 #7=1 #8=2 #9=3)
     (:multiple-value-prog1
-     ((:values-form . 1) (((:unparsed
-                            ()
-                            :expression 1 :context :form :source #7#)
-                           :evaluation t))
-      (:form        . *) (((:unparsed
-                            ()
-                            :expression 2 :context :form :source #8#)
-                           :evaluation t)
-                          ((:unparsed
-                            ()
-                            :expression 3 :context :form :source #9#)
-                           :evaluation t)))
+     ((:values . 1) (((:unparsed
+                       ()
+                       :expression 1 :context :form :source #7#)
+                      :evaluation t))
+      (:form   . *) (((:unparsed
+                       ()
+                       :expression 2 :context :form :source #8#)
+                      :evaluation t)
+                     ((:unparsed
+                       ()
+                       :expression 3 :context :form :source #9#)
+                      :evaluation t)))
      :source #6#)))

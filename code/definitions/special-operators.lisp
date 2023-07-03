@@ -199,27 +199,27 @@
 
 (define-special-operator setq
     (list (* (and :any
-                  (must (seq (<<- name       (variable-name!))
-                             (<<- value-form ((form! forms))))
+                  (must (seq (<<- name  (variable-name!))
+                             (<<- value ((form! forms))))
                         "must be a variable name followed by a form"))))
-  ((name       * :evaluation (make-instance 'assignment-semantics
-                                            :namespace 'variable))
-   (value-form * :evaluation t)))
+  ((name  * :evaluation (make-instance 'assignment-semantics
+                                       :namespace 'variable))
+   (value * :evaluation t)))
 
 (defrule unique-assignment-pairs ()
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (list (* (and :any
-                       (must (seq (<<- names       ((unique-variable-name! lambda-lists)
-                                                    seen))
-                                  (<<- value-forms ((form! forms))))
+                       (must (seq (<<- names  ((unique-variable-name! lambda-lists)
+                                               seen))
+                                  (<<- values ((form! forms))))
                              "must be a variable name followed by a form")))))
-  (list names value-forms))
+  (list names values))
 
 (define-special-operator psetq
-    (list* (<- (name value-form) (unique-assignment-pairs)))
-  ((name       * :evaluation (make-instance 'assignment-semantics
-                                            :namespace 'variable))
-   (value-form * :evaluation t)))
+    (list* (<- (name value) (unique-assignment-pairs)))
+  ((name  * :evaluation (make-instance 'assignment-semantics
+                                       :namespace 'variable))
+   (value * :evaluation t)))
 
 ;;; Special operators `throw', `catch' and `unwind-protect'
 
@@ -254,7 +254,7 @@
 (define-special-operator multiple-value-bind
     (list* (must (list (* (<<- name ((variable-name! names)))))
                  "must be a list of variable names") ; TODO unique variable name
-           (must (<- values-form ((form! forms)))
+           (must (<- values ((form! forms)))
                  "a value form must follow the list of variable names")
            (<- (declaration form) ((body forms))))
   ((name        *  :evaluation (make-instance 'binding-semantics
@@ -262,7 +262,7 @@
                                               :scope     :lexical
                                               :order     :parallel
                                               :values    'values))
-   (values-form 1  :evaluation t)
+   (values      1  :evaluation t)
    (declaration *>)
    (form        *> :evaluation t)))
 
@@ -272,6 +272,6 @@
    (argument      *> :evaluation t)))
 
 (define-special-operator multiple-value-prog1
-    (list* (<- values-form ((form! forms))) (<- form ((forms forms))))
-  ((values-form 1  :evaluation t)
-   (form        *> :evaluation t)))
+    (list* (<- values ((form! forms))) (<- form ((forms forms))))
+  ((values 1  :evaluation t)
+   (form   *> :evaluation t)))
