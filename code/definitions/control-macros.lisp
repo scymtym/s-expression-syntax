@@ -239,7 +239,7 @@
            (must (list (? (<- variable ((required-parameter! lambda-lists) '()))))
                  "must be a lambda list with zero or one required parameter")
            (<- (declaration form) ((body forms))))
-  `(,type (,variable) ,@declaration ,@form)
+    `(,type (,@(? variable)) ,@declaration ,@form)
   ((type        1)
    (variable    ?  :evaluation (make-instance 'binding-semantics
                                               :namespace 'variable
