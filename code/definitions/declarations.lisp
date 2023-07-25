@@ -15,9 +15,15 @@
 
 ;;; `declaration'
 
+(defrule declaration-argument ()
+    (value (source) argument)
+  (bp:node* (:unparsed :expression argument
+                       :context    :declaration-argument
+                       :source     source)))
+
 (defrule declaration-arguments () ; TODO
-    (list (* (<<- arguments)))
-  arguments #+later (bp:node* (:declaration-arguments :arguments arguments)))
+    (list (* (<<- arguments (declaration-argument))))
+  (nreverse arguments))
 
 (defrule declaration-specifier ()
     (value (source)
@@ -39,7 +45,7 @@
                 (* (<<- arguments ((variable-name! names)))))
 
           (list (<- identifier 'ftype)
-                (must (<<- arguments ((function-type-specifier! type-specifiers)))
+                (must (<<- arguments ((function-type-specifier! type-specifiers))) ; TODO wrong
                       "function type specifier must follow FTYPE declaration identifier")
                 (* (<<- arguments ((function-name! names)))))
 
