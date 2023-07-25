@@ -562,7 +562,8 @@
                                                      :context    :form
                                                      :source     #14#)
                                                     :evaluation t)))
-                                 :source #13#)
+                                 ; TODO :source #13#
+                                 )
                                 :evaluation :compound)))
      :source #11#))
   '(#15=(define-condition #16=baz () () (:documentation #17="bar"))

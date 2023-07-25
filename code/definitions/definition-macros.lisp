@@ -247,7 +247,9 @@
     (value (source)
       (seq (<- name     ((initarg-name! names)))
            (<- initform ((form! forms)))))
-  (bp:node* (:default-initarg :source source)
+  source
+  (bp:node* (:default-initarg ; :source source
+             )
     (1 (:name     . 1) name)
     (1 (:initform . 1) initform :evaluation t)))
 
