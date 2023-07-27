@@ -85,28 +85,28 @@
 (defmethod unparse ((client t) (syntax unparser-mixin) (node t))
   (multiple-value-bind (initargs sub-expressions)
       (destructure-and-unparse-node client node)
-    (apply (%unparser syntax) initargs sub-expressions)))
+    (let ((bp:*builder* :invalid))
+      (apply (%unparser syntax) initargs sub-expressions))))
 
 (defun destructure-and-unparse-node (client node)
-  (bp:with-unbuilder (client) ; TODO this does too much work
-    (let ((initargs  (bp:node-initargs* node))
-          (relations (bp:node-relations* node)))
-      (labels ((sub-expression (right)
-                 (unparse client t right))
-               (sub-expressions ()
-                 (loop :for relation           :in relations
-                       :for (name cardinality) = (multiple-value-list
-                                                  (bp:normalize-relation relation))
-                       :for right              = (bp:node-relation* relation node)
-                       :collect name
-                       :collect (bp:cardinality-ecase cardinality
-                                  ((1 bp:?)
-                                   (sub-expression right))
-                                  (*
-                                   (map 'list #'sub-expression right))
-                                  (:map
-                                   (error "not implemented"))))))
-        (values initargs (sub-expressions))))))
+  (let ((initargs  (bp:node-initargs client node))
+        (relations (bp:node-relations client node)))
+    (labels ((sub-expression (right)
+               (unparse client t right))
+             (sub-expressions ()
+               (loop :for relation           :in relations
+                     :for (name cardinality) = (multiple-value-list
+                                                (bp:normalize-relation relation))
+                     :for right              = (bp:node-relation client relation node)
+                     :collect name
+                     :collect (bp:cardinality-ecase cardinality
+                                ((1 bp:?)
+                                 (sub-expression right))
+                                (*
+                                 (map 'list #'sub-expression right))
+                                (:map
+                                 (error "not implemented"))))))
+      (values initargs (sub-expressions)))))
 
 (defmethod unparse ((client t) (syntax (eql :unparsed)) (node t))
   (getf (bp:node-initargs client node) :expression))
@@ -182,24 +182,6 @@
   (destructuring-bind (&key (label nil label-supplied?) statement)
       (nth-value 1 (destructure-and-unparse-node client node))
     `(,@(when label-supplied? `(,label)) ,@statement))) ; make the ? macro available everywhere
-
-(defmethod unparse ((client t) (syntax (eql t)) (node t))
-  (let* ((kind   (bp:node-kind client node))
-         (name   (or (find-symbol (symbol-name kind) (find-package '#:cl))
-                     (find-symbol (symbol-name kind) (find-package '#:s-expression-syntax))))
-         (syntax (case kind
-                   ((:unparsed
-                     :variable-name :function-name :type-name :block-name :initarg-name
-                     :keyword :lambda-list-keyword
-                     :tag :string-designator :documentation :literal
-                     :declaration-specifier :atomic-type-specifier)
-                    kind)
-                   ((:required-section :optional-section :rest-section :keyword-section :aux-section
-                     :tagbody-segment)
-                    name)
-                   (t
-                    (find-syntax name)))))
-    (unparse client syntax node)))
 
 ;;; `syntax-description'
 

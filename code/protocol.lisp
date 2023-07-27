@@ -235,3 +235,23 @@ SYNTAX is a designator for a syntax description:
 + Otherwise SYNTAX must be a syntax description object.
 
 TODO"))
+
+;;; Default behavior
+
+(defmethod unparse ((client t) (syntax (eql t)) (node t))
+  (let* ((kind   (bp:node-kind client node))
+         (name   (or (find-symbol (symbol-name kind) (find-package '#:cl))
+                     (find-symbol (symbol-name kind) (find-package '#:s-expression-syntax))))
+         (syntax (case kind
+                   ((:unparsed
+                     :variable-name :function-name :type-name :block-name :initarg-name
+                     :keyword :lambda-list-keyword
+                     :tag :string-designator :documentation :literal
+                     :declaration-specifier :atomic-type-specifier)
+                    kind)
+                   ((:required-section :optional-section :rest-section :keyword-section :aux-section
+                                       :tagbody-segment)
+                    name)
+                   (t
+                    (find-syntax name)))))
+    (unparse client syntax node)))
