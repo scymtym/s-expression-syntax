@@ -19,19 +19,16 @@
   (let ((value (eg::%naturalize value)))
     (bp:node* (:subsidiary-item :value value :source source))))
 
-(defrule compound-type-specifier (must?)
+(defrule compound-type-specifier ()
     (value (source)
-      (list (or (and (:transform :any (unless must? (:fail)))
-                     (<- name ((type-name! names))))
-                (<- name ((type-name names))))
-            (* (<<- arguments (or (%type-specifier 'nil)
-                                  (subsidiary-item))))))
+      (list (<- name ((type-name! names)))
+            (* (<<- arguments (subsidiary-item)))))
   (bp:node* (:compound-type-specifier :source source)
     (1 (:name     . 1) name)
     (* (:argument . *) (nreverse arguments))))
 
 (defrule compound-type-specifier! ()
-  (must (compound-type-specifier 't) "must be a compound type specifier"))
+  (must (compound-type-specifier) "must be a compound type specifier"))
 
 (defrule atomic-type-specifier ()
     (value (source)
@@ -107,17 +104,17 @@
 
 ;;;
 
-(defrule %type-specifier (list-must-be-compound?)
+(defrule %type-specifier ()
   (and (must (not (list* 'values :any)) "VALUES type is invalid in this context")
        (must (not 'values) "the symbol VALUES is not a valid type specifier")
        (or (atomic-type-specifier)
            (function-type-specifier)
-           (compound-type-specifier list-must-be-compound?)
+           (compound-type-specifier)
            ;; (list (guard (typep 'symbol)) (* :any))
            )))
 
 (defrule type-specifier ()
-  (%type-specifier 't))
+  (%type-specifier))
 
 (defrule type-specifier! ()
   (must (type-specifier) "must be a type specifier"))

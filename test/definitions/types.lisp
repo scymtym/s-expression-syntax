@@ -11,9 +11,16 @@
 
 (test compound-type-specifier
   "Smoke test for the `compound-type-specifier' rule."
-  (rule-test-cases ((syn::compound-type-specifier syn::type-specifiers) 't)
+  (rule-test-cases ((syn::compound-type-specifier syn::type-specifiers))
+    ;; Invalid syntax
     '(#1=1   nil    #1# nil)
-    '((#2=1) :fatal #2# "must be a type name")))
+    '((#2=1) :fatal #2# "must be a type name")
+    ;; Valid syntax
+    '(#3=(#4=foo #5=bar)
+      t #3# (:compound-type-specifier
+             ((:name     . 1) (((:type-name () :name foo :source #4#)))
+              (:argument . *) (((:subsidiary-item () :value bar :source #5#))))
+             :source #3#))))
 
 (test function-type-specifier
   "Smoke test for the `function-type-specifier' rule."
@@ -147,11 +154,7 @@
              ((:name     . 1) (((:type-name
                                  ()
                                  :name vector :source #7#)))
-              (:argument . *) (((:atomic-type-specifier
-                                 ((:name . 1) (((:type-name
-                                                 ()
-                                                 :name t :source #8#))))
-                                 :source #8#))))
+              (:argument . *) (((:subsidiary-item () :value t :source #8#))))
              :source #6#))
     '(#9=(#10=unsigned-byte #11=32)
       t nil (:compound-type-specifier
