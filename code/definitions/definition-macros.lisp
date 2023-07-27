@@ -86,28 +86,33 @@
                                         (eg:poption :type      (<- type ((type-specifier! type-specifiers)))))))))
                    "must be of the form (NAME [INITFORM] ...)"))
         (<- name ((variable-name! names))))
-    `(,name ,@(? initform-supplied? initform)
-      ,@(? read-only-supplied? :read-only read-only)
-      ,@(? type-supplied?      :type      type))
+    (if initform-supplied?
+        `(,name ,@(? initform-supplied? initform)
+                ,@(? read-only-supplied? :read-only read-only)
+                ,@(? type-supplied?      :type      type))
+        name)
   ((name      1)
    (initform  ? :evaluation t)
    (read-only ?)
    (type      ?)))
 
-(defrule structure-constructor (other-constructors)
-    (value (source)
-      (eg:option* :constructor
-                  (? (or 'nil   ; NAME remains `nil'
-                         (seq (<- name ((function-name/symbol! names)))
-                              (? (<- lambda-list ((ordinary-lambda-list! lambda-lists))))))))) ; TODO boa-lambda-list
+(defrule valid-structure-constructor-name (other-constructors)
+    (<- name ((function-name/symbol! names)))
   (let ((names (list* name (map 'list (lambda (constructor)
                                         (bp:node-relation* '(:name . 1) constructor))
                                 other-constructors))))
     (when (and (not (= (length names) 1)) (member nil names))
       (:fatal "(:constructor nil) and named constructors are mutually exclusive")))
-  (bp:node* (:structure-constructor :source source)
-    (1    (:name        . 1) name)
-    (bp:? (:lambda-list . 1) lambda-list :evaluation :compound)))
+  name)
+
+(define-syntax (structure-constructor :arguments ((other-constructors '())))
+    (eg:option* :constructor
+      (? (or 'nil   ; NAME remains `nil'
+             (seq (<- name (valid-structure-constructor-name other-constructors))
+                  (? (<- lambda-list ((ordinary-lambda-list! lambda-lists)))))))) ; TODO boa-lambda-list
+    `(:constructor ,name ,@(? lambda-list-supplied? lambda-list))
+  ((name        1)
+   (lambda-list ? :evaluation :compound)))
 
 (macrolet ((define-function-option (name option &optional (symbol? t))
              `(defrule ,name ()
@@ -160,9 +165,9 @@
           (* (<<- slot (slot-description))))
     `(,(if (or constructor-supplied? include-supplied?)
            `(,name
-             ,@(? conc-name-supplied?   `(:conc-name   ,conc-name))
-             ,@(? constructor-supplied? `(:constructor ,constructor))
-             ,@(? include-supplied?     `(:include     ,include     ,@include-slot)))
+             ,@(? conc-name-supplied? `(:conc-name   ,conc-name))
+             ,@constructor
+             ,@(? include-supplied?   `(:include     ,include     ,@include-slot)))
            name)
       ,@(? documentation)
       ,@slot)
