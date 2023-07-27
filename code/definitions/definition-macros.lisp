@@ -90,7 +90,7 @@
 
 (macrolet ((define-function-option (name option &optional (symbol? t))
              `(defrule ,name ()
-                  ,(let ((list-syntax `(eg:option*
+                  ,(let ((list-syntax `(eg:option* ; TODO can these really be repeated?
                                         ,option
                                         (? (<- name (or 'nil
                                                         ((function-name/symbol! names))))))))
@@ -98,6 +98,7 @@
                          `(or ,option ,list-syntax)
                          list-syntax))
                 (or name t))))
+  (define-function-option structure-conc-name      :conc-name)
   (define-function-option structure-copier         :copier)
   (define-function-option structure-predicate      :predicate)
   (define-function-option structure-print-object   :print-object   nil)
@@ -107,7 +108,8 @@
     (or (list (and (<- name ((class-name! names)))
                    (<- constructors (:transform :any '()))) ; HACK
               (:transform
-                 (* (or (<<- constructors           (structure-constructor constructors))
+                 (* (or (<- conc-name               (structure-conc-name))
+                        (<<- constructors           (structure-constructor constructors))
                         (<- copier                  (structure-copier))
                         (eg:option :include         (<- include ((class-name! names)))
                                                     (* (<<- include-slots (slot-description))))
@@ -128,14 +130,15 @@
                                    :type (cond (print-object   :print-object)
                                                (print-function :print-function)))))))
         (<- name ((class-name! names))))
-    (list name constructors include include-slots))
+    (list name conc-name constructors include include-slots))
 
 (define-macro defstruct
-    (list (<- (name constructor include include-slot)
+    (list (<- (name conc-name constructor include include-slot)
               (structure-name))
           (? (<- documentation ((documentation-string forms))))
           (* (<<- slot (slot-description))))
   ((name          1)
+   (conc-name     ?)
    (constructor   *> :evaluation :compound)
    (include       ?)
    (include-slot  *>)
