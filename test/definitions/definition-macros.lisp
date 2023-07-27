@@ -975,27 +975,35 @@
       (:export   . *) (((:string-designator () :string "bar" :source #28#))
                        ((:string-designator () :string "BAZ" :source #29#))))
      :source #24#))
+  '(#30=(defpackage #31=fez
+           (:shadow #32="a" #33=:b #34=#:c))
+    (:defpackage
+     ((:name   . 1) (((:string-designator () :string "FEZ" :source #31#)))
+      (:shadow . *) (((:string-designator () :string "a" :source #32#))
+                     ((:string-designator () :string "B" :source #33#))
+                     ((:string-designator () :string "C" :source #34#))))
+      :source #30#))
   ;; Non-standard options
-  '(#30=(defpackage #31="baz"
-      (:lock #32=nil)
-      #33=(:local-nicknames #34=(#35="foo" #36="bar")))
+  '(#35=(defpackage #36="baz"
+      (:lock #37=nil)
+      #38=(:local-nicknames #39=(#40="foo" #41="bar")))
     (:defpackage
      ((:name            . 1) (((:string-designator
-                                () :string "baz" :source #31#)))
+                                () :string "baz" :source #36#)))
       (:local-nicknames . *) (((:local-nicknames
                                 ((:local-nickname . *) (((:local-nickname
                                                           ((:local-nickname . 1) (((:string-designator
                                                                                     ()
                                                                                     :string "foo"
-                                                                                    :source #35#)))
+                                                                                    :source #40#)))
                                                            (:package-name   . 1) (((:string-designator
                                                                                     ()
                                                                                     :string "bar"
-                                                                                    :source #36#))))
-                                                          :source #34#))))
-                                :source #33#)))
-      (:lock            . 1) (((:literal () :value nil :source #32#))))
-      :source #30#)))
+                                                                                    :source #41#))))
+                                                          :source #39#))))
+                                :source #38#)))
+      (:lock            . 1) (((:literal () :value nil :source #37#))))
+      :source #35#)))
 
 (define-macro-test (in-package)
   ;; Invalid syntax

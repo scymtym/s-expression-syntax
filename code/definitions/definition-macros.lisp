@@ -478,7 +478,7 @@
           (* (or (eg:option* :nicknames     (* (<<- nickname (string-designator!))))
                  (eg:option  :documentation (<- documentation ((documentation-string! forms))))
                  (eg:option* :use           (* (<<- use (package-designator!))))
-                 (eg:option* :shadow        (* (<<- shadow (guard symbolp))))
+                 (eg:option* :shadow        (* (<<- shadow (string-designator!))))
                  (<<- shadowing-import-from (shadowing-import-from))
                  (<<- import-from           (import-from))
                  (eg:option* :export        (* (<<- export (string-designator!))))
