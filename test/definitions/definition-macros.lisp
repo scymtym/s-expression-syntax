@@ -891,8 +891,8 @@
     syn:invalid-syntax-error #7# ":DOCUMENTATION option must not be repeated")
   '((defpackage foo (:size 1) #8=(:size 2))
     syn:invalid-syntax-error #8# ":SIZE option must not be repeated")
-  '((defpackage foo (:locked t) #9=(:locked nil))
-    syn:invalid-syntax-error #9# ":LOCKED option must not be repeated")
+  '((defpackage foo (:lock t) #9=(:lock nil))
+    syn:invalid-syntax-error #9# ":LOCK option must not be repeated")
   ;; Valid syntax
   '(#10=(defpackage #11=foo
          (:documentation #12="bla")
@@ -947,7 +947,7 @@
      :source #24#))
   ;; Non-standard options
   '(#30=(defpackage #31="baz"
-      (:locked #32=nil)
+      (:lock #32=nil)
       #33=(:local-nicknames #34=(#35="foo" #36="bar")))
     (:defpackage
      ((:name            . 1) (((:string-designator
@@ -964,7 +964,7 @@
                                                                                     :source #36#))))
                                                           :source #34#))))
                                 :source #33#)))
-      (:locked          . 1) (((:literal () :value nil :source #32#))))
+      (:lock            . 1) (((:literal () :value nil :source #32#))))
       :source #30#)))
 
 (define-macro-test (in-package)

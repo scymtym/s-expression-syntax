@@ -461,14 +461,14 @@
                              "local nickname must be of the form (LOCAL-NICKNAME PACKAGE-NAME)"))))
   ((local-nickname *)))
 
-(defrule package-locked ()
+(defrule package-lock ()
     (value (source)
       (guard locked (typep 'boolean)))
   (let ((locked (eg::%naturalize locked)))
     (bp:node* (:literal :value locked :source source))))
 
-(defrule package-locked! ()
-  (must (package-locked) "packed locked must be a Boolean"))
+(defrule package-lock! ()
+  (must (package-lock) "package lock must be a Boolean"))
 
 (define-macro defpackage
     (list (must (<- name (string-designator!)) "name is required")
@@ -483,7 +483,7 @@
                  (eg:option  :size          (<- size (package-size!)))
                  ;; Non-standard options
                  (<<- local-nicknames       (local-nicknames))
-                 (eg:option :locked         (<- locked (package-locked!)))
+                 (eg:option :lock           (<- lock (package-lock!)))
                  (list* (must (not :any) "unknown option") :any)
                  (and :any (must (list* :any :any) "option must be a list of the form (:NAME . VALUE)")))))
   ((name                  1)
@@ -498,7 +498,7 @@
    (size                  ?)
    ;; Non-standard options
    (local-nicknames       *)
-   (locked                ?)))
+   (lock                  ?)))
 
 (define-macro in-package
     (list (<- name (must (string-designator!) "name is required")))
