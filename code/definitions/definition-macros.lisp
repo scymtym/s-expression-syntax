@@ -130,7 +130,7 @@
                                    :type (cond (print-object   :print-object)
                                                (print-function :print-function)))))))
         (<- name ((class-name! names))))
-    (list name conc-name constructors include include-slots))
+    (list name conc-name (nreverse constructors) include (nreverse include-slots)))
 
 (define-macro defstruct
     (list (<- (name conc-name constructor include include-slot)

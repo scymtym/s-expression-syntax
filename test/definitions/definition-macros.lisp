@@ -283,7 +283,30 @@
     (:defstruct
      ((:name      . 1) (((:type-name () :name bar :source #28#)))
       (:conc-name . 1) (((:function-name () :name bar- :source #29#))))
-     :source #27#)))
+     :source #27#))
+  '(#30=(defstruct (#31=baz #32=(:constructor #33=a) #34=(:constructor #35=b)))
+    (:defstruct
+     ((:name        . 1) (((:type-name () :name baz :source #31#)))
+      (:constructor . *) (((:structure-constructor
+                            ((:name . 1) (((:function-name () :name a :source #33#))))
+                            :source #32#)
+                           :evaluation :compound)
+                          ((:structure-constructor
+                            ((:name . 1) (((:function-name () :name b :source #35#))))
+                            :source #34#)
+                           :evaluation :compound)))
+      :source #30#))
+  '(#36=(defstruct (#37=fez (:include #38=woo #39=a #40=(#41=b))))
+    (:defstruct
+     ((:name         . 1) (((:type-name () :name fez :source #37#)))
+      (:include      . 1) (((:type-name () :name woo :source #38#)))
+      (:include-slot . *) (((:slot-description
+                             ((:name . 1) (((:variable-name () :name a :source #39#))))
+                             :source #39#))
+                           ((:slot-description
+                             ((:name . 1) (((:variable-name () :name b :source #41#))))
+                             :source #40#))))
+      :source #36#)))
 
 ;;; `defclass' including slots
 
