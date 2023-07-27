@@ -9,6 +9,49 @@
 (def-suite* :s-expression-syntax.control-macros
   :in :s-expression-syntax)
 
+;;; `lambda'
+
+(define-macro-test (lambda)
+  ;; Invalid syntax
+  '((lambda #1=1)
+    syn:invalid-syntax-error #1# "must be an ordinary lambda list")
+  '((lambda (x #2=x))
+    syn:invalid-syntax-error #2# "the variable name X occurs more than once")
+  ;; Valid syntax
+  '(#3=(lambda #4=())
+    (:lambda
+     ((:lambda-list . 1) (((:ordinary-lambda-list () :source #4#)
+                           :evaluation :compound)))
+     :source #3#))
+  '(#5=(lambda #6=(#7=a #8=&rest #9=b) #10=(foo))
+    (:lambda
+     ((:lambda-list . 1) (((:ordinary-lambda-list
+                            ((:required-section . 1)
+                             (((:required-section
+                                ((:parameter . *) (((:required-parameter
+                                                     ((:name . 1) (((:variable-name
+                                                                     ()
+                                                                     :name a :source #7#)
+                                                                    :evaluation nil)))
+                                                     :source #7#)))))))
+                             (:rest-section . 1)
+                             (((:rest-section
+                                ((:keyword   . 1) (((:lambda-list-keyword
+                                                     ()
+                                                     :keyword &rest :source #8#)))
+                                 (:parameter . 1) (((:rest-parameter
+                                                     ((:name . 1) (((:variable-name
+                                                                     ()
+                                                                     :name b :source #9#))))
+                                                     :source #9#))))))))
+                            :source #6#)
+                           :evaluation :compound))
+      (:form        . *) (((:unparsed
+                            ()
+                            :expression (foo) :context :form :source #10#)
+                           :evaluation t)))
+     :source #5#)))
+
 ;;; `and' and `or'
 
 (macrolet ((define (name)
@@ -1277,4 +1320,37 @@
                                                :kind ignore :source #24#))))
                         :source #21#)
                        :evaluation :compound)))
-      :source #19#)))
+      :source #19#))
+  '(#26=(restart-case #27=1 #28=(#29=bar #30=()
+                                   :test #31=(lambda #32=())
+                                   :interactive #33=(lambda #34=())
+                                   :report #35=(lambda #36=())))
+    (:restart-case
+        ((:form . 1)   (((:unparsed
+                          ()
+                          :expression 1 :context :form :source #27#)
+                         :evaluation t))
+         (:clause . *) (((:restart-clause
+                          ((:name               . 1) (((:variable-name () :name bar :source #29#)))
+                           (:lambda-list        . 1) (((:ordinary-lambda-list () :source #30#)))
+                           (:interactive-lambda . 1) (((:lambda-expression
+                                                        ((:lambda-list . 1) (((:ordinary-lambda-list
+                                                                               ()
+                                                                               :source #32#)
+                                                                              :evaluation :compound)))
+                                                        :source #31#)))
+                           (:report-lambda      . 1) (((:lambda-expression
+                                                        ((:lambda-list . 1) (((:ordinary-lambda-list
+                                                                               ()
+                                                                               :source #34#)
+                                                                              :evaluation :compound)))
+                                                        :source #33#)))
+                           (:test-lambda        . 1) (((:lambda-expression
+                                                        ((:lambda-list . 1) (((:ordinary-lambda-list
+                                                                               ()
+                                                                               :source #36#)
+                                                                              :evaluation :compound)))
+                                                        :source #35#))))
+                          :source #28#)
+                         :evaluation :compound)))
+     :source #26#)))

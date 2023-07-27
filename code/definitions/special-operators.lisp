@@ -97,7 +97,9 @@
     (list (<- object ((unparsed-expression forms) ':quote)))
   ((object 1 :evaluation nil)))
 
-(define-special-operator (lambda-expression :operator lambda)
+(define-special-operator (lambda-expression :arguments ((kind :lambda-expression))
+                                            :operator  lambda
+                                            :kind      kind)
     (list* (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (<- (documentation declaration form) ((docstring-body forms))))
   ((lambda-list   1  :evaluation :compound)
@@ -107,18 +109,12 @@
 
 (define-special-operator function
     (list* (must (list (or (<- name ((function-name names)))
-                           (must (<- lambda (lambda-expression))
+                           (must (<- lambda (lambda-expression :lambda-expression))
                                  "must be a function name or lambda expression")))
                  "nothing may follow function name or lambda expression"))
   ((name   ? :evaluation (make-instance 'reference-semantics
                                         :namespace 'function))
    (lambda ? :evaluation :compound)))
-
-;;; This handles the `lambda' macro by accepting a `lambda-expression'
-;;; and wrapping it in an AST node of kind `:lambda'.
-(define-syntax (lambda)
-    (<- lambda (lambda-expression))
-  ((lambda 1 :evaluation :compound)))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 ;;;

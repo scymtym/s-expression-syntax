@@ -62,11 +62,13 @@
 
 (defmacro define-special-operator (name-and-options syntax &rest parts)
   (check-type syntax (cons (member list list*)))
-  (destructuring-bind (name &key (operator name))
+  (destructuring-bind (name &rest options
+                            &key (operator name) &allow-other-keys)
       (a:ensure-list name-and-options)
-    `(define-syntax ,name
-         (,(first syntax) ',operator ,@(rest syntax))
-       ,@parts)))
+    (let ((other-options (a:remove-from-plist options :operator)))
+      `(define-syntax (,name ,@other-options)
+           (,(first syntax) ',operator ,@(rest syntax))
+         ,@parts))))
 
 (defmacro define-macro (name syntax &rest parts)
   (check-type syntax (cons (member list list*)))

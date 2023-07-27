@@ -28,12 +28,13 @@
 ;;; `parser-mixin'
 
 (defclass parser-mixin ()
-  ((%rule    :reader    rule
-             :accessor  %rule)
-   (%grammar :reader    grammar
-             :accessor  %grammar
-             :initform  nil)
-   (%parser  :accessor  %parser)))
+  ((%rule    :reader   rule
+             :accessor %rule)
+   (%grammar :reader   grammar
+             :accessor %grammar
+             :initform nil)
+   (%parser  :initarg  :parser
+             :accessor %parser)))
 
 (defmethod shared-initialize :after ((instance   parser-mixin)
                                      (slot-names t)

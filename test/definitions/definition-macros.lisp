@@ -544,7 +544,21 @@
                                          :source     #17#))))
                        :source #20#)
                       :evaluation :compound)))
-        :source #18#)))
+        :source #18#))
+  '(#21=(define-condition fez () () (:report #22=(lambda #23=())))
+    (:define-condition
+     ((:name   . 1) (((:type-name () :name fez :source #19#)))
+      (:report . 1) (((:condition-report
+                       ((:lambda . 1) (((:lambda-expression
+                                         ((:lambda-list . 1) (((:ordinary-lambda-list
+                                                                ()
+                                                                :source #23#)
+                                                               :evaluation :compound)))
+                                         :source #22#)
+                                        :evaluation :compound)))
+                       :source #22#)
+                      :evaluation :compound)))
+     :source #21#)))
 
 (define-macro-test (deftype)
   '(#1=(deftype)

@@ -8,6 +8,19 @@
 
 (parser:in-grammar special-operators)
 
+;;; Standard macro `lambda'
+;;;
+;;; Copy everything from `lambda-expression' since the two syntax
+;;; descriptions are identical except their names.
+
+(let ((lambda-expression (find-syntax 'lambda-expression)))
+  (setf (find-syntax 'lambda)
+        (make-instance 'special-operator
+                       :name    'lambda
+                       :parts   (parts lambda-expression)
+                       :rule    '(lambda-expression (kind :lambda))
+                       :grammar 'special-operators)))
+
 ;;; Standard macros `and' and `or'
 
 (macrolet ((define (name)
@@ -264,16 +277,16 @@
     (list* (or 'nil (<- name ((variable-name! names))))
            (<- lambda-list ((ordinary-lambda-list! lambda-lists)))
            (* (or (eg:poption :interactive (must (or (<- interactive-name   ((function-name/symbol names)))
-                                                     (<- interactive-lambda (lambda-expression)))
+                                                     (<- interactive-lambda (lambda-expression :lambda-expression)))
                                                  "must be a function name or a lambda expression"))
                   (eg:poption :report      (must (or (<- report-string      (and (guard (typep 'string))
                                                                                  ((unparsed-expression forms)
                                                                                   ':restart-report-string)))
                                                      (<- report-name        ((function-name/symbol names)))
-                                                     (<- report-lambda      (lambda-expression)))
+                                                     (<- report-lambda      (lambda-expression :lambda-expression)))
                                                  "must be a string, a function name or a lambda expression"))
                   (eg:poption :test        (must (or (<- test-name          ((function-name/symbol forms)))
-                                                     (<- test-lambda        (lambda-expression)))
+                                                     (<- test-lambda        (lambda-expression :lambda-expression)))
                                                  "must be a function name or a lambda expression"))))
            (:transform (<- (declaration form) ((body forms)))
              (when (not (or name report-string report-name report-lambda))

@@ -264,7 +264,7 @@
     (or (<- string   (and (guard (typep 'string))
                           ((unparsed-expression forms) :condition-report)))
         (<- function ((function-name/symbol names)))
-        (<- lambda   (lambda-expression)))
+        (<- lambda   (lambda-expression :lambda-expression)))
   ((string   ?)
    (function ?)
    (lambda   ? :evaluation :compound)))
