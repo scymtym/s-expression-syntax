@@ -113,3 +113,38 @@
            (segment      *> :evaluation :compound)))))
   (define dolist  list)
   (define dotimes count))
+
+;;; Standard macro `with-package-iterator'
+
+(define-macro with-package-iterator
+    (list* (list (<- variable ((variable-name! names)))
+                 (<- package-list ((form forms)))
+                 (must (+ (<<- symbol-type (or :internal :external :inherited))) ; TODO not a node
+                       "at least one of TODO must follow"))
+           (<- (declaration form) (body)))
+    `((,variable ,package-list ,@symbol-type) ,@declaration ,@form)
+  ((variable     1 :evaluation (load-time-value
+                                (make-instance 'binding-semantics
+                                               :namespace 'variable
+                                               :scope     :lexical
+                                               :values    nil)))
+   (package-list 1 :evaluation t)
+   (symbol-type  *)
+   (declaration  *)
+   (form         * :evaluation t)))
+
+;;; Standard macro `with-hash-table-iterator'
+
+(define-macro with-hash-table-iterator
+    (list* (list (<- variable ((variable-name! names)))
+                 (<- hash-table ((form forms))))
+           (<- (declaration form) (body)))
+    `((,variable ,hash-table) ,@declaration ,@form)
+  ((variable    1 :evaluation (load-time-value
+                               (make-instance 'binding-semantics
+                                              :namespace 'variable
+                                              :scope     :lexical
+                                              :values    nil)))
+   (hash-table  1 :evaluation t)
+   (declaration *)
+   (form        * :evaluation t)))
