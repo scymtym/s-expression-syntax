@@ -9,7 +9,7 @@
 (def-suite* :s-expression-syntax.definition-macros
   :in :s-expression-syntax)
 
-;;; `defconstant', `defvar' and `defparameter'
+;;; `defconstant', `defvar', `defparameter' and `define-symbol-macro'
 
 (define-macro-test (defconstant)
   ;; Invalid syntax
@@ -85,6 +85,31 @@
                              :evaluation t))
       (:documentation . 1) (((:documentation () :string "bla" :source #9#))))
      :source #6#)))
+
+(define-syntax-test (define-symbol-macro)
+  ;; Invalid syntax
+  '(#1=(define-symbol-macro)
+    syn:invalid-syntax-error #1#)
+  '((define-symbol-macro #2=1)
+    syn:invalid-syntax-error #2# "variable name must be a symbol")
+  '(#3=(define-symbol-macro foo)
+    syn:invalid-syntax-error #3#)
+  '(#4=(define-symbol-macro foo 1 2)
+    syn:invalid-syntax-error #4#)
+  ;; Valid syntax
+  '(#6=(define-symbol-macro #7=foo
+         #8=(bar 1))
+    (:define-symbol-macro
+     ((:name      . 1) (((:variable-name () :name foo :source #7#)
+                         :evaluation (:assignment :namespace variable)))
+      (:expansion . 1) (((:unparsed
+                          ()
+                          :expression #8#
+                          :context    :symbol-macro-expansion
+                          :source     #8#))))
+      :source #6#)))
+
+;;; `defun', `defmacro', `define-modify-macro'
 
 (define-macro-test (defun)
   '((defun (setf #1=1) ())
@@ -188,6 +213,36 @@
                               :expression #12# :context :form :source #12#)
                              :evaluation t)))
      :source #4#)))
+
+
+(define-syntax-test (define-modify-macro)
+  ;; Invalid syntax
+  '(#1=(define-modify-macro)
+    syn:invalid-syntax-error #1#)
+  '((define-modify-macro #2=1)
+    syn:invalid-syntax-error #2# "must be a function name")
+  '(#3=(define-modify-macro foo)
+    syn:invalid-syntax-error #3#)
+  '((define-modify-macro foo #101=1)
+    syn:invalid-syntax-error #101# "must be an ordinary lambda list")
+  '(#4=(define-modify-macro foo () #102=2)
+    syn:invalid-syntax-error #102# "function name must be a symbol")
+  '(#104=(define-modify-macro foo () foo #112=2)
+    syn:invalid-syntax-error #112# "must be a documentation string")
+  '(#105=(define-modify-macro foo () foo "" 2)
+    syn:invalid-syntax-error #105#)
+  ;; Valid syntax
+  '(#6=(define-modify-macro #7=foo #12=() #8=foo #9="bar")
+    (:define-modify-macro
+     ((:name          . 1) (((:function-name () :name foo :source #7#)
+                             :evaluation (:assignment :namespace function)))
+      (:lambda-list   . 1) (((:ordinary-lambda-list
+                              ()
+                              :source #12#)
+                             :evaluation :compound))
+      (:function      . 1) (((:function-name () :name foo :source #8#)))
+      (:documentation . 1) (((:documentation () :string "bar" :source #9#))))
+     :source #6#)))
 
 ;;; `defstruct' including slots
 

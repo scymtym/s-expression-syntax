@@ -37,6 +37,16 @@
    (initial-value 1 :evaluation t)
    (documentation ?)))
 
+;;; Standard macro `define-symbol-macro'
+
+(define-macro define-symbol-macro
+    (list (<- name ((variable-name! names)))
+          (<- expansion ((unparsed-expression forms) :symbol-macro-expansion)))
+  `(,name ,expansion)
+  ((name      1 :evaluation (make-instance 'assignment-semantics
+                                           :namespace 'variable))
+   (expansion 1)))
+
 ;;; Standard macro `defun'
 
 (define-macro defun
@@ -75,6 +85,20 @@
    (declaration   *>)
    (documentation ?)
    (form          *> :evaluation t)))
+
+;;; Standard macro `define-modify-macro'
+
+(define-macro define-modify-macro
+    (list (<- name ((function-name! names)))
+          (<- lambda-list ((ordinary-lambda-list! lambda-lists))) ; TODO define-modify-macro-lambda-list
+          (<- function ((function-name/symbol! names)))
+          (? (<- documentation ((documentation-string! forms)))))
+    `(,name ,lambda-list ,function ,@(? documentation))
+  ((name          1 :evaluation (make-instance 'assignment-semantics
+                                               :namespace 'function))
+   (lambda-list   1 :evaluation :compound)
+   (function      1)
+   (documentation ?)))
 
 ;;; Standard macro `defstruct' (including slot description, constructor, ...)
 
