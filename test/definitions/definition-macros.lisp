@@ -12,6 +12,7 @@
 ;;; `defconstant', `defvar' and `defparameter'
 
 (define-macro-test (defconstant)
+  ;; Invalid syntax
   '(#1=(defconstant)
     syn:invalid-syntax-error #1#)
   '((defconstant #2=1)
@@ -34,6 +35,7 @@
      :source #5#)))
 
 (define-macro-test (defvar)
+  ;; Invalid syntax
   '(#1=(defvar)
     syn:invalid-syntax-error #1#)
   '((defvar #2=1)
@@ -60,6 +62,7 @@
      :source #7#)))
 
 (define-macro-test (defparameter)
+  ;; Invalid syntax
   '(#1=(defparameter)
     syn:invalid-syntax-error #1#)
   '((defparameter #2=1)
@@ -70,7 +73,7 @@
     syn:invalid-syntax-error #4# "must be a documentation string")
   '(#5=(defparameter foo 1 "" 2)
     syn:invalid-syntax-error #5#)
-  ;; valid syntax
+  ;; Valid syntax
   '(#6=(defparameter #7=foo
          #8=(bar 1)
          #9="bla")
