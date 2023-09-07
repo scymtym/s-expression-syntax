@@ -120,20 +120,20 @@
    (read-only ?)
    (type      ?)))
 
-(defrule valid-structure-constructor-name (other-constructors)
-    (<- name ((function-name/symbol! names)))
-  (let ((names (list* name (map 'list (lambda (constructor)
-                                        (bp:node-relation* '(:name . 1) constructor))
-                                other-constructors))))
-    (when (and (not (= (length names) 1)) (member nil names))
-      (:fatal "(:constructor nil) and named constructors are mutually exclusive")))
-  name)
+(defrule structure-constructor-name ()
+  ((function-name/symbol! names)))
 
 (define-syntax (structure-constructor :arguments ((other-constructors '())))
-    (eg:option* :constructor
-      (? (or 'nil   ; NAME remains `nil'
-             (seq (<- name (valid-structure-constructor-name other-constructors))
-                  (? (<- lambda-list ((ordinary-lambda-list! lambda-lists)))))))) ; TODO boa-lambda-list
+    (:transform
+       (eg:option* :constructor
+                   (? (or 'nil ; NAME remains `nil'
+                          (seq (<- name (structure-constructor-name))
+                               (? (<- lambda-list ((ordinary-lambda-list! lambda-lists))))))))  ; TODO boa-lambda-list
+     (let ((names (list* name (map 'list (lambda (constructor)
+                                           (bp:node-relation* '(:name . 1) constructor))
+                                   other-constructors))))
+       (when (and (not (= (length names) 1)) (member nil names))
+         (:fatal "(:constructor nil) and named constructors are mutually exclusive"))))
     `(:constructor ,name ,@(? lambda-list-supplied? lambda-list))
   ((name        1)
    (lambda-list ? :evaluation :compound)))

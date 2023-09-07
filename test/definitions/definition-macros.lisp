@@ -508,7 +508,8 @@
                                                      ()
                                                      :expression 1 :context :form :source #25#)
                                                     :evaluation t)))
-                                 :source #24#)
+                                 ; :source #24#
+                                 )
                                 :evaluation :compound))
       (:metaclass        . 1) (((:type-name () :name foo :source #22#)))
       (:documentation    . 1) (((:documentation () :string "foo" :source #23#)))
