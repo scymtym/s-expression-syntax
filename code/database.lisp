@@ -153,6 +153,9 @@
       (multiple-value-list (destructure-and-unparse-node client node)) ; TODO don't cons the list
     `(,kind ,@argument)))
 
+(defmethod unparse ((client t) (syntax (eql :eval-when-situation)) (node t))
+  (getf (bp:node-initargs client node) :situation))
+
 (defmethod unparse ((client t) (syntax (eql 'required-section)) (node t))
   (destructuring-bind (&key parameter)
       (nth-value 1 (destructure-and-unparse-node client node))

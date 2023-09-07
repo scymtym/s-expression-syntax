@@ -247,7 +247,8 @@ TODO"))
                      :variable-name :function-name :type-name :block-name :initarg-name
                      :keyword :lambda-list-keyword
                      :tag :string-designator :documentation :literal
-                     :declaration-specifier :atomic-type-specifier)
+                     :declaration-specifier :atomic-type-specifier
+                     :eval-when-situation)
                     kind)
                    ((:required-section :optional-section :rest-section :keyword-section :aux-section
                                        :tagbody-segment)
