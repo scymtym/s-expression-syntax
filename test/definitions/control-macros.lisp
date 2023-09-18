@@ -1006,41 +1006,41 @@
                                   :source #6#)
                                  :evaluation :compound)))
                :source #4#))
-            '(#9=(,name () #100=(declare #10=(ignore #11=a) #12=(inline #13=b)))
+            '(#9=(,name () #10=(declare #11=(ignore #12=a) #13=(inline #14=b)))
               (,kind
                ((:declaration . *) (((:declaration
                                       ((:declaration-specifier . *)
                                        (((:declaration-specifier
-                                          ((:argument . *) (((:variable-name () :name a :source #11#))))
-                                          :kind ignore :source #10#))
+                                          ((:argument . *) (((:variable-name () :name a :source #12#))))
+                                          :kind ignore :source #11#))
                                         ((:declaration-specifier
-                                          ((:argument . *) (((:function-name () :name b :source #13#))))
-                                          :kind inline :source #12#))))
-                                      :source #100#))))
+                                          ((:argument . *) (((:function-name () :name b :source #14#))))
+                                          :kind inline :source #13#))))
+                                      :source #10#))))
                :source #9#))
-            '(#14=(,name () #15=:foo #16=(list) #17=:bar #18=(progn))
+            '(#15=(,name () #16=:foo #17=(list) #18=:bar #19=(progn))
               (,kind
                ((:segment . *) (((:tagbody-segment
-                                  ((:label     . 1) (((:tag () :name :foo :source #15#)
+                                  ((:label     . 1) (((:tag () :name :foo :source #16#)
                                                       :evaluation (:binding :namespace syn::tag
                                                                             :scope     :lexical)))
                                    (:statement . *) (((:unparsed () :expression (list)
                                                                     :context    :form
-                                                                    :source     #16#)
+                                                                    :source     #17#)
                                                       :evaluation t)))
-                                  :source #15#)
+                                  :source #16#)
                                  :evaluation :compound)
                                 ((:tagbody-segment
-                                  ((:label     . 1) (((:tag () :name :bar :source #17#)
+                                  ((:label     . 1) (((:tag () :name :bar :source #18#)
                                                       :evaluation (:binding :namespace syn::tag
                                                                             :scope     :lexical)))
                                    (:statement . *) (((:unparsed () :expression (progn)
                                                                     :context    :form
-                                                                    :source     #18#)
+                                                                    :source     #19#)
                                                       :evaluation t)))
-                                  :source #17#)
+                                  :source #18#)
                                  :evaluation :compound)))
-               :source #14#))))))
+               :source #15#))))))
   (define prog)
   (define prog*))
 
@@ -1307,7 +1307,7 @@
                        :source #12#)
                       :evaluation :compound)))
      :source #10#))
-  '(#19=(restart-case #20=1 #21=(#22=foo #23=() #100=(declare #24=(ignore #25=x))))
+  '(#19=(restart-case #20=1 #21=(#22=foo #23=() #24=(declare #25=(ignore #26=x))))
     (:restart-case
      ((:form    . 1) (((:unparsed
                         ()
@@ -1321,9 +1321,9 @@
                                                 (((:declaration-specifier
                                                    ((:argument . *)
                                                     (((:variable-name
-                                                       () :name x :source #25#))))
-                                                   :kind ignore :source #24#))))
-                                               :source #100#))))
+                                                       () :name x :source #26#))))
+                                                   :kind ignore :source #25#))))
+                                               :source #24#))))
                         :source #21#)
                        :evaluation :compound)))
       :source #19#))

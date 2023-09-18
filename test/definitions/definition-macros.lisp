@@ -97,17 +97,17 @@
   '(#4=(define-symbol-macro foo 1 2)
     syn:invalid-syntax-error #4#)
   ;; Valid syntax
-  '(#6=(define-symbol-macro #7=foo
-         #8=(bar 1))
+  '(#5=(define-symbol-macro #6=foo
+         #7=(bar 1))
     (:define-symbol-macro
-     ((:name      . 1) (((:variable-name () :name foo :source #7#)
+     ((:name      . 1) (((:variable-name () :name foo :source #6#)
                          :evaluation (:assignment :namespace variable)))
       (:expansion . 1) (((:unparsed
                           ()
-                          :expression #8#
+                          :expression #7#
                           :context    :symbol-macro-expansion
-                          :source     #8#))))
-      :source #6#)))
+                          :source     #7#))))
+      :source #5#)))
 
 ;;; `defun', `defmacro', `define-modify-macro'
 
@@ -125,8 +125,8 @@
   ;; Valid syntax
   '(#5=(defun #6=foo #7=(#8=bar #9=baz)
          #10="bla"
-         #100=(declare #11=(type #12=integer #13=bar #14=baz))
-         #15=(+ 1 2))
+         #11=(declare #12=(type #13=integer #14=bar #15=baz))
+         #16=(+ 1 2))
     (:defun
      ((:name          . 1) (((:function-name () :name foo :source #6#)))
       (:lambda-list   . 1) (((:ordinary-lambda-list
@@ -152,16 +152,16 @@
                                   ((:argument . *) (((:atomic-type-specifier
                                                       ((:name . 1) (((:type-name
                                                                       ()
-                                                                      :name integer :source #12#))))
-                                                      :source #12#))
-                                                    ((:variable-name () :name bar :source #13#))
-                                                    ((:variable-name () :name baz :source #14#))))
-                                  :kind type :source #11#))))
-                              :source #100#)))
+                                                                      :name integer :source #13#))))
+                                                      :source #13#))
+                                                    ((:variable-name () :name bar :source #14#))
+                                                    ((:variable-name () :name baz :source #15#))))
+                                  :kind type :source #12#))))
+                              :source #11#)))
       (:documentation . 1) (((:documentation () :string "bla" :source #10#)))
       (:form          . *) (((:unparsed
                               ()
-                              :expression #15# :context :form :source #15#)
+                              :expression #16# :context :form :source #16#)
                              :evaluation t)))
      :source #5#)))
 
@@ -177,8 +177,8 @@
   ;; Valid syntax
   '(#4=(defmacro #5=foo #6=(#7=a #8=b)
          #9="bla"
-         #100=(declare #10=(ignore #11=a))
-         #12=(list 'cons b b))
+         #10=(declare #11=(ignore #12=a))
+         #13=(list 'cons b b))
     (:defmacro
      ((:name          . 1) (((:function-name () :name foo :source #5#)))
       (:lambda-list   . 1) (((:macro-lambda-list
@@ -204,13 +204,13 @@
       (:declaration   . *) (((:declaration
                               ((:declaration-specifier . *)
                                (((:declaration-specifier
-                                  ((:argument . *) (((:variable-name () :name a :source #11#))))
-                                  :kind ignore :source #10#))))
-                              :source #100#)))
+                                  ((:argument . *) (((:variable-name () :name a :source #12#))))
+                                  :kind ignore :source #11#))))
+                              :source #10#)))
       (:documentation . 1) (((:documentation () :string "bla" :source #9#)))
       (:form          . *) (((:unparsed
                               ()
-                              :expression #12# :context :form :source #12#)
+                              :expression #13# :context :form :source #13#)
                              :evaluation t)))
      :source #4#)))
 
@@ -223,26 +223,26 @@
     syn:invalid-syntax-error #2# "must be a function name")
   '(#3=(define-modify-macro foo)
     syn:invalid-syntax-error #3#)
-  '((define-modify-macro foo #101=1)
-    syn:invalid-syntax-error #101# "must be an ordinary lambda list")
-  '(#4=(define-modify-macro foo () #102=2)
-    syn:invalid-syntax-error #102# "function name must be a symbol")
-  '(#104=(define-modify-macro foo () foo #112=2)
-    syn:invalid-syntax-error #112# "must be a documentation string")
-  '(#105=(define-modify-macro foo () foo "" 2)
-    syn:invalid-syntax-error #105#)
+  '((define-modify-macro foo #4=1)
+    syn:invalid-syntax-error #4# "must be an ordinary lambda list")
+  '((define-modify-macro foo () #5=2)
+    syn:invalid-syntax-error #5# "function name must be a symbol")
+  '((define-modify-macro foo () foo #6=2)
+    syn:invalid-syntax-error #6# "must be a documentation string")
+  '(#7=(define-modify-macro foo () foo "" 2)
+    syn:invalid-syntax-error #7#)
   ;; Valid syntax
-  '(#6=(define-modify-macro #7=foo #12=() #8=foo #9="bar")
+  '(#8=(define-modify-macro #9=foo #10=() #11=foo #12="bar")
     (:define-modify-macro
-     ((:name          . 1) (((:function-name () :name foo :source #7#)
+     ((:name          . 1) (((:function-name () :name foo :source #9#)
                              :evaluation (:assignment :namespace function)))
       (:lambda-list   . 1) (((:ordinary-lambda-list
                               ()
-                              :source #12#)
+                              :source #10#)
                              :evaluation :compound))
-      (:function      . 1) (((:function-name () :name foo :source #8#)))
-      (:documentation . 1) (((:documentation () :string "bar" :source #9#))))
-     :source #6#)))
+      (:function      . 1) (((:function-name () :name foo :source #11#)))
+      (:documentation . 1) (((:documentation () :string "bar" :source #12#))))
+     :source #8#)))
 
 ;;; `defstruct' including slots
 
@@ -671,9 +671,9 @@
   ;; Valid syntax
   '(#6=(deftype #7=foo #8=(#9=a #10=&key #11=b)
          #12="bla bli"
-         #105=(declare #13=(ignore #14=a))
-         #106=(declare #15=(ignore #16=b))
-         #17=(list a b))
+         #13=(declare #14=(ignore #15=a))
+         #16=(declare #17=(ignore #18=b))
+         #19=(list a b))
     (:deftype
      ((:name          . 1) (((:type-name () :name foo :source #7#)))
       (:lambda-list   . 1) (((:deftype-lambda-list
@@ -702,19 +702,19 @@
       (:declaration   . *) (((:declaration
                               ((:declaration-specifier . *)
                                (((:declaration-specifier
-                                  ((:argument . *) (((:variable-name () :name a :source #14#))))
-                                  :kind ignore :source #13#))))
-                              :source #105#))
+                                  ((:argument . *) (((:variable-name () :name a :source #15#))))
+                                  :kind ignore :source #14#))))
+                              :source #13#))
                             ((:declaration
                               ((:declaration-specifier . *)
                                (((:declaration-specifier
-                                  ((:argument . *) (((:variable-name () :name b :source #16#))))
-                                  :kind ignore :source #15#))))
-                              :source #106#)))
+                                  ((:argument . *) (((:variable-name () :name b :source #18#))))
+                                  :kind ignore :source #17#))))
+                              :source #16#)))
       (:documentation . 1) (((:documentation () :string "bla bli" :source #12#)))
       (:form          . *) (((:unparsed
                               ()
-                              :expression #17# :context :form :source #17#)
+                              :expression #19# :context :form :source #19#)
                              :evaluation t)))
      :source #6#)))
 
@@ -963,19 +963,19 @@
                            :evaluation :compound)))
      :source #20#))
   '(#26=(defmethod #27=foo #28=()
-          #29="foo" #100=(declare #30=(ignore)) #31=1)
+          #29="foo" #30=(declare #31=(ignore)) #32=1)
     (:defmethod
      ((:name          . 1) (((:function-name () :name foo :source #27#)))
       (:lambda-list   . 1) (((:specialized-lambda-list () :source #28#)
                              :evaluation :compound))
       (:declaration   . *) (((:declaration
                               ((:declaration-specifier . *)
-                               (((:declaration-specifier () :kind ignore :source #30#))))
-                              :source #100#)))
+                               (((:declaration-specifier () :kind ignore :source #31#))))
+                              :source #30#)))
       (:documentation . 1) (((:documentation () :string #29# :source #29#)))
       (:form          . *) (((:unparsed
                               ()
-                              :expression #31# :context :form :source #31#)
+                              :expression #32# :context :form :source #32#)
                              :evaluation t)))
       :source #26#)))
 

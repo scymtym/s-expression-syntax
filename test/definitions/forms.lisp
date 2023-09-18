@@ -63,72 +63,72 @@
              ((:unparsed () :expression 1 :context :form :source #6#)
               (:unparsed () :expression 2 :context :form :source #7#))))
     ;; Valid declarations
-    '((#106=(declare #8=(ignore #9=a)))
+    '((#8=(declare #9=(ignore #10=a)))
       t nil (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #9#))))
-                   :kind ignore :source #8#))))
-               :source #106#))
+                   ((:argument . *) (((:variable-name () :name a :source #10#))))
+                   :kind ignore :source #9#))))
+               :source #8#))
              ()))
-    '((#105=(declare #10=(type #11=bit)))
-      t nil (((:declaration
-               ((:declaration-specifier . *)
-                (((:declaration-specifier
-                   ((:argument . *) (((:atomic-type-specifier
-                                       ((:name . 1) (((:type-name () :name bit :source #11#))))
-                                       :source #11#))))
-                   :kind type :source #10#))))
-               :source #105#))
-             ()))
-    '((#104=(declare #12=(type #13=bit #14=a)))
+    '((#11=(declare #12=(type #13=bit)))
       t nil (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
                    ((:argument . *) (((:atomic-type-specifier
                                        ((:name . 1) (((:type-name () :name bit :source #13#))))
-                                       :source #13#))
-                                     ((:variable-name () :name a :source #14#))))
+                                       :source #13#))))
                    :kind type :source #12#))))
-               :source #104#))
+               :source #11#))
              ()))
-    '((#103=(declare #15=(type #16=bit #17=a #18=b)))
+    '((#14=(declare #15=(type #16=bit #17=a)))
       t nil (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
                    ((:argument . *) (((:atomic-type-specifier
                                        ((:name . 1) (((:type-name () :name bit :source #16#))))
                                        :source #16#))
-                                     ((:variable-name () :name a :source #17#))
-                                     ((:variable-name () :name b :source #18#))))
+                                     ((:variable-name () :name a :source #17#))))
                    :kind type :source #15#))))
-               :source #103#))
+               :source #14#))
              ()))
-    ;; Multiple declarations
-    '((#101=(declare #19=(ignore #20=a)) #102=(declare #21=(ignore #22=b)))
+    '((#18=(declare #19=(type #20=bit #21=a #22=b)))
       t nil (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #20#))))
-                   :kind ignore :source #19#))))
-               :source #101#)
+                   ((:argument . *) (((:atomic-type-specifier
+                                       ((:name . 1) (((:type-name () :name bit :source #20#))))
+                                       :source #20#))
+                                     ((:variable-name () :name a :source #21#))
+                                     ((:variable-name () :name b :source #22#))))
+                   :kind type :source #19#))))
+               :source #18#))
+             ()))
+    ;; Multiple declarations
+    '((#23=(declare #24=(ignore #25=a)) #26=(declare #27=(ignore #28=b)))
+      t nil (((:declaration
+               ((:declaration-specifier . *)
+                (((:declaration-specifier
+                   ((:argument . *) (((:variable-name () :name a :source #25#))))
+                   :kind ignore :source #24#))))
+               :source #23#)
               (:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name b :source #22#))))
-                   :kind ignore :source #21#))))
-               :source #102#))
+                   ((:argument . *) (((:variable-name () :name b :source #28#))))
+                   :kind ignore :source #27#))))
+               :source #26#))
              ()))
     ;; Declarations and forms
-    '((#100=(declare #23=(ignore #24=a)) #25=3 #26=4)
+    '((#29=(declare #30=(ignore #31=a)) #32=3 #33=4)
       t nil (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #24#))))
-                   :kind ignore :source #23#))))
-               :source #100#))
-             ((:unparsed () :expression 3 :context :form :source #25#)
-              (:unparsed () :expression 4 :context :form :source #26#))))))
+                   ((:argument . *) (((:variable-name () :name a :source #31#))))
+                   :kind ignore :source #30#))))
+               :source #29#))
+             ((:unparsed () :expression 3 :context :form :source #32#)
+              (:unparsed () :expression 4 :context :form :source #33#))))))
 
 (test docstring-body
   "Smoke test for the `docstring-body' rule."
@@ -139,43 +139,43 @@
     '((#1="foo") t nil
       (nil () ((:unparsed () :expression "foo" :context :form :source #1#))))
     ;; Declarations and docstrings
-    '(#2=(#103=(declare #3=(ignore #4=a)))
+    '(#2=(#3=(declare #4=(ignore #5=a)))
       t #2# (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #4#))))
-                   :kind ignore :source #3#))))
-               :source #103#))
+                   ((:argument . *) (((:variable-name () :name a :source #5#))))
+                   :kind ignore :source #4#))))
+               :source #3#))
              nil
              ()))
-    '(#5=(#102=(declare #6=(ignore #7=a)) #8="foo")
-      t #5# (((:declaration
+    '(#6=(#7=(declare #8=(ignore #9=a)) #10="foo")
+      t #6# (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #7#))))
-                   :kind ignore :source #6#))))
-               :source #102#))
+                   ((:argument . *) (((:variable-name () :name a :source #9#))))
+                   :kind ignore :source #8#))))
+               :source #7#))
              nil
-             ((:unparsed () :expression "foo" :context :form :source #8#))))
-    '((#9="foo" #101=(declare #10=(ignore #11=a)))
+             ((:unparsed () :expression "foo" :context :form :source #10#))))
+    '((#11="foo" #12=(declare #13=(ignore #14=a)))
       t nil (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #11#))))
-                   :kind ignore :source #10#))))
-               :source #101#))
-             (:documentation () :string "foo" :source #9#)
+                   ((:argument . *) (((:variable-name () :name a :source #14#))))
+                   :kind ignore :source #13#))))
+               :source #12#))
+             (:documentation () :string "foo" :source #11#)
              ()))
     ;; Forms and docstrings
-    '((#12=1)
-      t nil (nil () ((:unparsed () :expression 1 :context :form :source #12#))))
-    '((#13="foo" #14=1)
+    '((#15=1)
+      t nil (nil () ((:unparsed () :expression 1 :context :form :source #15#))))
+    '((#16="foo" #17=1)
       t nil (()
-             (:documentation () :string "foo" :source #13#)
-             ((:unparsed () :expression 1 :context :form :source #14#))))
-    '((#15=1 #16="foo")
-      t nil (nil () ((:unparsed () :expression 1     :context :form :source #15#)
-                     (:unparsed () :expression "foo" :context :form :source #16#))))))
+             (:documentation () :string "foo" :source #16#)
+             ((:unparsed () :expression 1 :context :form :source #17#))))
+    '((#18=1 #19="foo")
+      t nil (nil () ((:unparsed () :expression 1     :context :form :source #18#)
+                     (:unparsed () :expression "foo" :context :form :source #19#))))))
 
 (test tagbody-body
   "Smoke test for the `tagbody-body' rule."
@@ -190,28 +190,28 @@
     ;; Valid syntax
     '(#4=()
       t #4# (() ()))
-    '(#5=(#100=(declare #6=(ignore #7=a)))
+    '(#5=(#6=(declare #7=(ignore #8=a)))
       t #5# (((:declaration
                ((:declaration-specifier . *)
                 (((:declaration-specifier
-                   ((:argument . *) (((:variable-name () :name a :source #7#))))
-                   :kind ignore :source #6#))))
-               :source #100#))
+                   ((:argument . *) (((:variable-name () :name a :source #8#))))
+                   :kind ignore :source #7#))))
+               :source #6#))
              ()))
-    '(#8=(#9=7)
-      t #8# (()
+    '(#9=(#10=7)
+      t #9# (()
              ((:tagbody-segment
-               ((:label . 1) (((:tag () :name 7 :source #9#)
+               ((:label . 1) (((:tag () :name 7 :source #10#)
                                :evaluation (:binding :namespace syn::tag
                                                      :scope     :lexical))))
-               :source #9#))))
-    '(#10=(#11=(list))
-      t #10# (()
+               :source #10#))))
+    '(#11=(#12=(list))
+      t #11# (()
              ((:tagbody-segment
                ((:statement . *) (((:unparsed
                                     ()
                                     :expression (list)
                                     :context    :form
-                                    :source     #11#)
+                                    :source     #12#)
                                    :evaluation t)))
-               :source #11#))))))
+               :source #12#))))))
