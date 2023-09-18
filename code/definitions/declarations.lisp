@@ -31,6 +31,12 @@
                 (must (<<- arguments ((type-specifier! type-specifiers)))
                       "type specifier must follow TYPE declaration identifier")
                 (* (<<- arguments ((variable-name! names)))))
+          ;; A declaration specifier of the form ((…) …) must be an
+          ;; abbreviated type declaration.
+          (list (and (guard :any (typep 'cons))
+                     (<<- arguments ((compound-type-specifier! type-specifiers)))
+                     (<- identifier (:transform :any 'type))) ; TODO this will confuse clients that use non-standard symbol representations
+                (* (<<- arguments ((variable-name! names)))))
 
           (list (<- identifier 'ftype)
                 (must (<<- arguments ((function-type-specifier! type-specifiers)))

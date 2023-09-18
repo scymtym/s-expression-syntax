@@ -1,6 +1,6 @@
 ;;;; types.lisp --- Rules for parsing type specifiers.
 ;;;;
-;;;; Copyright (C) 2018-2022 Jan Moringen
+;;;; Copyright (C) 2018-2023 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -29,6 +29,9 @@
   (bp:node* (:compound-type-specifier :source source)
     (1 (:name     . 1) name)
     (* (:argument . *) (nreverse arguments))))
+
+(defrule compound-type-specifier! ()
+  (must (compound-type-specifier 't) "must be a compound type specifier"))
 
 (defrule atomic-type-specifier ()
     (value (source)
