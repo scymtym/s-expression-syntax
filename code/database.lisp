@@ -257,5 +257,5 @@
 (defmethod ensure-syntax ((name t) (class t) &rest initargs)
   (let ((initargs (list* :name name initargs)))
     (a:if-let ((existing (find-syntax name :if-does-not-exist nil)))
-      (apply #'reinitialize-instance existing initargs)
+      (apply #'change-class existing class initargs)
       (setf (find-syntax name) (apply #'make-instance class initargs)))))
