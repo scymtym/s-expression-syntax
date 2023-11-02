@@ -269,6 +269,11 @@
    (clause          * :evaluation :compound)
    (no-error-clause ? :evaluation :compound)))
 
+(define-macro ignore-errors
+    (list (<- form ((forms forms))))
+    `(,@form)
+  ((form *> :evaluation t)))
+
 ;;; Standard macros `restart-bind' and `restart-case'
 
 (define-syntax restart-binding
