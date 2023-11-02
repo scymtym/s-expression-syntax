@@ -229,7 +229,7 @@
 (define-macro handler-bind
     (list* (must (list (* (<<- binding (handler-binding!))))
                  "must be a list of handler bindings")
-           (<- form (forms)))
+           (<- form ((forms forms))))
     `((,@binding) ,@form)
   ((binding *  :evaluation :compound)
    (form    *> :evaluation t)))
