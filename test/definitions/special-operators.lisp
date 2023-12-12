@@ -721,7 +721,7 @@
   '((macrolet (#2=(f)))
     syn:invalid-syntax-error #2# "must be of the form (NAME LAMBDA-LIST DECLARATION* FORM*)")
   '((macrolet ((f #3=1)))
-    syn:invalid-syntax-error #3# "must be a destructuring lambda list")
+    syn:invalid-syntax-error #3# "must be a macro lambda list")
   '((macrolet ((f (x #4=x))))
     syn:invalid-syntax-error #4# "the variable name X occurs more than once")
   ;; Valid syntax
@@ -733,7 +733,7 @@
                         ((:name        . 1) (((:function-name () :name f :source #8#)
                                               :evaluation (:binding :namespace function
                                                                     :scope    :lexical)))
-                         (:lambda-list . 1) (((:destructuring-lambda-list
+                         (:lambda-list . 1) (((:macro-lambda-list
                                                ()
                                                :source #9#)
                                               :evaluation :compound)))
@@ -749,7 +749,7 @@
          ((:name        . 1) (((:function-name () :name f :source #12#)
                                :evaluation (:binding :namespace function
                                                      :scope    :lexical)))
-          (:lambda-list . 1) (((:destructuring-lambda-list
+          (:lambda-list . 1) (((:macro-lambda-list
                                 ((:whole-section . 1)
                                  (((:whole-section
                                     ((:keyword   . 1) (((:lambda-list-keyword
@@ -818,6 +818,29 @@
          :source #11#)
         :evaluation :compound)))
       :source #10#))
+  '(#26=(macrolet (#27=(#28=z #29=(#30=&environment #31=e))))
+    (:macrolet
+     ((:binding . *)
+      (((:local-macro-function-binding
+         ((:name          . 1) (((:function-name () :name z :source #28#)
+                                 :evaluation (:binding :namespace function
+                                                       :scope     :lexical)))
+          (:lambda-list   . 1) (((:macro-lambda-list
+                                  ((:environment-section . 1)
+                                   (((:environment-section
+                                      ((:keyword   . 1) (((:lambda-list-keyword
+                                                           ()
+                                                           :keyword &environment :source #30#)))
+                                       (:parameter . 1) (((:environment-parameter
+                                                           ((:name . 1) (((:variable-name
+                                                                           ()
+                                                                           :name e :source #31#))))
+                                                           :source #31#))))))))
+                                     :source #29#)
+                                    :evaluation :compound)))
+            :source #27#)
+        :evaluation :compound)))
+      :source #26#))
   #+TODO (is (equal '(syn::names (foo bar baz)
                syn::functions
                ((syn::parsed-lambda ((a b) () bla () nil ()) nil nil ((list a b)))

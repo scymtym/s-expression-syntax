@@ -118,7 +118,7 @@
     '((#3=(a))
       :fatal #3# "must be of the form (NAME LAMBDA-LIST DECLARATION* FORM*)")
     '(((a #4=1))
-      :fatal #4# "must be a destructuring lambda list")
+      :fatal #4# "must be a macro lambda list")
     ;; Valid
     '(() t nil ())
     '((#5=(#6=a #7=()))
@@ -126,7 +126,7 @@
               ((:name        . 1) (((:function-name () :name a :source #6#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
-               (:lambda-list . 1) (((:destructuring-lambda-list
+               (:lambda-list . 1) (((:macro-lambda-list
                                      ()
                                      :source #7#)
                                     :evaluation :compound)))
@@ -136,7 +136,7 @@
               ((:name        . 1) (((:function-name () :name a :source #9#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
-               (:lambda-list . 1) (((:destructuring-lambda-list
+               (:lambda-list . 1) (((:macro-lambda-list
                                      ((:whole-section . 1)
                                       (((:whole-section
                                          ((:keyword   . 1) (((:lambda-list-keyword () :keyword &whole :source #11#)))
@@ -174,7 +174,7 @@
               ((:name        . 1) (((:function-name () :name a :source #17#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
-               (:lambda-list . 1) (((:destructuring-lambda-list () :source #18#)
+               (:lambda-list . 1) (((:macro-lambda-list () :source #18#)
                                     :evaluation :compound))
                (:form        . *) (((:unparsed
                                      ()
@@ -186,14 +186,33 @@
               ((:name          . 1) (((:function-name () :name a :source #21#)
                                       :evaluation (:binding :namespace function
                                                             :scope     :lexical)))
-               (:lambda-list   . 1) (((:destructuring-lambda-list () :source #22#)
+               (:lambda-list   . 1) (((:macro-lambda-list () :source #22#)
                                       :evaluation :compound))
                (:documentation . 1) (((:documentation () :string "" :source #23#)))
                (:form          . *) (((:unparsed
                                        ()
                                        :expression #24# :context :form :source #24#)
                                       :evaluation t)))
-              :source #20#)))))
+              :source #20#)))
+    '((#25=(#26=z #27=(#28=&environment #29=e)))
+      t nil ((:local-macro-function-binding
+              ((:name          . 1) (((:function-name () :name z :source #26#)
+                                      :evaluation (:binding :namespace function
+                                                            :scope     :lexical)))
+               (:lambda-list   . 1) (((:macro-lambda-list
+                                       ((:environment-section . 1)
+                                        (((:environment-section
+                                           ((:keyword   . 1) (((:lambda-list-keyword
+                                                                ()
+                                                                :keyword &environment :source #28#)))
+                                            (:parameter . 1) (((:environment-parameter
+                                                                ((:name . 1) (((:variable-name
+                                                                                ()
+                                                                                :name e :source #29#))))
+                                                                :source #29#))))))))
+                                       :source #27#)
+                                      :evaluation :compound)))
+              :source #25#)))))
 
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."
