@@ -635,15 +635,7 @@
        :source #13#))
     '(#16=(#17=&aux #18=a #19=&environment #20=e)
       (:macro-lambda-list
-       ((:environment-section . 1)
-        (((:environment-section
-           ((:keyword   . 1) (((:lambda-list-keyword
-                                ()
-                                :keyword &environment :source #19#)))
-            (:parameter . 1) (((:environment-parameter
-                                ((:name . 1) (((:variable-name () :name e :source #20#))))
-                                :source #20#)))))))
-        (:aux-section . 1)
+       ((:aux-section . 1)
         (((:aux-section
            ((:keyword   . 1) (((:lambda-list-keyword
                                 ()
@@ -654,7 +646,15 @@
                                                 :name a :source #18#))))
                                 :source #18#)
                                :evaluation :compound))))
-          :evaluation :compound)))
+          :evaluation :compound))
+        (:environment-section . 1)
+        (((:environment-section
+           ((:keyword   . 1) (((:lambda-list-keyword
+                                ()
+                                :keyword &environment :source #19#)))
+            (:parameter . 1) (((:environment-parameter
+                                ((:name . 1) (((:variable-name () :name e :source #20#))))
+                                :source #20#))))))))
         :source #16#))
     '(#21=(#22=(#23=x #24=y))
       (:macro-lambda-list
