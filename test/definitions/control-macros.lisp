@@ -1,6 +1,6 @@
 ;;;; control-macros.lisp --- Tests for control macro rules.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -1327,7 +1327,7 @@
                         :source #21#)
                        :evaluation :compound)))
       :source #19#))
-  '(#26=(restart-case #27=1 #28=(#29=bar #30=()
+  '(#126=(restart-case #27=1 #28=(#29=bar #30=()
                                    :test #31=(lambda #32=())
                                    :interactive #33=(lambda #34=())
                                    :report #35=(lambda #36=())))
@@ -1359,4 +1359,4 @@
                                                         :source #35#))))
                           :source #28#)
                          :evaluation :compound)))
-     :source #26#)))
+     :source #126#)))
