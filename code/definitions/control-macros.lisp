@@ -1,6 +1,6 @@
 ;;;; control-macros.lisp --- Standard macros for control.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -236,7 +236,7 @@
 
 (define-syntax handler-clause
     (list* (<- type ((type-specifier! type-specifiers)))
-           (must (list (? (<- variable ((required-parameter! lambda-lists) '()))))
+           (must (list (? (<- variable ((required-parameter! lambda-lists lambda-lists) '()))))
                  "must be a lambda list with zero or one required parameter")
            (<- (declaration form) ((body forms))))
     `(,type (,@(? variable)) ,@declaration ,@form)

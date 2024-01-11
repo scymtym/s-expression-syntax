@@ -1,6 +1,6 @@
 ;;;; lambda-lists.lisp --- Rules for parsing different kinds of lambda lists.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -217,7 +217,7 @@
 (define-syntax ordinary-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required-section optional-section rest-section keyword-section aux-section)
-             (%ordinary-lambda-list seen)))
+             ((%ordinary-lambda-list lambda-lists lambda-lists) seen)))
     `(,@required-section ,@optional-section ,@rest-section ,@keyword-section ,@aux-section)
   ((required-section  ?)
    (optional-section  ? :evaluation :compound)
@@ -241,7 +241,7 @@
 (define-syntax generic-function-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required-section optional-section rest-section keyword-section)
-             (%generic-function-lambda-list seen)))
+             ((%generic-function-lambda-list lambda-lists lambda-lists) seen)))
     `(,@required-section ,@optional-section ,@rest-section ,@keyword-section)
   ((required-section ?)
    (optional-section ?)
@@ -297,7 +297,7 @@
 (define-syntax specialized-lambda-list
     (and (<- seen (:transform :any (make-hash-table :test #'eq)))
          (<- (required-section optional-section rest-section keyword-section aux-section)
-             (%specialized-lambda-list seen)))
+             ((%specialized-lambda-list lambda-lists lambda-lists) seen)))
     `(,@required-section ,@optional-section ,@rest-section ,@keyword-section ,@aux-section)
   ((required-section  ? :evaluation :compound)
    (optional-section  ? :evaluation :compound)

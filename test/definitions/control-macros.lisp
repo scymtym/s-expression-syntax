@@ -15,15 +15,17 @@
   ;; Invalid syntax
   '((lambda #1=1)
     syn:invalid-syntax-error #1# "must be an ordinary lambda list")
-  '((lambda (x #2=x))
-    syn:invalid-syntax-error #2# "the variable name X occurs more than once")
+  '((lambda (#2=(a b))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #2# "variable name must be a symbol")
+  '((lambda (x #3=x))
+    syn:invalid-syntax-error #3# "the variable name X occurs more than once")
   ;; Valid syntax
-  '(#3=(lambda #4=())
+  '(#4=(lambda #5=())
     (:lambda
-     ((:lambda-list . 1) (((:ordinary-lambda-list () :source #4#)
+     ((:lambda-list . 1) (((:ordinary-lambda-list () :source #5#)
                            :evaluation :compound)))
-     :source #3#))
-  '(#5=(lambda #6=(#7=a #8=&rest #9=b) #10=(foo))
+     :source #4#))
+  '(#6=(lambda #7=(#8=a #9=&rest #10=b) #11=(foo))
     (:lambda
      ((:lambda-list . 1) (((:ordinary-lambda-list
                             ((:required-section . 1)
@@ -31,26 +33,25 @@
                                 ((:parameter . *) (((:required-parameter
                                                      ((:name . 1) (((:variable-name
                                                                      ()
-                                                                     :name a :source #7#)
-                                                                    :evaluation nil)))
-                                                     :source #7#)))))))
+                                                                     :name a :source #8#))))
+                                                     :source #8#)))))))
                              (:rest-section . 1)
                              (((:rest-section
                                 ((:keyword   . 1) (((:lambda-list-keyword
                                                      ()
-                                                     :keyword &rest :source #8#)))
+                                                     :keyword &rest :source #9#)))
                                  (:parameter . 1) (((:rest-parameter
                                                      ((:name . 1) (((:variable-name
                                                                      ()
-                                                                     :name b :source #9#))))
-                                                     :source #9#))))))))
-                            :source #6#)
+                                                                     :name b :source #10#))))
+                                                     :source #10#))))))))
+                            :source #7#)
                            :evaluation :compound))
       (:form        . *) (((:unparsed
                             ()
-                            :expression (foo) :context :form :source #10#)
+                            :expression (foo) :context :form :source #11#)
                            :evaluation t)))
-     :source #5#)))
+     :source #6#)))
 
 ;;; `and' and `or'
 
@@ -1138,36 +1139,40 @@
     syn:invalid-syntax-error #3# "must be a lambda list with zero or one required parameter")
   '((handler-case nil (foo (#4=1)))
     syn:invalid-syntax-error #4# "variable name must be a symbol")
+  '((handler-case nil (foo (#5=(a b)))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #5# "variable name must be a symbol")
+  '((handler-case nil (:no-error (#6=(a b)))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #6# "variable name must be a symbol")
   ;; Repeated option
-  '((handler-case nil (:no-error ()) #5=(:no-error ()))
-    syn:invalid-syntax-error #5# "NO-ERROR must not be repeated")
+  '((handler-case nil (:no-error ()) #7=(:no-error ()))
+    syn:invalid-syntax-error #7# "NO-ERROR must not be repeated")
   ;; Valid syntax
-  '(#6=(handler-case #7=(foo)
-         #8=(#9=bar (#10=x) #11=(baz))
-         #12=(:no-error #13=(#14=y #15=z) #16=(fez)))
+  '(#8=(handler-case #9=(foo)
+         #10=(#11=bar (#12=x) #13=(baz))
+         #14=(:no-error #15=(#16=y #17=z) #18=(fez)))
     (:handler-case
      ((:form   . 1)          (((:unparsed
                                 ()
-                                :expression (foo) :context :form :source #7#)
+                                :expression (foo) :context :form :source #9#)
                                :evaluation t))
       (:clause . *)          (((:handler-clause
                                 ((:type     . 1) (((:atomic-type-specifier
                                                     ((:name . 1) (((:type-name
                                                                     ()
-                                                                    :name bar :source #9#))))
-                                                    :source #9#)))
+                                                                    :name bar :source #11#))))
+                                                    :source #11#)))
                                  (:variable . 1) (((:required-parameter
                                                     ((:name . 1) (((:variable-name
                                                                     ()
-                                                                    :name x :source #10#))))
-                                                    :source #10#)
+                                                                    :name x :source #12#))))
+                                                    :source #12#)
                                                    :evaluation (:binding :namespace variable
                                                                          :scope     :lexical)))
                                  (:form     . *) (((:unparsed
                                                     ()
-                                                    :expression (baz) :context :form :source #11#)
+                                                    :expression (baz) :context :form :source #13#)
                                                    :evaluation t)))
-                                :source #8#)
+                                :source #10#)
                                :evaluation :compound))
       (:no-error-clause . 1) (((:no-error-clause
                                 ((:lambda-list . 1) (((:ordinary-lambda-list
@@ -1175,24 +1180,22 @@
                                                                                    ((:parameter . *) (((:required-parameter
                                                                                                         ((:name . 1) (((:variable-name
                                                                                                                         ()
-                                                                                                                        :name y :source #14#)
-                                                                                                                       :evaluation nil)))
-                                                                                                        :source #14#))
+                                                                                                                        :name y :source #16#))))
+                                                                                                        :source #16#))
                                                                                                       ((:required-parameter
                                                                                                         ((:name . 1) (((:variable-name
                                                                                                                         ()
-                                                                                                                        :name z :source #15#)
-                                                                                                                       :evaluation nil)))
-                                                                                                        :source #15#))))))))
-                                                       :source #13#)
+                                                                                                                        :name z :source #17#))))
+                                                                                                        :source #17#))))))))
+                                                       :source #15#)
                                                       :evaluation :compound))
                                  (:form        . *) (((:unparsed
                                                        ()
-                                                       :expression (fez) :context :form :source #16#)
+                                                       :expression (fez) :context :form :source #18#)
                                                       :evaluation t)))
-                                :source #12#)
+                                :source #14#)
                                :evaluation :compound)))
-     :source #6#)))
+     :source #8#)))
 
 (define-macro-test (restart-bind)
   '((restart-bind . #1=())
@@ -1254,109 +1257,110 @@
     syn:invalid-syntax-error #3# "variable name must be a symbol")
   '((restart-case 1 (foo #4=1))
     syn:invalid-syntax-error #4# "must be an ordinary lambda list")
+  '((restart-case 1 (foo (#5=(a b))))
+    syn:invalid-syntax-error #5# "variable name must be a symbol")
   '((restart-case 1 (nil ()))
     syn:invalid-syntax-error nil "for an unnamed restart, the :REPORT option must be supplied")
-  '((restart-case 1 (bar () :interactive . #5=()))
-    syn:invalid-syntax-error #5# "must be a function name or a lambda expression")
-  '((restart-case 1 (bar () :report . #6=()))
-    syn:invalid-syntax-error #6# "must be a string, a function name or a lambda expression")
-  '((restart-case 1 (bar () :test . #7=()))
-    syn:invalid-syntax-error #7# "must be a function name or a lambda expression")
+  '((restart-case 1 (bar () :interactive . #6=()))
+    syn:invalid-syntax-error #6# "must be a function name or a lambda expression")
+  '((restart-case 1 (bar () :report . #7=()))
+    syn:invalid-syntax-error #7# "must be a string, a function name or a lambda expression")
+  '((restart-case 1 (bar () :test . #8=()))
+    syn:invalid-syntax-error #8# "must be a function name or a lambda expression")
   ;; Valid syntax
-  '(#8=(restart-case #9=1)
+  '(#9=(restart-case #10=1)
     (:restart-case
      ((:form . 1) (((:unparsed
                      ()
-                     :expression #9# :context :form :source #9#)
+                     :expression #10# :context :form :source #10#)
                     :evaluation t)))
-     :source #8#))
-  '(#10=(restart-case #11=1 #12=(#13=foo #14=(#15=x)
-                               :report #16="bar"
-                               :test #17=baz
-                               #18=1))
+     :source #9#))
+  '(#11=(restart-case #12=1 #13=(#14=foo #15=(#16=x)
+                               :report #17="bar"
+                               :test #18=baz
+                               #19=1))
     (:restart-case
      ((:form   . 1) (((:unparsed
                        ()
-                       :expression #11# :context :form :source #11#)
+                       :expression #12# :context :form :source #12#)
                       :evaluation t))
       (:clause . *) (((:restart-clause
-                       ((:name        . 1) (((:variable-name () :name foo :source #13#)))
+                       ((:name        . 1) (((:variable-name () :name foo :source #14#)))
                         (:lambda-list . 1) (((:ordinary-lambda-list
                                               ((:required-section . 1) (((:required-section
                                                                           ((:parameter . *) (((:required-parameter
                                                                                                ((:name . 1) (((:variable-name
                                                                                                                ()
-                                                                                                               :name x :source #15#)
-                                                                                                              :evaluation nil)))
-                                                                                               :source #15#))))))))
-                                              :source #14#)))
+                                                                                                               :name x :source #16#))))
+                                                                                               :source #16#))))))))
+                                              :source #15#)))
                         (:report-string . 1) (((:unparsed
                                                 ()
                                                 :expression "bar"
                                                 :context    :restart-report-string
-                                                :source     #16#)))
+                                                :source     #17#)))
                         (:test-name     . 1) (((:function-name
                                                 ()
-                                                :name baz :source #17#)))
+                                                :name baz :source #18#)))
                         (:form          . *) (((:unparsed
                                                 ()
                                                 :expression 1
                                                 :context    :form
-                                                :source     #18#)
+                                                :source     #19#)
                                                :evaluation t)))
-                       :source #12#)
+                       :source #13#)
                       :evaluation :compound)))
-     :source #10#))
-  '(#19=(restart-case #20=1 #21=(#22=foo #23=() #24=(declare #25=(ignore #26=x))))
+     :source #11#))
+  '(#20=(restart-case #21=1 #22=(#23=foo #24=() #25=(declare #26=(ignore #27=x))))
     (:restart-case
      ((:form    . 1) (((:unparsed
                         ()
-                        :expression 1 :context :form :source #20#)
+                        :expression 1 :context :form :source #21#)
                        :evaluation t))
       (:clause  . *) (((:restart-clause
-                        ((:name        . 1) (((:variable-name () :name foo :source #22#)))
-                         (:lambda-list . 1) (((:ordinary-lambda-list () :source #23#)))
+                        ((:name        . 1) (((:variable-name () :name foo :source #23#)))
+                         (:lambda-list . 1) (((:ordinary-lambda-list () :source #24#)))
                          (:declaration . *) (((:declaration
                                                ((:declaration-specifier . *)
                                                 (((:declaration-specifier
                                                    ((:argument . *)
                                                     (((:variable-name
-                                                       () :name x :source #26#))))
-                                                   :kind ignore :source #25#))))
-                                               :source #24#))))
-                        :source #21#)
+                                                       () :name x :source #27#))))
+                                                   :kind ignore :source #26#))))
+                                               :source #25#))))
+                        :source #22#)
                        :evaluation :compound)))
-      :source #19#))
-  '(#126=(restart-case #27=1 #28=(#29=bar #30=()
-                                   :test #31=(lambda #32=())
-                                   :interactive #33=(lambda #34=())
-                                   :report #35=(lambda #36=())))
+      :source #20#))
+  '(#28=(restart-case #29=1 #30=(#31=bar #32=()
+                                   :test #33=(lambda #34=())
+                                   :interactive #35=(lambda #36=())
+                                   :report #37=(lambda #38=())))
     (:restart-case
         ((:form . 1)   (((:unparsed
                           ()
-                          :expression 1 :context :form :source #27#)
+                          :expression 1 :context :form :source #29#)
                          :evaluation t))
          (:clause . *) (((:restart-clause
-                          ((:name               . 1) (((:variable-name () :name bar :source #29#)))
-                           (:lambda-list        . 1) (((:ordinary-lambda-list () :source #30#)))
+                          ((:name               . 1) (((:variable-name () :name bar :source #31#)))
+                           (:lambda-list        . 1) (((:ordinary-lambda-list () :source #32#)))
                            (:interactive-lambda . 1) (((:lambda-expression
-                                                        ((:lambda-list . 1) (((:ordinary-lambda-list
-                                                                               ()
-                                                                               :source #32#)
-                                                                              :evaluation :compound)))
-                                                        :source #31#)))
-                           (:report-lambda      . 1) (((:lambda-expression
                                                         ((:lambda-list . 1) (((:ordinary-lambda-list
                                                                                ()
                                                                                :source #34#)
                                                                               :evaluation :compound)))
                                                         :source #33#)))
-                           (:test-lambda        . 1) (((:lambda-expression
+                           (:report-lambda      . 1) (((:lambda-expression
                                                         ((:lambda-list . 1) (((:ordinary-lambda-list
                                                                                ()
                                                                                :source #36#)
                                                                               :evaluation :compound)))
-                                                        :source #35#))))
-                          :source #28#)
+                                                        :source #35#)))
+                           (:test-lambda        . 1) (((:lambda-expression
+                                                        ((:lambda-list . 1) (((:ordinary-lambda-list
+                                                                               ()
+                                                                               :source #38#)
+                                                                              :evaluation :compound)))
+                                                        :source #37#))))
+                          :source #30#)
                          :evaluation :compound)))
-     :source #126#)))
+     :source #28#)))

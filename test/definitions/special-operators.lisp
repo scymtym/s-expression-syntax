@@ -1,6 +1,6 @@
 ;;;; special-operators.lisp --- Tests for special operator rules.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -343,28 +343,32 @@
     syn:invalid-syntax-error #1# "nothing may follow function name or lambda expression")
   '((function (lambda 1))
     syn:invalid-syntax-error 1 "must be an ordinary lambda list")
-  '((function (lambda (x #2=x)))
-    syn:invalid-syntax-error #2# "the variable name X occurs more than once")
+  '((function (lambda (#2=(a b)))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #2# "variable name must be a symbol")
+  '((function (lambda (&key (a b #3=(b c))))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #3# "variable name must be a symbol")
+  '((function (lambda (x #4=x)))
+    syn:invalid-syntax-error #4# "the variable name X occurs more than once")
   ;; valid syntax
-  '(#3=(function #4=foo)
+  '(#5=(function #6=foo)
     (:function
-     ((:name . 1) (((:function-name () :name foo :source #4#)
-                    :evaluation (:reference :namespace function))))
-     :source #3#))
-  '(#5=(function #6=(setf foo))
-    (:function
-     ((:name . 1) (((:function-name () :name (setf foo) :source #6#)
+     ((:name . 1) (((:function-name () :name foo :source #6#)
                     :evaluation (:reference :namespace function))))
      :source #5#))
-  '(#7=(function #8=(lambda #9=()))
+  '(#7=(function #8=(setf foo))
+    (:function
+     ((:name . 1) (((:function-name () :name (setf foo) :source #8#)
+                    :evaluation (:reference :namespace function))))
+     :source #7#))
+  '(#9=(function #10=(lambda #11=()))
     (:function
      ((:lambda . 1) (((:lambda-expression
-                       ((:lambda-list . 1) (((:ordinary-lambda-list () :source #9#)
+                       ((:lambda-list . 1) (((:ordinary-lambda-list () :source #11#)
                                              :evaluation :compound)))
-                       :source #8#)
+                       :source #10#)
                       :evaluation :compound)))
-     :source #7#))
-  '(#10=(function #11=(lambda #12=(#13=a #14=&rest #15=b) #16=(foo)))
+     :source #9#))
+  '(#12=(function #13=(lambda #14=(#15=a #16=&rest #17=b) #18=(foo)))
     (:function
      ((:lambda . 1) (((:lambda-expression
                        ((:lambda-list . 1) (((:ordinary-lambda-list
@@ -373,28 +377,27 @@
                                                   ((:parameter . *) (((:required-parameter
                                                                        ((:name . 1) (((:variable-name
                                                                                        ()
-                                                                                       :name a :source #13#)
-                                                                                      :evaluation nil)))
-                                                                       :source #13#)))))))
+                                                                                       :name a :source #15#))))
+                                                                       :source #15#)))))))
                                                (:rest-section . 1)
                                                (((:rest-section
                                                   ((:keyword   . 1) (((:lambda-list-keyword
                                                                        ()
-                                                                       :keyword &rest :source #14#)))
+                                                                       :keyword &rest :source #16#)))
                                                    (:parameter . 1) (((:rest-parameter
                                                                        ((:name . 1) (((:variable-name
                                                                                        ()
-                                                                                       :name b :source #15#))))
-                                                                       :source #15#))))))))
-                                              :source #12#)
+                                                                                       :name b :source #17#))))
+                                                                       :source #17#))))))))
+                                              :source #14#)
                                              :evaluation :compound))
                         (:form        . *) (((:unparsed
                                               ()
-                                              :expression (foo) :context :form :source #16#)
+                                              :expression (foo) :context :form :source #18#)
                                              :evaluation t)))
-                       :source #11#)
+                       :source #13#)
                       :evaluation :compound)))
-     :source #10#)))
+     :source #12#)))
 
 ;;; Special operators `symbol-macrolet', `let[*]', `locally' and `progv'
 
@@ -866,26 +869,28 @@
     syn:invalid-syntax-error #2# "must be a function name")
   '((flet ((f #3=1)))
     syn:invalid-syntax-error #3# "must be an ordinary lambda list")
-  '((flet ((f (x #4=x))))
-    syn:invalid-syntax-error #4# "the variable name X occurs more than once")
+  '((flet ((f (#4=(a b))))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #4# "variable name must be a symbol")
+  '((flet ((f (x #5=x))))
+    syn:invalid-syntax-error #5# "the variable name X occurs more than once")
    ;; Valid syntax
-  '(#5=(flet ())
-    (:flet () :source #5#))
-  '(#6=(flet (#7=(#8=f #9=())))
+  '(#6=(flet ())
+    (:flet () :source #6#))
+  '(#7=(flet (#8=(#9=f #10=())))
     (:flet
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #8#)
+                        ((:name        . 1) (((:function-name () :name f :source #9#)
                                               :evaluation (:binding :namespace function
                                                                     :scope    :lexical)))
-                         (:lambda-list . 1) (((:ordinary-lambda-list () :source #9#)
+                         (:lambda-list . 1) (((:ordinary-lambda-list () :source #10#)
                                               :evaluation :compound)))
-                        :source #7#)
+                        :source #8#)
                        :evaluation :compound)))
-     :source #6#))
-  '(#10=(flet (#11=(#12=f #13=(#14=a #15=&rest #16=b))))
+     :source #7#))
+  '(#11=(flet (#12=(#13=f #14=(#15=a #16=&rest #17=b))))
     (:flet
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #12#)
+                        ((:name        . 1) (((:function-name () :name f :source #13#)
                                               :evaluation (:binding :namespace function
                                                                     :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
@@ -894,33 +899,32 @@
                                                    ((:parameter . *) (((:required-parameter
                                                                         ((:name . 1) (((:variable-name
                                                                                         ()
-                                                                                        :name a :source #14#)
-                                                                                       :evaluation nil)))
-                                                                        :source #14#)))))))
+                                                                                        :name a :source #15#))))
+                                                                        :source #15#)))))))
                                                 (:rest-section . 1)
                                                 (((:rest-section
                                                    ((:keyword   . 1) (((:lambda-list-keyword
                                                                         ()
-                                                                        :keyword &rest :source #15#)))
+                                                                        :keyword &rest :source #16#)))
                                                     (:parameter . 1) (((:rest-parameter
                                                                         ((:name . 1) (((:variable-name
                                                                                         ()
-                                                                                        :name b :source #16#))))
-                                                                        :source #16#))))))))
-                                               :source #13#)
+                                                                                        :name b :source #17#))))
+                                                                        :source #17#))))))))
+                                               :source #14#)
                                               :evaluation :compound)))
-                        :source #11#)
+                        :source #12#)
                        :evaluation :compound)))
-     :source #10#))
-  '(#17=(flet (#18=(#19=f #20=() #21=(declare #22=(type #23=bit #24=a)))))
+     :source #11#))
+  '(#18=(flet (#19=(#20=f #21=() #22=(declare #23=(type #24=bit #25=a)))))
     (:flet
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #19#)
+                        ((:name        . 1) (((:function-name () :name f :source #20#)
                                               :evaluation (:binding :namespace function
                                                                     :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
-                                               :source #20#)
+                                               :source #21#)
                                               :evaluation :compound))
                          (:declaration . *) (((:declaration
                                                ((:declaration-specifier . *)
@@ -928,33 +932,33 @@
                                                    ((:argument . *) (((:atomic-type-specifier
                                                                        ((:name . 1) (((:type-name
                                                                                        ()
-                                                                                       :name bit :source #23#))))
-                                                                       :source #23#))
+                                                                                       :name bit :source #24#))))
+                                                                       :source #24#))
                                                                      ((:variable-name
                                                                        ()
-                                                                       :name a :source #24#))))
-                                                   :kind type :source #22#))))
-                                               :source #21#))))
-                        :source #18#)
+                                                                       :name a :source #25#))))
+                                                   :kind type :source #23#))))
+                                               :source #22#))))
+                        :source #19#)
                        :evaluation :compound)))
-     :source #17#))
-  '(#25=(flet (#26=(#27=f #28=() #29=a)))
+     :source #18#))
+  '(#26=(flet (#27=(#28=f #29=() #30=a)))
     (:flet
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #27#)
+                        ((:name        . 1) (((:function-name () :name f :source #28#)
                                               :evaluation (:binding :namespace function
                                                                     :scope    :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
-                                               :source #28#)
+                                               :source #29#)
                                               :evaluation :compound))
                          (:form        . *) (((:unparsed
                                                ()
-                                               :expression a :context :form :source #29#)
+                                               :expression a :context :form :source #30#)
                                               :evaluation t)))
-                        :source #26#)
+                        :source #27#)
                        :evaluation :compound)))
-      :source #25#)))
+      :source #26#)))
 
 (define-syntax-test (labels)
   ;; Invalid syntax
@@ -966,28 +970,30 @@
     syn:invalid-syntax-error #2# "must be a function name")
   '((labels ((f #3=1)))
     syn:invalid-syntax-error #3# "must be an ordinary lambda list")
-  '((labels ((f (x #4=x))))
-    syn:invalid-syntax-error #4# "the variable name X occurs more than once")
+  '((labels ((f (#4=(a b))))) ; ensure parameter is not parsed as pattern
+    syn:invalid-syntax-error #4# "variable name must be a symbol")
+  '((labels ((f (x #5=x))))
+    syn:invalid-syntax-error #5# "the variable name X occurs more than once")
   ;; Valid syntax
-  '(#5=(labels ())
-    (:labels () :source #5#))
-  '(#6=(labels (#7=(#8=f #9=())))
+  '(#6=(labels ())
+    (:labels () :source #6#))
+  '(#7=(labels (#8=(#9=f #10=())))
     (:labels
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #8#)
+                        ((:name        . 1) (((:function-name () :name f :source #9#)
                                               :evaluation (:binding :namespace function
                                                                     :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
-                                               :source #9#)
+                                               :source #10#)
                                               :evaluation :compound)))
-                        :source #7#)
+                        :source #8#)
                        :evaluation :compound)))
-     :source #6#))
-  '(#10=(labels (#11=(#12=f #13=(#14=a #15=&rest #16=b))))
+     :source #7#))
+  '(#11=(labels (#12=(#13=f #14=(#15=a #16=&rest #17=b))))
     (:labels
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #12#)
+                        ((:name        . 1) (((:function-name () :name f :source #13#)
                                               :evaluation (:binding :namespace function
                                                                     :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
@@ -996,33 +1002,32 @@
                                                    ((:parameter . *) (((:required-parameter
                                                                         ((:name . 1) (((:variable-name
                                                                                         ()
-                                                                                        :name a :source #14#)
-                                                                                       :evaluation nil)))
-                                                                        :source #14#)))))))
+                                                                                        :name a :source #15#))))
+                                                                        :source #15#)))))))
                                                 (:rest-section . 1)
                                                 (((:rest-section
                                                    ((:keyword   . 1) (((:lambda-list-keyword
                                                                         ()
-                                                                        :keyword &rest :source #15#)))
+                                                                        :keyword &rest :source #16#)))
                                                     (:parameter . 1) (((:rest-parameter
                                                                         ((:name . 1) (((:variable-name
                                                                                         ()
-                                                                                        :name b :source #16#))))
-                                                                        :source #16#))))))))
-                                               :source #13#)
+                                                                                        :name b :source #17#))))
+                                                                        :source #17#))))))))
+                                               :source #14#)
                                               :evaluation :compound)))
-                        :source #11#)
+                        :source #12#)
                        :evaluation :compound)))
-     :source #10#))
-  '(#17=(labels (#18=(#19=f #20=() #21=(declare #22=(type #23=bit #24=a)))))
+     :source #11#))
+  '(#18=(labels (#19=(#20=f #21=() #22=(declare #23=(type #24=bit #25=a)))))
     (:labels
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #19#)
+                        ((:name        . 1) (((:function-name () :name f :source #20#)
                                               :evaluation (:binding :namespace function
                                                                     :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
-                                               :source #20#)
+                                               :source #21#)
                                               :evaluation :compound))
                          (:declaration . *) (((:declaration
                                                ((:declaration-specifier . *)
@@ -1030,33 +1035,33 @@
                                                    ((:argument . *) (((:atomic-type-specifier
                                                                        ((:name . 1) (((:type-name
                                                                                        ()
-                                                                                       :name bit :source #23#))))
-                                                                       :source #23#))
+                                                                                       :name bit :source #24#))))
+                                                                       :source #24#))
                                                                      ((:variable-name
                                                                        ()
-                                                                       :name a :source #24#))))
-                                                   :kind type :source #22#))))
-                                               :source #21#))))
-                        :source #18#)
+                                                                       :name a :source #25#))))
+                                                   :kind type :source #23#))))
+                                               :source #22#))))
+                        :source #19#)
                        :evaluation :compound)))
-     :source #17#))
-  '(#25=(labels (#26=(#27=f #28=() #29=a)))
+     :source #18#))
+  '(#26=(labels (#27=(#28=f #29=() #30=a)))
     (:labels
      ((:binding . *) (((:local-function-binding
-                        ((:name        . 1) (((:function-name () :name f :source #27#)
+                        ((:name        . 1) (((:function-name () :name f :source #28#)
                                               :evaluation (:binding :namespace function
                                                                     :scope     :lexical)))
                          (:lambda-list . 1) (((:ordinary-lambda-list
                                                ()
-                                               :source #28#)
+                                               :source #29#)
                                               :evaluation :compound))
                          (:form        . *) (((:unparsed
                                                ()
-                                               :expression a :context :form :source #29#)
+                                               :expression a :context :form :source #30#)
                                               :evaluation t)))
-                        :source #26#)
+                        :source #27#)
                        :evaluation :compound)))
-     :source #25#)))
+     :source #26#)))
 
 ;;; Special operators `declaim' and `the'
 
