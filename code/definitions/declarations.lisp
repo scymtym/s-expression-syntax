@@ -1,6 +1,6 @@
 ;;;; declarations.lisp --- Rules for parsing declarations.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -45,7 +45,8 @@
                 (* (<<- arguments ((variable-name! names)))))
 
           (list (<- identifier 'ftype)
-                (must (<<- arguments ((function-type-specifier! type-specifiers))) ; TODO wrong
+                (must (or (<<- arguments ((function-type-specifier type-specifiers)))
+                          (<<- arguments ((type-specifier type-specifiers))))
                       "function type specifier must follow FTYPE declaration identifier")
                 (* (<<- arguments ((function-name! names)))))
 
