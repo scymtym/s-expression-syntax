@@ -53,7 +53,7 @@
     '(()
       t nil ())
     '((#5=(#6=a #7=()))
-      t #5# ((:local-function-binding
+      t nil ((:local-function-binding
               ((:name        . 1) (((:function-name () :name a :source #6#)
                                     :evaluation (:binding :namespace function
                                                           :scope     :lexical)))
@@ -63,21 +63,21 @@
                                     :evaluation :compound)))
               :source #5#)))
     '((#8=(#9=a #10=() #11=1))
-      t #8# ((:local-function-binding
-               ((:name        . 1) (((:function-name () :name a :source #9#)
-                                     :evaluation (:binding :namespace function
-                                                           :scope     :lexical)))
-                (:lambda-list . 1) (((:ordinary-lambda-list
-                                      ()
-                                      :source #10#)
-                                     :evaluation :compound))
-                (:form        . *) (((:unparsed
-                                      ()
-                                      :expression 1
-                                      :context    :form
-                                      :source     #11#)
-                                     :evaluation t)))
-               :source #8#)))
+      t nil ((:local-function-binding
+              ((:name        . 1) (((:function-name () :name a :source #9#)
+                                    :evaluation (:binding :namespace function
+                                                          :scope     :lexical)))
+               (:lambda-list . 1) (((:ordinary-lambda-list
+                                     ()
+                                     :source #10#)
+                                    :evaluation :compound))
+               (:form        . *) (((:unparsed
+                                     ()
+                                     :expression 1
+                                     :context    :form
+                                     :source     #11#)
+                                    :evaluation t)))
+              :source #8#)))
      '((#12=(#13=a #14=() #15=1))
        t #12# ((:local-function-binding
                 ((:name        . 1) (((:function-name () :name a :source #13#)
@@ -107,42 +107,42 @@
                                          :expression 1 :context :form :source #20#)
                                         :evaluation t)))
                 :source #16#)))
-     '((#116=(#117=a #118=()
-              #119=(declare #120=(ignore #130=b))
-              #139=(declare #140=(ignore #141=c))
-              #142=d
-              #143=e))
+     '((#21=(#22=a #23=()
+              #24=(declare #25=(ignore #26=b))
+              #27=(declare #28=(ignore #29=c))
+              #30=d
+              #31=e))
        t nil ((:local-function-binding
-               ((:name          . 1) (((:function-name () :name a :source #117#)
+               ((:name          . 1) (((:function-name () :name a :source #22#)
                                        :evaluation (:binding :namespace function
                                                              :scope     :lexical)))
                 (:lambda-list   . 1) (((:ordinary-lambda-list
                                         ()
-                                        :source #118#)
+                                        :source #23#)
                                        :evaluation :compound))
                 (:declaration   . *) (((:declaration
                                         ((:declaration-specifier . *)
                                          (((:declaration-specifier
                                             ((:argument . *)
-                                             (((:variable-name () :name b :source #130#))))
-                                            :kind ignore :source #120#))))
-                                        :source #119#))
+                                             (((:variable-name () :name b :source #26#))))
+                                            :kind ignore :source #25#))))
+                                        :source #24#))
                                       ((:declaration
                                         ((:declaration-specifier . *)
                                          (((:declaration-specifier
                                             ((:argument . *)
-                                             (((:variable-name () :name c :source #141#))))
-                                            :kind ignore :source #140#))))
-                                        :source #139#)))
+                                             (((:variable-name () :name c :source #29#))))
+                                            :kind ignore :source #28#))))
+                                        :source #27#)))
                 (:form          . *) (((:unparsed
                                         ()
-                                        :expression d :context :form :source #142#)
+                                        :expression d :context :form :source #30#)
                                        :evaluation t)
                                       ((:unparsed
                                         ()
-                                        :expression e :context :form :source #143#)
+                                        :expression e :context :form :source #31#)
                                        :evaluation t)))
-               :source #116#)))))
+               :source #21#)))))
 
 (test macro-function-bindings
   "Smoke test for the `macro-function-bindings' rule."
