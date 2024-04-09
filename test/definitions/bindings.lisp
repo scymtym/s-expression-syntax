@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Tests for binding rules.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -106,7 +106,43 @@
                                          ()
                                          :expression 1 :context :form :source #20#)
                                         :evaluation t)))
-                :source #16#)))))
+                :source #16#)))
+     '((#116=(#117=a #118=()
+              #119=(declare #120=(ignore #130=b))
+              #139=(declare #140=(ignore #141=c))
+              #142=d
+              #143=e))
+       t nil ((:local-function-binding
+               ((:name          . 1) (((:function-name () :name a :source #117#)
+                                       :evaluation (:binding :namespace function
+                                                             :scope     :lexical)))
+                (:lambda-list   . 1) (((:ordinary-lambda-list
+                                        ()
+                                        :source #118#)
+                                       :evaluation :compound))
+                (:declaration   . *) (((:declaration
+                                        ((:declaration-specifier . *)
+                                         (((:declaration-specifier
+                                            ((:argument . *)
+                                             (((:variable-name () :name b :source #130#))))
+                                            :kind ignore :source #120#))))
+                                        :source #119#))
+                                      ((:declaration
+                                        ((:declaration-specifier . *)
+                                         (((:declaration-specifier
+                                            ((:argument . *)
+                                             (((:variable-name () :name c :source #141#))))
+                                            :kind ignore :source #140#))))
+                                        :source #139#)))
+                (:form          . *) (((:unparsed
+                                        ()
+                                        :expression d :context :form :source #142#)
+                                       :evaluation t)
+                                      ((:unparsed
+                                        ()
+                                        :expression e :context :form :source #143#)
+                                       :evaluation t)))
+               :source #116#)))))
 
 (test macro-function-bindings
   "Smoke test for the `macro-function-bindings' rule."

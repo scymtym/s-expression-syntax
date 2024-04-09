@@ -1,6 +1,6 @@
 ;;;; bindings.lisp --- Rules for binding constructs.
 ;;;;
-;;;; Copyright (C) 2018-2023 Jan Moringen
+;;;; Copyright (C) 2018-2024 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -46,10 +46,10 @@
                                                :scope     :lexical
                                                :order     :parallel
                                                :values    'functions))
-   (lambda-list   1 :evaluation :compound)
+   (lambda-list   1  :evaluation :compound)
    (documentation ?)
-   (declaration   *)
-   (form          * :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
 
 (defrule local-function-binding! ()
   (must (local-function-binding)
