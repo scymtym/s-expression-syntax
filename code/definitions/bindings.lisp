@@ -73,10 +73,10 @@
                                                :namespace 'function
                                                :scope     :lexical
                                                :values    'functions))
-   (lambda-list   1 :evaluation :compound)
+   (lambda-list   1  :evaluation :compound)
    (documentation ?)
-   (declaration   *)
-   (form          * :evaluation t)))
+   (declaration   *>)
+   (form          *> :evaluation t)))
 
 (defrule local-macro-function-binding! ()
     (must (local-macro-function-binding)

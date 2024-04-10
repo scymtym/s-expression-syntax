@@ -248,7 +248,41 @@
                                                                 :source #29#))))))))
                                        :source #27#)
                                       :evaluation :compound)))
-              :source #25#)))))
+              :source #25#)))
+    '((#30=(#31=x #32=()
+               #33=(declare #34=(ignore #35=y))
+               #36=(declare #37=(ignore #38=z))
+               #39=a
+               #40=b))
+      t nil ((:local-macro-function-binding
+              ((:name          . 1) (((:function-name () :name x :source #31#)
+                                      :evaluation (:binding :namespace function
+                                                            :scope     :lexical)))
+               (:lambda-list   . 1) (((:macro-lambda-list () :source #32#)
+                                      :evaluation :compound))
+               (:declaration   . *) (((:declaration
+                                       ((:declaration-specifier . *)
+                                        (((:declaration-specifier
+                                           ((:argument . *)
+                                            (((:variable-name () :name y :source #35#))))
+                                           :kind ignore :source #34#))))
+                                       :source #33#))
+                                     ((:declaration
+                                       ((:declaration-specifier . *)
+                                        (((:declaration-specifier
+                                           ((:argument . *)
+                                            (((:variable-name () :name z :source #38#))))
+                                           :kind ignore :source #37#))))
+                                       :source #36#)))
+               (:form          . *) (((:unparsed () :expression a
+                                                    :context    :form
+                                                    :source     #39#)
+                                      :evaluation t)
+                                     ((:unparsed () :expression b
+                                                    :context    :form
+                                                    :source     #40#)
+                                      :evaluation t)))
+              :source #30#)))))
 
 (test symbol-macro-bindings
   "Smoke test for the `symbol-macro-bindings' rule."
